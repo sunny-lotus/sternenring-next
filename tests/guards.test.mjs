@@ -27,9 +27,10 @@ test('描画コードに負の拡大・左右反転の書き方が無い', () =>
   for (const f of src) assert.ok(!bad.test(f.text), `${f.p} に反転の疑い`);
 });
 
-test('旧保存キー sternenring-core-save-v1 を読み書きしない／P1 は localStorage を使わない', () => {
+test('旧保存キー sternenring-core-save-v1 を読み書きしない／ブラウザの保存にさわるのは src/save.js だけ（2026-11-22 作者「NEXTが冒険の記録を持つ」）', () => {
   for (const f of src) {
     assert.ok(!f.text.includes('sternenring-core-save'), f.p);
+    if (f.p === 'src/save.js') { assert.ok(f.text.includes("'sternenring-next-save-v1:slot1'"), '保存の名前'); assert.ok(!/sessionStorage|indexedDB/.test(f.text)); continue; }
     assert.ok(!/localStorage|sessionStorage|indexedDB/.test(f.text), f.p);
   }
 });

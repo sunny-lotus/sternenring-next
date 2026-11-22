@@ -3,6 +3,13 @@
 // trio-trial.cjs・five-trial.cjs・normal-encounter-presets.json（2026-11-07 相談用の仮値）。
 // 数値は未採用の仮値。本番ゲーム・原作の設定ではない。
 var SR = window.SR || (window.SR = {});
+// 保存先（2026-11-22 作者「NEXTが冒険の記録を持つ」「戦闘はその記録を受け取って戦い、結果を返す」）：
+// フィールド（STERNENRING_RPG_NEXT）から開いたとき（?field=1）は、NEXT が渡す「冒険の記録」（parent.SR_RECORD_STORE）を読み書きする。
+// ふつうに開いたときは、今までどおりブラウザの保存。戦闘の中では、保存はすべて SRS を通す
+var SRS = (function () {
+  try { if (/[?&]field=1(&|$)/.test(location.search) && window.parent !== window && window.parent.SR_RECORD_STORE) return window.parent.SR_RECORD_STORE; } catch (e) {}
+  try { return window.localStorage; } catch (e) { var m = {}; return { getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } }; }
+})();
 
 SR.C = { maxMp: 100, maxK: 100, recovery: 26, ap: 24, maxRounds: 24,
   ctBase: 1000, brkDelay: 0.5, releaseWeight: 0.6,
@@ -43,8 +50,8 @@ skill('scan', 'all', 0, 0, { kind: 'scan', label: '調べる' });   // 2026-11-0
 // 見つけた弱点はこの端末に覚えておき、次の戦いからは最初からアイコンで見える
 SR.weakMemo = (function () {
   var KEY = 'sr-battle-weak-v1', set = {};
-  try { set = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
-  return { has: function (k) { return !!set[k]; }, add: function (k) { set[k] = 1; try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) {} } };
+  try { set = JSON.parse(SRS.getItem(KEY)) || {}; } catch (e) {}
+  return { has: function (k) { return !!set[k]; }, add: function (k) { set[k] = 1; try { SRS.setItem(KEY, JSON.stringify(set)); } catch (e) {} } };
 })();
 SR.defendRate = 0.5;
 skill('崩し斬り', 'N', 4, 18, { kind: 'attack', kd: 30, hp: 32, form: 'brave' });
@@ -206,7 +213,7 @@ SR.growthLabels = { exp1: '初級の段の経験値（短め）', exp2: '中級�
   focusNormal: '重点の経験値（通常戦）', focusBoss: '重点の経験値（ボス戦）', loseMul: '負けたときの経験値の倍率', goldNormal: 'お金（通常戦の勝ち・銅貨の枚数）', goldBoss: 'お金（ボス戦の勝ち・銅貨の枚数）', price2: '中級の本の値段（銅貨の枚数）', price3: '上級の本の値段（銅貨の枚数）' };
 SR.growthCfg = (function () {
   var c = Object.assign({}, SR.growthDefaults);
-  try { Object.assign(c, JSON.parse(localStorage.getItem('sr-battle-dev-v1')) || {}); } catch (e) {}
+  try { Object.assign(c, JSON.parse(SRS.getItem('sr-battle-dev-v1')) || {}); } catch (e) {}
   return c;
 })();
 SR.applyGrowthCfg = function () { SR.bookPrice = [0, 0, SR.growthCfg.price2, SR.growthCfg.price3]; };
@@ -221,10 +228,10 @@ SR.visH = function (h) { return SR.cumExp(h) / SR.cumExp(3); };
 SR.setGrowthCfg = function (k, v) {
   if (!(k in SR.growthDefaults) || !isFinite(v)) return;
   SR.growthCfg[k] = Math.max(0, v); if (/^exp[123]$/.test(k)) SR.growthCfg[k] = Math.max(1, v);
-  try { localStorage.setItem('sr-battle-dev-v1', JSON.stringify(SR.growthCfg)); } catch (e) {}
+  try { SRS.setItem('sr-battle-dev-v1', JSON.stringify(SR.growthCfg)); } catch (e) {}
   SR.applyGrowthCfg();
 };
-SR.resetGrowthCfg = function () { SR.growthCfg = Object.assign({}, SR.growthDefaults); try { localStorage.removeItem('sr-battle-dev-v1'); } catch (e) {} SR.applyGrowthCfg(); };
+SR.resetGrowthCfg = function () { SR.growthCfg = Object.assign({}, SR.growthDefaults); try { SRS.removeItem('sr-battle-dev-v1'); } catch (e) {} SR.applyGrowthCfg(); };
 SR.applyGrowthCfg();
 // 星の高さ（0〜3。1段＝1）。段の中で、前の技ほど下
 (function () {
@@ -272,9 +279,9 @@ SR.growth = (function () {
       exp: { V: z(), F: z(), S: z(), L: z() }, focus: { V: SR.tree.start.V, F: SR.tree.start.F, S: SR.tree.start.S, L: SR.tree.start.L },
       uniq: { N: [], V: [], F: [], S: [], L: [] }, pas: { N: [], V: [], F: [], S: [], L: [] } };
   }
-  try { g = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  try { g = JSON.parse(SRS.getItem(KEY)); } catch (e) {}
   if (!g || !g.exp) g = fresh();
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(g)); } catch (e) {} }
+  function save() { try { SRS.setItem(KEY, JSON.stringify(g)); } catch (e) {} }
   var api = {
     data: function () { return g; },
     reset: function () { g = fresh(); save(); },
@@ -597,9 +604,9 @@ SR.isLink = function (id) { return !!SR.skills[id] && SR.skills[id].owner === 'l
 (function () {
   var G = SR.growth, KEY = 'sr-battle-bond-v1', b;
   function fresh() { return { bond: { V: 0, F: 0, S: 0, L: 0 }, ev: { V: false, F: false, S: false, L: false } }; }
-  try { b = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  try { b = JSON.parse(SRS.getItem(KEY)); } catch (e) {}
   if (!b || !b.bond) b = fresh();
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(b)); } catch (e) {} }
+  function save() { try { SRS.setItem(KEY, JSON.stringify(b)); } catch (e) {} }
   G.linkOpen = function () { return G.era() >= 3; };          // 連携技は終盤から
   G.bond = function (c) { return b.bond[c] || 0; };
   G.linkEv = function (c) { return !!b.ev[c]; };
@@ -713,17 +720,17 @@ SR.enemyAtkMulAt = function (lv) { return lv <= 5 ? 1.4 : lv >= 10 ? SR.enemyAtk
 SR.normalHpMul = 1.5;    // ボスでない敵のHP（通常戦が2ターンで終わっていたので少し長く）
 SR.limitBreak = (function () {   // 限界突破を持っているか（キャラごと・試し用に開発者設定で切りかえ）
   var KEY = "sr-battle-lb-v1", d = {};
-  try { d = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
-  return { has: function (id) { return !!d[id]; }, set: function (id, on) { d[id] = !!on; try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} } };
+  try { d = JSON.parse(SRS.getItem(KEY)) || {}; } catch (e) {}
+  return { has: function (id) { return !!d[id]; }, set: function (id, on) { d[id] = !!on; try { SRS.setItem(KEY, JSON.stringify(d)); } catch (e) {} } };
 })();
 SR.lvExp = { normal: 30, boss: 120, loseMul: 0.3 };       // 戦いでもらう経験値（全員・控えも）
 // 2026-11-22 サニー：敵の推奨レベル（数値は仮。序盤Lv1〜10・中盤10〜20・終盤20〜のつもり）
 SR.recLv = { normal: 1, swarm: 2, boss: 6, shellSwift: 8, elements: 10, casters: 12, fireResist: 15, twins: 20, aoe: 25 };
 SR.level = (function () {
   var KEY = 'sr-battle-lv-v1', d;
-  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  try { d = JSON.parse(SRS.getItem(KEY)); } catch (e) {}
   if (!d || !d.exp) d = { exp: { N: 0, V: 0, F: 0, S: 0, L: 0 } };
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+  function save() { try { SRS.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
   function need(lv) { return 40 + lv * 20; }   // lv から lv+1 に必要な経験値
   function info(id) {
     var e = d.exp[id] || 0, lv = 1;
@@ -736,17 +743,31 @@ SR.level = (function () {
     add: function (id, n) { var a = info(id).lv; d.exp[id] = (d.exp[id] || 0) + n; save(); return info(id).lv - a; },
     up: function (id) { var i = info(id); if (i.lv < SR.LV_MAX) { d.exp[id] = (d.exp[id] || 0) + (i.next - i.cur); save(); } },   // 試し用：1つ上げる
     reset: function () { d = { exp: { N: 0, V: 0, F: 0, S: 0, L: 0 } }; save(); },
-    reload: function () { try { var x = JSON.parse(localStorage.getItem(KEY)); if (x && x.exp) d = x; } catch (e) {} }
+    reload: function () { try { var x = JSON.parse(SRS.getItem(KEY)); if (x && x.exp) d = x; } catch (e) {} }
   };
 })();
 (function () { var rs = SR.growth.reset; SR.growth.reset = function () { rs(); SR.level.reset(); }; })();
+// フィールドの記録から受け取る（2026-11-22）：inbox のお金・経験値を育ちに足して inbox を空にする。フィールドで覚えた技（sr-field-skills-v1）は覚えたことにする
+(function () {
+  var box = null; try { box = JSON.parse(SRS.getItem('sr-field-inbox-v1')); } catch (e) {}
+  if (box) {
+    if (box.gold) { var g = SR.growth.data(); g.gold = (g.gold || 0) + box.gold; try { SRS.setItem('sr-battle-growth-v2', JSON.stringify(g)); } catch (e) {} }
+    Object.keys(box.exp || {}).forEach(function (code) { if (box.exp[code] > 0) SR.level.add(code, box.exp[code]); });
+    try { SRS.removeItem('sr-field-inbox-v1'); } catch (e) {}
+  }
+  var can = SR.canLearn;
+  SR.canLearn = function (tree, who, id) {
+    try { var fs = JSON.parse(SRS.getItem('sr-field-skills-v1') || '{}'); if (fs[who] && fs[who].indexOf(id) >= 0) return true; } catch (e) {}
+    return can(tree, who, id);
+  };
+})();
 
 // ---- 開発者設定で数字を直接さわるための入口（試し用）----
 (function () {
   var G = SR.growth;
-  G.setGold = function (n) { var d = G.data(); d.gold = Math.max(0, Math.round(n)); try { localStorage.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
-  G.setExp = function (who, s, v) { var d = G.data(); if (!d.exp[who]) return; d.exp[who][s] = Math.max(0, Math.min(SR.cumExp(3), Math.round(v))); try { localStorage.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
-  G.setBook = function (s, t) { var d = G.data(); d.books[s] = Math.max(1, Math.min(3, t)); try { localStorage.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
+  G.setGold = function (n) { var d = G.data(); d.gold = Math.max(0, Math.round(n)); try { SRS.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
+  G.setExp = function (who, s, v) { var d = G.data(); if (!d.exp[who]) return; d.exp[who][s] = Math.max(0, Math.min(SR.cumExp(3), Math.round(v))); try { SRS.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
+  G.setBook = function (s, t) { var d = G.data(); d.books[s] = Math.max(1, Math.min(3, t)); try { SRS.setItem('sr-battle-growth-v2', JSON.stringify(d)); } catch (e) {} };
 })();
 (function () {
   var L = SR.level, KEY = 'sr-battle-lv-v1';
@@ -754,9 +775,9 @@ SR.level = (function () {
   L.setLv = function (id, lv) {   // そのLvのちょうど始まりにする
     lv = Math.max(1, Math.min(SR.LV_MAX, Math.round(lv)));
     var e = 0; for (var i = 1; i < lv; i++) e += need(i);
-    var d; try { d = JSON.parse(localStorage.getItem(KEY)); } catch (x) {}
+    var d; try { d = JSON.parse(SRS.getItem(KEY)); } catch (x) {}
     if (!d || !d.exp) d = { exp: { N: 0, V: 0, F: 0, S: 0, L: 0 } };
-    d.exp[id] = e; try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (x) {}
+    d.exp[id] = e; try { SRS.setItem(KEY, JSON.stringify(d)); } catch (x) {}
     L.reload();
   };
 })();
@@ -796,11 +817,11 @@ SR.moneyText = function (n) { var s = SR.coinSplit(n); return s.length ? s.map(f
 // 前の「金貨」の数字（ゲームの中だけの単位）を、銅貨の数え方へ一度だけ直す（×10）
 (function () {
   try {
-    if (localStorage.getItem('sr-money-v2')) return;
-    var d = SR.growth.data(); d.gold = Math.round((d.gold || 0) * 10); localStorage.setItem('sr-battle-growth-v2', JSON.stringify(d));
-    var cfg = JSON.parse(localStorage.getItem('sr-battle-dev-v1') || 'null');
-    if (cfg) { ['goldNormal', 'goldBoss', 'price2', 'price3'].forEach(function (k) { if (cfg[k] != null) cfg[k] *= 10; }); localStorage.setItem('sr-battle-dev-v1', JSON.stringify(cfg)); Object.assign(SR.growthCfg, cfg); SR.applyGrowthCfg(); }
-    localStorage.setItem('sr-money-v2', '1');
+    if (SRS.getItem('sr-money-v2')) return;
+    var d = SR.growth.data(); d.gold = Math.round((d.gold || 0) * 10); SRS.setItem('sr-battle-growth-v2', JSON.stringify(d));
+    var cfg = JSON.parse(SRS.getItem('sr-battle-dev-v1') || 'null');
+    if (cfg) { ['goldNormal', 'goldBoss', 'price2', 'price3'].forEach(function (k) { if (cfg[k] != null) cfg[k] *= 10; }); SRS.setItem('sr-battle-dev-v1', JSON.stringify(cfg)); Object.assign(SR.growthCfg, cfg); SR.applyGrowthCfg(); }
+    SRS.setItem('sr-money-v2', '1');
   } catch (e) {}
 })();
 
@@ -921,9 +942,9 @@ SR.MATERIALS = { '野草': '道ばたや森に生える草。薬草のもと', '
 SR.matDrop = { normal: [1, 2], boss: [3, 5] };   // 勝ったときに拾える素材の数（はんい）
 SR.bag = (function () {   // 持ち物（アイテムと素材）。この端末に保存
   var KEY = 'sr-battle-bag-v1', d;
-  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  try { d = JSON.parse(SRS.getItem(KEY)); } catch (e) {}
   if (!d || !d.items) d = { items: { '薬草': 3 }, mats: {} };
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
+  function save() { try { SRS.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
   return {
     items: function () { return d.items; }, mats: function () { return d.mats; },
     n: function (id) { return d.items[id] || 0; }, m: function (id) { return d.mats[id] || 0; },
@@ -948,8 +969,8 @@ SR.chainMpRegen = 0.35;   // 通常戦では、番ごとのMP回復が0.35倍（
 SR.isBossEnc = function (key) { var e = SR.encounters[key]; return !!e && (e.engine !== '集団' || key === 'twins'); };
 SR.party = (function () {
   var KEY = 'sr-battle-party-v1', d = null;
-  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-  function save() { try { if (d) localStorage.setItem(KEY, JSON.stringify(d)); else localStorage.removeItem(KEY); } catch (e) {} }
+  try { d = JSON.parse(SRS.getItem(KEY)); } catch (e) {}
+  function save() { try { if (d) SRS.setItem(KEY, JSON.stringify(d)); else SRS.removeItem(KEY); } catch (e) {} }
   return {
     carry: function () { return d; },   // null＝全回復
     keep: function (heroes) { d = {}; heroes.forEach(function (u) { d[u.id] = { hp: Math.max(0, u.hp) / u.maxHp, mp: u.mp, down: u.hp <= 0 }; }); save(); },
@@ -968,6 +989,6 @@ SR.COLO = {
 };
 SR.coloBest = (function () {
   var KEY = 'sr-colo-best-v1', d = {};
-  try { d = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
-  return { get: function (k) { return d[k] || 0; }, put: function (k, n) { if (n > (d[k] || 0)) { d[k] = n; try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} return true; } return false; } };
+  try { d = JSON.parse(SRS.getItem(KEY)) || {}; } catch (e) {}
+  return { get: function (k) { return d[k] || 0; }, put: function (k, n) { if (n > (d[k] || 0)) { d[k] = n; try { SRS.setItem(KEY, JSON.stringify(d)); } catch (e) {} return true; } return false; } };
 })();

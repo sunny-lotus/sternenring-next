@@ -9,6 +9,7 @@ const KEY_DIR = /** @type {Record<string,string>} */ ({
 /** @param {import('../core/input.js').InputState} input */
 export function bindKeyboard(input) {
   window.addEventListener('keydown', (e) => {
+    if ((e.code === 'Enter' || e.code === 'Space' || e.code === 'KeyZ') && !e.repeat) { e.preventDefault(); input.pressAction(); return; } // 調べる
     const dir = KEY_DIR[e.code];
     if (!dir) return;
     e.preventDefault();

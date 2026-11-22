@@ -20,10 +20,10 @@ SR.loadout = (function () {
   function used(list) { return list.reduce(function (n, s) { return n + (SR.passives[s] ? apOf(s) : 0); }, 0); }
   function cap() { return SR.passiveCap[SR.growth.era()] || SR.passiveCap[1]; }
   function load() {
-    try { var v = JSON.parse(localStorage.getItem(KEY)); if (v && v.N) return v; } catch (e) {}
+    try { var v = JSON.parse(SRS.getItem(KEY)); if (v && v.N) return v; } catch (e) {}
     return null;
   }
-  function save(set) { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) {} }
+  function save(set) { try { SRS.setItem(KEY, JSON.stringify(set)); } catch (e) {} }
   // お手本の構成から、パッシブだけを持ってくる
   function fromKit(k) { var o = {}; ids.forEach(function (id) { o[id] = SR.kits[k][id].filter(function (s) { return SR.passives[s]; }); }); return o; }
   // パッシブ以外を外し、上限を超えた分は後ろから外す

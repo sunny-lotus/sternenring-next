@@ -8,7 +8,7 @@ DEV-DESIGN-001（受入済み）の `examples/AGENTS.next.md` をもとに、DEV
 
 ## 守ること
 - 旧版 `STERNENRING_RPG_CORE` のファイル・作業ツリー・利用者のセーブ（ポート8081）は変えない。旧キー `sternenring-core-save-v1` を読み書きしない。
-- 新しい保存キーは `sternenring-next-save-v1`（スロット付き、まず `:slot1`）。設定は `sternenring-next-settings-v1`。P1 は永続保存なし（localStorage を使わない）。
+- 保存キーは `sternenring-next-save-v1`（スロット付き、まず `:slot1`）。設定は `sternenring-next-settings-v1`。2026-11-22 作者の決定「NEXTが冒険の記録を持つ」で保存を始めた：記録は `src/core/record.js`（描画・保存に依存しない）、ブラウザの保存にさわるのは `src/save.js` だけ（tests/guards.test.mjs）。戦闘（battle/）は、フィールドから開いたときは保存の代わりに NEXT の記録（window.SR_RECORD_STORE）を読み書きする。
 - 確認は隔離ポートで行う：技術担当 8130〜8139、検証役 8140〜8149。使ったサーバーは止める。
 - push・公開・公開サイトの変更は、作者がそのつど頼んだときだけ（2026-11-22 作者「公開する」で GitHub sunny-lotus/sternenring-next と GitHub Pages に公開した）。予定済みタスク・検証役は push・公開をしない。
 - 世界設定は非公開GitHub `sunny-lotus/STERNENRING-Development` の最新mainを読むだけ。原稿・世界設定は編集しない。序盤の世界の正体や魔法の名前の開示順を守る（序盤は「魔法」）。

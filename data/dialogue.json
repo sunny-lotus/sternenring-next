@@ -1,0 +1,16 @@
+{
+  "format": "sternenring-next-dialogue",
+  "version": 1,
+  "note": "仮の文（2026-11-22）。本当の台詞・サブクエの文は世界観・シナリオ室の確定待ち。ここにある文は、しくみの試しのためだけ",
+  "lines": {
+    "plaza.lamp.first": "（仮）露店の灯り。あたたかい色をしている。",
+    "plaza.lamp.again": "（仮）露店の灯りが、まだともっている。",
+    "plaza.ring": "（仮）空を見上げた。",
+    "forest.herbs.first": "（仮）薬草の茂み。少し摘んで、売れそうなものを集めた。",
+    "forest.herbs.again": "（仮）もう摘み終わった。",
+    "forest.camp.first": "（仮）焚き火の跡。ヴォルトと少し話をした。",
+    "forest.camp.again": "（仮）焚き火の跡。もう冷えている。",
+    "forest.stone.first": "（仮）古い石碑。ヴォルトが何かに気づいたようだ。",
+    "forest.stone.again": "（仮）古い石碑。"
+  }
+}

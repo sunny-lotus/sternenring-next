@@ -26,6 +26,10 @@ export class InputState {
   /** 次の1歩の方向（先行入力が先、なければ押しっぱなし） */
   next() { return this.queue.shift() ?? this.held(); }
   held() { return this.heldStack.at(-1) ?? null; }
+  /** 「調べる」を押した（2026-11-22 作者「フィールドの出来事から記録を書きかえる」）。次の更新で1回だけ使われる */
+  pressAction() { if (this.enabled) this.action = true; }
+  /** 「調べる」を受け取る（押されていれば true にして消す） */
+  takeAction() { const a = !!this.action; this.action = false; return a; }
   /** 歩いている間にたまっている数 */
   pending() { return this.queue.length; }
 }

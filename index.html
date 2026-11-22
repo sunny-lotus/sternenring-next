@@ -12,8 +12,8 @@
   [hidden] { display: none !important; }
   /* 右上：効果音の大きさ（DEV-BOOK-001 rev2）・曲の大きさ（rev3）と表示切替を横に並べる */
   #topright { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); display: flex; gap: 6px; }
-  #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle { background: rgba(27,26,34,.72); color: var(--ink); border: 1px solid var(--edge); border-radius: 3px; padding: 5px 10px; font: 13px sans-serif; white-space: nowrap; }
-  @media (max-width: 420px) { #topright { gap: 4px; right: max(8px, env(safe-area-inset-right)); } #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle { padding: 5px 6px; } }
+  #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { background: rgba(27,26,34,.72); color: var(--ink); border: 1px solid var(--edge); border-radius: 3px; padding: 5px 10px; font: 13px sans-serif; white-space: nowrap; }
+  @media (max-width: 420px) { #topright { gap: 4px; right: max(8px, env(safe-area-inset-right)); } #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { padding: 5px 6px; } }
   /* 右上のボタンが3つになったので（rev3）、幅460px以下では地名の下に「仮」を置き、ボタンと重ねない */
   @media (max-width: 460px) { body #hud { flex-direction: column; align-items: flex-start; gap: 4px; } }
   #perf { position: fixed; left: 12px; top: calc(max(10px, env(safe-area-inset-top)) + 34px); background: rgba(27,26,34,.8); color: #cfe3c0; padding: 2px 6px; font: 11px/1.4 monospace; pointer-events: none; }
@@ -49,7 +49,7 @@
   @media (max-width: 400px) {
     #hud { top: calc(max(10px, env(safe-area-inset-top)) + 38px); }
     #topright { left: max(8px, env(safe-area-inset-left)); justify-content: flex-end; }
-    #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle { font-size: 12px; padding: 5px 6px; }
+    #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { font-size: 12px; padding: 5px 6px; }
     #perf { top: calc(max(10px, env(safe-area-inset-top)) + 102px); }
     body #cam-panel { top: calc(max(10px, env(safe-area-inset-top)) + 102px) !important; }
     #intro-skip { min-width: 76px; }
@@ -62,17 +62,23 @@
   #battle-overlay:not(.status) #battle-back { left: max(8px, env(safe-area-inset-left)); top: calc(max(6px, env(safe-area-inset-top)) + 34px); transform: none; font-size: 12px; padding: 4px 10px; } /* 戦闘では左上（行動順の帯に重ねない。2026-11-22） */
   #battle-back.done { opacity: 1; font-size: 15px; padding: 8px 20px; background: rgba(60,40,20,.92); }
   @keyframes battle-in { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
-  /* エンカウント：白い光 → 金のふちの斬撃3本 → 暗転（2026-11-22） */
-  #enc-fx { position: fixed; inset: 0; z-index: 90; pointer-events: none; overflow: hidden; animation: enc-dark 1.1s ease-in forwards; }
-  #enc-fx::before { content: ""; position: absolute; inset: 0; background: #fff; animation: enc-flash .35s ease-out forwards; }
-  #enc-fx i { position: absolute; left: -20%; width: 140%; height: 14%; background: #07060c; border-top: 3px solid #f2d48a; border-bottom: 3px solid #f2d48a; box-shadow: 0 0 18px rgba(242,212,138,.7); transform: rotate(-18deg) translateX(-110%); animation: enc-slash .42s cubic-bezier(.6,0,.3,1) forwards; }
-  #enc-fx i:nth-child(1) { top: 18%; animation-delay: .18s; }
-  #enc-fx i:nth-child(2) { top: 44%; animation-delay: .3s; transform: rotate(-18deg) translateX(110%); animation-name: enc-slash-r; }
-  #enc-fx i:nth-child(3) { top: 70%; animation-delay: .42s; }
-  @keyframes enc-flash { from { opacity: .95; } to { opacity: 0; } }
-  @keyframes enc-slash { to { transform: rotate(-18deg) translateX(0); } }
-  @keyframes enc-slash-r { to { transform: rotate(-18deg) translateX(0); } }
-  @keyframes enc-dark { 0%, 55% { background: rgba(7,6,12,0); } 100% { background: rgba(7,6,12,1); } }
+  /* エンカウント（2026-11-22 作者「もっとかっこよく」）：白い光とゆれ → 寄って色があせる → 金の魔法陣 → 金のひび → 黒い破片が四方から → 戦闘へ */
+  body.encountering #paper, body.encountering #stage { animation: enc-zoom 1.3s cubic-bezier(.5,0,.6,1) forwards; }
+  @keyframes enc-zoom { 0% { transform: none; filter: none; } 6% { transform: translate(-8px,4px) scale(1.01); } 12% { transform: translate(7px,-5px) scale(1.02); } 18% { transform: translate(-4px,3px) scale(1.03); } 60% { transform: scale(1.22); filter: saturate(.25) brightness(.8) contrast(1.2); } 100% { transform: scale(1.35); filter: saturate(0) brightness(.4) blur(3px); } }
+  #enc-fx { position: fixed; inset: 0; z-index: 90; pointer-events: none; overflow: hidden; animation: enc-out 1.7s linear forwards; }
+  #enc-fx .ef-flash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #fff 0%, #fff8e0 40%, rgba(255,240,200,.6) 100%); animation: enc-flash .32s ease-out forwards; }
+  #enc-fx .ef-ring { position: absolute; left: 50%; top: 50%; width: min(80vw, 80vh); height: min(80vw, 80vh); transform: translate(-50%,-50%) scale(.2) rotate(0deg); opacity: 0; fill: none; stroke: #f2d48a; stroke-width: 2.4; filter: drop-shadow(0 0 6px rgba(242,212,138,.9)); animation: enc-ring 1.1s cubic-bezier(.2,.8,.2,1) .12s forwards; }
+  #enc-fx .ef-ring .thin, #enc-fx .ef-ring line { stroke-width: 1.2; }
+  #enc-fx .ef-crack { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #ffe6a0; stroke-width: .5; stroke-linejoin: round; filter: drop-shadow(0 0 2px #ffd27a) drop-shadow(0 0 6px rgba(255,190,80,.8)); stroke-dasharray: 80; stroke-dashoffset: 80; animation: enc-crack .32s ease-out .5s forwards; }
+  #enc-fx .ef-shards b { position: absolute; inset: 0; background: linear-gradient(135deg, #14101e, #05040a); transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1.4); opacity: 0; animation: enc-shard .38s cubic-bezier(.7,0,.3,1) forwards; }
+  #enc-fx .ef-shards b::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 47%, rgba(242,212,138,.9) 50%, transparent 53%); opacity: .5; }
+  @keyframes enc-flash { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes enc-ring { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.2) rotate(0deg); } 25% { opacity: 1; } 75% { opacity: 1; transform: translate(-50%,-50%) scale(1.05) rotate(110deg); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.5) rotate(150deg); } }
+  @keyframes enc-crack { to { stroke-dashoffset: 0; } }
+  @keyframes enc-shard { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  @keyframes enc-out { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+  #battle-overlay[data-wait] { background: transparent; animation: none; }
+  #battle-overlay[data-wait] iframe, #battle-overlay[data-wait] #battle-back { opacity: 0 !important; }
   /* 戦闘から戻る：明るく光って消える */
   #battle-overlay.closing { animation: battle-out .7s ease-in forwards; pointer-events: none; }
   @keyframes battle-out { 0% { opacity: 1; filter: brightness(1); transform: none; } 35% { opacity: 1; filter: brightness(2.2); } 100% { opacity: 0; filter: brightness(1.4); transform: scale(1.05); } }
@@ -83,6 +89,23 @@
   #battle-overlay.status.closing iframe { animation: page-out .5s cubic-bezier(.5,0,.75,.2) forwards; }
   @keyframes page-in { from { transform: rotateY(-100deg); filter: brightness(.4); } to { transform: rotateY(0); filter: brightness(1); } }
   @keyframes page-out { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(.4); } }
+  /* 言葉の窓と「調べる」（2026-11-22） */
+  #msg { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(720px, calc(100% - 32px)); z-index: 60; background: linear-gradient(180deg, rgba(34,24,14,.94), rgba(20,14,8,.96)); border: 1px solid #c9a050; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.5), inset 0 0 0 3px rgba(201,160,80,.18); padding: 14px 20px; color: #f3e6c4; font: 16px/1.7 "Shippori Mincho B1", serif; animation: msg-in .22s ease-out; }
+  #msg p { margin: 0; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; }
+  #msg::after { content: "▼"; position: absolute; right: 12px; bottom: 6px; font-size: 11px; color: #c9a050; animation: msg-blink 1s infinite; }
+  @keyframes msg-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
+  @keyframes msg-blink { 50% { opacity: .2; } }
+  #act-btn { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(28px, env(safe-area-inset-bottom)); z-index: 40; width: 72px; height: 72px; border-radius: 50%; background: rgba(232,223,202,.22); border: 1px solid rgba(232,223,202,.45); color: #f3e6c4; font: 14px "Shippori Mincho B1", serif; }
+  #act-btn:active { background: rgba(201,162,94,.55); }
+  /* 設定の統一（2026-11-22）：右上はメニューだけ。音・曲・表示・内装はメニューの「設定」へ。カメラは、調整のパネルが開いているあいだだけ「カメラ：閉じる」を出す */
+  #sound-toggle, #bgm-toggle, #room-toggle, #render-toggle { display: none !important; }
+  #cam-toggle:not([aria-pressed="true"]) { display: none !important; }
+  #dev-pos { position: fixed; left: 50%; top: max(10px, env(safe-area-inset-top)); transform: translateX(-50%); z-index: 45; background: rgba(10,12,30,.75); color: #f6e2a8; padding: 3px 10px; border-radius: 4px; font: 12px monospace; pointer-events: none; }
+  #dev-toggle { opacity: .7; font-size: 12px !important; }
+  /* 開発者の半透明の窓（2026-11-22）：右に置き、うしろのフィールドが見える */
+  #battle-overlay.status.devwin { inset: auto; left: max(10px, env(safe-area-inset-left)); top: calc(max(10px, env(safe-area-inset-top)) + 44px); width: min(460px, calc(100vw - 20px)); height: min(76vh, 720px); background: transparent; perspective: none; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+  #battle-overlay.status.devwin iframe { background: transparent; animation: none; box-shadow: none; }
+  #battle-overlay.status.devwin #battle-back { top: auto; bottom: 8px; }
 </style>
 </head>
 <body>
@@ -90,8 +113,11 @@
 <canvas id="stage" aria-label="フィールド（平面）" hidden></canvas>
 <button type="button" id="intro-cover" hidden aria-keyshortcuts="Enter Space"><span id="cover-label">クリックしてはじめる</span></button>
 <div id="hud"><span id="map-title"></span><span id="map-badge" hidden>仮配置</span></div>
-<div id="topright"><button type="button" id="sound-toggle">音：中</button><button type="button" id="bgm-toggle">曲：中</button><button type="button" id="room-toggle" hidden>内装：絵</button><button type="button" id="status-toggle" aria-keyshortcuts="M">メニュー</button><button type="button" id="cam-toggle">カメラ</button><button type="button" id="render-toggle">表示：紙の舞台</button></div>
+<div id="topright"><button type="button" id="sound-toggle">音：中</button><button type="button" id="bgm-toggle">曲：中</button><button type="button" id="room-toggle" hidden>内装：絵</button><button type="button" id="dev-toggle" aria-keyshortcuts="F2" title="開発者メニュー（F2）">開発</button><button type="button" id="status-toggle" aria-keyshortcuts="M">メニュー</button><button type="button" id="cam-toggle">カメラ</button><button type="button" id="render-toggle">表示：紙の舞台</button></div>
 <div id="perf" hidden></div>
+<div id="dev-pos" hidden></div>
+<div id="msg" hidden role="status" aria-live="polite"></div>
+<button type="button" id="act-btn" aria-label="調べる" aria-keyshortcuts="Enter Space Z">調べる</button>
 <div id="pad" aria-label="十字ボタン">
   <button type="button" data-dir="up" aria-label="上"></button>
   <button type="button" data-dir="left" aria-label="左"></button>

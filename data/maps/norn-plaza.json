@@ -157,6 +157,42 @@
         1.5
       ]
     },
+    "townArt": {
+      "note": "ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ",
+      "base": "assets/town/norn/",
+      "ground": {
+        "paved": "tex_cobble_street.png",
+        "grass": "tex_grass.png"
+      },
+      "boards": {
+        "house-*": [
+          "house_home_2f.png",
+          "house_a_narrow.png",
+          "house_b_sideroof.png",
+          "house_c_stepgable.png",
+          "house_d_workshop.png",
+          "house_e_archway.png",
+          "house_f_corner.png"
+        ],
+        "inn-tall": "house_merchant_3f.png",
+        "lamp": "lamp_post.png",
+        "stall": "stall.png",
+        "flower-stall": "flower_stall.png",
+        "cart": "cart.png",
+        "planter": "planter.png",
+        "flowerbed": "flowerbed.png",
+        "tree": "tree_street.png",
+        "tree-small": "tree_small.png",
+        "herbs": "herbs_drying.png",
+        "awning-green": "awnings-1.png",
+        "awning-red": "awnings-2.png",
+        "awning-wheat": "awnings-3.png",
+        "sign-bread": "signs-1.png",
+        "sign-shoe": "signs-2.png",
+        "sign-cup": "signs-3.png",
+        "sign-deer": "signs-4.png"
+      }
+    },
     "floor": "cobble",
     "paved": [
       {
@@ -201,7 +237,11 @@
         "items": [
           {
             "asset": "placeholder:night-sky-ring",
-            "image": "assets/backdrops/title_bg_temp.jpg",
+            "sink": 1,
+            "image": "assets/backdrops/norn_night_v02.jpg",
+            "imageNightNote": "夜の背景（美術・演出室 2026-11-22 pixel/元絵/背景_ノルン/norn_night_backdrop_v02、試作）",
+            "imageDay": "assets/backdrops/norn_day_v02.jpg",
+            "imageDayNote": "昼の背景（美術・演出室 2026-11-22 norn_day_backdrop_v02。手前の家を一階・扉まで描き直したもの。作者「背景を書かせなおす、家の窓やドアがあるように」）",
             "imageNote": "今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）",
             "x": 0,
             "y": 0,

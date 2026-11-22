@@ -318,3 +318,46 @@ test('隊列：setParty で並びを変えると、先頭がいまの場所に�
   assert.deepEqual(field.state.actors.map((a) => a.id), want);
   assert.deepEqual({ x: field.state.actors[0].x, y: field.state.actors[0].y }, { x: before.x, y: before.y });
 });
+
+test('調べる：向いている先の出来事を動かし、記録に書く。2回目は旗で別のページ。言葉が出ているあいだは歩けない', async () => {
+  const { createRecord, goldOf, fieldSkills } = await import('../src/core/record.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const d = loadAll(), record = createRecord(); let changed = 0;
+  const field = createField({ maps: d.maps, collision: d.collision, world: { ...d.world, start: { map: 'test-forest', spawn: 'default' } }, party: d.ledger.party, record, onRecordChange: () => changed++ });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  tap(field, input, 'right', 12); tap(field, input, 'down', 2); // (20,9)。下の (20,10) が薬草の茂み
+  assert.deepEqual(pos(field), { x: 20, y: 9, dir: 'down' });
+  input.pressAction(); run(field, input, 20);
+  assert.equal(field.view().message.dialogue, 'forest.herbs.first');
+  assert.deepEqual(field.view().message.notes, ['銅貨を30枚手に入れた']);
+  assert.equal(goldOf(record), 30); assert.equal(changed, 1);
+  tap(field, input, 'left'); assert.deepEqual(pos(field), { x: 20, y: 9, dir: 'down' }, '言葉が出ているあいだは歩けない');
+  field.closeMessage();
+  input.pressAction(); run(field, input, 20);
+  assert.equal(field.view().message.dialogue, 'forest.herbs.again');
+  assert.equal(goldOf(record), 30, '2回目はもらえない');
+  field.closeMessage();
+  tap(field, input, 'right', 8); tap(field, input, 'down'); // (28,9) で下を向く → 古い石碑
+  input.pressAction(); run(field, input, 20);
+  assert.deepEqual(fieldSkills(record).volt, ['閃光弾']);
+});
+
+test('開発者メニュー：ワープ・すぐ戦う・ランダムの戦闘なし・倒した敵を戻す', () => {
+  const { field, input } = makeField();
+  assert.equal(field.dev.warp('test-forest'), true);
+  assert.equal(field.state.mapId, 'test-forest');
+  assert.deepEqual(pos(field), { x: 8, y: 7, dir: 'right' });
+  assert.equal(field.dev.warp('no-such-map'), false);
+  run(field, input, 400);
+  field.dev.setNoRandom(true);
+  tap(field, input, 'down', 2); // 街道の外
+  for (let k = 0; k < 120; k++) tap(field, input, k % 2 ? 'left' : 'right');
+  assert.equal(field.view().battle, null, 'ランダムの戦闘なしなら起きない');
+  assert.equal(field.dev.fight('swarm'), true);
+  assert.equal(field.view().battle.battle, 'swarm');
+  field.endBattle('win');
+  field.state.defeated.push('test-forest:forest-beasts');
+  field.dev.reviveFoes();
+  assert.deepEqual(field.view().defeated, []);
+});

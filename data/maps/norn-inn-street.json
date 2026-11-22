@@ -77,9 +77,9 @@
     "#..#.........#..........#......#.#",
     "#....###.###.##.###.###....#######",
     "#....###.###....###.###....#######",
+    "#...............................##",
     "#................................#",
-    "#................................#",
-    "#.##....##..##.##.....##.##.##...#",
+    "#.##....###.##.##....###.##.##...#",
     "#................................#",
     "##################################"
   ],
@@ -94,6 +94,42 @@
       ]
     },
     "floor": "cobble",
+    "townArt": {
+      "note": "ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ",
+      "base": "assets/town/norn/",
+      "ground": {
+        "paved": "tex_cobble_street.png",
+        "grass": "tex_grass.png"
+      },
+      "boards": {
+        "house-*": [
+          "house_home_2f.png",
+          "house_a_narrow.png",
+          "house_b_sideroof.png",
+          "house_c_stepgable.png",
+          "house_d_workshop.png",
+          "house_e_archway.png",
+          "house_f_corner.png"
+        ],
+        "inn-tall": "house_e_archway.png",
+        "lamp": "lamp_post.png",
+        "stall": "stall.png",
+        "flower-stall": "flower_stall.png",
+        "cart": "cart.png",
+        "planter": "planter.png",
+        "flowerbed": "flowerbed.png",
+        "tree": "tree_street.png",
+        "tree-small": "tree_small.png",
+        "herbs": "herbs_drying.png",
+        "awning-green": "awnings-1.png",
+        "awning-red": "awnings-2.png",
+        "awning-wheat": "awnings-3.png",
+        "sign-bread": "signs-1.png",
+        "sign-shoe": "signs-2.png",
+        "sign-cup": "signs-3.png",
+        "sign-deer": "signs-4.png"
+      }
+    },
     "paved": [
       {
         "x": 0,
@@ -119,7 +155,11 @@
         "items": [
           {
             "asset": "placeholder:night-sky-ring",
-            "image": "assets/backdrops/title_bg_temp.jpg",
+            "sink": 1,
+            "image": "assets/backdrops/norn_night_v02.jpg",
+            "imageNightNote": "夜の背景（美術・演出室 2026-11-22 pixel/元絵/背景_ノルン/norn_night_backdrop_v02、試作）",
+            "imageDay": "assets/backdrops/norn_day_v02.jpg",
+            "imageDayNote": "昼の背景（美術・演出室 2026-11-22 norn_day_backdrop_v02。手前の家を一階・扉まで描き直したもの。作者「背景を書かせなおす、家の窓やドアがあるように」）",
             "imageNote": "今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）。カルディアの城壁とレグナス城の背景の元絵を依頼中",
             "x": 0,
             "y": 0,
@@ -147,7 +187,7 @@
             "y": 1,
             "w": 7,
             "h": 4,
-            "standH": 7.2,
+            "standH": 6.3,
             "zOffset": 0
           },
           {
@@ -185,6 +225,69 @@
             "h": 4,
             "standH": 4.6,
             "zOffset": 0
+          },
+          {
+            "asset": "placeholder:awning-green",
+            "x": 14,
+            "y": 4,
+            "w": 5,
+            "h": 1,
+            "standH": 2.6,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:awning-red",
+            "x": 19,
+            "y": 4,
+            "w": 5,
+            "h": 1,
+            "standH": 2.6,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:awning-wheat",
+            "x": 25,
+            "y": 4,
+            "w": 5,
+            "h": 1,
+            "standH": 2.6,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:sign-deer",
+            "x": 11,
+            "y": 4,
+            "w": 2,
+            "h": 1,
+            "standH": 4.2,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:sign-bread",
+            "x": 14,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 3.6,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:sign-shoe",
+            "x": 22,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 3.6,
+            "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:sign-cup",
+            "x": 28,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 3.6,
+            "zOffset": 0.25
           }
         ]
       },
@@ -208,69 +311,6 @@
             "h": 1,
             "standH": 1.2,
             "zOffset": 0
-          },
-          {
-            "asset": "placeholder:awning-green",
-            "x": 14,
-            "y": 5,
-            "w": 5,
-            "h": 1,
-            "standH": 3.2,
-            "zOffset": 0.1
-          },
-          {
-            "asset": "placeholder:awning-red",
-            "x": 19,
-            "y": 5,
-            "w": 5,
-            "h": 1,
-            "standH": 2.9,
-            "zOffset": 0.12
-          },
-          {
-            "asset": "placeholder:awning-wheat",
-            "x": 25,
-            "y": 5,
-            "w": 5,
-            "h": 1,
-            "standH": 3.1,
-            "zOffset": 0.1
-          },
-          {
-            "asset": "placeholder:sign-deer",
-            "x": 11,
-            "y": 5,
-            "w": 2,
-            "h": 1,
-            "standH": 5.4,
-            "zOffset": 0.2
-          },
-          {
-            "asset": "placeholder:sign-bread",
-            "x": 14,
-            "y": 5,
-            "w": 1,
-            "h": 1,
-            "standH": 4.6,
-            "zOffset": 0.22
-          },
-          {
-            "asset": "placeholder:sign-shoe",
-            "x": 22,
-            "y": 5,
-            "w": 1,
-            "h": 1,
-            "standH": 4.4,
-            "zOffset": 0.22
-          },
-          {
-            "asset": "placeholder:sign-cup",
-            "x": 28,
-            "y": 5,
-            "w": 1,
-            "h": 1,
-            "standH": 4.6,
-            "zOffset": 0.22
           },
           {
             "asset": "placeholder:crates",
@@ -355,15 +395,6 @@
           },
           {
             "asset": "placeholder:stall",
-            "x": 16,
-            "y": 11,
-            "w": 3,
-            "h": 2,
-            "standH": 2.6,
-            "zOffset": 0.05
-          },
-          {
-            "asset": "placeholder:stall",
             "x": 20,
             "y": 11,
             "w": 3,
@@ -378,6 +409,15 @@
             "w": 3,
             "h": 2,
             "standH": 2.6,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:flower-stall",
+            "x": 16,
+            "y": 11,
+            "w": 3,
+            "h": 2,
+            "standH": 2.8,
             "zOffset": 0.05
           },
           {
@@ -409,25 +449,7 @@
           },
           {
             "asset": "placeholder:planter",
-            "x": 8,
-            "y": 15,
-            "w": 2,
-            "h": 1,
-            "standH": 1.2,
-            "zOffset": 0.02
-          },
-          {
-            "asset": "placeholder:planter",
             "x": 15,
-            "y": 15,
-            "w": 2,
-            "h": 1,
-            "standH": 1.2,
-            "zOffset": 0.02
-          },
-          {
-            "asset": "placeholder:planter",
-            "x": 22,
             "y": 15,
             "w": 2,
             "h": 1,
@@ -442,6 +464,33 @@
             "h": 1,
             "standH": 1.2,
             "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:flowerbed",
+            "x": 8,
+            "y": 15,
+            "w": 3,
+            "h": 1,
+            "standH": 0.9,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:flowerbed",
+            "x": 21,
+            "y": 15,
+            "w": 3,
+            "h": 1,
+            "standH": 0.9,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:tree-small",
+            "x": 32,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 2.2,
+            "zOffset": 0.03
           },
           {
             "asset": "placeholder:crates",

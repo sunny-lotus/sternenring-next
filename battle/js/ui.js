@@ -300,7 +300,7 @@
         var d = DIFF[k] || 0, pips = '', best = 0, rl = SR.recLv && SR.recLv[k];
         var avgLv = SR.level ? ['N', 'V', 'F', 'S', 'L'].reduce(function (s, id) { return s + SR.level.lv(id); }, 0) / 5 : 1;   // 5人の平均Lv
         for (var i = 0; i < 5; i++) pips += '<i class="' + (i < d ? 'on' : '') + '"></i>';
-        try { best = (JSON.parse(localStorage.getItem('sr-battle-best-v1')) || {})[e.name] || 0; } catch (x) {}
+        try { best = (JSON.parse(SRS.getItem('sr-battle-best-v1')) || {})[e.name] || 0; } catch (x) {}
         b.className += ' enc';
         b.innerHTML = (img ? '<img class="th" src="img/enemies/' + img + '.png" alt="">' : '<span class="th">？</span>') +
           '<span class="tx"><b>' + e.name + '</b><span class="meta">' + (e.era ? '<span class="badge b-form">' + ['', '序盤', '中盤', '終盤'][e.era] + '</span>' : '') +
@@ -463,7 +463,7 @@
         return '<div class="dvr">' + face(c) + '<button class="btn mini' + (ev ? ' sel' : '') + '" data-nav data-dv="lev" data-id="' + c + '">' + (ev ? 'イベント済み' : 'イベントまだ') + '</button>' +
           '<span class="dvl">親密度</span><input type="number" min="0" max="' + (SR.bondLv[2] + 20) + '" step="10" value="' + G.bond(c) + '" data-dvi="bond" data-id="' + c + '"><span class="dvl">段' + G.bondLvOf(c) + '</span>' +
           '<button class="btn mini" data-nav data-dv="bondset" data-id="' + c + '" data-v="' + SR.bondLv[1] + '">段2に</button><button class="btn mini" data-nav data-dv="bondset" data-id="' + c + '" data-v="' + SR.bondLv[2] + '">段3に</button></div>';
-      }).join('') + '<div class="small dvnote">連携技は終盤から。時期は技の書の上で変えられる（いま：' + SR.eraName[G.era()] + '）。</div>';
+      }).join('') + '<div class="small dvnote">連携技は終盤から。時期は' + (FIELD ? '開発者の窓' : '技の書の上') + 'で変えられる（いま：' + SR.eraName[G.era()] + '）。</div>';
     }
     box.innerHTML = h + '</div>';
   }
@@ -516,7 +516,7 @@
         '<div class="rps"><span class="hp">HP <b>' + Math.round(u.maxHp) + '</b></span><span class="k">ブレイクゲージ <b>' + Math.round(u.maxK) + '</b></span><span class="m">MP <b>' + Math.round(u.maxMp) + '</b></span></div></div>';
     }).join('');
     var G = SR.growth, info = $('menuInfo');
-    if (info) info.innerHTML = '<div><span>お金</span><b>' + SR.moneyHTML(G.gold()) + '</b></div><div><span>時期</span><b>' + SR.eraName[G.era()] + '</b></div>';
+    if (info) info.innerHTML = '<div><span>お金</span><b>' + SR.moneyHTML(G.gold()) + '</b></div>' + (FIELD ? '' : '<div><span>時期</span><b>' + SR.eraName[G.era()] + '</b></div>');
   }
   // ステータス：今の育ち・装備で戦いを始めたときの数字を見せる
   function drawStatus() {
@@ -1214,7 +1214,7 @@
     var win = B.outcome === 'win', s = B.stat;
     if (B.bestNew === undefined) {
       B.bestNew = false;
-      try { var best = JSON.parse(localStorage.getItem('sr-battle-best-v1')) || {}, key = B.enc.name; if ((s.maxHit || 0) > (best[key] || 0)) { B.bestNew = !!best[key] || s.maxHit > 0; best[key] = Math.round(s.maxHit); localStorage.setItem('sr-battle-best-v1', JSON.stringify(best)); } B.best = best[key] || 0; } catch (e) { B.best = 0; }
+      try { var best = JSON.parse(SRS.getItem('sr-battle-best-v1')) || {}, key = B.enc.name; if ((s.maxHit || 0) > (best[key] || 0)) { B.bestNew = !!best[key] || s.maxHit > 0; best[key] = Math.round(s.maxHit); SRS.setItem('sr-battle-best-v1', JSON.stringify(best)); } B.best = best[key] || 0; } catch (e) { B.best = 0; }
     }
     var mh = s.maxHit ? '<div class="maxhit">最大ダメージ <b>' + Math.round(s.maxHit).toLocaleString() + '</b>（' + s.maxHitBy + '）' + (B.bestNew ? '<span class="newbest">NEW RECORD</span>' : B.best ? '<span class="small">　自己ベスト ' + B.best.toLocaleString() + '</span>' : '') + '</div>' : '';
     var gr = B.grown ? '<div class="growres">' + B.grown.learned.map(function (l) { return '<div class="lrn">' + l + '</div>'; }).join('') + B.grown.lines.map(function (l) { return '<div>経験値　' + l + '</div>'; }).join('') + (B.grown.gold ? '<div>お金 +' + SR.moneyHTML(B.grown.gold) + '</div>' : '') + '</div>' : '';
@@ -1238,7 +1238,8 @@
       '<div class="rst">' + B.t + '手・ブレイク' + s.breaks + '回' + (B.tune.charge ? '（大技を止めた' + (s.stops || 0) + '回）' : '') + '・追撃' + s.chases + '・反撃' + s.counters + '・交代' + s.swaps + '</div></div>' +
       (cards ? '<div class="rcards">' + cards + '</div>' : '') +
       (money || chips ? '<div class="rgain">' + money + (chips ? '<div class="rchips">' + chips + '</div>' : '') + '</div>' : '') + notes +
-      (colo ? coloRow() : '<div class="row" style="justify-content:center"><button class="btn primary" data-nav data-act="again">もう一度</button>' +
+      (colo ? coloRow() : FIELD ? '<div class="row" style="justify-content:center"><button class="btn primary" data-nav data-act="field">フィールドへ戻る</button></div>'   // フィールドから開いた戦闘は「もう一度」を出さない（2026-11-22 作者「もう一度戦うはいらないよね」）
+        : '<div class="row" style="justify-content:center"><button class="btn primary" data-nav data-act="again">もう一度</button>' +
       '<button class="btn" data-nav data-act="title">相手・構成を変える</button></div>') + '</div>';
   }
   // 2026-11-22 サニー：結果の演出。経験値バーが伸びる→Lvアップや覚えた技が「ぴろん」と出て消える。お金は数字が増える
@@ -1353,6 +1354,7 @@
     else if (act === 'go') run();
     else if (act === 'fast') speed = 0.25;
     else if (act === 'again') start();
+    else if (act === 'field') { try { parent.postMessage({ type: 'sr-battle-close' }, location.origin); } catch (e) {} }   // フィールドへ戻る（親が戻る演出をして閉じる）
     else if (act === 'coloNext') start();   // コロシアム：次の戦い
     else if (act === 'title') location.reload();
   });
@@ -1371,7 +1373,7 @@
   // 出来事を順に見せて、終わったら done
   function play(evs, done) {
     st.mode = 'play'; st.actor = null; playActor = null; draw();
-    if (B.fxBest === undefined) { try { B.fxBest = (JSON.parse(localStorage.getItem('sr-battle-best-v1')) || {})[B.enc.name] || 0; } catch (e) { B.fxBest = 0; } B.fxTop = B.fxBest; }
+    if (B.fxBest === undefined) { try { B.fxBest = (JSON.parse(SRS.getItem('sr-battle-best-v1')) || {})[B.enc.name] || 0; } catch (e) { B.fxBest = 0; } B.fxTop = B.fxBest; }
     playMood = B.enemies.some(function (e) { return e.hp > 0 && e.charge === 2 && !B.broken(e); }) ? 2 : 0;
     var i = 0;
     var banner = $('banner');
@@ -1750,7 +1752,7 @@
 
   // カメラ：場面ごとに動く／全体で固定（ためし用の切りかえ）
   var camMode = 'auto';
-  try { if (localStorage.getItem('sr_cam') === 'fixed') camMode = 'fixed'; } catch (e) {}
+  try { if (SRS.getItem('sr_cam') === 'fixed') camMode = 'fixed'; } catch (e) {}
   (function () {
     var b = $('icoBtn'), o = $('icovl'); if (!b || !o) return;
     $('battle').appendChild(b); $('battle').appendChild(o);
@@ -1767,7 +1769,7 @@
     var b = $('camBtn'); if (!b) return;
     function lbl() { b.textContent = 'カメラ ' + (camMode === 'fixed' ? '固定' : '動く'); }
     lbl();
-    b.onclick = function () { camMode = camMode === 'fixed' ? 'auto' : 'fixed'; try { localStorage.setItem('sr_cam', camMode); } catch (e) {} lbl(); if (SR.stage3d) SR.stage3d.setCamMode(camMode); };
+    b.onclick = function () { camMode = camMode === 'fixed' ? 'auto' : 'fixed'; try { SRS.setItem('sr_cam', camMode); } catch (e) {} lbl(); if (SR.stage3d) SR.stage3d.setCamMode(camMode); };
   })();
 
   // ブースト：宝石をタップして力をこめる（こめた数だけ光る）
@@ -1947,8 +1949,10 @@
   // ?field=1&enc=<敵の組> でタイトルをとばしてすぐ戦闘に入る。勝ち負けが出たら親の画面（フィールド）へ知らせる。ふだんの開き方は変わらない
   // ?field=1&page=status：フィールドのステータスメニューとして、そのページだけを開く（戦闘はしない）。そのページの「戻る」（Bボタン・Esc も）で親へ「閉じて」と知らせる（2026-11-22 作者「ステータスメニューを追加」）
   var fpage = FIELD && FP.get('page');
-  if (fpage && document.getElementById('pg-' + fpage)) {
-    document.body.classList.add('field-page'); goPage(fpage);
+  if (fpage && (document.getElementById('pg-' + fpage) || fpage === 'fdev')) {
+    document.body.classList.add('field-page'); if (fpage !== 'fdev') goPage(fpage);
+    // 開発者の窓（2026-11-22 作者「開発者メニューは画面の様子を見ながら確認したいから半透明のウィンドウで」）：うしろのフィールドが見えるよう、ページの地を半透明に
+    if (fpage === 'fdev') { document.body.classList.add('fdev-win'); var fw = document.createElement('style'); fw.textContent = 'html,body{background:transparent!important}body.fdev-win #title,body.fdev-win #title::before,body.fdev-win #title::after{background:transparent!important}body.fdev-win .mpage{background:rgba(16,12,10,.72)!important;border-radius:10px}body.fdev-win .mpage::before{inset:4px}body.fdev-win .mpage .mbody,body.fdev-win .mpage .mhead{background:none!important}body.fdev-win #pg-fdev .mback{display:none}'; document.head.appendChild(fw); setTimeout(function () { goPage('fdev'); try { parent.postMessage({ type: 'sr-field-ready' }, location.origin); } catch (e) {} }, 0); }
     var fst = document.createElement('style'); fst.textContent = 'body.field-page .mpage{padding-left:max(12px,1.5vw)!important;padding-right:max(12px,1.5vw)!important}body.field-page .rpg-party>.rpm{flex:1 1 0;max-height:150px}body.field-page .fm-measure .rpg-party>.rpm{flex:none}body.field-page #title{perspective:1800px}body.field-page .mpage.pg-turn{transform-origin:0 50%;animation:fpturn .5s cubic-bezier(.2,.8,.25,1) both}@keyframes fpturn{from{transform:rotateY(-80deg);filter:brightness(.45)}to{transform:none;filter:none}}body.field-page .mpage.pg-turn-back{transform-origin:100% 50%;animation:fpturnb .5s cubic-bezier(.2,.8,.25,1) both}@keyframes fpturnb{from{transform:rotateY(80deg);filter:brightness(.45)}to{transform:none;filter:none}}'; document.head.appendChild(fst);   // 横の上限（1200px）をはずし、一覧の行は残りの高さまでのびる
     // フィールドのメニューは画面いっぱいに（2026-11-22 作者「これもうちょっと全体的に使えませんか」）：メニューの中身（一覧と右の項目）の大きさを測り、
     // 画面に入るいちばん大きな倍率（2倍まで）に広げる。画面の大きさが変わったとき・メニューに戻ったときに測り直す
@@ -1956,7 +1960,7 @@
     // 5人を並べ、1人を押してからもう1人を押すと入れかわる。並びは保存し、親（フィールド）へ知らせる。フィールドでは、この順に並んで歩く（先頭が主人公の位置）
     (function () {
       var FKEY = 'sr-field-formation-v1', ID2 = { N: 'nacht', V: 'volt', F: 'flare', S: 'serena', L: 'licht' };
-      var order = null; try { order = JSON.parse(localStorage.getItem(FKEY)); } catch (e) {}
+      var order = null; try { order = JSON.parse(SRS.getItem(FKEY)); } catch (e) {}
       if (!Array.isArray(order) || order.length !== 5) order = ['nacht', 'volt', 'flare', 'serena', 'licht'];
       var NAME = {}, CODE = {}; Object.keys(ID2).forEach(function (k) { NAME[ID2[k]] = SR.names[k]; CODE[ID2[k]] = k; });
       var cmd = document.querySelector('#pg-menu .rpg-cmd');
@@ -1992,10 +1996,107 @@
         var i = +c.getAttribute('data-fm');
         if (sel === null) { sel = i; SR.sound.se('tick'); }
         else if (sel === i) { sel = null; }
-        else { var t = order[sel]; order[sel] = order[i]; order[i] = t; sel = null; try { localStorage.setItem(FKEY, JSON.stringify(order)); } catch (e) {} tell(); SR.sound.se('swap'); }
+        else { var t = order[sel]; order[sel] = order[i]; order[i] = t; sel = null; try { SRS.setItem(FKEY, JSON.stringify(order)); } catch (e) {} tell(); SR.sound.se('swap'); }
         draw(); if (nav && nav.refresh) nav.refresh();
       });
       new MutationObserver(function () { if ($('title').getAttribute('data-page') === 'formation') { sel = null; draw(); } }).observe($('title'), { attributes: true, attributeFilter: ['data-page'] });
+      draw();
+    })();
+    // 設定の統一（2026-11-22 作者「設定を統一しよう」）：フィールドのメニューの「設定」に、フィールドと戦闘で共通の設定をまとめる。
+    // 曲・効果音の大きさ（なし・小・中・大）、表示（紙の舞台・平面）、内装（絵・ドット）、カメラの調整、全画面。
+    // 値は冒険の記録の sr-settings-v1 に書き、親（フィールド）へ知らせる（sr-settings）。カメラは親が開く（sr-open-camera）
+    (function () {
+      var SKEY = 'sr-settings-v1';
+      function get() { var s = null; try { s = JSON.parse(SRS.getItem(SKEY)); } catch (e) {} return Object.assign({ se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night' }, s || {}); }
+      function put(s) { try { SRS.setItem(SKEY, JSON.stringify(s)); } catch (e) {} try { parent.postMessage({ type: 'sr-settings' }, location.origin); } catch (e) {} }
+      var LV = [['off', 'なし'], ['low', '小'], ['mid', '中'], ['high', '大']];
+      var sec = document.querySelector('#pg-settings [data-snd="bgm"]'); sec = sec && sec.closest('.row');
+      if (!sec) return;
+      sec.style.display = 'none';
+      var box = document.createElement('div'); box.className = 'fset'; sec.parentNode.insertBefore(box, sec);
+      var st = document.createElement('style');
+      st.textContent = '.fset{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center;margin:6px 0 10px}.fset>span{color:#e8dcb8;letter-spacing:.12em}.fset .seg{display:flex;flex-wrap:wrap;gap:6px}.fset .seg button.on{background:linear-gradient(180deg,rgba(150,112,36,.9),rgba(70,46,10,.95));color:#fff6dc;border-color:#f2d48a}';
+      document.head.appendChild(st);
+      function seg(key, opts) { var s = get(); return '<div class="seg">' + opts.map(function (o) { return '<button class="btn mini' + (String(s[key]) === String(o[0]) ? ' on' : '') + '" data-nav data-fset="' + key + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>'; }
+      function draw() {
+        box.innerHTML = '<span>曲の大きさ</span>' + seg('bgm', LV) + '<span>効果音の大きさ</span>' + seg('se', LV) +
+          '<span>画面</span><div class="seg"><button class="btn mini" data-nav data-ffs>全画面</button></div>';
+        if (nav && nav.refresh) nav.refresh();
+      }
+      box.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-fset]');
+        if (b) { var s = get(), k = b.getAttribute('data-fset'), v = b.getAttribute('data-v'); s[k] = k === 'pixelRoom' ? v === 'true' : v; put(s); draw(); SR.sound.se('tick'); return; }
+        if (ev.target.closest('[data-fcam]')) { try { parent.postMessage({ type: 'sr-open-camera' }, location.origin); } catch (e) {} }
+        if (ev.target.closest('[data-ffs]')) { try { parent.postMessage({ type: 'sr-fullscreen' }, location.origin); } catch (e) {} }   // 全画面はゲーム全体（親）で
+      });
+      new MutationObserver(function () { if ($('title').getAttribute('data-page') === 'settings') draw(); }).observe($('title'), { attributes: true, attributeFilter: ['data-page'] });
+      draw();
+    })();
+    // 開発者メニュー（2026-11-22 作者「開発者メニューを作ってほしい」）：フィールドのメニューにだけ「開発者」を足す。
+    // ワープ・すぐ戦う・時期・ランダムの戦闘・倒した敵を戻す・お金・試しの出来事をもう一度・記録をはじめから・座標を出す。戦闘の数字の調整（開発者設定）へも行ける。
+    // フィールドで行うものは親へ知らせる（sr-dev）。時期・お金は戦闘の育ちをここで書く（冒険の記録に入る）
+    (function () {
+      var cmd = document.querySelector('#pg-menu .rpg-cmd');
+      // プレイの画面と開発の画面を分ける（2026-11-22 作者「時期も開発だけが見えてればいい。プレイ画面と開発画面がごちゃごちゃにならないように整理して」）：
+      // メニューに「開発者」は出さない（F2・右上の「開発」だけ）。設定の開発用の項目・技の書と状態の「時期」はフィールドでは隠す
+      if (false) { var b = document.createElement('button'); b.className = 'rcmd'; b.setAttribute('data-nav', ''); b.setAttribute('data-page', 'fdev');
+        b.innerHTML = '<svg viewBox="0 0 32 32"><path d="M8 24 L16 8 L24 24 Z M16 14 L16 19 M16 21.5 L16 22"/></svg><b>開発者</b>'; cmd.appendChild(b); }
+      (function () {
+        var sp = document.getElementById('pg-settings'), hide = false;
+        if (sp) Array.prototype.forEach.call(sp.querySelectorAll('.mbody > *'), function (el) { if (el.tagName === 'H3') hide = /^開発/.test(el.textContent); if (hide) el.style.display = 'none'; });
+        var dvBack = document.querySelector('#pg-dev .mback'); if (dvBack) dvBack.setAttribute('data-page', 'fdev');
+        var hs = document.createElement('style'); hs.textContent = '.bk-era .small,.bk-era [data-lo="era"]{display:none!important}'; document.head.appendChild(hs);
+      })();
+      var pg = document.createElement('div'); pg.className = 'mpage'; pg.id = 'pg-fdev';
+      pg.innerHTML = '<div class="mhead"><button class="btn mback" data-nav data-back data-page="menu">戻る</button><h2>開発者</h2></div><div class="mbody scroll"><div class="fdev" id="fdevBox"></div></div>';
+      var anchor = document.getElementById('pg-status'); anchor.parentNode.insertBefore(pg, anchor);
+      var st = document.createElement('style');
+      st.textContent = '#title[data-page="fdev"] #pg-fdev{display:flex}.fdev{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:center;padding:8px 4px}.fdev>span{color:#e8dcb8;letter-spacing:.12em}.fdev .seg{display:flex;flex-wrap:wrap;gap:6px}.fdev .seg button.on{background:linear-gradient(180deg,rgba(150,112,36,.9),rgba(70,46,10,.95));color:#fff6dc;border-color:#f2d48a}.fdev .note{grid-column:1/3;font-size:12px;color:#bfb49a}';
+      document.head.appendChild(st);
+      function tell(o) { o.type = 'sr-dev'; try { parent.postMessage(o, location.origin); } catch (e) {} }
+      var WARPS = [['norn-inn-street', '銀鹿亭前'], ['norn-plaza', '広場'], ['silver-deer-1f', '銀鹿亭の中'], ['test-forest', '森'], ['test-dungeon', 'ダンジョン']];
+      var FIGHTS = Object.keys(SR.encounters).filter(function (k) { return k !== 'random'; });
+      var noRandom = false, showPos = false;
+      function sget() { var s = null; try { s = JSON.parse(SRS.getItem('sr-settings-v1')); } catch (e) {} return Object.assign({ se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night' }, s || {}); }
+      function sput(s) { try { SRS.setItem('sr-settings-v1', JSON.stringify(s)); } catch (e) {} try { parent.postMessage({ type: 'sr-settings' }, location.origin); } catch (e) {} }
+      function sseg(key, opts) { var s = sget(); return '<div class="seg">' + opts.map(function (o) { return btn('data-dset="' + key + '" data-v="' + o[0] + '"', o[1], String(s[key]) === String(o[0])); }).join('') + '</div>'; }
+      function btn(attrs, label, on) { return '<button class="btn mini' + (on ? ' on' : '') + '" data-nav ' + attrs + '>' + label + '</button>'; }
+      function draw() {
+        var era = SR.growth.era() || 1;
+        document.getElementById('fdevBox').innerHTML =
+          '<span>カメラ</span><div class="seg">' + btn('data-dcam', 'カメラの角度を調整する') + '</div>' +
+          '<span>時間</span>' + sseg('time', [['day', '昼'], ['night', '夜']]) +
+          '<span>表示</span>' + sseg('render', [['paper', '紙の舞台'], ['flat2d', '平面']]) +
+          '<span>内装の絵柄</span>' + sseg('pixelRoom', [['false', '絵'], ['true', 'ドット']]) +
+          '<span>ワープ</span><div class="seg">' + WARPS.map(function (w) { return btn('data-dv="warp" data-v="' + w[0] + '"', w[1]); }).join('') + '</div>' +
+          '<span>すぐ戦う</span><div class="seg">' + FIGHTS.map(function (k) { return btn('data-dv="fight" data-v="' + k + '"', SR.encounters[k].name); }).join('') + '</div>' +
+          '<span>時期</span><div class="seg">' + [1, 2, 3].map(function (n) { return btn('data-dv="era" data-v="' + n + '"', SR.eraName[n], era === n); }).join('') + '</div>' +
+          '<div class="note">連携技は「終盤」から出る（親密度とイベントで開いた仲間の分）</div>' +
+          '<span>ランダムの戦闘</span><div class="seg">' + btn('data-dv="random" data-v="on"', 'あり', !noRandom) + btn('data-dv="random" data-v="off"', 'なし', noRandom) + '</div>' +
+          '<span>見えている敵</span><div class="seg">' + btn('data-dv="revive"', '倒した敵を元に戻す') + '</div>' +
+          '<span>お金</span><div class="seg">' + btn('data-dv="gold" data-v="1000"', '+1000') + btn('data-dv="gold" data-v="10000"', '+10000') + '</div>' +
+          '<span>試しの出来事</span><div class="seg">' + btn('data-dv="retry"', '森の3か所をもう一度') + '</div>' +
+          '<span>座標</span><div class="seg">' + btn('data-dv="pos" data-v="on"', '出す', showPos) + btn('data-dv="pos" data-v="off"', '出さない', !showPos) + '</div>' +
+          '<span>戦闘の数字</span><div class="seg">' + btn('data-page="dev"', 'レベル・スキルの経験値・親密度を調整する') + '</div>' +
+          '<span>記録</span><div class="seg">' + btn('data-dv="reset"', '冒険の記録をはじめからにする') + '</div>';
+        if (nav && nav.refresh) nav.refresh();
+      }
+      pg.addEventListener('click', function (ev) {
+        var ds = ev.target.closest('[data-dset]');
+        if (ds) { var s = sget(), k = ds.getAttribute('data-dset'), dv = ds.getAttribute('data-v'); s[k] = k === 'pixelRoom' ? dv === 'true' : dv; sput(s); SR.sound.se('tick'); draw(); return; }
+        if (ev.target.closest('[data-dcam]')) { SR.sound.se('tick'); try { parent.postMessage({ type: 'sr-open-camera' }, location.origin); } catch (e) {} return; }
+        var b = ev.target.closest('[data-dv]'); if (!b) return;
+        var a = b.getAttribute('data-dv'), v = b.getAttribute('data-v');
+        SR.sound.se('tick');
+        if (a === 'era') { SR.growth.setEra(+v); draw(); return; }
+        if (a === 'gold') { SR.growth.setGold((SR.growth.data().gold || 0) + (+v)); draw(); return; }
+        if (a === 'random') { noRandom = v === 'off'; tell({ action: 'random', off: noRandom }); draw(); return; }
+        if (a === 'pos') { showPos = v === 'on'; tell({ action: 'pos', on: showPos }); draw(); return; }
+        if (a === 'reset') { if (!confirm('冒険の記録（育ち・お金・技・親密度・旗・隊列・設定）を、はじめからにします。もどせません。いいですか？')) return; tell({ action: 'reset' }); return; }
+        tell({ action: a, value: v });   // warp・fight・revive・retry はフィールドで
+      });
+      new MutationObserver(function () { if ($('title').getAttribute('data-page') === 'fdev') draw(); }).observe($('title'), { attributes: true, attributeFilter: ['data-page'] });
+      document.addEventListener('keydown', function (e) { if (e.key === 'F2' && !e.repeat) { e.preventDefault(); goPage('fdev'); } }, true);   // メニューの中でも F2 で開発者へ
       draw();
     })();
     var fitFieldMenu = function () {

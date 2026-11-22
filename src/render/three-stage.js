@@ -293,6 +293,8 @@ const isWallAt = (map, x, y) => x < 0 || y < 0 || x >= map.width || y >= map.hei
 function roundRectPath(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }
 function cobbleFloor(g, map, T, W, H) { // 石畳：角の丸い四角い石が、少しずつずれながら横の列に並ぶ。目地は暗く、ところどころ草・こけ、欠けた石・直した石
   const R = rnd(71);
+  const pat = townPattern(g, 'paved', T, 4); // 町の絵があれば、絵の石畳（1枚＝4マス）
+  if (pat) { g.fillStyle = pat; g.fillRect(0, 0, W, H); return; } // 町の絵の石畳（家の下も暗くしない：枠に見えるので）
   g.fillStyle = '#6e665a'; g.fillRect(0, 0, W, H); // 目地
   const rowH = T * 0.42;
   for (let y = 0, row = 0; y < H; y += rowH, row++) {
@@ -321,14 +323,31 @@ function cobbleFloor(g, map, T, W, H) { // 石畳：角の丸い四角い石が�
 /** 町の石畳でない所：家ぎわ（となりに壁があるマス＝路地・裏道）は踏み固めた土、開けた所は芝生 */
 function townYardFloor(g, map, T, W, H, paved) {
   const R = rnd(97);
+  // 町の絵の芝生があれば、石畳でない所は芝生を基本にする（2026-11-22 作者「芝生のテクスチャ張っている？」・緑の町）。
+  // 物のすぐそば（上下左右のとなりに家・植えこみ・荷箱など）だけ、踏まれて土がのぞく。境目はぼかす
+  const gp = townPattern(g, 'grass', T, 4);
+  if (gp) {
+    g.fillStyle = gp; g.fillRect(0, 0, W, H);
+    g.save(); g.filter = 'blur(6px)';
+    for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
+      if (isWallAt(map, x, y)) continue;
+      const near = [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dx, dy]) => isWallAt(map, x + dx, y + dy)).length;
+      if (!near) continue;
+      g.fillStyle = `rgba(122,96,64,${0.35 + near * 0.12})`; g.beginPath(); g.ellipse(x * T + T / 2, y * T + T / 2, T * 0.62, T * 0.5, R() * 3, 0, 7); g.fill();
+    }
+    g.restore();
+    for (let k = 0; k < (W * H) / 1400; k++) { g.fillStyle = 'rgba(140,130,118,.7)'; g.beginPath(); g.ellipse(R() * W, R() * H, 1.5 + R() * 1.5, 1 + R(), R() * 3, 0, 7); g.fill(); } // 小石
+    return;
+  }
   g.fillStyle = '#8a6e4c'; g.fillRect(0, 0, W, H);
   for (let k = 0; k < (W * H) / 300; k++) { const r = 4 + R() * 12; g.fillStyle = R() < 0.5 ? 'rgba(70,52,34,.16)' : 'rgba(170,140,100,.14)'; g.beginPath(); g.ellipse(R() * W, R() * H, r, r * 0.6, R() * 3, 0, 7); g.fill(); }
   for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
     if (isWallAt(map, x, y)) continue;
     const nearWall = [[0, -1], [0, 1], [-1, 0], [1, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]].some(([dx, dy]) => isWallAt(map, x + dx, y + dy));
     if (nearWall) continue; // 家ぎわは土のまま
-    const gx = x * T, gy = y * T; // 芝生：丸いしげみを重ねて、マスの形が見えないように
-    for (let k = 0; k < 3; k++) { g.fillStyle = R() < 0.5 ? 'rgba(86,122,62,.55)' : 'rgba(104,140,72,.5)'; g.beginPath(); g.ellipse(gx + T * (0.2 + R() * 0.6), gy + T * (0.2 + R() * 0.6), T * (0.5 + R() * 0.3), T * (0.42 + R() * 0.3), R() * 3, 0, 7); g.fill(); }
+    const gx = x * T, gy = y * T; // 芝生：丸いしげみを重ねて、マスの形が見えないように（町の絵があれば絵の芝生で）
+    const gp = townPattern(g, 'grass', T, 4);
+    for (let k = 0; k < 3; k++) { g.fillStyle = gp || (R() < 0.5 ? 'rgba(86,122,62,.55)' : 'rgba(104,140,72,.5)'); g.beginPath(); g.ellipse(gx + T * (0.2 + R() * 0.6), gy + T * (0.2 + R() * 0.6), T * (0.5 + R() * 0.3), T * (0.42 + R() * 0.3), R() * 3, 0, 7); g.fill(); }
     for (let k = 0; k < 5; k++) { g.strokeStyle = 'rgba(130,170,90,.8)'; g.lineWidth = 1.5; const px = gx + R() * T, py = gy + R() * T; g.beginPath(); g.moveTo(px, py); g.lineTo(px + (R() - 0.5) * 3, py - 3 - R() * 3); g.stroke(); }
   }
   for (let k = 0; k < (W * H) / 900; k++) { g.fillStyle = 'rgba(140,130,118,.75)'; g.beginPath(); g.ellipse(R() * W, R() * H, 1.5 + R() * 1.5, 1 + R(), R() * 3, 0, 7); g.fill(); } // 小石
@@ -361,6 +380,68 @@ function soilFloor(g, map, T, W, H) { // 森の土：茶色の土に濃淡のし
   for (let k = 0; k < (W * H) / 1100; k++) { g.fillStyle = ['rgba(170,110,50,.7)', 'rgba(140,80,40,.7)', 'rgba(190,150,70,.7)'][Math.floor(R() * 3)]; g.beginPath(); g.ellipse(R() * W, R() * H, 3 + R() * 2, 1.5 + R(), R() * 3, 0, 7); g.fill(); } // 落ち葉
   noise(g, W, H, R, 16);
 }
+// ---- 町の絵（stage.townArt）：板の絵と地面の模様（2026-11-22） ----
+/** @type {any} */ let TOWN_CFG = null;
+/** @type {Record<string, HTMLImageElement>|null} */ let TOWN_IMG = null;
+// 夜の窓の明かり（2026-11-22 作者「家、夜の時明かりがついてほしい」）：町の家の絵ごとの窓の位置（絵の画素、[左, 上, 右, 下]）。
+// 夜は、この中の明るい所（カーテン・ガラス）ほど暖かく光らせる（窓枠の濃い木はあまり光らない）。窓の一部は消えたまま
+const TOWN_WINDOWS = {
+  'house_a_narrow.png': [[112, 140, 162, 190], [112, 270, 160, 318], [172, 404, 196, 448]],
+  'house_b_sideroof.png': [[243, 95, 273, 125], [110, 180, 150, 228], [240, 180, 278, 228], [370, 180, 410, 228], [296, 310, 414, 388]],
+  'house_c_stepgable.png': [[120, 120, 145, 148], [215, 120, 240, 148], [62, 243, 88, 278], [167, 243, 193, 278], [270, 243, 296, 278], [62, 390, 88, 422], [272, 390, 298, 422]],
+  'house_d_workshop.png': [[145, 170, 225, 218], [285, 170, 365, 218]],
+  'house_e_archway.png': [[105, 148, 150, 200], [205, 135, 325, 195], [377, 148, 418, 200], [98, 305, 162, 370], [238, 320, 266, 345]],
+  'house_f_corner.png': [[92, 202, 146, 252], [248, 202, 302, 252], [372, 203, 424, 262], [248, 350, 336, 405]],
+  'house_home_2f.png': [[100, 182, 162, 240], [285, 182, 345, 240], [250, 358, 330, 420]],
+  'house_merchant_3f.png': [[170, 98, 210, 140], [150, 222, 232, 270], [66, 218, 104, 280], [280, 218, 318, 280], [130, 380, 250, 480]],
+};
+/** 窓の明かりの絵（emissiveMap）。窓の外は黒 @param {HTMLCanvasElement} c 家の絵を描いた板のキャンバス @param {string} file @param {number} seed */
+function windowGlow(c, file, seed) {
+  const rects = TOWN_WINDOWS[file]; if (!rects) return null;
+  const im = TOWN_IMG?.[file]; if (!im) return null;
+  const sx = c.width / im.naturalWidth, sy = c.height / im.naturalHeight;
+  const src = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  return canvas(c.width, c.height, (g, W, H) => {
+    g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+    const out = g.getImageData(0, 0, W, H), d = out.data;
+    rects.forEach((r, i) => {
+      if (((seed * 7 + i * 13) % 5) === 0) return; // 5つに1つくらいは消えている
+      const x0 = Math.floor(r[0] * sx), y0 = Math.floor(r[1] * sy), x1 = Math.ceil(r[2] * sx), y1 = Math.ceil(r[3] * sy);
+      for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) for (let x = Math.max(0, x0); x < Math.min(W, x1); x++) {
+        const k = (y * W + x) * 4; if (src[k + 3] < 90) continue;
+        const lum = (src[k] + src[k + 1] + src[k + 2]) / 765, v = 0.22 + 0.78 * Math.min(1, Math.max(0, (lum - 0.32) / 0.45));
+        d[k] = 255 * v; d[k + 1] = 178 * v; d[k + 2] = 92 * v;
+      }
+    });
+    g.putImageData(out, 0, 0);
+  });
+}
+/**
+ * 板の名前に合う町の絵があれば、板の大きさのキャンバスに描いて返す。
+ * 家（house-*・inn-*）は横いっぱいにして、高さは絵の形から（家ごとに屋根の高さが変わる）。
+ * 吊るすもの（sign-*・awning-*・herbs）は板の上のほうに、それ以外は地面に立てて、形を変えずに入れる
+ */
+function townBoardCanvas(name, b, it) {
+  const cfg = TOWN_CFG, imgs = TOWN_IMG; if (!cfg || !imgs) return null;
+  let file = cfg.boards?.[name];
+  if (!file && /^house-/.test(name)) file = cfg.boards?.['house-*'];
+  if (Array.isArray(file)) file = file[Math.abs((it.x * 131 + it.y * 37 + 7) | 0) % file.length]; // 家は位置で選ぶ（開き直しても同じ）
+  const im = file && imgs[file]; if (!im) return null;
+  const ar = im.naturalHeight / im.naturalWidth;
+  if (/^(house-|inn-)/.test(name)) { const h = b.w * ar; return { h, file, c: canvas(b.w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) }; }
+  const hang = /^(sign-|awning-|herbs)/.test(name);
+  return { h: b.h, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
+    let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
+    if (hang && /^awning-/.test(name)) { w = W; h = Math.min(H * 0.45, W * ar); } // 庇は横いっぱい
+    g.drawImage(im, (W - w) / 2, hang ? 0 : H - h, w, h);
+  }) };
+}
+/** 地面の模様（町の絵）。size＝絵1枚が覆うマス数 @returns {CanvasPattern|null} */
+function townPattern(g, key, T, size) {
+  const file = TOWN_CFG?.ground?.[key], im = file && TOWN_IMG?.[file]; if (!im) return null;
+  const p = g.createPattern(im, 'repeat'); if (!p) return null;
+  p.setTransform(new DOMMatrix().scale((size * T) / im.naturalWidth, (size * T) / im.naturalHeight)); return p;
+}
 function pageCanvas(map) { // 羊皮紙のページ。うすいインクで石畳と入口のしるしを描く（ページに描かれた町の地図のように）
   const T = 32, W = map.width * T, H = map.height * T;
   return canvas(W, H, (g) => {
@@ -369,7 +450,8 @@ function pageCanvas(map) { // 羊皮紙のページ。うすいインクで石�
     if (floor === 'cobble' && Array.isArray(paved)) { // 町：道と広場（stage.paved）だけ石畳、ほかは土か芝生（2026-11-22 作者「道や広場は石畳、ほかは土か芝生」）
       townYardFloor(g, map, T, W, H, paved);
       g.save(); g.beginPath(); for (const p of paved) g.rect(p.x * T, p.y * T, p.w * T, p.h * T); g.clip(); cobbleFloor(g, map, T, W, H); g.restore();
-      g.strokeStyle = 'rgba(70,60,48,.55)'; g.lineWidth = 3; for (const p of paved) g.strokeRect(p.x * T + 1.5, p.y * T + 1.5, p.w * T - 3, p.h * T - 3); // 石畳のふち（縁石）
+      // 石畳と土の境目は線を引かず、ぼかしてなじませる（2026-11-22 作者「地面の変な枠もどうにかしたい」）
+      g.save(); g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(120,100,72,.55)'; g.lineWidth = 7; for (const p of paved) g.strokeRect(p.x * T, p.y * T, p.w * T, p.h * T); g.restore();
     }
     else if (floor === 'cobble') cobbleFloor(g, map, T, W, H);
     else if (floor === 'soil') soilFloor(g, map, T, W, H);
@@ -382,7 +464,7 @@ function pageCanvas(map) { // 羊皮紙のページ。うすいインクで石�
     }
     for (const side of [0, 1]) { // ページごとの、ふちの焼けと飾り線
       const x0 = side * W / 2, gr = g.createRadialGradient(x0 + W / 4, H / 2, 40, x0 + W / 4, H / 2, W * 0.4); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(90,60,20,.26)');
-      g.fillStyle = gr; g.fillRect(x0, 0, W / 2, H); g.strokeStyle = 'rgba(120,90,50,.25)'; g.lineWidth = 2; g.strokeRect(x0 + 14, 14, W / 2 - 28, H - 28);
+      g.fillStyle = gr; g.fillRect(x0, 0, W / 2, H); if (!map.stage?.townArt) { g.strokeStyle = 'rgba(120,90,50,.25)'; g.lineWidth = 2; g.strokeRect(x0 + 14, 14, W / 2 - 28, H - 28); } // 町の絵のマップでは飾り線を引かない（地面に枠が見えるので）
     }
     const gut = g.createLinearGradient(W / 2 - 40, 0, W / 2 + 40, 0); gut.addColorStop(0, 'rgba(60,40,20,0)'); gut.addColorStop(0.5, 'rgba(60,40,20,.3)'); gut.addColorStop(1, 'rgba(60,40,20,0)');
     g.fillStyle = gut; g.fillRect(W / 2 - 40, 0, 80, H); noise(g, W, H, R, 16);
@@ -485,7 +567,9 @@ export function createThreeStage(canvasEl, assets) {
   const fadeMat = new THREE.MeshBasicMaterial({ color: 0x0a0a10, transparent: true, opacity: 0, depthTest: false }); fadeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fadeMat));
 
   // 灯り（試作と同じ組み合わせ）
-  scene.add(new THREE.HemisphereLight(0x8090c8, 0x2a1a10, 0.9));
+  const hemi = new THREE.HemisphereLight(0x8090c8, 0x2a1a10, 0.9); scene.add(hemi);
+  // 昼と夜（2026-11-22 作者「昼背景を作ってみたら、いいのでそれも入れてみて」）：外のマップだけ。昼は空・もやを明るく、日の光を強く、灯りはほのかに。奥の背景は昼の絵（stage の背景の板の imageDay）
+  let DAY = false; const DAY_SKY = 0xa9c8e6;
   // カメラから主人公へのスポットライト（やわらかいふち。主人公とまわりの床を少し明るく）
   const charSpot = new THREE.SpotLight(0xfff1dc, 2.2, 0, 0.2, 0.75, 0); scene.add(charSpot, charSpot.target);
   const key = new THREE.DirectionalLight(0xfff0d8, 1.6); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0005; scene.add(key, key.target);
@@ -514,8 +598,22 @@ export function createThreeStage(canvasEl, assets) {
   const artCache = {}; let ART2 = null;
   // 元絵1枚が覆うマス数（横, 縦）。ドット絵にするときの細かさを決める
   const ART_TILES = { floor: [4, 4], wall: [4, 4], ceiling: [4, 4], brick: [1.5, 1.9], window: [1.3, 1.8], tabletop: [3, 1.8], counter: [7, 1.1], blanket: [2, 1.2], door: [1, 2.1] };
+  // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）：マップの stage.townArt の絵を読んでおく（地面の模様と板の絵に使う）
+  /** @type {Record<string, HTMLImageElement>|null} */ let TOWN = null;
+  const townCache = {};
+  async function loadTown(m) {
+    TOWN = null; const t = m.stage?.townArt; if (!t) return;
+    const files = new Set([...Object.values(t.ground || {}), ...Object.values(t.boards || {}).flat()]);
+    const out = {};
+    await Promise.all([...files].map(async (f) => {
+      const url = (t.base || '') + f;
+      if (!(url in townCache)) townCache[url] = await new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = url; });
+      if (townCache[url]) out[f] = townCache[url];
+    }));
+    TOWN = out; TOWN_CFG = t; TOWN_IMG = out;
+  }
   async function loadArt(m) {
-    ART2 = null; const t = m.stage?.textures; if (!t || new URLSearchParams(location.search).get('innart') === '0') return;
+    TOWN_CFG = null; TOWN_IMG = null; ART2 = null; const t = m.stage?.textures; if (!t || new URLSearchParams(location.search).get('innart') === '0') return;
     const out = {};
     for (const k of ['floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door']) {
       if (!t[k]) continue; const url = (t.base || '') + t[k];
@@ -599,7 +697,7 @@ export function createThreeStage(canvasEl, assets) {
     // めくる紙のための、このマップのページの絵（root の外に持つので、マップを読みかえても次のめくりまで残る）
     if (prevPageTex && prevPageTex !== curPageTex) prevPageTex.dispose();
     prevPageTex = curPageTex; curPageTex = texOf(pageCv);
-    scene.background = new THREE.Color(NIGHT); scene.fog = new THREE.Fog(NIGHT, 34, 80);
+    const sky = DAY ? DAY_SKY : NIGHT; scene.background = new THREE.Color(sky); scene.fog = new THREE.Fog(sky, 34, 80);
   }
 
   function buildInterior() { // ブックヌック：本棚にはまった、手前が開いた箱の内側（試作_ブックヌックと同じ作り）
@@ -852,8 +950,11 @@ export function createThreeStage(canvasEl, assets) {
       const name = it.asset.replace('placeholder:', '');
       const artC = rc ? null : (ART[name] || ((w, h) => genericArt(w, h, boards.length + 5)))(b.w, b.h, it.x * 131 + it.y * 37 + 1); // 3つめ＝板ごとの seed（位置から決まるので、開き直しても同じ家）
       let art = rc ? texOf(rc, true) : PIXROOM && interior ? pixTex(artC, b.w, b.h) : texOf(artC);
-      if (it.image) { // 絵のファイルを張る（いまは奥の背景の仮。下をそろえ、板の形に合わせて上を切る＝引き伸ばさない）
-        const bw = b.w, bh = b.h; art = loader.load(it.image, (t) => { const iw = t.image.width, ih = t.image.height, f = Math.min(1, (iw / ih) / (bw / bh)); t.repeat.set(1, f); t.offset.set(0, 0); t.needsUpdate = true; });
+      const townC = rc ? null : townBoardCanvas(name, b, it);
+      if (townC) { b.h = townC.h; art = PIXROOM ? pixTex(townC.c, b.w, b.h) : texOf(townC.c); } // 内装（絵柄）を「ドット」にすると町の絵もドットに
+      const img = DAY && !interior && it.imageDay ? it.imageDay : it.image; // 昼は昼の背景
+      if (img) { // 絵のファイルを張る（奥の背景。下をそろえ、板の形に合わせて上を切る＝引き伸ばさない）
+        const bw = b.w, bh = b.h; art = loader.load(img, (t) => { const iw = t.image.width, ih = t.image.height, f = Math.min(1, (iw / ih) / (bw / bh)); t.repeat.set(1, f); t.offset.set(0, 0); t.needsUpdate = true; });
         art.colorSpace = THREE.SRGBColorSpace; art.anisotropy = 8;
       }
       // ブックヌック（中）の物は立体：板ではなく厚みのある箱にし、側面と上にも手ざわりを張る（2026-11-22 作者：「ブックヌックは、シャドーボックスと違って立体もある。横も描けるテクスチャで」）
@@ -865,7 +966,8 @@ export function createThreeStage(canvasEl, assets) {
         continue;
       }
       const mesh = boardMesh(art, b.w, b.h);
-      if (layer.band === 'backdrop') { mesh.castShadow = false; mesh.material.fog = false; }
+      if (townC?.file && !DAY && !interior) { const gl = windowGlow(townC.c, townC.file, Math.abs(it.x * 31 + it.y * 17) | 0); if (gl) { mesh.material.emissiveMap = PIXROOM ? pixTex(gl, b.w, b.h) : texOf(gl); mesh.material.emissive = new THREE.Color(0xffffff); mesh.material.emissiveIntensity = 2.2; } } // 夜は家の窓に明かり
+      if (layer.band === 'backdrop') { mesh.castShadow = false; mesh.material.fog = false; if (it.sink) mesh.position.y -= it.sink; } // sink：背景の下を本のページより下に沈める（絵の下のはしで切れた家の壁を見せない。2026-11-22 作者「屋根はあるけど家のドアや窓の部分がなくて変」）
       else if (!interior) holeMaterial(mesh.material);
       const cx = b.x + b.w / 2, hinge = new THREE.Group();
       // 外：板はページの上に立ち、本がひらくときはページといっしょに動く（左右どちらのページか）
@@ -948,7 +1050,7 @@ export function createThreeStage(canvasEl, assets) {
       if (root) { scene.remove(root); disposeTree(root); }
       map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; lights = []; fires = []; cam.init = false;
       interior = map.kind === 'interior'; nook = null;
-      await loadArt(map);
+      await loadArt(map); await loadTown(map);
       if (interior) buildInterior(); else buildExterior();
       buildBoards();
       buildExitMarks();
@@ -956,7 +1058,9 @@ export function createThreeStage(canvasEl, assets) {
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
       key.position.set(W / 2 - 14, 26, H / 2 + 16); key.target.position.set(W / 2, 0, H / 2);
-      key.intensity = interior ? 0.5 : 1.6;
+      key.intensity = interior ? 0.5 : DAY ? 2.6 : 1.6;
+      key.color.set(DAY && !interior ? 0xfff8ec : 0xfff0d8);
+      hemi.intensity = DAY && !interior ? 1.7 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
     },
     resize(w, h, dpr) { cssW = Math.max(1, w); cssH = Math.max(1, h); renderer.setPixelRatio(Math.min(2, dpr || 1)); renderer.setSize(cssW, cssH, false); camera.aspect = cssW / cssH; camera.updateProjectionMatrix(); },
     /**
@@ -1047,7 +1151,7 @@ export function createThreeStage(canvasEl, assets) {
         let on = 1;
         if (efk === 'nook-in:arrive') { const t0 = 0.1 + 0.5 * (1 - cl((l.z ?? 0) / H)); on = cl((ep - t0) / 0.14); if (on > 0 && on < 1) on *= 0.6 + 0.4 * Math.abs(Math.sin(now * 40 + l.ph)); }
         const flick = l.fire ? 0.82 + 0.18 * Math.sin(now * 11.3 + l.ph) * Math.sin(now * 6.7) + 0.08 * Math.sin(now * 23) : 1 + Math.sin(now * 7 + l.ph) * 0.04; // 火はよくゆらめく
-        l.L.intensity = l.base * on * flick;
+        l.L.intensity = l.base * on * flick * (DAY && !interior ? 0.12 : 1); // 昼は灯りをほのかに
         if (l.glow) l.glow.material.opacity = 0.9 * on * (1 + Math.sin(now * 7 + l.ph) * 0.05);
       }
       for (const f of fires) {
@@ -1099,7 +1203,7 @@ export function createThreeStage(canvasEl, assets) {
       if (pages && scene.fog && scene.fog.isFog) { const k = zoom < 1 ? 1 - zoom : 0, far = Math.max(80, wideD * 2.2) * k + 80 * (1 - k); scene.fog.near = 34 + (far - 80) * 0.6; scene.fog.far = far; camera.far = Math.max(400, far * 1.5); }
       camera.position.copy(eye); camera.lookAt(look); camera.updateProjectionMatrix();
       charSpot.position.copy(eye).add(new THREE.Vector3(0, 0.6, 0)); charSpot.target.position.set(lead.x + 0.5, 1.1 + heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.6);
-      charSpot.intensity = zoom < 1 ? 2.2 * zoom : 2.2; // 本全体を見せるあいだは弱める
+      charSpot.intensity = (zoom < 1 ? 2.2 * zoom : 2.2) * (DAY && !interior ? 0.4 : 1); // 本全体を見せるあいだは弱める。昼は日の光があるので弱く
       { // のぞき穴：主人公の足もと〜頭の上を画面に写し、その真ん中を中心、背の高さの0.85倍を半径にする（本全体を見せるあいだは閉じる）
         const gy = heightLerp(map, lead.x, lead.y) * HU, buf = renderer.getDrawingBufferSize(new THREE.Vector2());
         const toPx = (v) => { v.project(camera); return new THREE.Vector2((v.x + 1) / 2 * buf.x, (v.y + 1) / 2 * buf.y); };
@@ -1120,6 +1224,9 @@ export function createThreeStage(canvasEl, assets) {
     },
     /** 内装をドット絵にするか（右上の「内装」ボタン。2026-11-22 作者「元絵もドットもどっちもあり」）。変えたら、いまのマップを読み直す */
     setPixelRoom(on) { PIXROOM = !!on; },
+    /** 昼・夜（変えたら、いまのマップを読み直す） @param {'day'|'night'} t */
+    setTime(t) { DAY = t === 'day'; },
+    time: () => (DAY ? 'day' : 'night'),
     pixelRoom: () => PIXROOM,
     dispose() { if (root) { scene.remove(root); disposeTree(root); } renderer.dispose(); map = null; },
     debug: () => ({ name: 'paper', engine: 'three', drawCalls: renderer.info.render.calls, boards: boards.length, inner: [Math.round(cssW * renderer.getPixelRatio()), Math.round(cssH * renderer.getPixelRatio())], eye: [...lastEye], intro: lastIntro ? { ...lastIntro } : null, orbs: orbsShown, interior, actors: Object.keys(actors), effect: lastEffect, map: map?.id ?? null }),

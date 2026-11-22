@@ -2,13 +2,14 @@
 // フィールドの場面：マス移動・衝突・追従・出入口の転送。描画にも DOM にも依存しない。
 import { DIR_VEC, mapQuery } from './map.js';
 import { placeFollower, pushTrail, dirBetween } from './party.js';
+import { pickPage, applyEffects } from './record.js';
 
 /**
  * @typedef {{ id:string, x:number, y:number, dir:string, from:{x:number,y:number}|null, t:number, animMs:number }} Actor
  */
 
 /**
- * @param {{ maps: Record<string, any>, collision: any, world: any, party: {id:string}[] }} data
+ * @param {{ maps: Record<string, any>, collision: any, world: any, party: {id:string}[], record?: import("./record.js").AdventureRecord, onRecordChange?: () => void, rng?: () => number }} data
  */
 export function createField(data) {
   const stepMs = data.world.stepMs ?? 160;
@@ -31,6 +32,8 @@ export function createField(data) {
     /** @type {string|null} 転送したときに出た向き */ arriveDir: null,
     /** @type {{id:string, battle:string, mapId:string, random?:boolean}|null} いま戦闘中の敵（見えている敵か、ランダム。このあいだフィールドは止まる） */ battle: null,
     /** 街道の外を、前の戦闘から歩いた歩数（ランダムの戦闘に使う） */ wildSteps: 0,
+    /** 開発者メニュー：ランダムの戦闘を起こさない */ devNoRandom: false,
+    /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
   };
@@ -76,7 +79,7 @@ export function createField(data) {
   const onRoad = (mapId, x, y) => (data.maps[mapId].roads || []).some((/** @type {any} */ r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   function randomEncounter() {
     const m = data.maps[state.mapId], re = m.randomEncounters, p = player();
-    if (!re || onRoad(state.mapId, p.x, p.y)) return false;
+    if (!re || state.devNoRandom || onRoad(state.mapId, p.x, p.y)) return false;
     state.wildSteps++;
     if (state.wildSteps < (re.minSteps ?? 8) || rng() >= (re.rate ?? 0.08)) return false;
     const list = re.battles || [];
@@ -84,6 +87,25 @@ export function createField(data) {
     state.wildSteps = 0;
     return true;
   }
+
+  /**
+   * 調べる（2026-11-22 作者「フィールドの出来事から記録を書きかえる：サブクエの完了で技を覚える、会話で親密度が上がる」）：
+   * 向いている先のマス（無ければ立っているマス）の出来事（trigger: examine）を、冒険の記録の旗でページを選んで動かし、
+   * ページの set（旗）・give（お金・経験値・技・親密度）を記録に書く。言葉とお知らせは state.message に出す
+   */
+  function examine() {
+    const p = player(), [dx, dy] = DIR_VEC[p.dir] || [0, 0], rec = data.record;
+    const list = (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => (e.trigger || 'examine') === 'examine');
+    const ev = list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
+    if (!ev || !rec) return false;
+    const page = pickPage(rec, ev.pages); if (!page) return false;
+    const notes = applyEffects(rec, { ...(page.give || {}), flags: { ...(page.set?.flags || {}) } });
+    state.message = { event: ev.id, dialogue: page.dialogue || null, notes };
+    data.onRecordChange?.();
+    return true;
+  }
+  /** 言葉を閉じる（画面の係が呼ぶ） */
+  function closeMessage() { state.message = null; }
 
   const player = () => state.actors[0];
   const moving = () => player().from !== null;
@@ -154,6 +176,7 @@ export function createField(data) {
    */
   function update(dt, input) {
     if (state.battle) { input.clearQueue(); return; } // 戦闘中はフィールドを止める
+    if (state.message) { input.clearQueue(); input.takeAction?.(); return; } // 言葉が出ているあいだも止める（閉じるのは画面の係：closeMessage）
     if (state.leaving) { // 出入口の演出の「離れる」あいだ
       state.leaving.left = Math.max(0, state.leaving.left - dt);
       input.clearQueue();
@@ -175,6 +198,7 @@ export function createField(data) {
       if (checkExit()) { input.clearQueue(); return; }
       if (randomEncounter()) { for (const a of state.actors) a.animMs = 0; input.clearQueue(); return; }
     }
+    if (input.takeAction?.() && examine()) { input.clearQueue(); return; }
     const dir = input.next();
     if (!dir) { for (const a of state.actors) a.animMs = 0; return; }
     if (!tryStep(dir, carry)) for (const a of state.actors) a.animMs = 0;
@@ -185,6 +209,7 @@ export function createField(data) {
     return {
       mapId: state.mapId,
       battle: state.battle ? { ...state.battle } : null,
+      message: state.message ? { ...state.message, notes: [...state.message.notes] } : null,
       defeated: [...state.defeated],
       transition: state.arriveKind || !transitionMs ? 0 : state.transitionLeft / transitionMs,
       // 出入口の演出：kind（page / nook-in / nook-out）、phase（leave＝転送の前・arrive＝転送のあと）、p（0→1）、at（踏んだ出入口のマス）
@@ -210,5 +235,23 @@ export function createField(data) {
     placeParty(state.mapId, { x: p.x, y: p.y, dir: p.dir });
   }
 
-  return { state, update, view, endBattle, setParty, stepMs, transitionMs };
+  // 開発者メニュー（2026-11-22 作者「開発者メニューを作ってほしい」）
+  const dev = {
+    /** マップの始まりの位置へ飛ぶ（演出なし） @param {string} mapId @param {string} [spawn] */
+    warp(mapId, spawn = 'default') {
+      const m = data.maps[mapId]; if (!m || state.battle || state.leaving) return false;
+      const at = m.spawns?.[spawn] || Object.values(m.spawns || {})[0]; if (!at) return false;
+      placeParty(mapId, at); state.message = null; state.arriveKind = null; state.transitionLeft = transitionMs; state.transitionTotal = transitionMs; state.transfers++;
+      state.transferLog.push({ from: '(dev)', to: mapId, exit: '(dev)' });
+      return true;
+    },
+    /** その場で戦闘を始める @param {string} battle */
+    fight(battle) { if (state.battle) return false; state.battle = { id: 'dev', battle, mapId: state.mapId, random: true }; return true; },
+    /** ランダムの戦闘を起こさない（true）／起こす @param {boolean} off */
+    setNoRandom(off) { state.devNoRandom = !!off; state.wildSteps = 0; },
+    /** 倒した見えている敵を、すべて元に戻す */
+    reviveFoes() { state.defeated = []; },
+  };
+
+  return { state, update, view, endBattle, setParty, closeMessage, dev, stepMs, transitionMs };
 }

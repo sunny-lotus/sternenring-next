@@ -1,5 +1,5 @@
 // @ts-check
-// 起動だけ。部品を組み立てて loop を回す。永続保存なし（ブラウザの保存領域を読み書きしない。保存は P3 から）。
+// 起動だけ。部品を組み立てて loop を回す。冒険の記録は src/core/record.js、保存は src/save.js（2026-11-22 作者「NEXTが冒険の記録を持つ」）。
 // 描画は2つ：紙の舞台（paper・WebGL）と平面（flat2d・Canvas 2D の予備）。右上のボタンか ?render=flat2d で切りかえる。
 import { loadGameData } from './data.js';
 import { InputState } from './core/input.js';
@@ -13,6 +13,8 @@ import { createCamPanel } from './ui/cam-panel.js';
 import { createIntro, shouldPlayIntro, gateInput, startWhenReady, INTRO_TIMING } from './render/book-intro.js';
 import { createSound, decideOpenCue, nextLevel, SOUND_LEVELS } from './audio/sound.js';
 import { createBgm, decideBgm } from './audio/bgm.js';
+import { storeFor, formationOf, goldOf, fieldSkills, intimacyOf, linkOpenOf } from './core/record.js';
+import { loadRecord, createSaver } from './save.js';
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
 const params = new URLSearchParams(location.search);
@@ -34,7 +36,13 @@ async function boot() {
   const partyIds = (params.get('party') || '').split(',').map((s) => s.trim()).filter(Boolean);
   const picked = partyIds.map((id) => people.find((/** @type {any} */ p) => p.id === id)).filter(Boolean);
   if (picked.length) party.splice(0, party.length, ...picked);
-  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party });
+  // 冒険の記録（2026-11-22）：起動したときに読み、戦闘・メニュー（battle/）にはブラウザの保存の代わりにこれを渡す（window.SR_RECORD_STORE）。書きかえたら少しあとに保存
+  const record = loadRecord(), saver = createSaver(record);
+  /** @type {any} */ (window).SR_RECORD_STORE = storeFor(record, () => saver.schedule());
+  window.addEventListener('pagehide', () => saver.now());
+  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party, record, onRecordChange: () => saver.schedule() });
+  // 調べたときの言葉（仮の文。data/dialogue.json）
+  const dialogue = await fetch('data/dialogue.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { lines: {} }), () => ({ lines: {} }));
   const assets = { ledger: d.ledger, images: d.images, regions: d.regions, style: d.style };
   // カメラ角度の調整パネル（右上の「カメラ」ボタンで開け閉め。?cam=1 なら開いて始まる）。いまのマップの値から始まる
   const camUi = createCamPanel(params, () => d.maps[field.state.mapId]?.stage?.camera);
@@ -110,6 +118,18 @@ async function boot() {
   const syncBgmUi = () => { const l = SOUND_LEVELS.find((x) => x.id === bgm.level); bgmBtn.textContent = `曲：${l?.label}`; bgmBtn.setAttribute('aria-label', `曲の大きさ：${l?.label}（押すと変わる）`); };
   bgmBtn.addEventListener('click', () => { bgm.unlock('bgm-button'); bgm.setLevel(nextLevel(bgm.level)); syncBgmUi(); });
   syncBgmUi();
+  // 設定の統一（2026-11-22 作者「設定を統一しよう」）：曲・効果音の大きさ、表示、内装は、メニューの「設定」（フィールドと戦闘で共通）で決め、
+  // 冒険の記録の sr-settings-v1 に保存する。起動したとき・メニューで変えたとき（sr-settings）に、ここで当てる。右上はメニューだけにした
+  const readSettings = () => { let s = {}; try { s = JSON.parse(record.store['sr-settings-v1'] || '{}') || {}; } catch { s = {}; } return { se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', ...s }; };
+  const applySettings = () => {
+    const s = readSettings(), lv = (/** @type {string} */ v) => (SOUND_LEVELS.some((l) => l.id === v) ? v : 'mid');
+    if (params.get('mute') !== '1') { sound.setLevel(lv(s.se)); bgm.setLevel(lv(s.bgm)); syncSoundUi(); syncBgmUi(); }
+    if (!params.get('render') && renderers.paper) { const m = s.render === 'flat2d' ? 'flat2d' : 'paper'; if (m !== mode) { mode = m; showMode(); } }
+    const r = renderers.paper; if (r?.setPixelRoom && r.pixelRoom() !== !!s.pixelRoom) { r.setPixelRoom(!!s.pixelRoom); shown = ''; }
+    const tm = s.time === 'day' ? 'day' : 'night'; if (r?.setTime && r.time() !== tm) { r.setTime(tm); shown = ''; } // 時間（昼・夜）。変えたらマップを読み直す
+    syncRoomUi();
+  };
+  applySettings();
   document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stopAll(); bgm.setHidden(document.hidden); });
   const skipIntro = (/** @type {string} */ why) => { if (!intro.blocking) return; if (intro.skip(why, performance.now())) { input.clearQueue(); sound.stop('sfx.book.open'); } syncIntroUi(); };
   // 表紙の開始の一押し（人の操作の中で音を有効にする）。用意を待つのは上限まで。そのあいだにタブ離脱・表示切替で終われば始めない
@@ -134,6 +154,22 @@ async function boot() {
   syncIntroUi();
 
   bindKeyboard(input); bindTouchpad($('pad'), input);
+  // 言葉の窓（2026-11-22 作者「フィールドの出来事から記録を書きかえる」）：調べた出来事の言葉と、手に入れたもののお知らせ（金の字）。
+  // 調べる（Enter・Space・Z・画面の「調べる」）か、窓を押すと閉じる。閉じた同じ押しで、また調べてしまわないようにする
+  const msgBox = $('msg'); let msgShownAt = 0;
+  const syncMsg = () => {
+    const m = field.state.message;
+    if (m && msgBox.hidden) {
+      const line = m.dialogue ? (dialogue.lines?.[m.dialogue] ?? m.dialogue) : '';
+      msgBox.innerHTML = (line ? `<p>${line}</p>` : '') + m.notes.map((n) => `<p class="note">${n}</p>`).join('');
+      msgBox.hidden = false; msgShownAt = performance.now();
+      if (m.notes.length) sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]);
+    } else if (!m && !msgBox.hidden) msgBox.hidden = true;
+  };
+  const closeMsg = () => { if (!field.state.message || performance.now() - msgShownAt < 200) return false; field.closeMessage(); input.takeAction(); msgBox.hidden = true; return true; };
+  window.addEventListener('keydown', (e) => { if (['Enter', 'Space', 'KeyZ'].includes(e.code) && !e.repeat) closeMsg(); });
+  msgBox.addEventListener('pointerdown', (e) => { e.preventDefault(); closeMsg(); });
+  $('act-btn').addEventListener('pointerdown', (e) => { e.preventDefault(); if (!closeMsg()) input.pressAction(); });
 
   // 重さの計測（?perf=1 のときだけ表示）
   const perfEl = $('perf'); perfEl.hidden = params.get('perf') !== '1';
@@ -192,11 +228,27 @@ async function boot() {
     const box = battleUi.box; battleUi = null; box.classList.add('closing');
     setTimeout(() => { box.remove(); field.endBattle(outcome); input.releaseAll?.(); input.clearQueue(); bgm.setHidden(false); window.focus(); }, 700);
   };
+  // エンカウントの演出（2026-11-22 作者「エンカウントの演出もっとかっこよく」）：白い光と画面のゆれ → フィールドがぐっと寄って色があせる
+  // → 金の魔法陣が回りながら広がる → 真ん中から金のひびが走る → 黒い破片が四方から飛びこんで画面をおおう → 戦闘へ（約1.4秒）
+  const encounterFx = () => {
+    const fx = document.createElement('div'); fx.id = 'enc-fx';
+    const ticks = Array.from({ length: 24 }, (_, i) => { const a = i * 15 * Math.PI / 180, r1 = i % 3 ? 78 : 72; return `<line x1="${(Math.cos(a) * r1).toFixed(1)}" y1="${(Math.sin(a) * r1).toFixed(1)}" x2="${(Math.cos(a) * 86).toFixed(1)}" y2="${(Math.sin(a) * 86).toFixed(1)}"/>`; }).join('');
+    const cracks = ['50,50 38,30 30,12 22,0', '50,50 66,36 80,30 100,18', '50,50 72,58 88,74 100,82', '50,50 54,72 46,88 50,100', '50,50 30,62 14,60 0,72', '50,50 26,44 10,36 0,30', '50,50 58,24 64,8 70,0', '50,50 40,78 28,92 22,100']
+      .map((p) => `<polyline points="${p}"/>`).join('');
+    // 破片：真ん中を囲む8つの三角（四方から飛びこむ）
+    const P = [[0, 0], [50, 0], [100, 0], [100, 50], [100, 100], [50, 100], [0, 100], [0, 50]];
+    const shards = P.map((p, i) => { const q = P[(i + 1) % 8]; return `<b style="clip-path:polygon(50% 50%,${p[0]}% ${p[1]}%,${q[0]}% ${q[1]}%);--dx:${(p[0] + q[0] - 100) * 0.9}%;--dy:${(p[1] + q[1] - 100) * 0.9}%;--r:${(i % 2 ? 1 : -1) * (14 + i * 3)}deg;animation-delay:${(0.78 + i * 0.03).toFixed(2)}s"></b>`; }).join('');
+    fx.innerHTML = `<div class="ef-flash"></div><svg class="ef-ring" viewBox="-100 -100 200 200"><circle r="92"/><circle r="70" class="thin"/><g>${ticks}</g><path d="M0,-60 L52,30 L-52,30 Z M0,60 L-52,-30 L52,-30 Z" class="thin"/></svg><svg class="ef-crack" viewBox="0 0 100 100" preserveAspectRatio="none">${cracks}</svg><div class="ef-shards">${shards}</div>`;
+    document.body.appendChild(fx); document.body.classList.add('encountering');
+    setTimeout(() => document.body.classList.remove('encountering'), 1300);
+    setTimeout(() => fx.remove(), 1700);
+  };
   const openBattle = (/** @type {{battle:string}} */ b) => {
     // エンカウントの演出（2026-11-22 作者「エンカウント時の演出も追加」）：白く光ったあと、金のふちの斬撃が3本走って暗転。そのあいだに戦闘を読み込む
-    const fx = document.createElement('div'); fx.id = 'enc-fx'; fx.innerHTML = '<i></i><i></i><i></i>'; document.body.appendChild(fx); setTimeout(() => fx.remove(), 1100);
+    encounterFx();
     const box = document.createElement('div'); box.id = 'battle-overlay';
     box.innerHTML = `<iframe title="戦闘" src="battle/index.html?field=1&enc=${encodeURIComponent(b.battle)}" allow="autoplay; fullscreen"></iframe><button type="button" id="battle-back">逃げる（試し）</button>`;
+    box.dataset.wait = '1'; setTimeout(() => { delete box.dataset.wait; }, 1350); // エンカウントの演出が終わるまで、戦闘の画面は見せない（読み込みは先に進める）
     document.body.appendChild(box); battleUi = { box, outcome: null };
     bgm.setHidden(true);
     /** @type {HTMLButtonElement} */ (box.querySelector('#battle-back')).addEventListener('click', closeBattle);
@@ -205,41 +257,69 @@ async function boot() {
   // メニュー（2026-11-22 作者「ステータスメニューを追加」→「ステータスだけじゃなくて、メニューをつけて」「技の書とか」）：右上の「メニュー」ボタン（キーボードは M）で、
   // バトル試作のメニューのページ（?field=1&page=menu：ステータス・アイテム・技の書・設定・遊び方）をフィールドの上に開く。戦闘で育った分は同じ画面の保存から読むので、戦闘とつながる。開いているあいだフィールドは止まる
   // 隊列（2026-11-22 作者「仲間の隊列を組めるようにして、その通りの順番で並ぶ」）：メニューの「隊列」で決めた順に、仲間（台帳の party と cast）が並んで歩く。
-  // 並びはバトル試作の側に保存してあり、起動したときに小さなページ（battle/formation.html）が知らせてくる（NEXT は保存しない）。?only・?party で決めたときは使わない
+  // 並びは冒険の記録にある（メニューの「隊列」が書きかえ、sr-formation で知らせてくる）。起動したときは記録から読む。?only・?party で決めたときは使わない
+  // 開発者メニュー（2026-11-22 作者「開発者メニューを作ってほしい」）：メニューの「開発者」からの知らせを、フィールドで行う
+  const posEl = $('dev-pos');
+  let showPos = false;
+  /** @param {any} m */
+  const devAction = (m) => {
+    if (m.action === 'warp') { if (!statusUi?.classList.contains('devwin')) closeStatus(); field.dev.warp(m.value); }
+    else if (m.action === 'fight') { closeStatus(); setTimeout(() => field.dev.fight(m.value), 550); }
+    else if (m.action === 'random') field.dev.setNoRandom(m.off);
+    else if (m.action === 'revive') field.dev.reviveFoes();
+    else if (m.action === 'retry') { for (const k of ['tryHerbs', 'tryCamp', 'tryStone']) delete record.flags[k]; saver.schedule(); }
+    else if (m.action === 'pos') { showPos = !!m.on; posEl.hidden = !showPos; }
+    else if (m.action === 'reset') { for (const k of Object.keys(record.store)) delete record.store[k]; for (const k of Object.keys(record.flags)) delete record.flags[k]; record.store['sr-dev-fresh'] = '1'; saver.now(); location.reload(); }
+  };
   const applyFormation = (/** @type {unknown} */ order) => {
     if (onlyId || params.get('party') || !Array.isArray(order)) return;
     const list = order.map((id) => people.find((/** @type {any} */ p) => p.id === id)).filter(Boolean);
     if (list.length) field.setParty(list);
   };
-  { const fr = document.createElement('iframe'); fr.src = 'battle/formation.html'; fr.hidden = true; fr.title = '隊列'; fr.addEventListener('load', () => setTimeout(() => fr.remove(), 1000)); document.body.appendChild(fr); }
+  applyFormation(formationOf(record));
   /** @type {HTMLElement | null} */
   let statusUi = null;
   // 本のページをめくるように開く・閉じる（2026-11-22 作者「本をめくるみたいな演出を入れてほしい、メニューでも」）
   // 音（2026-11-22 作者「メニューも開く音、めくる音3種類、閉じる音使ってよ」）：開く＝本がひらく音、ページを移る＝めくる音3つを順に、閉じる＝本を閉じる音
   const closeStatus = () => { if (!statusUi) return; const box = statusUi; statusUi = null; box.classList.add('closing'); sound.play('sfx.book.close'); setTimeout(() => { box.remove(); input.releaseAll?.(); input.clearQueue(); window.focus(); }, 520); };
-  const openStatus = () => {
+  /** @param {string} [startPage] 開いてすぐ出すページ（'fdev'＝開発者） */
+  const openStatus = (startPage) => {
+    if (statusUi && startPage) { if (!statusUi.classList.contains('devwin')) goMenuPage(startPage); return; } // もう開いていれば、そのページへ
     if (statusUi || battleUi || field.state.battle || intro.blocking) return;
     sound.unlock('menu'); sound.play('sfx.book.open');
     const box = document.createElement('div'); box.id = 'battle-overlay'; box.className = 'status';
-    box.innerHTML = '<iframe title="メニュー" src="battle/index.html?field=1&page=menu"></iframe><button type="button" id="battle-back" class="done">閉じる</button>';
+    const win = startPage === 'fdev'; // 開発者は、うしろの画面が見える半透明の窓
+    if (win) box.classList.add('devwin');
+    box.innerHTML = `<iframe title="メニュー" src="battle/index.html?field=1&page=${win ? 'fdev' : 'menu'}"></iframe><button type="button" id="battle-back" class="done">閉じる</button>`;
+    if (startPage && !win) box.dataset.start = startPage;
     document.body.appendChild(box); statusUi = box;
     /** @type {HTMLButtonElement} */ (box.querySelector('#battle-back')).addEventListener('click', closeStatus);
     const fr = /** @type {HTMLIFrameElement} */ (box.querySelector('iframe')); fr.addEventListener('load', () => { box.classList.add('ready'); fr.contentWindow?.focus(); });
   };
   $('status-toggle').addEventListener('click', () => { /** @type {HTMLElement} */ ($('status-toggle')).blur(); openStatus(); });
   window.addEventListener('keydown', (e) => { if ((e.key === 'm' || e.key === 'M') && !e.repeat) openStatus(); });
+  // 開発者メニューは、いつでも開ける（2026-11-22 作者「開発者メニューはいつでも開けるようにしておきたい。ショートカットキーでもボタンでも」）：F2・右上の「開発」
+  /** メニューの中のページへ移る（メニューのボタンを押したのと同じ） @param {string} page */
+  const goMenuPage = (page) => { try { const d = /** @type {HTMLIFrameElement} */ (statusUi?.querySelector('iframe')).contentDocument; /** @type {HTMLElement|null} */ (d?.querySelector(`#pg-menu [data-page="${page}"]`))?.click(); } catch { /* まだ読みこみ中 */ } };
+  window.addEventListener('keydown', (e) => { if (e.key === 'F2' && !e.repeat) { e.preventDefault(); openStatus('fdev'); } });
+  $('dev-toggle').addEventListener('click', () => { /** @type {HTMLElement} */ ($('dev-toggle')).blur(); openStatus('fdev'); });
   window.addEventListener('message', (ev) => {
     if (ev.origin !== location.origin) return;
-    if (ev.data?.type === 'sr-battle-close') { if (statusUi) closeStatus(); return; }
+    if (ev.data?.type === 'sr-battle-close') { if (statusUi) closeStatus(); else if (battleUi) closeBattle(); return; } // メニューを閉じる／戦闘の結果の「フィールドへ戻る」
+    if (ev.data?.type === 'sr-settings') { applySettings(); return; } // メニューの「設定」で変えた
+    if (ev.data?.type === 'sr-dev') { devAction(ev.data); return; } // 開発者メニュー
+    if (ev.data?.type === 'sr-dev-open') { openStatus('fdev'); return; } // メニューの中で F2
+    if (ev.data?.type === 'sr-open-camera') { if (!statusUi?.classList.contains('devwin')) closeStatus(); camUi.setOpen(true); syncCamBtn(); return; } // 設定の「カメラの角度を調整する」
+    if (ev.data?.type === 'sr-fullscreen') { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen?.(); else el.requestFullscreen?.().catch(() => {}); return; }
     if (ev.data?.type === 'sr-formation') { applyFormation(ev.data.order); return; } // 隊列（メニューで変えたとき・起動したとき）
     if (ev.data?.type === 'sr-field-page') { if (statusUi) sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]); return; } // メニューの中でページを移った
-    if (ev.data?.type === 'sr-field-ready') { for (const b of document.querySelectorAll('#battle-overlay')) b.classList.add('ready'); return; } // 試作が切りかえ終わったら見せる（タイトルを一瞬見せない）
+    if (ev.data?.type === 'sr-field-ready') { for (const b of document.querySelectorAll('#battle-overlay')) b.classList.add('ready'); if (statusUi?.dataset.start) { const p = statusUi.dataset.start; delete statusUi.dataset.start; setTimeout(() => goMenuPage(p), 0); } return; } // 試作が切りかえ終わったら見せる（タイトルを一瞬見せない）
     if (!battleUi || ev.data?.type !== 'sr-battle-result') return;
     battleUi.outcome = ev.data.outcome;
     const btn = /** @type {HTMLButtonElement} */ (battleUi.box.querySelector('#battle-back')); btn.textContent = 'フィールドへ戻る'; btn.classList.add('done');
   });
   // 演出中は歩かない。方向の入力が来たら演出を終える（その入力では歩かない）。ステータスを開いているあいだも歩かない
-  startLoop((dt) => { if (field.state.battle && !battleUi) openBattle(field.state.battle); if (statusUi) { input.clearQueue(); return; } if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
+  startLoop((dt) => { syncMsg(); if (showPos) { const a = field.state.actors[0]; posEl.textContent = `${field.state.mapId}  (${a.x}, ${a.y})  ${a.dir}`; } if (field.state.battle && !battleUi) openBattle(field.state.battle); if (statusUi) { input.clearQueue(); return; } if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
   $('status').hidden = true;
   // 確認用の読み取り口（状態を書きかえない）。検証役・自動確認がマップと位置を読むために使う。
   window.STERNENRING_NEXT = Object.freeze({
@@ -249,6 +329,7 @@ async function boot() {
     input: () => ({ held: input.held(), pending: input.pending() }),
     intro: () => ({ ...intro.snapshot(), blocking: intro.blocking, reducedMotion }),
     sound: () => ({ ...sound.snapshot(), openCue }),
+    record: () => ({ gold: goldOf(record), flags: { ...record.flags }, intimacy: intimacyOf(record), linkOpen: linkOpenOf(record), skills: fieldSkills(record), formation: formationOf(record), keys: Object.keys(record.store), save: saver.info }),
     bgm: () => bgm.snapshot(),
   });
 }

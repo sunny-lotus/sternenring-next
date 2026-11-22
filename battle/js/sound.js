@@ -5,8 +5,18 @@ var SR = window.SR || (window.SR = {});
 SR.sound = (function () {
   var KEY = 'sr-battle-sound-v1';
   var on = { bgm: true, se: true };
-  try { var s = JSON.parse(localStorage.getItem(KEY)); if (s) on = Object.assign(on, s); } catch (e) {}
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(on)); } catch (e) {} }
+  try { var s = JSON.parse(SRS.getItem(KEY)); if (s) on = Object.assign(on, s); } catch (e) {}
+  // 設定の統一（2026-11-22 作者「設定を統一しよう」）：フィールドから開いたときは、フィールドと共通の大きさ（なし・小・中・大）を使う。
+  // 「なし」なら鳴らさない。大きさは「中」を今までの大きさとして、小0.5倍・大1.6倍
+  var FIELD_SND = /[?&]field=1(&|$)/.test(location.search), VOLK = { off: 0, low: 0.5, mid: 1, high: 1.6 }, volSe = 1, volBgm = 1;
+  function readShared() {
+    if (!FIELD_SND) return;
+    var st = null; try { st = JSON.parse(SRS.getItem('sr-settings-v1')); } catch (e) {}
+    st = st || {}; var se = st.se || 'mid', bg = st.bgm || 'mid';
+    on.se = se !== 'off'; on.bgm = bg !== 'off'; volSe = VOLK[se] != null ? VOLK[se] : 1; volBgm = VOLK[bg] != null ? VOLK[bg] : 1;
+  }
+  readShared();
+  function save() { try { SRS.setItem(KEY, JSON.stringify(on)); } catch (e) {} }
 
   // BGM の繰り返し方（ゲーム音楽/制作メモ/各曲ループ仕様/各曲の繰り返し方_AI引き継ぎ.md）
   // 星火の剣舞29：ファイルの先頭から末尾までを、すき間なく繰り返す。
@@ -45,9 +55,9 @@ SR.sound = (function () {
     stopBgm(true);
     var tr = TRACKS[kind], c = ac(), my = ++bgmToken;
     if (!c || !window.fetch) {   // 古い端末：ふつうの再生（全体を繰り返すだけ）
-      bgmEl = new Audio(tr.first); bgmEl.loop = true; bgmEl.volume = BGM_VOL; bgmEl.play().catch(function () {}); return;
+      bgmEl = new Audio(tr.first); bgmEl.loop = true; bgmEl.volume = Math.min(1, BGM_VOL * volBgm); bgmEl.play().catch(function () {}); return;
     }
-    bgmGain = c.createGain(); bgmGain.gain.value = BGM_VOL; bgmGain.connect(c.destination);
+    bgmGain = c.createGain(); bgmGain.gain.value = BGM_VOL * volBgm; bgmGain.connect(c.destination);
     var g = bgmGain, pRep = tr.repeat ? loadBuf(tr.repeat) : null;
     loadBuf(tr.first).then(function (b1) {
       if (my !== bgmToken) return;
@@ -107,7 +117,7 @@ SR.sound = (function () {
   function ac() {
     if (!ctx) {
       var A = window.AudioContext || window.webkitAudioContext; if (!A) return null;
-      ctx = new A(); master = ctx.createGain(); master.gain.value = 0.7; master.connect(ctx.destination);
+      ctx = new A(); master = ctx.createGain(); master.gain.value = 0.7 * volSe; master.connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
@@ -184,13 +194,13 @@ SR.sound = (function () {
     var f = FILES[name]; if (!f) return false;
     var c = ac(); loadBufs();
     if (c && bufs[name]) {
-      if (!fileGain) { fileGain = c.createGain(); fileGain.gain.value = 0.8; fileGain.connect(c.destination); }
+      if (!fileGain) { fileGain = c.createGain(); fileGain.gain.value = 0.8 * volSe; fileGain.connect(c.destination); }
       var src = c.createBufferSource(), g = c.createGain();
       src.buffer = bufs[name]; g.gain.value = f[1]; src.connect(g); g.connect(fileGain); src.start(0, f[2] || 0);
       return true;
     }
     var base = pool[name]; if (!base || broken[name]) return false;
-    var a = base.cloneNode(); a.volume = Math.min(1, f[1]);
+    var a = base.cloneNode(); a.volume = Math.min(1, f[1] * volSe);
     try { if (f[2]) a.currentTime = f[2]; } catch (e) {}
     var p = a.play(); if (p && p.catch) p.catch(function () {});
     return true;

@@ -25,7 +25,7 @@
     "D..............................................................#",
     "D..............................................................#",
     "#..............................................................#",
-    "#..............................................................#",
+    "#...................#...#...#..................................#",
     "#..............................................................#",
     "#..###.....................##.....###.........##..###..........#",
     "#..###...###....###..##................###........###.....###..#",
@@ -135,7 +135,102 @@
     ],
     "note": "街道の外だけ。8歩をこえたら1歩ごとに8%（仮）"
   },
-  "events": [],
+  "events": [
+    {
+      "id": "try-herbs",
+      "x": 20,
+      "y": 10,
+      "trigger": "examine",
+      "note": "仮：お金の受け渡しの試し（サブクエの代わり）",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "tryHerbs": true
+            }
+          },
+          "dialogue": "forest.herbs.again"
+        },
+        {
+          "dialogue": "forest.herbs.first",
+          "give": {
+            "gold": 30
+          },
+          "set": {
+            "flags": {
+              "tryHerbs": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "try-campfire",
+      "x": 24,
+      "y": 10,
+      "trigger": "examine",
+      "note": "仮：親密度と、ヴォルトとの連携技を開く試し（ヴォルトのイベントの代わり）",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "tryCamp": true
+            }
+          },
+          "dialogue": "forest.camp.again"
+        },
+        {
+          "dialogue": "forest.camp.first",
+          "give": {
+            "openLink": [
+              "volt"
+            ],
+            "intimacy": {
+              "volt": 1
+            }
+          },
+          "set": {
+            "flags": {
+              "tryCamp": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "try-stone",
+      "x": 28,
+      "y": 10,
+      "trigger": "examine",
+      "note": "仮：技を覚える試し（サブクエの完了の代わり）",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "tryStone": true
+            }
+          },
+          "dialogue": "forest.stone.again"
+        },
+        {
+          "dialogue": "forest.stone.first",
+          "give": {
+            "skills": [
+              {
+                "who": "volt",
+                "skill": "閃光弾"
+              }
+            ]
+          },
+          "set": {
+            "flags": {
+              "tryStone": true
+            }
+          }
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,
@@ -522,6 +617,36 @@
             "standH": 1.6,
             "zOffset": 0.05,
             "encounter": "road-beasts"
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 20,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.05,
+            "tryEvent": "try-herbs"
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 24,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 0.9,
+            "zOffset": 0.05,
+            "tryEvent": "try-campfire"
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 28,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 2.2,
+            "zOffset": 0.05,
+            "tryEvent": "try-stone"
           }
         ]
       },

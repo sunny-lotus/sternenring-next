@@ -15,7 +15,7 @@ const put = (band, asset, x, y, w, h, standH, zOffset = 0, solid = true) => { if
 // 北の家並み（通りの奥）：壁どうしくっつけ、ところどころ細い路地（行き止まり）がのぞく。屋根の高さを少しずつ変える
 put('back', 'house-mid', 1, 1, 3, 4, 5);
 //   x=4 は細い路地（奥に荷箱）
-put('back', 'inn-tall', 5, 1, 7, 4, 7.2, 0); // 銀鹿亭（三階建て、一階は食堂）。入口 (8,4) が絵の扉の真ん中に来るよう幅7（x=12・13 は2マスの路地）
+put('back', 'inn-tall', 5, 1, 7, 4, 6.3, 0); // 銀鹿亭（いまは仮に house_e_archway の扉を入口にしている。2026-11-22 作者「酒場っぽくないのと、入れるスペースがないように見える」。本当の正面は美術・演出室に依頼中）（三階建て、一階は食堂）。入口 (8,4) が絵の扉の真ん中に来るよう幅7（x=12・13 は2マスの路地）
 put('back', 'house-tall', 14, 1, 5, 4, 6.6);
 //   x=13 は細い路地
 put('back', 'house-ochre', 19, 1, 5, 4, 5.4, 0.02);
@@ -27,13 +27,14 @@ put('mid', 'crates', 24, 1, 1, 1, 1.2);
 g[4][8] = 'D'; // 銀鹿亭の入口
 
 // 店先：家の前に張り出す庇（下をくぐって歩ける）と吊り看板（板の上のほうにだけ描く）
-put('mid', 'awning-green', 14, 5, 5, 1, 3.2, 0.1, false);
-put('mid', 'awning-red', 19, 5, 5, 1, 2.9, 0.12, false);
-put('mid', 'awning-wheat', 25, 5, 5, 1, 3.1, 0.1, false);
-put('mid', 'sign-deer', 11, 5, 2, 1, 5.4, 0.2, false); // 覚えてもらう目印：銀の鹿の看板
-put('mid', 'sign-bread', 14, 5, 1, 1, 4.6, 0.22, false);
-put('mid', 'sign-shoe', 22, 5, 1, 1, 4.4, 0.22, false);
-put('mid', 'sign-cup', 28, 5, 1, 1, 4.6, 0.22, false);
+// 看板と庇は、家の壁にくっつける（家の正面と同じ列、ほんの少し手前）。前は1.5マス手前に立っていて、宙に浮いて見えた（2026-11-22 作者「看板と布は相変わらず」）
+put('back', 'awning-green', 14, 4, 5, 1, 2.6, 0.25, false); // 庇は1階の入口の上（2026-11-22 作者「看板と布それぞれ位置がおかしい」）
+put('back', 'awning-red', 19, 4, 5, 1, 2.6, 0.25, false);
+put('back', 'awning-wheat', 25, 4, 5, 1, 2.6, 0.25, false);
+put('back', 'sign-deer', 11, 4, 2, 1, 4.2, 0.25, false); // 看板は2階の窓の横 // 覚えてもらう目印：銀の鹿の看板
+put('back', 'sign-bread', 14, 4, 1, 1, 3.6, 0.25, false);
+put('back', 'sign-shoe', 22, 4, 1, 1, 3.6, 0.25, false);
+put('back', 'sign-cup', 28, 4, 1, 1, 3.6, 0.25, false);
 put('mid', 'crates', 6, 5, 1, 1, 1.3, 0.05); // 宿の入口の脇の旅人の荷物
 put('mid', 'planter', 10, 5, 1, 1, 1.4, 0.05); // 入口の脇の花鉢
 
@@ -42,11 +43,14 @@ for (const x of [3, 13, 24, 31]) put('mid', 'lamp', x, 10, 1, 1, 3.8, 0.05);
 put('mid', 'tree', 1, 9, 2, 1, 4.2, 0.05); // 通りの木
 
 // 南側（手前）：屋台が並び、そのうしろにも家。屋台の間はすき間をあけ、手前の家並みの路地へ抜けられる
-for (const [x, w] of [[5, 3], [9, 3], [16, 3], [20, 3], [27, 3]]) put('mid', 'stall', x, 11, w, 2, 2.6, 0.05);
+for (const [x, w] of [[5, 3], [9, 3], [20, 3], [27, 3]]) put('mid', 'stall', x, 11, w, 2, 2.6, 0.05);
+put('mid', 'flower-stall', 16, 11, 3, 2, 2.8, 0.05); // 花屋（2026-11-22 作者「花は？」）
 put('mid', 'crates', 13, 11, 2, 1, 1.4, 0.05);
 put('mid', 'cart', 30, 11, 3, 2, 2.4, 0.05);
 // 手前のはし：カメラは低く主人公のうしろ（約9マス）にあるので、高い家を置くと画面をふさぐ（画面で確認）。低い植えこみ・荷箱・樽だけを置き、本の手前のふちを見せる
-for (const [x, w] of [[2, 2], [8, 2], [15, 2], [22, 2], [28, 2]]) put('mid', 'planter', x, 15, w, 1, 1.2, 0.02);
+for (const [x, w] of [[2, 2], [15, 2], [28, 2]]) put('mid', 'planter', x, 15, w, 1, 1.2, 0.02);
+for (const [x, w] of [[8, 3], [21, 3]]) put('mid', 'flowerbed', x, 15, w, 1, 0.9, 0.02); // 花壇
+put('mid', 'tree-small', 32, 13, 1, 1, 2.2, 0.03); // 小さな木（緑の町）
 put('mid', 'crates', 12, 15, 2, 1, 1.2, 0.02); put('mid', 'crates', 25, 15, 2, 1, 1.2, 0.02);
 
 // 東の端：ページをめくって広場へ（景観案の「市場通り → 星環祭の広場」の見開きができるまでの仮）
@@ -68,10 +72,11 @@ const m = {
     camera: { pitchDeg: 10, fovDeg: 60, follow: 'player', deadzone: [2, 1.5] },
     // 光の玉は場所ごとに変える（2026-11-22 作者「オーブは場所によって変えるようにしたい」）。値は仮
     floor: 'cobble',
+    townArt: {"note":"ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ","base":"assets/town/norn/","ground":{"paved":"tex_cobble_street.png","grass":"tex_grass.png"},"boards":{"house-*":["house_home_2f.png","house_a_narrow.png","house_b_sideroof.png","house_c_stepgable.png","house_d_workshop.png","house_e_archway.png","house_f_corner.png"],"inn-tall":"house_e_archway.png","lamp":"lamp_post.png","stall":"stall.png","flower-stall":"flower_stall.png","cart":"cart.png","planter":"planter.png","flowerbed":"flowerbed.png","tree":"tree_street.png","tree-small":"tree_small.png","herbs":"herbs_drying.png","awning-green":"awnings-1.png","awning-red":"awnings-2.png","awning-wheat":"awnings-3.png","sign-bread":"signs-1.png","sign-shoe":"signs-2.png","sign-cup":"signs-3.png","sign-deer":"signs-4.png"}}, // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）
     paved: [{"x":0,"y":5,"w":34,"h":9}], // 石畳は通り（5〜13行目）だけ。ほかは土か芝生（作者「道や広場は石畳、ほかは土か芝生」） // 仮の床：石畳（2026-11-22 作者「床を仮に作ってほしい」）
     orbs: {"count":10,"alpha":0.5,"color":[1,0.86,0.62],"size":0.7,"note":"町：導機灯や窓の灯りに舞う、暖かいほこりの粒（仮）"},
     layers: [
-      { band: 'backdrop', items: [{ asset: 'placeholder:night-sky-ring', image: 'assets/backdrops/title_bg_temp.jpg', imageNote: '今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）。カルディアの城壁とレグナス城の背景の元絵を依頼中', x: 0, y: 0, w: W, h: 1, standH: 22 }] },
+      { band: 'backdrop', items: [{ asset: 'placeholder:night-sky-ring', sink: 1, image: 'assets/backdrops/norn_night_v02.jpg', imageNightNote: '夜の背景（美術・演出室 2026-11-22 pixel/元絵/背景_ノルン/norn_night_backdrop_v02、試作）', imageDay: 'assets/backdrops/norn_day_v02.jpg', imageDayNote: '昼の背景（美術・演出室 2026-11-22 norn_day_backdrop_v02。手前の家を一階・扉まで描き直したもの。作者「背景を書かせなおす、家の窓やドアがあるように」）', imageNote: '今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）。カルディアの城壁とレグナス城の背景の元絵を依頼中', x: 0, y: 0, w: W, h: 1, standH: 22 }] },
       { band: 'back', items: items.back },
       { band: 'mid', items: items.mid },
       { band: 'actors', items: [] },
