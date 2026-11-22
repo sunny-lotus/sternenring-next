@@ -118,7 +118,7 @@ export function createBgm(ledger, opts = {}) {
     if (!ctx) return;
     try {
       await Promise.all(tracks.map(async (t) => {
-        const r = await fetch(t.path, { cache: 'no-store' });
+        const r = await fetch(t.path, { cache: 'no-cache' });
         if (!r.ok) throw Error(`${t.path} を読めません (${r.status})`);
         const buf = await ctx.decodeAudioData(await r.arrayBuffer());
         buffers[t.id] = buf;

@@ -21,7 +21,8 @@ const params = new URLSearchParams(location.search);
 
 async function boot() {
   // 音の台帳は、ゲームのデータと並べて読む。読めなくても無音で進む（音はゲームの進行に要らない）
-  const audioLedger = fetch('data/audio.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { sounds: [] }), () => ({ sounds: [] }));
+  const audioLedger = fetch('data/audio.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : { sounds: [] }), () => ({ sounds: [] }));
+  const dialogueP = fetch('data/dialogue.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : { lines: {} }), () => ({ lines: {} })); // 調べたときの言葉も、はじめに並べて読む
   const d = await loadGameData();
   if (d.errors.length) { $('status').textContent = `データに問題があるため起動しません：\n${d.errors.join('\n')}`; $('status').classList.add('error'); return; }
   const input = new InputState({ buffer: d.world.inputBuffer });
@@ -42,7 +43,7 @@ async function boot() {
   window.addEventListener('pagehide', () => saver.now());
   const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party, record, onRecordChange: () => saver.schedule() });
   // 調べたときの言葉（仮の文。data/dialogue.json）
-  const dialogue = await fetch('data/dialogue.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { lines: {} }), () => ({ lines: {} }));
+  const dialogue = await dialogueP;
   const assets = { ledger: d.ledger, images: d.images, regions: d.regions, style: d.style };
   // カメラ角度の調整パネル（右上の「カメラ」ボタンで開け閉め。?cam=1 なら開いて始まる）。いまのマップの値から始まる
   const camUi = createCamPanel(params, () => d.maps[field.state.mapId]?.stage?.camera);

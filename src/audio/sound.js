@@ -77,7 +77,7 @@ export function createSound(ledger, opts = {}) {
     if (!ctx) return;
     try {
       await Promise.all(ledger.sounds.map(async (s) => {
-        const r = await fetch(s.path, { cache: 'no-store' });
+        const r = await fetch(s.path, { cache: 'no-cache' });
         if (!r.ok) throw Error(`${s.path} を読めません (${r.status})`);
         buffers[s.id] = await ctx.decodeAudioData(await r.arrayBuffer());
       }));
