@@ -1,0 +1,122 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "silver-deer-room-b",
+  "title": "銀鹿亭・客室（仮）",
+  "kind": "interior",
+  "status": "provisional",
+  "provenance": "2026-11-22 作者の指示（相談チャット）で作った仮の客室。銀鹿亭の吹き抜けの2階の通路の扉から入る。正式な間取りは4室の確定待ち。",
+  "width": 9,
+  "height": 7,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "collision": [
+    "#########",
+    "#.##....#",
+    "#.##....#",
+    "#.......#",
+    "#.......#",
+    "#.......#",
+    "####D####"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "floor",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "door",
+      "x": 4,
+      "y": 6,
+      "dir": "down",
+      "effect": "nook-out",
+      "to": {
+        "map": "silver-deer-1f",
+        "exit": "room-b-door",
+        "arrive": {
+          "x": 12,
+          "y": 1,
+          "dir": "down"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 4,
+      "y": 4,
+      "dir": "up"
+    }
+  },
+  "events": [],
+  "stage": {
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 60,
+      "follow": "center-if-fits"
+    },
+    "textures": {
+      "note": "内装の手ざわり（美術・演出室の元絵 pixel/元絵/内装_銀鹿亭_v01、ドット絵にせずそのまま。2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵に戻る",
+      "base": "assets/interiors/silver-deer/",
+      "floor": "floor.png",
+      "wall": "wall.png",
+      "ceiling": "ceiling.png",
+      "brick": "brick.png",
+      "window": "window.png",
+      "tabletop": "tabletop.png",
+      "counter": "counter.png",
+      "blanket": "blanket.png",
+      "door": "door.png"
+    },
+    "backWindows": false,
+    "backNote": "奥の壁の仮の板（コードで描いた梁・窓・棚）ははがした。壁は内装の元絵の漆喰だけ（2026-11-22 作者「壁のなんかよくわからないやつははがしていいよ」）",
+    "orbs": {
+      "count": 8,
+      "alpha": 0.5,
+      "color": [
+        1,
+        0.8,
+        0.55
+      ],
+      "size": 0.6,
+      "note": "宿の中：暖炉の火の粉のような、暖かい粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": []
+      },
+      {
+        "band": "back",
+        "items": []
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:bed",
+            "x": 2,
+            "y": 1,
+            "w": 2,
+            "h": 2,
+            "standH": 1
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  }
+}

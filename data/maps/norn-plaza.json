@@ -1,0 +1,626 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "norn-plaza",
+  "title": "ノルン・広場",
+  "kind": "exterior",
+  "status": "provisional",
+  "provenance": "DEV-DESIGN-001 examples の仮配置（旧版 dist/data/norn.json の通行行を写し、宿の入口(5,5)を扉にしたもの）。正式な街並みは4室の確定待ち。 2026-11-22 作者の指示で 56×40 に広げた（tools/gen-norn.cjs。元の広場は左上にそのまま。東と南の通りは仮の配置）。",
+  "width": 56,
+  "height": 40,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "collision": [
+    "########################################################",
+    "#......................................................#",
+    "#.######........######..#####.######....############...#",
+    "#.######........######..#####.######....############...#",
+    "#.######........######..#####.######....############...#",
+    "#.######........######..#####.######....############...#",
+    "#......................................................#",
+    "#......................................................#",
+    "#.####...........####..................................#",
+    "#.####...........####..................................#",
+    "D......................................................D",
+    "D......................................................D",
+    "D......................................................D",
+    "#..###............###..................................#",
+    "#..###............###...######..........##########.....#",
+    "#..###............###...##########......##############.#",
+    "#.......................##########......##############.#",
+    "#.......................##########......##############.#",
+    "#.........................................##...........#",
+    "#......................................................#",
+    "######.............######.....######....######.........#",
+    "######.........##############.######....##########.#####",
+    "######.........##############.######....##########.#####",
+    "######.........##############.######....##########.#####",
+    "#.......##.............................................#",
+    "#......................................................#",
+    "#######.................#####.#####.....##########.....#",
+    "#######........########.#####.#####.....##############.#",
+    "#######........########.#####.#####.....##############.#",
+    "#######........########.#####.#####.....##############.#",
+    "#..............##....##................................#",
+    "#......................................................#",
+    "#..............######...................############...#",
+    "#####.####.....##################.......############...#",
+    "#####.####.....##################.......############...#",
+    "#####.####.....##################.......############...#",
+    "#......................................................#",
+    "#......................................................#",
+    "#......................................................#",
+    "########################################################"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "paving",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "west-street",
+      "x": 0,
+      "y": 10,
+      "span": 3,
+      "dir": "left",
+      "effect": "page",
+      "to": {
+        "map": "norn-inn-street",
+        "exit": "east-street",
+        "arrive": {
+          "x": 32,
+          "y": 6,
+          "dir": "left"
+        }
+      }
+    },
+    {
+      "id": "east-road",
+      "x": 55,
+      "y": 10,
+      "span": 3,
+      "dir": "right",
+      "effect": "page",
+      "to": {
+        "map": "test-forest",
+        "exit": "west-road",
+        "arrive": {
+          "x": 1,
+          "y": 6,
+          "dir": "right"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 12,
+      "y": 11,
+      "dir": "up"
+    }
+  },
+  "events": [
+    {
+      "id": "stall-lamp",
+      "x": 6,
+      "y": 9,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "lampSeen": true
+            }
+          },
+          "dialogue": "plaza.lamp.again"
+        },
+        {
+          "dialogue": "plaza.lamp.first",
+          "set": {
+            "flags": {
+              "lampSeen": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ring-view",
+      "x": 12,
+      "y": 5,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "plaza.ring",
+          "set": {
+            "flags": {
+              "ringSeen": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "stage": {
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 60,
+      "follow": "player",
+      "deadzone": [
+        2,
+        1.5
+      ]
+    },
+    "floor": "cobble",
+    "paved": [
+      {
+        "x": 1,
+        "y": 1,
+        "w": 23,
+        "h": 18
+      },
+      {
+        "x": 0,
+        "y": 9,
+        "w": 56,
+        "h": 5
+      },
+      {
+        "x": 10,
+        "y": 14,
+        "w": 5,
+        "h": 25
+      },
+      {
+        "x": 36,
+        "y": 1,
+        "w": 4,
+        "h": 38
+      }
+    ],
+    "orbs": {
+      "count": 10,
+      "alpha": 0.5,
+      "color": [
+        1,
+        0.86,
+        0.62
+      ],
+      "size": 0.7,
+      "note": "町：導機灯や窓の灯りに舞う、暖かいほこりの粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": [
+          {
+            "asset": "placeholder:night-sky-ring",
+            "image": "assets/backdrops/title_bg_temp.jpg",
+            "imageNote": "今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）",
+            "x": 0,
+            "y": 0,
+            "w": 56,
+            "h": 1,
+            "standH": 26
+          }
+        ]
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "placeholder:house-front",
+            "x": 2,
+            "y": 2,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 16,
+            "y": 2,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.1
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 24,
+            "y": 2,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 30,
+            "y": 2,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.04
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 40,
+            "y": 2,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 46,
+            "y": 2,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.07
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 24,
+            "y": 14,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 40,
+            "y": 14,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 45,
+            "y": 14,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.08
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 1,
+            "y": 20,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.08
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 19,
+            "y": 20,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 30,
+            "y": 20,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.07
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 40,
+            "y": 20,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 1,
+            "y": 26,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 24,
+            "y": 26,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 30,
+            "y": 26,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.06
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 40,
+            "y": 26,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.01
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 45,
+            "y": 26,
+            "w": 5,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.04
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 15,
+            "y": 32,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 40,
+            "y": 32,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.01
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 46,
+            "y": 32,
+            "w": 6,
+            "h": 4,
+            "standH": 5,
+            "zOffset": 0.09
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:stall",
+            "x": 2,
+            "y": 8,
+            "w": 4,
+            "h": 2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 17,
+            "y": 8,
+            "w": 4,
+            "h": 2,
+            "standH": 3,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 3,
+            "y": 13,
+            "w": 3,
+            "h": 3
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 19,
+            "y": 13,
+            "w": 3,
+            "h": 3
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 30,
+            "y": 15,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.08
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 50,
+            "y": 15,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.07
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 15,
+            "y": 21,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.07
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 25,
+            "y": 21,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.06
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 46,
+            "y": 21,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.09
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 51,
+            "y": 21,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.01
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 15,
+            "y": 27,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 19,
+            "y": 27,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 50,
+            "y": 27,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 1,
+            "y": 33,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 6,
+            "y": 33,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.04
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 21,
+            "y": 33,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.07
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 25,
+            "y": 33,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.04
+          },
+          {
+            "asset": "placeholder:house-small",
+            "x": 29,
+            "y": 33,
+            "w": 4,
+            "h": 3,
+            "standH": 3.5,
+            "zOffset": 0.09
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 42,
+            "y": 18,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 8,
+            "y": 24,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 15,
+            "y": 30,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 21,
+            "y": 30,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": [
+          {
+            "asset": "placeholder:foreground-branch",
+            "x": 0,
+            "y": 17,
+            "w": 4,
+            "h": 2,
+            "zOffset": 0.2,
+            "fadeNearPlayer": true
+          }
+        ]
+      }
+    ]
+  }
+}

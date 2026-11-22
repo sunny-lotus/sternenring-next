@@ -1,0 +1,991 @@
+{
+  "format": "sternenring-next-assets",
+  "version": 1,
+  "note": "素材台帳。path は STERNENRING_RPG_NEXT からの相対パス。旧版 dist/assets から複製したもの（旧版のファイルは動かしていない）。status: placeholder（仮）/ adopted-legacy（旧版で採用済み・新版では仮配置）/ received / adopted。placeholder: で始まるIDは台帳に載せず、仮の板（名前つきの紙の四角）で描く。",
+  "assets": [
+    {
+      "id": "tiles.pipoya-town",
+      "kind": "tileset",
+      "path": "assets/tiles/pipoya-town.png",
+      "regionsPath": "assets/tiles/pipoya-town.json",
+      "tile": [
+        32,
+        32
+      ],
+      "status": "adopted-legacy",
+      "source": "旧版 dist/assets/tiles（ぴぽや）",
+      "license": "assets/tiles/README.md（ぴぽや利用規約）",
+      "sha256": "87284c54e12d996a2beb48f3014168908fc01162b5fe2e322cb26c7ac0502f85"
+    },
+    {
+      "id": "chara.nacht.walk",
+      "kind": "sheet",
+      "path": "assets/characters/nacht/walk.png",
+      "frame": [
+        64,
+        64
+      ],
+      "anchor": [
+        32,
+        58
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 4,
+      "frameMs": 100,
+      "noFlip": true,
+      "status": "adopted-legacy",
+      "source": "旧版 dist/assets/characters/nacht",
+      "equipmentSide": "刀は左の腰",
+      "sha256": "dc4eb8225b0200cc2678ffeff760c824f82f5182b2192f09217f305d3dee7707"
+    },
+    {
+      "id": "chara.nacht.idle",
+      "kind": "sheet",
+      "path": "assets/characters/nacht/idle.png",
+      "frame": [
+        64,
+        64
+      ],
+      "anchor": [
+        32,
+        58
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "adopted-legacy",
+      "source": "旧版 dist/assets/characters/nacht",
+      "equipmentSide": "刀は左の腰",
+      "sha256": "4a31cea55efce77893b8e3e658fe01b0b1e07fe42c0901834fbf96b83b71dee0"
+    },
+    {
+      "id": "chara.nacht.chibi.walk",
+      "kind": "sheet",
+      "path": "assets/characters/nacht/chibi-walk.png",
+      "frame": [
+        70,
+        98
+      ],
+      "anchor": [
+        35,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 4,
+      "frameMs": 160,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/nacht-chibi、道具 walk12.ps1）",
+      "sourceArt": "pixel/元絵/nacht_walk12_source_v01.png（美術・演出室の元絵、作者が採用した見本に合わせた12ポーズ）",
+      "equipmentSide": "刀は左の腰",
+      "sha256": "64048a1761b119f3f50886f16d455a37af7e5e9da948a5ecb15cd8eb0edd7824"
+    },
+    {
+      "id": "chara.nacht.chibi.idle",
+      "kind": "sheet",
+      "path": "assets/characters/nacht/chibi-idle.png",
+      "frame": [
+        70,
+        98
+      ],
+      "anchor": [
+        35,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/nacht-chibi、道具 walk12.ps1）",
+      "sourceArt": "pixel/元絵/nacht_walk12_source_v01.png（美術・演出室の元絵、作者が採用した見本に合わせた12ポーズ）",
+      "equipmentSide": "刀は左の腰",
+      "sha256": "d9684ae0ce2623eebad0c3a32b6b8063ea7954a7e93b48edbd117f76d8c34d1e"
+    },
+    {
+      "id": "chara.volt.walk",
+      "kind": "sheet",
+      "path": "assets/characters/volt/walk.png",
+      "frame": [
+        64,
+        64
+      ],
+      "anchor": [
+        32,
+        58
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 4,
+      "frameMs": 100,
+      "noFlip": true,
+      "status": "adopted-legacy",
+      "source": "旧版 dist/assets/characters/volt",
+      "equipmentSide": "右の義足と杖",
+      "sha256": "e061e16754be496613b44bd506d815c73ff46cbf17a176e7aaf25c519635ab7b"
+    },
+    {
+      "id": "chara.volt.idle",
+      "kind": "sheet",
+      "path": "assets/characters/volt/idle.png",
+      "frame": [
+        64,
+        64
+      ],
+      "anchor": [
+        32,
+        58
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "adopted-legacy",
+      "source": "旧版 dist/assets/characters/volt",
+      "equipmentSide": "右の義足と杖",
+      "sha256": "98ee95a7c8f8292577d2b6f90ffcb92cc7f86d12799ec2a15e5fb3ea2f655956"
+    },
+    {
+      "id": "chara.volt.chibi.walk",
+      "kind": "sheet",
+      "path": "assets/characters/volt/chibi-walk.png",
+      "frame": [
+        60,
+        98
+      ],
+      "anchor": [
+        30,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 4,
+      "frameMs": 160,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/volt-chibi、道具 walk12.ps1・eyes.ps1）",
+      "sourceArt": "pixel/元絵/volt_walk12_source_v01.png（美術・演出室の元絵、作者が『いいね』と答えた見本に合わせた12ポーズ）",
+      "equipmentSide": "杖は右手・右脚は義足（長ズボンとブーツで隠す）",
+      "sha256": "f75b9bf1ba3182cc0a2a0a11fdbab98058b021d0d6db4b38ba383d422bad5e90"
+    },
+    {
+      "id": "chara.volt.chibi.idle",
+      "kind": "sheet",
+      "path": "assets/characters/volt/chibi-idle.png",
+      "frame": [
+        60,
+        98
+      ],
+      "anchor": [
+        30,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/volt-chibi、道具 walk12.ps1・eyes.ps1）",
+      "sourceArt": "pixel/元絵/volt_walk12_source_v01.png（美術・演出室の元絵、作者が『いいね』と答えた見本に合わせた12ポーズ）",
+      "equipmentSide": "杖は右手・右脚は義足（長ズボンとブーツで隠す）",
+      "sha256": "30595b30e9a62c8fc83a7a5daee770f5221287929b0259aaca6aa2e81cd5e84c"
+    },
+    {
+      "id": "chara.nacht.chibi.faces",
+      "kind": "faces",
+      "path": "assets/characters/nacht/chibi-faces.png",
+      "cell": [
+        19,
+        14
+      ],
+      "dirs": [
+        "down",
+        "left",
+        "right"
+      ],
+      "expressions": [
+        "normal"
+      ],
+      "anchors": {
+        "walk": {
+          "left": [
+            [
+              23,
+              23
+            ],
+            [
+              22,
+              24
+            ],
+            [
+              23,
+              23
+            ],
+            [
+              22,
+              24
+            ]
+          ],
+          "right": [
+            [
+              32,
+              23
+            ],
+            [
+              32,
+              23
+            ],
+            [
+              32,
+              22
+            ],
+            [
+              32,
+              23
+            ]
+          ],
+          "down": [
+            [
+              27,
+              23
+            ],
+            [
+              27,
+              24
+            ],
+            [
+              28,
+              23
+            ],
+            [
+              27,
+              24
+            ]
+          ],
+          "up": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "idle": {
+          "left": [
+            [
+              22,
+              24
+            ]
+          ],
+          "right": [
+            [
+              32,
+              23
+            ]
+          ],
+          "down": [
+            [
+              27,
+              24
+            ]
+          ],
+          "up": [
+            null
+          ]
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "source": "相談チャット（2026-11-22、pixel/nacht-chibi、道具 facesplit.ps1）。顔だけの層。いまは立つコマの顔を切り出した normal だけ",
+      "sha256": "b8a697d6da4974170bef4b9ce258c6fffb99dc31d15a3f84bfe7272f2e292db5"
+    },
+    {
+      "id": "chara.volt.chibi.faces",
+      "kind": "faces",
+      "path": "assets/characters/volt/chibi-faces.png",
+      "cell": [
+        15,
+        12
+      ],
+      "dirs": [
+        "down",
+        "left",
+        "right"
+      ],
+      "expressions": [
+        "normal"
+      ],
+      "anchors": {
+        "walk": {
+          "left": [
+            [
+              17,
+              23
+            ],
+            [
+              17,
+              23
+            ],
+            [
+              17,
+              23
+            ],
+            [
+              17,
+              23
+            ]
+          ],
+          "right": [
+            [
+              28,
+              25
+            ],
+            [
+              28,
+              25
+            ],
+            [
+              28,
+              25
+            ],
+            [
+              28,
+              25
+            ]
+          ],
+          "down": [
+            [
+              23,
+              24
+            ],
+            [
+              24,
+              25
+            ],
+            [
+              23,
+              24
+            ],
+            [
+              24,
+              25
+            ]
+          ],
+          "up": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "idle": {
+          "left": [
+            [
+              17,
+              23
+            ]
+          ],
+          "right": [
+            [
+              28,
+              25
+            ]
+          ],
+          "down": [
+            [
+              24,
+              25
+            ]
+          ],
+          "up": [
+            null
+          ]
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "source": "相談チャット（2026-11-22、pixel/volt-chibi、道具 facesplit.ps1）。顔だけの層。いまは立つコマの顔を切り出した normal だけ",
+      "sha256": "4ec9029fe94d84bd8af861603571ee1191b7f58ecd4e02214e535ce7e46903ea"
+    },
+    {
+      "id": "chara.flare.chibi.walk",
+      "path": "assets/characters/flare/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        66,
+        85
+      ],
+      "anchor": [
+        33,
+        83
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/flare-chibi、道具 walk12.ps1）",
+      "sourceArt": "pixel/元絵/flare_walk12_source_v01.png（美術・演出室の元絵、作者「いいねこれで行こう」の見本に合わせた12ポーズ）",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "72113bd2df586bcece75767801bbbdd95de56526bc0c2783608d5e460ed9963a"
+    },
+    {
+      "id": "chara.flare.chibi.idle",
+      "path": "assets/characters/flare/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        66,
+        85
+      ],
+      "anchor": [
+        33,
+        83
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャットでドット絵化（2026-11-22、pixel/flare-chibi、道具 walk12.ps1）",
+      "sourceArt": "pixel/元絵/flare_walk12_source_v01.png（美術・演出室の元絵、作者「いいねこれで行こう」の見本に合わせた12ポーズ）",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "280dae62d835ca513adf1f4a889032614772f741fd81f648d6bb453a8e36589b"
+    },
+    {
+      "id": "chara.flare.chibi.faces",
+      "kind": "faces",
+      "path": "assets/characters/flare/chibi-faces.png",
+      "cell": [
+        13,
+        12
+      ],
+      "dirs": [
+        "down",
+        "left",
+        "right"
+      ],
+      "expressions": [
+        "normal"
+      ],
+      "anchors": {
+        "walk": {
+          "left": [
+            [
+              18,
+              21
+            ],
+            [
+              18,
+              20
+            ],
+            [
+              18,
+              20
+            ],
+            [
+              18,
+              20
+            ]
+          ],
+          "right": [
+            [
+              37,
+              21
+            ],
+            [
+              36,
+              20
+            ],
+            [
+              36,
+              20
+            ],
+            [
+              36,
+              20
+            ]
+          ],
+          "down": [
+            [
+              27,
+              21
+            ],
+            [
+              26,
+              21
+            ],
+            [
+              27,
+              21
+            ],
+            [
+              26,
+              21
+            ]
+          ],
+          "up": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "idle": {
+          "left": [
+            [
+              18,
+              20
+            ]
+          ],
+          "right": [
+            [
+              36,
+              20
+            ]
+          ],
+          "down": [
+            [
+              26,
+              21
+            ]
+          ],
+          "up": [
+            null
+          ]
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "source": "相談チャット（2026-11-22、pixel/flare-chibi、道具 facesplit.ps1）。顔だけの層。赤い髪を肌とまちがえないよう、明るく黄色みの少ない所だけを顔として切り出した（-StrictSkin）",
+      "sha256": "f0a4a52964aa74bc4bb6f687f9fc5f9d146d28c89da43cfc9fab4946f0754bdf"
+    },
+    {
+      "id": "chara.serena.chibi.walk",
+      "path": "assets/characters/serena/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        66,
+        92
+      ],
+      "anchor": [
+        33,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-22、pixel/serena-chibi、道具 walk12.ps1）。元絵 serena_walk12_source_v03.png（正面・奥向きの歩き4コマ描き直し済み）",
+      "sourceArt": "serena_walk12_source_v03",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "2b163eac9739d7fbd25d7b11e92f0f40f061587daeb03bcaff3d5a932a0693cd"
+    },
+    {
+      "id": "chara.serena.chibi.idle",
+      "path": "assets/characters/serena/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        66,
+        92
+      ],
+      "anchor": [
+        33,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-22、pixel/serena-chibi、道具 walk12.ps1）。元絵 serena_walk12_source_v03.png（正面・奥向きの歩き4コマ描き直し済み）",
+      "sourceArt": "serena_walk12_source_v03",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "e3b12f813fd913a8495875f7f9f406930643eab4470a77c9b9778611183118d6"
+    },
+    {
+      "id": "chara.serena.chibi.faces",
+      "kind": "faces",
+      "path": "assets/characters/serena/chibi-faces.png",
+      "cell": [
+        14,
+        13
+      ],
+      "dirs": [
+        "down",
+        "left",
+        "right"
+      ],
+      "expressions": [
+        "normal"
+      ],
+      "anchors": {
+        "walk": {
+          "left": [
+            [
+              17,
+              16
+            ],
+            [
+              18,
+              16
+            ],
+            [
+              18,
+              16
+            ],
+            [
+              18,
+              16
+            ]
+          ],
+          "right": [
+            [
+              34,
+              15
+            ],
+            [
+              34,
+              15
+            ],
+            [
+              34,
+              15
+            ],
+            [
+              34,
+              15
+            ]
+          ],
+          "down": [
+            [
+              26,
+              16
+            ],
+            [
+              27,
+              18
+            ],
+            [
+              27,
+              16
+            ],
+            [
+              27,
+              18
+            ]
+          ],
+          "up": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "idle": {
+          "left": [
+            [
+              18,
+              16
+            ]
+          ],
+          "right": [
+            [
+              34,
+              15
+            ]
+          ],
+          "down": [
+            [
+              27,
+              18
+            ]
+          ],
+          "up": [
+            null
+          ]
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "source": "相談チャット（2026-11-22、pixel/serena-chibi、道具 walk12.ps1・facesplit.ps1 -StrictSkin）。元絵 serena_walk12_source_v03.png（正面・奥向きの歩き4コマ描き直し済み）",
+      "sha256": "2ae35e4c2caa0cbc72434bec7a997884ce91b3a3cce3fc305b6994c0b05c8168"
+    },
+    {
+      "id": "chara.licht.chibi.walk",
+      "path": "assets/characters/licht/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        70,
+        98
+      ],
+      "anchor": [
+        35,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-22、pixel/licht-chibi、道具 walk12.ps1）。元絵 licht_walk12_source_v02.png（見本 v05、右向き・右足前の1コマ描き直し済み）",
+      "sourceArt": "licht_walk12_source_v02",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "da667a184f63a883c18347499cc143cc93470de595394be496b86a86192395c0"
+    },
+    {
+      "id": "chara.licht.chibi.idle",
+      "path": "assets/characters/licht/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        70,
+        98
+      ],
+      "anchor": [
+        35,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-22、pixel/licht-chibi、道具 walk12.ps1）。元絵 licht_walk12_source_v02.png（見本 v05、右向き・右足前の1コマ描き直し済み）",
+      "sourceArt": "licht_walk12_source_v02",
+      "equipmentSide": "フランベルジュは鞘に収めて左の腰（両手は空ける）",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "b950dace51ddb6c98497b8629997939ae08c8b83c4879b269348b4b560d9f8be"
+    },
+    {
+      "id": "chara.licht.chibi.faces",
+      "kind": "faces",
+      "path": "assets/characters/licht/chibi-faces.png",
+      "cell": [
+        18,
+        22
+      ],
+      "dirs": [
+        "down",
+        "left",
+        "right"
+      ],
+      "expressions": [
+        "normal"
+      ],
+      "anchors": {
+        "walk": {
+          "left": [
+            [
+              19,
+              11
+            ],
+            [
+              20,
+              11
+            ],
+            [
+              19,
+              11
+            ],
+            [
+              20,
+              11
+            ]
+          ],
+          "right": [
+            [
+              32,
+              12
+            ],
+            [
+              31,
+              11
+            ],
+            [
+              32,
+              11
+            ],
+            [
+              31,
+              11
+            ]
+          ],
+          "down": [
+            [
+              28,
+              10
+            ],
+            [
+              28,
+              9
+            ],
+            [
+              28,
+              9
+            ],
+            [
+              28,
+              9
+            ]
+          ],
+          "up": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "idle": {
+          "left": [
+            [
+              20,
+              11
+            ]
+          ],
+          "right": [
+            [
+              31,
+              11
+            ]
+          ],
+          "down": [
+            [
+              28,
+              9
+            ]
+          ],
+          "up": [
+            null
+          ]
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "source": "相談チャット（2026-11-22、pixel/licht-chibi、道具 walk12.ps1・facesplit.ps1 -StrictSkin）。元絵 licht_walk12_source_v02.png（見本 v05、右向き・右足前の1コマ描き直し済み）",
+      "sha256": "eeec9e8b934502f0e9417749aecc8084d5d47e79de424aa515163b2ee63a3718"
+    }
+  ],
+  "party": [
+    {
+      "id": "nacht",
+      "name": "ナハト",
+      "walk": "chara.nacht.chibi.walk",
+      "idle": "chara.nacht.chibi.idle",
+      "walkLegacy": "chara.nacht.walk",
+      "idleLegacy": "chara.nacht.idle",
+      "faces": "chara.nacht.chibi.faces"
+    },
+    {
+      "id": "volt",
+      "name": "ヴォルト",
+      "walk": "chara.volt.chibi.walk",
+      "idle": "chara.volt.chibi.idle",
+      "walkLegacy": "chara.volt.walk",
+      "idleLegacy": "chara.volt.idle",
+      "faces": "chara.volt.chibi.faces"
+    }
+  ],
+  "cast": [
+    {
+      "id": "flare",
+      "name": "フレア",
+      "walk": "chara.flare.chibi.walk",
+      "idle": "chara.flare.chibi.idle",
+      "faces": "chara.flare.chibi.faces",
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+    },
+    {
+      "id": "serena",
+      "name": "セレナ",
+      "walk": "chara.serena.chibi.walk",
+      "idle": "chara.serena.chibi.idle",
+      "faces": "chara.serena.chibi.faces",
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+    },
+    {
+      "id": "licht",
+      "name": "リヒト",
+      "walk": "chara.licht.chibi.walk",
+      "idle": "chara.licht.chibi.idle",
+      "faces": "chara.licht.chibi.faces",
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+    }
+  ]
+}

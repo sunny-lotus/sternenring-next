@@ -1,0 +1,5 @@
+# 作業用・一時ファイル（公開しない）
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

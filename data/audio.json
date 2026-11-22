@@ -1,0 +1,122 @@
+{
+  "format": "sternenring-next-audio",
+  "version": 1,
+  "note": "音の台帳（DEV-BOOK-001 rev2）。path は STERNENRING_RPG_NEXT からの相対パス。作者の本の実録音（ノイズ低減版）を、制作側 production/claude/assets/audio/book-recording-v01/ から写したもの（元のファイルは変えていない）。sha256 は adoption.json と同じ。assignedTo が null のものは、鳴らす場面（演出・操作）がまだ無いので割当待ち（音のために新しい演出やUIは作らない）。",
+  "source": {
+    "folder": "production/claude/assets/audio/book-recording-v01",
+    "adoption": "adoption.json（作者「いいねこれ入れよう」2026-11-22 13:59、ノイズ低減版5点を採用）",
+    "manifest": "denoise-manifest.json（listeningVerified: false）",
+    "original": "作者による本の実録音（manifest.json の source・sha256 4b2baf76…）"
+  },
+  "sounds": [
+    {
+      "id": "sfx.book.open",
+      "path": "assets/audio/book/book_open_v01_denoise.wav",
+      "sourceFile": "book_open_v01_denoise.wav",
+      "durationSeconds": 1.1,
+      "peakDbFS": -8.01,
+      "status": "adopted",
+      "assignedTo": "intro.book-open",
+      "use": "開始演出「飛び出す絵本」の本がひらく動き（演出の始まり t=0 から。いちばん大きな音は約0.2秒）。フィールドのメニューを開くときにも鳴らす（2026-11-22 作者「メニューも開く音」）",
+      "sha256": "d6bdf8a1d092fd952f4e509b21c2cd9e6daf0e0e92769856b8452cf05bba0265"
+    },
+    {
+      "id": "sfx.page.turn01",
+      "path": "assets/audio/book/page_turn_01_v01_denoise.wav",
+      "sourceFile": "page_turn_01_v01_denoise.wav",
+      "durationSeconds": 2.3,
+      "peakDbFS": -8,
+      "status": "adopted",
+      "assignedTo": "field.page-turn",
+      "use": "外どうしの出入口でページがめくれはじめるとき（着いた直後）。3つを順に鳴らす（2026-11-22 作者「ページめくりの音を入れてほしい」）。フィールドのメニューの中でページを移るときにも順に鳴らす（2026-11-22 作者「めくる音3種類」）",
+      "sha256": "855cc8e038d5b5267da408982f658a99af87d1f90ac7e6e67f9bd26a92b4a048"
+    },
+    {
+      "id": "sfx.page.turn02",
+      "path": "assets/audio/book/page_turn_02_v01_denoise.wav",
+      "sourceFile": "page_turn_02_v01_denoise.wav",
+      "durationSeconds": 1.65,
+      "peakDbFS": -11.76,
+      "status": "adopted",
+      "assignedTo": "field.page-turn",
+      "use": "外どうしの出入口でページがめくれはじめるとき（着いた直後）。3つを順に鳴らす（2026-11-22 作者「ページめくりの音を入れてほしい」）。フィールドのメニューの中でページを移るときにも順に鳴らす（2026-11-22 作者「めくる音3種類」）",
+      "sha256": "95a462fab4b4d56776a808ce8430cdcca0d4df94dbabee9e8f2eb880a5ba091f"
+    },
+    {
+      "id": "sfx.page.turn03",
+      "path": "assets/audio/book/page_turn_03_v01_denoise.wav",
+      "sourceFile": "page_turn_03_v01_denoise.wav",
+      "durationSeconds": 1.8,
+      "peakDbFS": -12.48,
+      "status": "adopted",
+      "assignedTo": "field.page-turn",
+      "use": "外どうしの出入口でページがめくれはじめるとき（着いた直後）。3つを順に鳴らす（2026-11-22 作者「ページめくりの音を入れてほしい」）。フィールドのメニューの中でページを移るときにも順に鳴らす（2026-11-22 作者「めくる音3種類」）",
+      "sha256": "bed3c0528fc0b1f9bd89458b1c3ea9342be5785165ceb2b2d6e4f1d616a7b9bb"
+    },
+    {
+      "id": "sfx.book.close",
+      "path": "assets/audio/book/book_close_soft_v01_denoise.wav",
+      "sourceFile": "book_close_soft_v01_denoise.wav",
+      "durationSeconds": 1.25,
+      "peakDbFS": -14,
+      "status": "adopted",
+      "assignedTo": "menu.close",
+      "use": "フィールドのメニューを閉じるとき（2026-11-22 作者「閉じる音使ってよ」）",
+      "sha256": "d6612775aaab91aff8dc0f221619316a540a94b17cf74bef63e262a00d0cfd24"
+    }
+  ],
+  "bgmNote": "曲（DEV-BOOK-001 rev3）。作者指定の完成版ケルト街BGM v30（production/claude/assets/BGM-TOWN-CELTIC-V30.json、作者「音楽はケルトのやつ」）。原WAV outputs/SR_街BGM_ケルト_完成版_v30.wav をそのまま写した（再合成・切詰め・速度変更なし。sha256 照合済み、元のファイルは変えていない）。ループは音源全体 [0, 3024000) フレーム、導入2小節も毎周。bgmByMap は今の仮の試験区画だけの割当で、正式な他マップや物語場面への割当は確定しない。",
+  "bgm": [
+    {
+      "id": "bgm.town.celtic.v30",
+      "path": "assets/audio/bgm/town_celtic_v30.wav",
+      "sourceFile": "SR_街BGM_ケルト_完成版_v30.wav",
+      "title": "ケルト風街BGM（正式曲名未設定）",
+      "version": 30,
+      "status": "adopted",
+      "sampleRateHz": 44100,
+      "channels": 2,
+      "sampleWidthBytes": 2,
+      "frames": 3024000,
+      "seconds": 68.57142857142857,
+      "loop": {
+        "mode": "whole_asset_loop",
+        "startFrame": 0,
+        "endFrameExclusive": 3024000,
+        "introRepeats": true
+      },
+      "loopSpecification": "創作活動/シュテルネンリング/ゲーム音楽/制作メモ/各曲ループ仕様/music-loops.json（town-celtic）",
+      "sha256": "5b71fcac158d97e8e8929fc74904ce30792fd8b423193038b2ab948bff9d6d08"
+    },
+    {
+      "id": "bgm.field.hikari-no-arpeggio",
+      "path": "assets/audio/bgm/hikari_no_arpeggio.wav",
+      "sourceFile": "バトル試作/audio/menu-hikari-no-arpeggio.wav（もとは まなびクエストのメニュー曲「光のアルペジオ」の録音ピアノ版）",
+      "title": "光のアルペジオ",
+      "status": "adopted",
+      "use": "町以外（森・ダンジョン）のフィールド（2026-11-22 作者「曲について町以外は光のアルペジオを流そうか」）",
+      "sampleRateHz": 44100,
+      "channels": 1,
+      "sampleWidthBytes": 2,
+      "frames": 1221401,
+      "seconds": 27.696167800453516,
+      "loop": {
+        "mode": "overlap_period",
+        "periodSeconds": 24.646153846153847,
+        "note": "音源の終わりを待たず、約24.646秒ごとに次の周を頭から重ねる（前の周の余韻を残す）。教材作成/manabiquest/音楽/光のアルペジオ_繰り返し方.txt"
+      },
+      "sha256": "0e4eeec73fe14ab263b673465c6055b1de9ef3be1d64d07de16061e13c159632"
+    }
+  ],
+  "bgmByMap": {
+    "norn-plaza": "bgm.town.celtic.v30",
+    "silver-deer-1f": "bgm.town.celtic.v30",
+    "silver-deer-room-a": "bgm.town.celtic.v30",
+    "silver-deer-room-b": "bgm.town.celtic.v30",
+    "silver-deer-room-c": "bgm.town.celtic.v30",
+    "silver-deer-room-d": "bgm.town.celtic.v30",
+    "norn-inn-street": "bgm.town.celtic.v30",
+    "test-forest": "bgm.field.hikari-no-arpeggio",
+    "test-dungeon": "bgm.field.hikari-no-arpeggio"
+  }
+}

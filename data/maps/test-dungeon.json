@@ -1,0 +1,278 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "test-dungeon",
+  "title": "試験区画・ダンジョン（仮）",
+  "kind": "interior",
+  "status": "provisional",
+  "provenance": "2026-11-22 作者の指示（相談チャット）で作った技術試験用のダンジョン（tools/gen-test-maps.cjs で生成）。見せ方はブックヌック（試作_ブックヌックが基準）。場所・中身・名前は世界設定に無い仮のもので、正式な舞台として扱わない。",
+  "width": 11,
+  "height": 64,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "collision": [
+    "###########",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.##...##.#",
+    "#.##...##.#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#.........#",
+    "#####D#####"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "floor",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "front-gate",
+      "x": 5,
+      "y": 63,
+      "dir": "down",
+      "effect": "nook-out",
+      "to": {
+        "map": "test-forest",
+        "exit": "gate",
+        "arrive": {
+          "x": 58,
+          "y": 4,
+          "dir": "down"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 5,
+      "y": 61,
+      "dir": "up"
+    }
+  },
+  "events": [],
+  "stage": {
+    "look": "dungeon",
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 60,
+      "follow": "player"
+    },
+    "orbs": {
+      "count": 14,
+      "alpha": 0.6,
+      "color": [
+        0.62,
+        0.75,
+        1
+      ],
+      "size": 0.8,
+      "note": "ダンジョン：青白い、ひんやりした光の粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": [
+          {
+            "asset": "placeholder:dungeon-back-wall",
+            "x": 0,
+            "y": 0,
+            "w": 11,
+            "h": 1,
+            "standH": 4
+          }
+        ]
+      },
+      {
+        "band": "back",
+        "items": []
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 4,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 4,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 12,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 12,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 20,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 20,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 28,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 28,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 36,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 36,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 44,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 44,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 2,
+            "y": 52,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          },
+          {
+            "asset": "placeholder:stone-pillar",
+            "x": 7,
+            "y": 52,
+            "w": 2,
+            "h": 2,
+            "standH": 4.5
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  }
+}

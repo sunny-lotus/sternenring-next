@@ -1,0 +1,311 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "silver-deer-1f",
+  "title": "銀鹿亭・一階",
+  "kind": "interior",
+  "status": "provisional",
+  "provenance": "DEV-DESIGN-001 examples の仮配置（旧版 dist/data/silver-deer.json の通行行と家具位置を写し、下の壁(10,13)を出入口にしたもの）。正式な間取りは4室の確定待ち。",
+  "width": 20,
+  "height": 14,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door",
+    "c": "counter"
+  },
+  "collision": [
+    "#####D######D#######",
+    "#..................#",
+    "#.ccccccc......###.#",
+    "#.ccccccc......###.#",
+    "D..................#",
+    "#..................#",
+    "#..###........###..#",
+    "D..###........###..#",
+    "#..................#",
+    "#..................#",
+    "#..###........###..#",
+    "#..###........###..#",
+    "#..................#",
+    "##########D#########"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "floor",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "front-door",
+      "x": 10,
+      "y": 13,
+      "dir": "down",
+      "effect": "nook-out",
+      "to": {
+        "map": "norn-inn-street",
+        "exit": "inn-door",
+        "arrive": {
+          "x": 8,
+          "y": 5,
+          "dir": "down"
+        }
+      }
+    },
+    {
+      "id": "room-a-door",
+      "x": 5,
+      "y": 0,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "silver-deer-room-a",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-b-door",
+      "x": 12,
+      "y": 0,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "silver-deer-room-b",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-c-door",
+      "x": 0,
+      "y": 4,
+      "dir": "left",
+      "effect": "nook-in",
+      "to": {
+        "map": "silver-deer-room-c",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-d-door",
+      "x": 0,
+      "y": 7,
+      "dir": "left",
+      "effect": "nook-in",
+      "to": {
+        "map": "silver-deer-room-d",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 10,
+      "y": 11,
+      "dir": "up"
+    }
+  },
+  "events": [
+    {
+      "id": "hearth",
+      "x": 16,
+      "y": 3,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "hearthSeen": true
+            }
+          },
+          "dialogue": "inn.hearth.again"
+        },
+        {
+          "dialogue": "inn.hearth.first",
+          "set": {
+            "flags": {
+              "hearthSeen": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "counter",
+      "x": 5,
+      "y": 3,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "inn.counter"
+        }
+      ]
+    }
+  ],
+  "stage": {
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 60,
+      "follow": "center-if-fits"
+    },
+    "ceiling": 8,
+    "textures": {
+      "note": "内装の手ざわり（美術・演出室の元絵 pixel/元絵/内装_銀鹿亭_v01、ドット絵にせずそのまま。2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵に戻る",
+      "base": "assets/interiors/silver-deer/",
+      "floor": "floor.png",
+      "wall": "wall.png",
+      "ceiling": "ceiling.png",
+      "brick": "brick.png",
+      "window": "window.png",
+      "tabletop": "tabletop.png",
+      "counter": "counter.png",
+      "blanket": "blanket.png",
+      "door": "door.png"
+    },
+    "backWindows": false,
+    "backNote": "奥の壁の仮の板（コードで描いた梁・窓・棚）ははがした。壁は内装の元絵の漆喰だけ（2026-11-22 作者「壁のなんかよくわからないやつははがしていいよ」）",
+    "orbs": {
+      "count": 8,
+      "alpha": 0.5,
+      "color": [
+        1,
+        0.8,
+        0.55
+      ],
+      "size": 0.6,
+      "note": "宿の中：暖炉の火の粉のような、暖かい粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": []
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "counter",
+            "repeat": "x",
+            "x": 2,
+            "y": 2,
+            "w": 7,
+            "h": 2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "hearth",
+            "x": 15,
+            "y": 2,
+            "w": 3,
+            "h": 2,
+            "zOffset": 0.1
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "table",
+            "x": 3,
+            "y": 6,
+            "w": 3,
+            "h": 2
+          },
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "table",
+            "x": 14,
+            "y": 6,
+            "w": 3,
+            "h": 2
+          },
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "table",
+            "x": 3,
+            "y": 10,
+            "w": 3,
+            "h": 2
+          },
+          {
+            "asset": "tiles.pipoya-town",
+            "region": "table",
+            "x": 14,
+            "y": 10,
+            "w": 3,
+            "h": 2
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": [
+          {
+            "asset": "placeholder:pillar",
+            "x": 0,
+            "y": 12,
+            "w": 1,
+            "h": 2,
+            "zOffset": 0.2,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:pillar",
+            "x": 19,
+            "y": 12,
+            "w": 1,
+            "h": 2,
+            "zOffset": 0.2,
+            "fadeNearPlayer": true
+          }
+        ]
+      }
+    ]
+  },
+  "heights": [
+    "00000500000050000000",
+    "05555555555555555550",
+    "05000000000000000040",
+    "05000000000000000030",
+    "55000000000000000020",
+    "05000000000000000010",
+    "05000000000000000000",
+    "55000000000000000000",
+    "05000000000000000000",
+    "05000000000000000000",
+    "00000000000000000000",
+    "00000000000000000000",
+    "00000000000000000000",
+    "00000000000000000000"
+  ],
+  "heightsNote": "マスの高さ（0〜9、1段＝0.7マス）。奥の列（y=1）と左の壁ぞい（x=1, y=1〜9）は吹き抜けの2階の通路（5、L字の回廊。2026-11-22 作者「回廊を左壁面に沿って伸ばして」）、右の壁ぞい（x=18, y=2〜5）は階段（4→1）。高さが1段より大きくちがうマスへは歩けない。2026-11-22 作者「上は別のエリアではなく吹き抜けに、2階の壁にドアがあって部屋に入れるように」"
+}

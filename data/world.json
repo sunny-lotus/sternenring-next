@@ -1,0 +1,41 @@
+{
+  "format": "sternenring-next-world",
+  "version": 1,
+  "maps": [
+    "norn-inn-street",
+    "norn-plaza",
+    "silver-deer-1f",
+    "silver-deer-room-d",
+    "silver-deer-room-c",
+    "silver-deer-room-b",
+    "silver-deer-room-a",
+    "test-forest",
+    "test-dungeon"
+  ],
+  "start": {
+    "map": "norn-inn-street",
+    "spawn": "default"
+  },
+  "stepMs": 160,
+  "transitionMs": 240,
+  "inputBuffer": 2,
+  "effects": {
+    "page": {
+      "leaveMs": 450,
+      "arriveMs": 2000
+    },
+    "nook-in": {
+      "leaveMs": 900,
+      "arriveMs": 2600
+    },
+    "nook-out": {
+      "leaveMs": 800,
+      "arriveMs": 1700
+    },
+    "floor": {
+      "leaveMs": 500,
+      "arriveMs": 800
+    }
+  },
+  "effectsNote": "出入口の演出の長さ（ミリ秒）。page＝外のエリアどうしでページをめくる／nook-in＝建物・ダンジョンに入る（ブックヌック）／nook-out＝出る。作者の決定 2026-11-22"
+}

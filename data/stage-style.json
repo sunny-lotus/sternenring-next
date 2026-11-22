@@ -1,0 +1,75 @@
+{
+  "format": "sternenring-next-stage-style",
+  "version": 1,
+  "note": "紙の舞台（paper）の見た目の設定。すべて仮の値で、作者のスマホで見て調整する。edge/shadow の dx・dy はドット数、dz はマス数。air は帯ごとに奥の空気の色へ寄せる割合（0〜1）。boardFacing: camera＝板がカメラの正面を向く（ドットがつぶれない）／upright＝地面に垂直に立てる。 book（DEV-BOOK-001）：床をページに見立てた表紙と、ページの束のふち（margin・edge はマス、depth は床の下への下げ幅、色は仮。keepCover＝演出のあとも表紙を残す）。orbs：ふちのぼやけた丸い光の玉（2026-11-22 六角形から変えた。count 0 で出さない）。",
+  "boardFacing": "upright",
+  "edge": {
+    "dx": 1,
+    "dy": 1,
+    "dz": 0.02,
+    "color": [
+      0.42,
+      0.37,
+      0.29
+    ]
+  },
+  "shadow": {
+    "dx": 4,
+    "dy": 3,
+    "dz": 0.12,
+    "alpha": 0.3,
+    "color": [
+      0.2,
+      0.19,
+      0.33
+    ]
+  },
+  "air": {
+    "backdrop": 0.35,
+    "back": 0.12,
+    "mid": 0,
+    "actors": 0,
+    "front": 0,
+    "color": [
+      0.11,
+      0.11,
+      0.18
+    ]
+  },
+  "ground": {
+    "length": 0.45,
+    "skew": 0.35,
+    "alpha": 0.26
+  },
+  "footShadow": 0.32,
+  "clear": [
+    0.106,
+    0.102,
+    0.133
+  ],
+  "book": {
+    "margin": 0.6,
+    "edge": 0.18,
+    "depth": 0.06,
+    "cover": [
+      0.23,
+      0.14,
+      0.09
+    ],
+    "pageEdge": [
+      0.85,
+      0.78,
+      0.64
+    ],
+    "keepCover": true
+  },
+  "orbs": {
+    "count": 18,
+    "alpha": 0.7,
+    "color": [
+      0.86,
+      0.88,
+      1
+    ]
+  }
+}

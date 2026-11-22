@@ -1,0 +1,12 @@
+{
+  "format": "sternenring-next-collision",
+  "version": 1,
+  "kinds": {
+    "floor":   { "passable": true,  "note": "通れる" },
+    "wall":    { "passable": false, "note": "通れない" },
+    "door":    { "passable": true,  "exit": true, "note": "踏むと exits を探して転送" },
+    "water":   { "passable": false, "examinable": true, "note": "通れない・調べられる" },
+    "bridge":  { "passable": true,  "note": "通れる（水の上）" },
+    "counter": { "passable": false, "examineThrough": true, "note": "通れない・向こう側を調べられる" }
+  }
+}
