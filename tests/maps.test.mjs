@@ -49,10 +49,10 @@ broken('キャラ絵の noFlip 欠落', (_m, l) => { delete l.assets.find((a) =>
 broken('キャラ絵の noFlip=false', (_m, l) => { l.assets.find((a) => a.id === 'chara.volt.walk').noFlip = false; }, /noFlip/);
 broken('向きの行の並びが違う（左右入れ替え）', (_m, l) => { l.assets.find((a) => a.id === 'chara.volt.walk').directions = ['down', 'right', 'left', 'up']; }, /向きの並び/);
 broken('台帳の path が上の階層を指す', (_m, l) => { l.assets[0].path = 'assets/../../STERNENRING_RPG_CORE/x.png'; }, /path が不正/);
-broken('隠し通路の範囲がマップ外', (m) => { m['norn-inn-street'].stage.hiddenPaths = [{ x: 30, y: 1, w: 9, h: 2 }]; }, /hiddenPaths.*マップ外/);
+broken('隠し通路の範囲がマップ外', (m) => { m['norn-inn-street'].stage.hiddenPaths = [{ x: 40, y: 1, w: 9, h: 2 }]; }, /hiddenPaths.*マップ外/);
 broken('光の玉の数が多すぎる', (m) => { m['test-forest'].stage.orbs.count = 99; }, /stage.orbs の値が不正/);
 broken('床の種類が不正', (m) => { m['test-forest'].stage.floor = 'lava'; }, /stage.floor/);
-broken('石畳の範囲がマップ外', (m) => { m['norn-inn-street'].stage.paved = [{ x: 30, y: 5, w: 9, h: 2 }]; }, /stage.paved.*マップ外/);
+broken('石畳の範囲がマップ外', (m) => { m['norn-inn-street'].stage.paved = [{ x: 40, y: 5, w: 9, h: 2 }]; }, /stage.paved.*マップ外/);
 broken('見えている敵が壁の上', (m) => { m['test-forest'].encounters[0].y = 0; }, /encounters .* は通れる床のマスに置く/);
 broken('見えている敵の id が重なる', (m) => { m['test-forest'].encounters.push({ ...m['test-forest'].encounters[0] }); }, /encounters の id .*重なっている/);
 broken('街道がマップ外', (m) => { m['test-forest'].roads.push({ x: 60, y: 0, w: 9, h: 1 }); }, /roads .* がマップ外/);

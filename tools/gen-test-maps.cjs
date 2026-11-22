@@ -35,12 +35,12 @@ function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 16
     ],
     spawns: { default: { x: 8, y: 7, dir: 'right' } }, events: [],
     // 見えている敵（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」）。バトル試作の「通常戦（敵三体）」。勝つと消える
-    encounters: [{ id: 'forest-beasts', x: 14, y: 10, battle: 'normal', note: '仮の見えている敵', symbol: ['sr-norma', 'sr-normb', 'sr-normc'].map((k) => 'battle/img/enemies/' + k + '.png'), symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵' }, {"id":"road-beasts","x":30,"y":8,"battle":"swarm","note":"仮の見えている敵（街道の上）：バトル試作の「子獣の群れ」", symbol: [1, 2, 3].map(() => 'battle/img/enemies/sr-pup.png'), symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵'}],
+    encounters: [{ id: 'forest-beasts', x: 14, y: 10, battle: 'normal', note: '仮の見えている敵', symbol: ['battle/img/enemies/sr-norma.png'], symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵' }, {"id":"road-beasts","x":30,"y":8,"battle":"swarm","note":"仮の見えている敵（街道の上）：バトル試作の「子獣の群れ」", symbol: ['battle/img/enemies/sr-pup.png'], symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵'}],
     // 街道（2026-11-22 作者「森は街道を作って」「街道の上はシンボルエンカウントのみ、街道以外ではランダム」）
     roads: [{"x":0,"y":6,"w":60,"h":3},{"x":57,"y":4,"w":3,"h":2}], randomEncounters: {"rate":0.08,"minSteps":8,"battles":["normal","swarm","elements","casters"],"note":"街道の外だけ。8歩をこえたら1歩ごとに8%（仮）"},
     stage: { camera: { pitchDeg: 10, fovDeg: 60, follow: 'player', deadzone: [2, 1.5] }, floor: 'soil', orbs: {"count":26,"alpha":0.75,"color":[0.8,1,0.7],"size":1,"note":"森：木もれ日のような、緑がかった光の粒（仮）"}, layers: [
       { band: 'backdrop', items: [{ asset: 'placeholder:night-sky-ring', x: 0, y: 0, w: W, h: 1, standH: 6 }] },
-      { band: 'back', items: items.back }, { band: 'mid', items: [...items.mid, { asset: 'placeholder:monster', x: 13, y: 10, w: 3, h: 1, standH: 2.2, zOffset: 0.05, encounter: 'forest-beasts' }, {"asset":"placeholder:monster","x":29,"y":8,"w":3,"h":1,"standH":2.2,"zOffset":0.05,"encounter":"road-beasts"}] }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
+      { band: 'back', items: items.back }, { band: 'mid', items: [...items.mid, { asset: 'placeholder:monster', x: 12, y: 10, w: 4, h: 1, standH: 3.4, zOffset: 0.05, encounter: 'forest-beasts' }, {"asset":"placeholder:monster","x":29,"y":8,"w":3,"h":1,"standH":3.1,"zOffset":0.05,"encounter":"road-beasts"}] }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
   });
   console.log('forest', W, H, 'boards', items.back.length + items.mid.length);
 }

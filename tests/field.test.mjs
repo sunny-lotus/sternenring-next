@@ -304,10 +304,10 @@ test('ランダムの戦闘：街道の上では起きず、街道の外では�
 
 test('広い出入口（3マス）：出たのと同じ列に着く（銀鹿亭前の東のいちばん下 → 広場の西のいちばん下）', () => {
   const { field, input, d } = makeField(); // 銀鹿亭前 (8,6)
-  tap(field, input, 'down', 2); tap(field, input, 'right', 24); // (32,8)
-  assert.deepEqual(pos(field), { x: 32, y: 8, dir: 'right' });
-  input.press('right'); input.release('right'); run(field, input, field.stepMs + 20); // 東の出入口の下の段 (33,8)
-  assert.deepEqual(field.view().effect.at, { x: 33, y: 8 }, '踏んだマス');
+  tap(field, input, 'down', 2); tap(field, input, 'right', 34); // (42,8)（2026-11-23 家を大きくして通りを44マスに）
+  assert.deepEqual(pos(field), { x: 42, y: 8, dir: 'right' });
+  input.press('right'); input.release('right'); run(field, input, field.stepMs + 20); // 東の出入口の下の段 (43,8)
+  assert.deepEqual(field.view().effect.at, { x: 43, y: 8 }, '踏んだマス');
   run(field, input, d.world.effects.page.leaveMs + 20);
   assert.equal(field.state.mapId, 'norn-plaza');
   assert.deepEqual(pos(field), { x: 1, y: 12, dir: 'right' }, '広場の西の出入口の下の段の隣');

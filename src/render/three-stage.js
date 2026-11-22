@@ -433,12 +433,17 @@ function windowGlow(c, file, seed) {
  */
 function townBoardCanvas(name, b, it) {
   const cfg = TOWN_CFG, imgs = TOWN_IMG; if (!cfg || !imgs) return null;
-  let file = cfg.boards?.[name];
+  let file = it.art || cfg.boards?.[name]; // it.art：地図で家の絵を決めているとき
   if (!file && /^house-/.test(name)) file = cfg.boards?.['house-*'];
   if (Array.isArray(file)) file = file[Math.abs((it.x * 131 + it.y * 37 + 7) | 0) % file.length]; // 家は位置で選ぶ（開き直しても同じ）
   const im = file && imgs[file]; if (!im) return null;
   const ar = im.naturalHeight / im.naturalWidth;
-  if (/^(house-|inn-)/.test(name)) { const h = b.w * ar; return { h, file, c: canvas(b.w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) }; }
+  if (/^(house-|inn-)/.test(name)) {
+    // ドアの高さをキャラにそろえる（2026-11-23 作者「家のドアとキャラの大きさを同じくらいに」）：townArt.doors[絵].h＝ドアの高さ（絵の高さに対する割合）、doorH＝そろえる高さ（マス）。
+    // 絵の幅は足もとの幅と少し違ってよい（足もとの真ん中にそろえる）
+    const df = cfg.doors?.[file]?.h, doorH = cfg.doorH;
+    const h = df && doorH ? doorH / df : b.w * ar, w = h / ar; return { w, h, file, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) };
+  }
   const hang = /^(sign-|awning-|herbs)/.test(name);
   return { h: b.h, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
     let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
@@ -977,7 +982,7 @@ export function createThreeStage(canvasEl, assets) {
       const artC = rc ? null : (ART[name] || ((w, h) => genericArt(w, h, boards.length + 5)))(b.w, b.h, it.x * 131 + it.y * 37 + 1); // 3つめ＝板ごとの seed（位置から決まるので、開き直しても同じ家）
       let art = rc ? texOf(rc, true) : PIXROOM && interior ? pixTex(artC, b.w, b.h) : texOf(artC);
       const townC = rc ? null : townBoardCanvas(name, b, it);
-      if (townC) { b.h = townC.h; art = PIXROOM ? pixTex(townC.c, b.w, b.h) : texOf(townC.c); }
+      if (townC) { if (townC.w && townC.w !== b.w) { b.x += (b.w - townC.w) / 2; b.w = townC.w; } b.h = townC.h; art =PIXROOM ? pixTex(townC.c, b.w, b.h) : texOf(townC.c); }
       if (it.encounter && SYM[it.encounter]) art = texOf(symbolCanvas(SYM[it.encounter], b.w, b.h), true); // 見えている敵は、戦う敵の姿 // 内装（絵柄）を「ドット」にすると町の絵もドットに
       const img = DAY && !interior && it.imageDay ? it.imageDay : it.image; // 昼は昼の背景
       if (img) { // 絵のファイルを張る（奥の背景。下をそろえ、板の形に合わせて上を切る＝引き伸ばさない）
