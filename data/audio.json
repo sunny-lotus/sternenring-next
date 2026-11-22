@@ -11,7 +11,13 @@
   "sounds": [
     {
       "id": "sfx.book.open",
-      "path": "assets/audio/book/book_open_v01_denoise.wav",
+      "path": "assets/audio/book/book_open_v01_denoise.mp3",
+      "sourcePath": "assets/audio/book/book_open_v01_denoise.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "cb72669f0cac16affcf07bff1346056fb0bb70bd884b04e395fa4e2b3bcee611",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "book_open_v01_denoise.wav",
       "durationSeconds": 1.1,
       "peakDbFS": -8.01,
@@ -22,7 +28,13 @@
     },
     {
       "id": "sfx.page.turn01",
-      "path": "assets/audio/book/page_turn_01_v01_denoise.wav",
+      "path": "assets/audio/book/page_turn_01_v01_denoise.mp3",
+      "sourcePath": "assets/audio/book/page_turn_01_v01_denoise.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "6dbdff8b2e0cd71eb542ec83ac77a047191d48d6188582d04a95189bf0b2edff",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "page_turn_01_v01_denoise.wav",
       "durationSeconds": 2.3,
       "peakDbFS": -8,
@@ -33,7 +45,13 @@
     },
     {
       "id": "sfx.page.turn02",
-      "path": "assets/audio/book/page_turn_02_v01_denoise.wav",
+      "path": "assets/audio/book/page_turn_02_v01_denoise.mp3",
+      "sourcePath": "assets/audio/book/page_turn_02_v01_denoise.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "80fabe38be9210c6a45f9c1f631612058d27f729c3db69df082cec4f97154012",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "page_turn_02_v01_denoise.wav",
       "durationSeconds": 1.65,
       "peakDbFS": -11.76,
@@ -44,7 +62,13 @@
     },
     {
       "id": "sfx.page.turn03",
-      "path": "assets/audio/book/page_turn_03_v01_denoise.wav",
+      "path": "assets/audio/book/page_turn_03_v01_denoise.mp3",
+      "sourcePath": "assets/audio/book/page_turn_03_v01_denoise.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "07aaef02d0b265e2be77e41f83e77870fe73594af5656f53c14ad2ab7cb58eca",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "page_turn_03_v01_denoise.wav",
       "durationSeconds": 1.8,
       "peakDbFS": -12.48,
@@ -55,7 +79,13 @@
     },
     {
       "id": "sfx.book.close",
-      "path": "assets/audio/book/book_close_soft_v01_denoise.wav",
+      "path": "assets/audio/book/book_close_soft_v01_denoise.mp3",
+      "sourcePath": "assets/audio/book/book_close_soft_v01_denoise.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "343add28df65fb3fa17174754e2bb6da75edd5ea9293daf7c55758fd085a943e",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "book_close_soft_v01_denoise.wav",
       "durationSeconds": 1.25,
       "peakDbFS": -14,
@@ -69,7 +99,13 @@
   "bgm": [
     {
       "id": "bgm.town.celtic.v30",
-      "path": "assets/audio/bgm/town_celtic_v30.wav",
+      "path": "assets/audio/bgm/town_celtic_v30.mp3",
+      "sourcePath": "assets/audio/bgm/town_celtic_v30.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "32cf76dbf817bcb4fa532153b12cd22da44b5762260d9437abfb250f5a6a8bbb",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "SR_街BGM_ケルト_完成版_v30.wav",
       "title": "ケルト風街BGM（正式曲名未設定）",
       "version": 30,
@@ -90,7 +126,13 @@
     },
     {
       "id": "bgm.field.hikari-no-arpeggio",
-      "path": "assets/audio/bgm/hikari_no_arpeggio.wav",
+      "path": "assets/audio/bgm/hikari_no_arpeggio.mp3",
+      "sourcePath": "assets/audio/bgm/hikari_no_arpeggio.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "a219badf49fc7cd9b3d6af0f25bf154054577980c72309fcd9a865a50af6e8a2",
+        "note": "2026-11-22 作者「軽くしてほしい」：読みこみを速くするため、ゲームは MP3 を鳴らす。採用の音源（sourcePath の WAV、sha256）はそのまま残す。フレーム数は同じ（ブラウザで確認）"
+      },
       "sourceFile": "バトル試作/audio/menu-hikari-no-arpeggio.wav（もとは まなびクエストのメニュー曲「光のアルペジオ」の録音ピアノ版）",
       "title": "光のアルペジオ",
       "status": "adopted",

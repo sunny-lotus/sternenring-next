@@ -221,12 +221,15 @@ async function boot() {
   // （結果が出る前に押すと「逃げる」＝敵は残る。試しのためのボタン）。戦闘中はフィールドの曲を止める
   /** @type {{ box: HTMLElement, outcome: string|null } | null} */
   let battleUi = null;
+  let battleClosing = false;
   const closeBattle = () => {
     if (!battleUi) return;
     const outcome = battleUi.outcome === 'win' ? 'win' : battleUi.outcome === 'lose' ? 'lose' : 'escape';
     // 戻る演出（2026-11-22 作者「戦闘結果後はボタンを押すと終了するのも演出を加えて」）：戦闘の画面が明るく光って消え、フィールドが現れる
-    const box = battleUi.box; battleUi = null; box.classList.add('closing');
-    setTimeout(() => { box.remove(); field.endBattle(outcome); input.releaseAll?.(); input.clearQueue(); bgm.setHidden(false); window.focus(); }, 700);
+    // 戦闘はすぐ終わらせる（前は戻る演出の0.7秒のあとに終えていたので、そのあいだに「まだ戦闘中」と見て、同じ戦闘をもう一度開いていた。
+    // 2026-11-22 作者「シンボルエンカウントした後に、またバトルになるのはどうして？」）。演出のあいだは歩かない（battleClosing）
+    const box = battleUi.box; battleUi = null; box.classList.add('closing'); field.endBattle(outcome); battleClosing = true;
+    setTimeout(() => { box.remove(); battleClosing = false; input.releaseAll?.(); input.clearQueue(); bgm.setHidden(false); window.focus(); }, 700);
   };
   // エンカウントの演出（2026-11-22 作者「エンカウントの演出もっとかっこよく」）：白い光と画面のゆれ → フィールドがぐっと寄って色があせる
   // → 金の魔法陣が回りながら広がる → 真ん中から金のひびが走る → 黒い破片が四方から飛びこんで画面をおおう → 戦闘へ（約1.4秒）
@@ -319,7 +322,7 @@ async function boot() {
     const btn = /** @type {HTMLButtonElement} */ (battleUi.box.querySelector('#battle-back')); btn.textContent = 'フィールドへ戻る'; btn.classList.add('done');
   });
   // 演出中は歩かない。方向の入力が来たら演出を終える（その入力では歩かない）。ステータスを開いているあいだも歩かない
-  startLoop((dt) => { syncMsg(); if (showPos) { const a = field.state.actors[0]; posEl.textContent = `${field.state.mapId}  (${a.x}, ${a.y})  ${a.dir}`; } if (field.state.battle && !battleUi) openBattle(field.state.battle); if (statusUi) { input.clearQueue(); return; } if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
+  startLoop((dt) => { syncMsg(); if (showPos) { const a = field.state.actors[0]; posEl.textContent = `${field.state.mapId}  (${a.x}, ${a.y})  ${a.dir}`; } if (field.state.battle && !battleUi && !battleClosing) openBattle(field.state.battle); if (statusUi || battleClosing) { input.clearQueue(); return; } if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
   $('status').hidden = true;
   // 確認用の読み取り口（状態を書きかえない）。検証役・自動確認がマップと位置を読むために使う。
   window.STERNENRING_NEXT = Object.freeze({

@@ -90,6 +90,7 @@ export function validateMap(map, ctx) {
     else { const ids = new Set(); for (const e of encs) {
       if (!e || typeof e.id !== 'string' || ids.has(e.id)) err(`encounters の id ${e && e.id} が無いか重なっている`); else ids.add(e.id);
       if (!e || typeof e.battle !== 'string' || !e.battle) err(`encounters ${e && e.id} の battle が無い`);
+      if (e && e.symbol !== undefined && !(Array.isArray(e.symbol) && e.symbol.every((/** @type {any} */ u) => typeof u === 'string' && u))) err(`encounters ${e.id} の symbol は絵のパスの配列`);
       const row = e && map.collision?.[e.y]; const ch = row ? [...row][e.x] : undefined;
       if (!e || ch === undefined || map.legend?.[ch] !== 'floor') err(`encounters ${e && e.id} は通れる床のマスに置く`);
     } }

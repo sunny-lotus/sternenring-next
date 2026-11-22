@@ -532,7 +532,7 @@
     var heroes = T.heroes.slice().sort(function (a, b) { return ORD.indexOf(a.id) - ORD.indexOf(b.id); });
     var picks = heroes.map(function (u) { return '<button class="' + (u.id === sel ? 'on' : '') + '" data-nav data-stsel="' + u.id + '" aria-label="' + u.name + '"><img src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></button>'; }).join('');
     var me = heroes.filter(function (u) { return u.id === sel; })[0] || heroes[0];
-    var ROMA = { N: 'NACHT', V: 'VOLT', F: 'FLARE', S: 'SERENA', L: 'LICHT' }, src = 'img/' + SR.img[me.id] + '_stand.png?v=5', motes = '';
+    var ROMA = { N: 'NACHT', V: 'VOLT', F: 'FLARE', S: 'SERENA', L: 'LICHT' }, src = 'img/' + SR.img[me.id] + '_stand.webp?v=5', motes = '';
     for (var mi = 0; mi < 14; mi++) motes += '<i style="left:' + (8 + (mi * 37) % 84) + '%;animation-delay:' + (-(mi * 0.83) % 6).toFixed(2) + 's;animation-duration:' + (5 + (mi * 7) % 4) + 's"></i>';
     box.innerHTML = '<div class="stpick">' + picks + '</div><div class="stfig s-' + me.id + '">' +
       '<div class="stroma" data-n="' + ROMA[me.id].length + '">' + ROMA[me.id] + '</div><div class="strune"><i></i><i></i><i></i></div><div class="stmotes">' + motes + '</div>' +
@@ -818,11 +818,11 @@
         else if (ordNo[u.id]) cmdLine = '<div class="cmd">' + (ordNo[u.id][0] - 1) + '番あと</div>';
       }
       if (res) {
-        d.innerHTML = '<div class="pic"><img class="st" src="img/' + SR.img[u.id] + '_stand.png?v=5" alt=""><img class="fc" src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></div><div>' +
+        d.innerHTML = '<div class="pic"><img class="st" src="img/' + SR.img[u.id] + '_stand.webp?v=5" alt=""><img class="fc" src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></div><div>' +
           '<div class="nm">' + role + u.name + '</div>' + tags + bars(u, v) + '</div>';
         addOrd(d, u.id); ra.appendChild(d);
       } else {
-        d.innerHTML = '<div class="pic"><img class="st" src="img/' + SR.img[u.id] + '_stand.png?v=5" alt=""><img class="fc" src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></div>' +
+        d.innerHTML = '<div class="pic"><img class="st" src="img/' + SR.img[u.id] + '_stand.webp?v=5" alt=""><img class="fc" src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></div>' +
           '<div class="nm">' + role + u.name + '</div><div>' + tags + '</div>' + bars(u, v) + cmdLine;
         addOrd(d, u.id); pa.appendChild(d);
       }
@@ -1586,7 +1586,7 @@
       SR.stage3d.setup(B.enemies.map(function (e) {
         var big = B.isBoss || e.type === 'twin', small = e.type === 'pup';
         return { id: e.id, img: 'img/enemies/' + e.img + '.png', pixel: true, h: (SR.ENEMY_H && SR.ENEMY_H[e.img]) || (big ? 3.2 : small ? 1.5 : 2.2) };
-      }).concat(front.map(function (u) { return { id: u.id, hero: true, pos: u.pos, img: SR.PIX[u.id] ? SR.PIX[u.id].src : 'img/' + SR.img[u.id] + '_stand.png?v=5', pixel: !!SR.PIX[u.id], atlas: SR.PIX[u.id] ? SR.PIX[u.id].atlas : null, h: SR.PIX[u.id] ? (SR.PIX[u.id].h || 1.8) : 2.45 }; })));
+      }).concat(front.map(function (u) { return { id: u.id, hero: true, pos: u.pos, img: SR.PIX[u.id] ? SR.PIX[u.id].src : 'img/' + SR.img[u.id] + '_stand.webp?v=5', pixel: !!SR.PIX[u.id], atlas: SR.PIX[u.id] ? SR.PIX[u.id].atlas : null, h: SR.PIX[u.id] ? (SR.PIX[u.id].h || 1.8) : 2.45 }; })));
       SR.stage3d.onFrame(placeUnits);
       SR.stage3d.start();
     }
@@ -1668,7 +1668,7 @@
       } else {
         d.className = 'unit hero hdu' + (v.hp <= 0 ? ' down' : '') + (v.brk ? ' brk' : '');
         var lq = lastPos[d.id]; if (lq) { d.style.width = lq[0]; d.style.height = lq[1]; d.style.left = lq[2]; d.style.top = lq[3]; }
-        d.innerHTML = '<div class="spr"><img class="st" src="img/' + SR.img[u.id] + '_stand.png?v=5" alt=""></div><div class="lab"><span class="nm">' + u.name + '</span>' + '<div class="tgs">' + SR.iconizeTags(tags) + '</div></div>';
+        d.innerHTML = '<div class="spr"><img class="st" src="img/' + SR.img[u.id] + '_stand.webp?v=5" alt=""></div><div class="lab"><span class="nm">' + u.name + '</span>' + '<div class="tgs">' + SR.iconizeTags(tags) + '</div></div>';
         pa.appendChild(d);
         hud += '<div class="hc' + (st.actor === u ? ' cur' : '') + (v.hp <= 0 ? ' down' : '') + (v.brk ? ' brk' : '') + '"><div class="hf"><img src="img/' + SR.img[u.id] + '_face.jpg?v=6" alt=""></div><div class="hb"><div class="hn"><span class="rl r' + u.pos + '">' + ROLE[u.pos].charAt(0) + '</span>' + u.name + '<span class="lvt">Lv' + (u.lv || 1) + '</span>' + (u.id === 'N' ? ' <span class="fm f-' + v.form + '">' + SR.formNames[v.form] + '</span>' : '') + '</div>' + hudBars(u, v) + '</div></div>';
       }
@@ -1697,7 +1697,7 @@
       if (o.kind === 'enemy') {
         icon = beastSVG(B.unit(o.id));
         if (o.label === '大技') { tag = '大技'; hot = true; } else if (o.label === '溜め') { tag = '溜め'; hot = true; }
-      } else { icon = '<img class="rdy" src="img/' + SR.img[o.id] + '_ready.png" alt="">'; tag = o.kind === 'support' ? '支援' : ''; }   // 2026-11-22 サニー：行動順は構えの絵（_ready）を使う
+      } else { icon = '<img class="rdy" src="img/' + SR.img[o.id] + '_ready.webp" alt="">'; tag = o.kind === 'support' ? '支援' : ''; }   // 2026-11-22 サニー：行動順は構えの絵（_ready）を使う
       if (o.label.indexOf('ブレイク明け') === 0 || o.label === '動けない') tag = '休み';
       if (i === nNext) tag = 'NEXT';
       return '<div class="oc o-' + o.kind + (i === 0 ? ' cur' : '') + (i === nNext ? ' pvn' : '') + '" data-u="' + o.id + '" style="opacity:' + Math.max(.4, 1 - i * .08).toFixed(2) + '" title="' + o.name + '：' + o.label + '"><div class="oi">' + icon + '</div>' + (tag ? '<span class="' + (hot ? 'hot' : '') + (tag === 'NEXT' ? ' nx' : '') + '"><em>' + tag + '</em></span>' : '') + '</div>';
@@ -1741,7 +1741,7 @@
     var again = c.getAttribute('data-who') === u.id && !c.classList.contains('hidden');
     c.classList.remove('hidden'); c.setAttribute('data-who', u.id);
     // 2026-11-22：キャラの色・うしろの大きな名前・絵の上を走る光（出たときだけ）
-    var csrc = SR.CUTIN[u.id] || 'img/' + SR.img[u.id] + '_stand.png?v=5', ROMA = { N: 'NACHT', V: 'VOLT', F: 'FLARE', S: 'SERENA', L: 'LICHT' };
+    var csrc = SR.CUTIN[u.id] || 'img/' + SR.img[u.id] + '_stand.webp?v=5', ROMA = { N: 'NACHT', V: 'VOLT', F: 'FLARE', S: 'SERENA', L: 'LICHT' };
     c.style.setProperty('--tc', SR.THEME[u.id] || '#f2d48a'); c.classList.toggle('again', again);
     var html = '<div class="croma">' + (ROMA[u.id] || '') + '</div><img src="' + csrc + '" alt=""' + (again ? ' style="animation:none"' : '') + '>' +
       (again ? '' : '<div class="csweep" style="-webkit-mask-image:url(' + csrc + '),linear-gradient(180deg,#000 62%,transparent 80%);mask-image:url(' + csrc + '),linear-gradient(180deg,#000 62%,transparent 80%)"></div>') +
@@ -1987,7 +1987,7 @@
       function draw() {
         var row = document.getElementById('fmRow'); if (!row) return;
         row.innerHTML = order.map(function (id, i) {
-          return '<div class="fmc' + (sel === i ? ' sel' : '') + '" data-nav data-fm="' + i + '"><img src="img/' + id + '_ready.png" alt=""><div class="fmi">' + (i + 1) + '<small>' + (i === 0 ? '先頭' : '') + '</small></div><div class="fmn"><b>' + (NAME[id] || id) + '</b></div></div>';
+          return '<div class="fmc' + (sel === i ? ' sel' : '') + '" data-nav data-fm="' + i + '"><img src="img/' + id + '_ready.webp" alt=""><div class="fmi">' + (i + 1) + '<small>' + (i === 0 ? '先頭' : '') + '</small></div><div class="fmn"><b>' + (NAME[id] || id) + '</b></div></div>';
         }).join('');
       }
       function tell() { try { parent.postMessage({ type: 'sr-formation', order: order.slice() }, location.origin); } catch (e) {} }

@@ -32,7 +32,7 @@ test('曲の台帳：作者指定の v30、ファイルのハッシュ・周波�
   assert.equal(t.sha256, SPEC.sha256);
   assert.deepEqual([t.sampleRateHz, t.channels, t.sampleWidthBytes, t.frames], [SPEC.sampleRateHz, SPEC.channels, SPEC.sampleWidthBytes, SPEC.frames]);
   assert.deepEqual(t.loop, { mode: 'whole_asset_loop', startFrame: 0, endFrameExclusive: SPEC.frames, introRepeats: true });
-  const file = join(root, t.path);
+  const file = join(root, t.sourcePath || t.path); // 採用の WAV（ゲームが鳴らすのは軽い MP3＝path）
   assert.ok(existsSync(file), t.path);
   const buf = readFileSync(file);
   assert.equal(createHash('sha256').update(buf).digest('hex'), SPEC.sha256);
@@ -79,7 +79,7 @@ test('曲のコード：全体ループ（loopStart/loopEnd を動かさない�
 test('光のアルペジオ：町以外の曲。ファイルのハッシュ・フレーム数が台帳と同じ、約24.646秒ごとに重ねるループ', () => {
   const t = audio.bgm.find((b) => b.id === 'bgm.field.hikari-no-arpeggio');
   assert.ok(t);
-  const buf = readFileSync(join(root, t.path));
+  const buf = readFileSync(join(root, t.sourcePath || t.path));
   assert.equal(createHash('sha256').update(buf).digest('hex'), t.sha256);
   const w = parseWav(buf);
   assert.deepEqual(w.fmt, { format: 1, channels: 1, rate: 44100, bits: 16 });

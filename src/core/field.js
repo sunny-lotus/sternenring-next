@@ -33,6 +33,7 @@ export function createField(data) {
     /** @type {{id:string, battle:string, mapId:string, random?:boolean}|null} いま戦闘中の敵（見えている敵か、ランダム。このあいだフィールドは止まる） */ battle: null,
     /** 街道の外を、前の戦闘から歩いた歩数（ランダムの戦闘に使う） */ wildSteps: 0,
     /** 開発者メニュー：ランダムの戦闘を起こさない */ devNoRandom: false,
+    /** @type {string|null} 逃げた・負けたばかりの見えている敵（1歩動くまで戦わない） */ foeRest: null,
     /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
@@ -57,7 +58,7 @@ export function createField(data) {
   /** まだ倒していない、見えている敵（そのマスにいれば） @param {number} x @param {number} y */
   function encounterAt(x, y) {
     const list = data.maps[state.mapId].encounters || [];
-    return list.find((/** @type {any} */ e) => e.x === x && e.y === y && !state.defeated.includes(`${state.mapId}:${e.id}`)) || null;
+    return list.find((/** @type {any} */ e) => e.x === x && e.y === y && !state.defeated.includes(`${state.mapId}:${e.id}`) && state.foeRest !== `${state.mapId}:${e.id}`) || null;
   }
   /**
    * 戦闘が終わったら呼ぶ。win なら、その敵を倒したことにする（そのマスは通れるようになり、板も消える）。lose・escape なら敵は残る
@@ -68,6 +69,10 @@ export function createField(data) {
     if (outcome === 'win' && !b.random) state.defeated.push(`${b.mapId}:${b.id}`); // ランダムの戦闘は、倒しても何も残らない
     state.battles.push({ id: b.id, mapId: b.mapId, outcome });
     state.battle = null;
+    // 戦闘のすぐあとに、また戦闘にならないように（2026-11-22 作者「シンボルエンカウントした後に、またバトルになるのはどうして？」）：
+    // ランダムの戦闘の歩数は、どの戦闘のあとも0から数え直す。逃げた・負けた見えている敵は、1歩動くまでぶつかっても戦わない
+    state.wildSteps = 0;
+    state.foeRest = outcome !== 'win' && !b.random ? `${b.mapId}:${b.id}` : null;
   }
 
   // ランダムの戦闘（2026-11-22 作者「街道の上はシンボルエンカウントのみ、街道以外ではランダムで、シンボルもあるときがある」）：
@@ -122,6 +127,7 @@ export function createField(data) {
     if (!queries[state.mapId].passable(nx, ny)) return false;
     // 高さが1段より大きくちがうマスへは歩けない（2階の通路へは階段からだけ上がれる。2026-11-22）
     if (Math.abs(queries[state.mapId].heightAt(nx, ny) - queries[state.mapId].heightAt(p.x, p.y)) > 1) return false;
+    state.foeRest = null; // 1歩動いたら、逃げた敵ともまた戦える
     const from = { x: p.x, y: p.y };
     p.from = from; p.x = nx; p.y = ny; p.t = carry;
     pushTrail(state.trail, from, state.actors.length - 1);

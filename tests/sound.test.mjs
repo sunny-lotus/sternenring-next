@@ -27,8 +27,10 @@ test('音の台帳：採用の5点がそろい、ファイルのハッシュが�
   assert.deepEqual(audio.sounds.map((s) => s.sourceFile).sort(), Object.keys(ADOPTED).sort());
   for (const s of audio.sounds) {
     assert.ok(s.path.startsWith('assets/audio/'), s.id);
-    const file = join(root, s.path);
-    assert.ok(existsSync(file), s.path);
+    const file = join(root, s.sourcePath || s.path); // 採用の WAV（ゲームが鳴らすのは軽い MP3＝path）
+    assert.ok(existsSync(file), s.sourcePath);
+    assert.ok(existsSync(join(root, s.path)), s.path);
+    if (s.encoded) assert.equal(createHash('sha256').update(readFileSync(join(root, s.path))).digest('hex'), s.encoded.sha256, s.path);
     const h = createHash('sha256').update(readFileSync(file)).digest('hex');
     assert.equal(h, ADOPTED[s.sourceFile], s.id);
     assert.equal(s.sha256, h, s.id);
@@ -82,13 +84,13 @@ test('音量：中→大→なし→小→中。増幅しない（gain ≤ 1）�
   assert.equal(SOUND_LEVELS.find((l) => l.id === 'off').gain, 0);
 });
 
-test('サーバー：wav を audio/wav で配信する', async () => {
+test('サーバー：鳴らす音（mp3）を audio/mpeg で配信する', async () => {
   const server = createServer({ root, log: () => {}, own: new Set(['127.0.0.1']) });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   try {
     const res = await new Promise((resolve, reject) => http.get(`http://127.0.0.1:${server.address().port}/${audio.sounds[0].path}`, (r) => { r.resume(); r.on('end', () => resolve(r)); }).on('error', reject));
     assert.equal(res.statusCode, 200);
-    assert.equal(res.headers['content-type'], 'audio/wav');
+    assert.equal(res.headers['content-type'], 'audio/mpeg');
   } finally { await new Promise((r) => server.close(r)); }
 });
 

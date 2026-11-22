@@ -23,11 +23,11 @@ SR.sound = (function () {
   // 臨界の刃62：初回だけ全体（遅いテーマから）を1回。終わった時刻ちょうどに反復用WAVを始め、それを繰り返す。
   // つなぎは音声の時計（Web Audio）で予約する。フェードや無音は足さない。
   var TRACKS = {
-    normal: { first: 'audio/seika-no-kenbu_29_loop.wav' },
-    boss: { first: 'audio/rinkai-no-yaiba_62_loop.wav', repeat: 'audio/rinkai-no-yaiba_62_repeat.wav' },
+    normal: { first: 'audio/seika-no-kenbu_29_loop.mp3' },
+    boss: { first: 'audio/rinkai-no-yaiba_62_loop.mp3', repeat: 'audio/rinkai-no-yaiba_62_repeat.mp3' },
     // メニュー：まなびクエストのメニュー曲「光のアルペジオ」（教材作成/manabiquest/音楽 の WAV と「光のアルペジオ_繰り返し方.txt」）。
     // 1周は (60 / 78 / 4) × 128.16 = 約24.646秒。ファイルの終わりを待たず、その周期で次の周を始め、前の周の余韻を次の頭に重ねる。
-    menu: { first: 'audio/menu-hikari-no-arpeggio.wav', period: 60 / 78 / 4 * 128.16 }
+    menu: { first: 'audio/menu-hikari-no-arpeggio.mp3', period: 60 / 78 / 4 * 128.16 }
   };
   var BGM_VOL = 0.45, bgmKind = null, bgmToken = 0, bgmSrcs = [], bgmGain = null, bgmEl = null, bufs = {};
   function loadBuf(url) {

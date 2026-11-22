@@ -276,7 +276,11 @@ test('見えている敵：ぶつかると戦闘になり、戦闘中は歩け�
   field.endBattle('lose');
   assert.equal(field.view().battle, null);
   tap(field, input, 'down');
-  assert.ok(field.view().battle, '負けたら敵は残っていて、またぶつかると戦闘');
+  assert.equal(field.view().battle, null, '負けた・逃げたすぐあとは、ぶつかっても戦闘にならない（2026-11-22 作者「またバトルになるのはどうして？」）');
+  tap(field, input, 'up'); tap(field, input, 'down');
+  assert.deepEqual(pos(field), { x: 14, y: 9, dir: 'down' }, '1歩動いて戻る');
+  tap(field, input, 'down');
+  assert.ok(field.view().battle, '負けたら敵は残っていて、1歩動いたあとにまたぶつかると戦闘');
   field.endBattle('win');
   assert.deepEqual(field.view().defeated, ['test-forest:forest-beasts']);
   tap(field, input, 'down');

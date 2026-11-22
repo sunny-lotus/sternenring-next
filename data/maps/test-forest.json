@@ -100,14 +100,26 @@
       "x": 14,
       "y": 10,
       "battle": "normal",
-      "note": "仮の見えている敵：バトル試作の「通常戦（敵三体）」。勝つと消える（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」）"
+      "note": "仮の見えている敵：バトル試作の「通常戦（敵三体）」。勝つと消える（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」）",
+      "symbol": [
+        "battle/img/enemies/sr-norma.png",
+        "battle/img/enemies/sr-normb.png",
+        "battle/img/enemies/sr-normc.png"
+      ],
+      "symbolNote": "戦闘の敵のドット絵（battle/img/enemies）。2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」"
     },
     {
       "id": "road-beasts",
       "x": 30,
       "y": 8,
       "battle": "swarm",
-      "note": "仮の見えている敵（街道の上）：バトル試作の「子獣の群れ」"
+      "note": "仮の見えている敵（街道の上）：バトル試作の「子獣の群れ」",
+      "symbol": [
+        "battle/img/enemies/sr-pup.png",
+        "battle/img/enemies/sr-pup.png",
+        "battle/img/enemies/sr-pup.png"
+      ],
+      "symbolNote": "戦闘の敵のドット絵（battle/img/enemies）。2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」"
     }
   ],
   "roads": [
@@ -600,21 +612,21 @@
           },
           {
             "asset": "placeholder:monster",
-            "x": 14,
+            "x": 13,
             "y": 10,
-            "w": 2,
+            "w": 3,
             "h": 1,
-            "standH": 1.6,
+            "standH": 2.2,
             "zOffset": 0.05,
             "encounter": "forest-beasts"
           },
           {
             "asset": "placeholder:monster",
-            "x": 30,
+            "x": 29,
             "y": 8,
-            "w": 2,
+            "w": 3,
             "h": 1,
-            "standH": 1.6,
+            "standH": 2.2,
             "zOffset": 0.05,
             "encounter": "road-beasts"
           },

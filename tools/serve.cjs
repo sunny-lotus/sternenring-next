@@ -48,7 +48,7 @@ const ownAddresses = () => new Set(Object.values(os.networkInterfaces()).flat().
 function createServer({ root, log = console.log, own = ownAddresses(), battleRoot = path.resolve(root, 'battle') }) {
   const allowed = ['index.html', 'src', 'data', 'assets'];
   const battleAllowed = ['index.html', 'formation.html', 'js', 'img', 'audio', 'manifest.json'];
-  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg' };
+  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg' };
   const seen = new Set();
 
   const httpServer = http.createServer(async (req, res) => {

@@ -98,36 +98,36 @@
       "note": "ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ",
       "base": "assets/town/norn/",
       "ground": {
-        "paved": "tex_cobble_street.png",
-        "grass": "tex_grass.png"
+        "paved": "tex_cobble_street.webp",
+        "grass": "tex_grass.webp"
       },
       "boards": {
         "house-*": [
-          "house_home_2f.png",
-          "house_a_narrow.png",
-          "house_b_sideroof.png",
-          "house_c_stepgable.png",
-          "house_d_workshop.png",
-          "house_e_archway.png",
-          "house_f_corner.png"
+          "house_home_2f.webp",
+          "house_a_narrow.webp",
+          "house_b_sideroof.webp",
+          "house_c_stepgable.webp",
+          "house_d_workshop.webp",
+          "house_e_archway.webp",
+          "house_f_corner.webp"
         ],
-        "inn-tall": "house_e_archway.png",
-        "lamp": "lamp_post.png",
-        "stall": "stall.png",
-        "flower-stall": "flower_stall.png",
-        "cart": "cart.png",
-        "planter": "planter.png",
-        "flowerbed": "flowerbed.png",
-        "tree": "tree_street.png",
-        "tree-small": "tree_small.png",
-        "herbs": "herbs_drying.png",
-        "awning-green": "awnings-1.png",
-        "awning-red": "awnings-2.png",
-        "awning-wheat": "awnings-3.png",
-        "sign-bread": "signs-1.png",
-        "sign-shoe": "signs-2.png",
-        "sign-cup": "signs-3.png",
-        "sign-deer": "signs-4.png"
+        "inn-tall": "house_e_archway.webp",
+        "lamp": "lamp_post.webp",
+        "stall": "stall.webp",
+        "flower-stall": "flower_stall.webp",
+        "cart": "cart.webp",
+        "planter": "planter.webp",
+        "flowerbed": "flowerbed.webp",
+        "tree": "tree_street.webp",
+        "tree-small": "tree_small.webp",
+        "herbs": "herbs_drying.webp",
+        "awning-green": "awnings-1.webp",
+        "awning-red": "awnings-2.webp",
+        "awning-wheat": "awnings-3.webp",
+        "sign-bread": "signs-1.webp",
+        "sign-shoe": "signs-2.webp",
+        "sign-cup": "signs-3.webp",
+        "sign-deer": "signs-4.webp"
       }
     },
     "paved": [
