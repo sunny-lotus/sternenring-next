@@ -328,14 +328,16 @@ function townYardFloor(g, map, T, W, H, paved) {
   const gp = townPattern(g, 'grass', T, 4);
   if (gp) {
     g.fillStyle = gp; g.fillRect(0, 0, W, H);
-    g.save(); g.filter = 'blur(6px)';
-    for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
-      if (isWallAt(map, x, y)) continue;
-      const near = [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dx, dy]) => isWallAt(map, x + dx, y + dy)).length;
-      if (!near) continue;
-      g.fillStyle = `rgba(122,96,64,${0.35 + near * 0.12})`; g.beginPath(); g.ellipse(x * T + T / 2, y * T + T / 2, T * 0.62, T * 0.5, R() * 3, 0, 7); g.fill();
-    }
-    g.restore();
+    // 土のしみは別のキャンバスに描いてから、ぼかしは1回だけかける（1つずつぼかすと、町を開くのに1秒かかっていた。2026-11-22 作者「町が出るまで時間がかかる」）
+    const dirt = canvas(W, H, (d) => {
+      for (let y = 0; y < map.height; y++) for (let x = 0; x < map.width; x++) {
+        if (isWallAt(map, x, y)) continue;
+        const near = [[0, -1], [0, 1], [-1, 0], [1, 0]].filter(([dx, dy]) => isWallAt(map, x + dx, y + dy)).length;
+        if (!near) continue;
+        d.fillStyle = `rgba(122,96,64,${0.35 + near * 0.12})`; d.beginPath(); d.ellipse(x * T + T / 2, y * T + T / 2, T * 0.62, T * 0.5, R() * 3, 0, 7); d.fill();
+      }
+    });
+    g.save(); g.filter = 'blur(6px)'; g.drawImage(dirt, 0, 0); g.restore();
     for (let k = 0; k < (W * H) / 1400; k++) { g.fillStyle = 'rgba(140,130,118,.7)'; g.beginPath(); g.ellipse(R() * W, R() * H, 1.5 + R() * 1.5, 1 + R(), R() * 3, 0, 7); g.fill(); } // 小石
     return;
   }
@@ -459,7 +461,7 @@ function pageCanvas(map) { // 羊皮紙のページ。うすいインクで石�
       townYardFloor(g, map, T, W, H, paved);
       g.save(); g.beginPath(); for (const p of paved) g.rect(p.x * T, p.y * T, p.w * T, p.h * T); g.clip(); cobbleFloor(g, map, T, W, H); g.restore();
       // 石畳と土の境目は線を引かず、ぼかしてなじませる（2026-11-22 作者「地面の変な枠もどうにかしたい」）
-      g.save(); g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(120,100,72,.55)'; g.lineWidth = 7; for (const p of paved) g.strokeRect(p.x * T, p.y * T, p.w * T, p.h * T); g.restore();
+      g.save(); g.filter = 'blur(5px)'; g.strokeStyle = 'rgba(120,100,72,.55)'; g.lineWidth = 7; g.beginPath(); for (const p of paved) g.rect(p.x * T, p.y * T, p.w * T, p.h * T); g.stroke(); g.restore(); /* 1回の線で（ぼかしも1回） */
     }
     else if (floor === 'cobble') cobbleFloor(g, map, T, W, H);
     else if (floor === 'soil') soilFloor(g, map, T, W, H);
@@ -1075,11 +1077,14 @@ export function createThreeStage(canvasEl, assets) {
       if (root) { scene.remove(root); disposeTree(root); }
       map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; lights = []; fires = []; cam.init = false;
       interior = map.kind === 'interior'; nook = null;
-      await loadArt(map); await loadTown(map); await loadSymbols(map);
-      if (interior) buildInterior(); else buildExterior();
-      buildBoards();
+      // ?perf=1：マップを開くときの各段の時間をコンソールに出す（2026-11-22 作者「町が出るまで時間がかかる理由」を調べるため）
+      const PF = /[?&]perf=1/.test(location.search), pt = [performance.now()], mark = () => pt.push(performance.now());
+      await loadArt(map); mark(); await loadTown(map); mark(); await loadSymbols(map); mark();
+      if (interior) buildInterior(); else buildExterior(); mark();
+      buildBoards(); mark();
       buildExitMarks();
-      applyOrbs(map);
+      applyOrbs(map); mark();
+      if (PF) console.info('[perf] load', map.id, ['art', 'town', 'symbols', 'ground', 'boards', 'marks'].map((k, i) => k + ' ' + Math.round(pt[i + 1] - pt[i]) + 'ms').join(' / '));
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
       key.position.set(W / 2 - 14, 26, H / 2 + 16); key.target.position.set(W / 2, 0, H / 2);
