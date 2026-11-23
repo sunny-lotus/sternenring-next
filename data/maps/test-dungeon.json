@@ -274,6 +274,27 @@
         "band": "front",
         "items": []
       }
-    ]
+    ],
+    "textures": {
+      "note": "森のダンジョンの元絵 v01（美術・演出室 2026-11-23、pixel/元絵/森_試し_v01）",
+      "base": "assets/interiors/test-dungeon/",
+      "wall": "dungeon_wall.webp",
+      "floor": "dungeon_floor.webp",
+      "ceiling": "dungeon_ceiling.webp",
+      "lampWall": "dungeon_lamp.webp",
+      "pillar": "dungeon_pillar.webp",
+      "cuts": {
+        "lampWall": [
+          [
+            36,
+            18,
+            476,
+            492
+          ],
+          512,
+          512
+        ]
+      }
+    }
   }
 }
