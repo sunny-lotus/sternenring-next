@@ -1193,19 +1193,31 @@ export function createThreeStage(canvasEl, assets) {
     const lx = cx - BW / 2 - 6, lz = cz - BH * 0.2;
     const brass = new THREE.MeshStandardMaterial({ color: 0x8a6a30, roughness: 0.35, metalness: 0.7 });
     let shadeY = 5.6; // 笠の高さ（光の玉と灯りをここに）
-    if (bookArt.desk_lamp) { // v02 desk_lamp の切り抜き（真鍮の台とだいだいのガラスの笠）。足もとを机に
-      const t = bookArt.desk_lamp.clone(); t.needsUpdate = true; const b = [47, 37, 466, 985]; t.repeat.set((b[2] - b[0] + 1) / 512, (b[3] - b[1] + 1) / 1024); t.offset.set(b[0] / 512, 1 - (b[3] + 1) / 1024);
-      const lh = 14, lw = lh * (b[2] - b[0] + 1) / (b[3] - b[1] + 1); // 大きく（2026-11-23 作者「このランプのサイズ感もっとでかくていいのでは見切れてもいい」）
-      shadeY = -0.52 + lh * 0.75; // 笠は絵の上から約0.25
-      const lp = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.35, roughness: 0.5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.25 }));
-      lp.position.set(lx, -0.52 + lh / 2, lz); lp.castShadow = true; lp.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: t, alphaTest: 0.35 }); root.add(lp);
-    } else {
-      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 0.4, 20), brass); base.position.set(lx, -0.32, lz); root.add(base);
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 6, 10), brass); pole.position.set(lx, 2.9, lz); root.add(pole);
-      const shade = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff9a40, emissiveIntensity: 0.9, roughness: 0.4, side: THREE.DoubleSide, transparent: true, opacity: 0.92 }));
-      shade.position.set(lx, 6.4, lz); root.add(shade);
+    { // 立体の机のランプ（2026-11-23 作者「置いてある机のランプはリアルにしたい、3Dで」）：元絵 v02 desk_lamp と同じ形を、ろくろで回した形（LatheGeometry）で作る。
+      // 丸い台・細い柱と節・波打つふちのだいだい色のガラスの笠（真鍮の骨とふち）・鋲のついた笠の頭・てっぺんの飾り。高さは前の絵と同じ約14
+      const g = new THREE.Group(); g.position.set(lx, -0.52, lz); root.add(g);
+      const brassM = new THREE.MeshStandardMaterial({ color: 0xc29a4c, roughness: 0.38, metalness: 0.65, emissive: 0x2a1a08, emissiveIntensity: 0.4 });
+      const lathe = (/** @type {number[][]} */ pts, /** @type {any} */ mat, seg = 40) => { const m = new THREE.Mesh(new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg), mat); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+      // 台と柱（足もと→上へ）
+      lathe([[0, 0], [2.15, 0], [2.18, 0.18], [2.0, 0.42], [1.55, 0.6], [1.25, 0.85], [0.75, 1.05], [0.42, 1.3], [0.3, 1.7], [0.3, 2.05], [0.48, 2.15], [0.5, 2.4], [0.3, 2.55], [0.21, 2.7], [0.21, 8.3], [0.36, 8.45], [0.4, 8.8], [0.3, 9.0], [0.24, 9.3], [0, 9.32]], brassM);
+      // 笠：だいだい色のガラス（内側にも見える）。ふちは少し波打つ
+      const shadeH = 2.65, shadePts = []; for (let i = 0; i <= 16; i++) { const t = i / 16, y = 9.42 + shadeH * t, r = 1.05 + (3.12 - 1.05) * Math.cos(t * Math.PI / 2) ** 0.75; shadePts.push(new THREE.Vector2(r, y)); }
+      const shadeG = new THREE.LatheGeometry(shadePts, 64), sp = shadeG.attributes.position;
+      for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), z = sp.getZ(i), y = sp.getY(i), ang = Math.atan2(z, x), low = Math.max(0, 1 - (y - 9.42) / 0.5); sp.setY(i, y - low * 0.16 * (1 - Math.abs(Math.cos(ang * 6)))); } // 10か所でふちが少し下がる（波）
+      shadeG.computeVertexNormals();
+      const glassM = new THREE.MeshStandardMaterial({ color: 0xd86a20, emissive: 0xe0661a, emissiveIntensity: 0.6, roughness: 0.45, metalness: 0, transparent: true, opacity: 0.95, side: THREE.DoubleSide }); // 光りすぎると白っぽくなるので、だいだい色を濃く、自分の光はひかえめに
+      const shade = new THREE.Mesh(shadeG, glassM); shade.castShadow = true; g.add(shade);
+      // 笠の骨（真鍮の細い線）とふち
+      for (let k = 0; k < 12; k++) { const ang = k / 12 * Math.PI * 2, path = new THREE.CatmullRomCurve3(shadePts.map((v) => new THREE.Vector3(Math.cos(ang) * (v.x + 0.02), v.y, Math.sin(ang) * (v.x + 0.02)))); const rib = new THREE.Mesh(new THREE.TubeGeometry(path, 16, 0.05, 5, false), brassM); g.add(rib); }
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(3.12, 0.07, 6, 64), brassM); rim.rotation.x = Math.PI / 2; rim.position.y = 9.36; g.add(rim);
+      // 笠の頭（鋲つき）とてっぺんの飾り
+      lathe([[1.08, 11.98], [1.16, 12.1], [1.16, 12.42], [0.95, 12.6], [0.55, 12.78], [0.3, 12.9], [0.3, 13.0], [0.16, 13.05], [0.27, 13.3], [0.3, 13.5], [0.18, 13.75], [0.06, 13.95], [0, 14.0]], brassM);
+      for (let k = 0; k < 9; k++) { const ang = k / 9 * Math.PI * 2, r = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), brassM); r.position.set(Math.cos(ang) * 1.18, 12.27, Math.sin(ang) * 1.18); g.add(r); }
+      // 笠の中の灯り（電球のかわりの、明るい玉）
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffe2a0 })); bulb.position.y = 10.4; g.add(bulb);
+      shadeY = -0.52 + 10.6;
     }
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(bookArt.desk_lamp ? 11 : 7, bookArt.desk_lamp ? 11 : 7, 1); glow.position.set(lx, shadeY, lz); root.add(glow);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(8, 8, 1); glow.position.set(lx, shadeY, lz); root.add(glow);
     const L = new THREE.PointLight(0xffb066, DAY ? 60 : 220, BW * 1.6, 1.4); L.position.set(lx, shadeY - 0.2, lz); root.add(L);
     lights.push({ L, base: L.intensity, ph: 0.5, z: lz, glow, lamp: true });
   }
@@ -1335,6 +1347,24 @@ export function createThreeStage(canvasEl, assets) {
     // 仮の客（地図の stage.npcs）：sit＝卓の奥の椅子に座る（下半身は卓の天板にかくれるよう、座面の高さまで沈める）、stand＝立つ。
     // 絵はいつもカメラのほうを向く（キャラと同じ）。ぶつからない（仮）
     for (const n of map.stage?.npcs || []) {
+      if (n.sprite) { // キャラの絵で置く（2026-11-23 作者「ナハトたちで置いてみる？」）：立ち姿の1コマ目（正面は顔の層も）。座る客は、腰が座面に来るまで沈め、座面より下は切る
+        const am = actorMesh(n.sprite); if (!am || !am.sheet) continue;
+        const dir = n.facing === 'back' ? 'up' : 'down', sh = am.sheet.idle, f = sheetFrame(sh.e, dir, 0), img = sh.t.image, m = am.mesh.material;
+        m.map = sh.t; m.emissiveMap = sh.t; m.needsUpdate = true; sh.t.repeat.set(f.sw / img.width, f.sh / img.height); sh.t.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height);
+        if (am.face) {
+          const F = am.face, e = F.e, list = e.anchors.idle[dir], an = list && list[Math.round(f.sx / f.sw)], row = e.dirs.indexOf(dir), col = Math.max(0, e.expressions.indexOf('normal'));
+          F.mesh.visible = !!an && row >= 0;
+          if (F.mesh.visible) { const [cw, ch] = e.cell, fi = F.t.image; F.mesh.position.set(((an[0] + cw / 2) / F.fw - 0.5) * F.w, am.mesh.position.y + (0.5 - (an[1] + ch / 2) / F.fh) * F.h, 0.004); F.t.repeat.set(cw / fi.width, ch / fi.height); F.t.offset.set(col * cw / fi.width, 1 - (row + 1) * ch / fi.height); }
+        }
+        am.hinge.position.set(n.x, 0, n.z);
+        if (n.pose === 'sit') {
+          const bh = am.mesh.geometry.parameters.height; am.hinge.position.y = 0.6 - bh * 0.32; // 腰（足もとから背の3割ほど。デフォルメで頭が大きい）を座面の高さ 0.6 に
+          const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.62)]; // 座面より下は描かない（卓の下から足が見えないように）
+          for (const mt of [m, am.face?.mesh.material]) if (mt) { mt.clippingPlanes = clip; mt.needsUpdate = true; }
+          renderer.localClippingEnabled = true;
+        }
+        npcHinges.push(am.hinge); continue;
+      }
       // 座る客は、絵の上の半分（腰から上）だけを座面の高さ（0.6）に置く：卓の下は空いているので、足まで描くと卓の下から見えた
       const hgt = 2.4, sit = n.pose === 'sit', part = sit ? 0.56 : 1, t = texOf(mobCanvas(n.tone || '#6a5a4a', n.facing === 'back'));
       if (sit) { t.repeat.set(1, part); t.offset.set(0, 1 - part); }
