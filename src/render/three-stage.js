@@ -593,7 +593,7 @@ function cutDoor(townC, im, cut) {
   g.fillStyle = gl; g.fillRect(x0, y0, dw, dh);
   g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = Math.max(1, dw * 0.05); shape(g, 0, 0); g.stroke(); // 戸口のふちの影
   g.restore();
-  return { c: door, x0: cut.x0, x1: cut.x1, y0: cut.y0, y1: cut.y1, hinge: cut.hinge || 'right' };
+  return { c: door, x0: cut.x0, x1: cut.x1, y0: cut.y0, y1: cut.y1, hinge: cut.double ? 'both' : cut.hinge || 'right' }; // both＝両開き（2026-11-24 作者「家はいる時でる時扉を開くように」）
 }
 /** 地面の模様（町の絵）。size＝絵1枚が覆うマス数 @returns {CanvasPattern|null} */
 function townPattern(g, key, T, size) {
@@ -1873,11 +1873,17 @@ export function createThreeStage(canvasEl, assets) {
         holeRecess = { recess, hinge, inside: recess[0], peek: !!peekT, h: dh * 1.35, sill: y0, veil };
       }
       if (doorCut && !doorCut.hole) { // 切り抜いた扉の板：ちょうつがいの側を軸に、家の中（奥）へ開く
-        const dw = (doorCut.x1 - doorCut.x0) * b.w, dh = (doorCut.y1 - doorCut.y0) * b.h, right = doorCut.hinge !== 'left';
-        const dm = boardMesh(PIXROOM ? pixTex(doorCut.c, dw, dh) : texOf(doorCut.c), dw, dh); dm.position.set(right ? -dw / 2 : dw / 2, dh / 2, 0);
-        if (!interior) holeMaterial(dm.material);
-        const pivot = new THREE.Group(); pivot.position.set(((right ? doorCut.x1 : doorCut.x0) - 0.5) * b.w, (1 - doorCut.y1) * b.h, 0.015); pivot.add(dm); hinge.add(pivot);
-        door = { pivot, exit: it.doorExit, sign: right ? 1 : -1 };
+        const dw = (doorCut.x1 - doorCut.x0) * b.w, dh = (doorCut.y1 - doorCut.y0) * b.h, tex = PIXROOM ? pixTex(doorCut.c, dw, dh) : texOf(doorCut.c);
+        // 扉の板（片開きは1枚、両開きは左右2枚。2026-11-24 作者「家はいる時でる時扉を開くように」）
+        const leaves = doorCut.hinge === 'both' ? [[0, 0.5, false], [0.5, 1, true]] : [[0, 1, doorCut.hinge !== 'left']];
+        const pivots = leaves.map(([u0, u1, right]) => {
+          const t = leaves.length > 1 ? tex.clone() : tex; if (leaves.length > 1) { t.needsUpdate = true; t.repeat.set(u1 - u0, 1); t.offset.set(u0, 0); }
+          const lw = (u1 - u0) * dw, dm = boardMesh(t, lw, dh); dm.position.set(right ? -lw / 2 : lw / 2, dh / 2, 0);
+          if (!interior) holeMaterial(dm.material);
+          const pivot = new THREE.Group(); pivot.position.set((doorCut.x0 + (right ? u1 : u0) * (doorCut.x1 - doorCut.x0) - 0.5) * b.w, (1 - doorCut.y1) * b.h, 0.015); pivot.add(dm); hinge.add(pivot);
+          return { pivot, sign: right ? 1 : -1 };
+        });
+        door = { pivot: pivots[0].pivot, pivots, exit: it.doorExit, sign: pivots[0].sign };
       }
       let roomCard = null;
       if (it.doorExit && !interior) { // 人形の家の演出で、正面が開いたときに見える中の部屋（灯りのともった漆喰と梁と床。開くときだけ見せる）
@@ -2157,6 +2163,7 @@ export function createThreeStage(canvasEl, assets) {
           continue;
         }
         const m = b.mesh.material; if (m.opacity !== alpha) { const was = m.opacity >= 1; m.opacity = alpha; if (was !== (alpha >= 1)) { m.depthWrite = alpha >= 1; m.alphaTest = alpha >= 1 ? 0.35 : 0.05; m.needsUpdate = true; b.mesh.castShadow = alpha >= 1; } } // 作り直しは「不透明⇔薄い」が変わるときだけ
+        if (b.door) for (const pv of b.door.pivots || [b.door]) for (const o of pv.pivot.children) { const dm = /** @type {any} */ (o).material; if (!dm) continue; if (dm.userData.holeOn && hole) dm.userData.holeOn.value = hole.value; if (dm.opacity !== alpha) { const was = dm.opacity >= 1; dm.opacity = alpha; if (was !== (alpha >= 1)) { dm.depthWrite = alpha >= 1; dm.alphaTest = alpha >= 1 ? 0.35 : 0.05; dm.needsUpdate = true; o.castShadow = alpha >= 1; } } } // 扉の板も家といっしょに透かす（2026-11-24 手前の家が透けても扉だけ浮いて残っていた）
       }
       // キャラ（左右反転しない。いまは1方向の絵のまま）
       const seen = new Set();
@@ -2199,7 +2206,7 @@ export function createThreeStage(canvasEl, assets) {
         let open = 0;
         if (efk === 'nook-in:leave' && ef.exit === b.door.exit) open = ez(cl((ep - 0.05) / 0.4));
         if (efk === 'nook-out:arrive') { const ex = (map.exits || []).find((/** @type {any} */ e) => e.id === b.door.exit); if (ex && Math.abs(lead.x - ex.x) + Math.abs(lead.y - ex.y) <= 2) open = outA ? 1 - ez(cl((ep - 0.6) / 0.35)) : 1 - ez(cl((ep - 0.3) / 0.45)); }
-        b.door.pivot.rotation.y = b.door.sign * open * Math.PI * 0.55;
+        for (const pv of b.door.pivots || [b.door]) pv.pivot.rotation.y = pv.sign * open * Math.PI * 0.55;
       }
       for (const dr of innerDoors) { // 中の扉：入るときに開き、部屋から出てきたら開いたまま着いて閉まる
         let open = 0;
