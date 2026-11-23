@@ -154,7 +154,9 @@ async function boot() {
   const fsApp = !!(window.matchMedia?.('(display-mode: fullscreen)').matches || window.matchMedia?.('(display-mode: standalone)').matches || /** @type {any} */ (navigator).standalone);
   const fsEnter = () => { try { const p = (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen).call(fsEl, { navigationUI: 'hide' }); if (p && p.catch) p.catch(() => {}); } catch { /* 断られたら、そのまま */ } };
   const fsExit = () => { try { const p = (fsDoc.exitFullscreen || fsDoc.webkitExitFullscreen).call(fsDoc); if (p && p.catch) p.catch(() => {}); } catch { /* そのまま */ } };
-  const fsSync = () => { fsBtn.hidden = !fsCan || fsApp; fsBtn.textContent = fsOn() ? '全画面をやめる' : '全画面'; };
+  // 全画面のあいだは横向きに（2026-11-23 作者「全画面にしたら横にしてほしい」）。向きを決められるのは全画面のときだけ（Android）。iPhone のブラウザは向きを決められない
+  const fsTurn = (/** @type {boolean} */ on) => { try { const o = /** @type {any} */ (screen).orientation; if (!o) return; if (on) { const p = o.lock?.('landscape'); if (p && p.catch) p.catch(() => {}); } else o.unlock?.(); } catch { /* 向きを決められなければ、そのまま */ } };
+  const fsSync = () => { fsBtn.hidden = !fsCan || fsApp; fsBtn.textContent = fsOn() ? '全画面をやめる' : '全画面'; fsTurn(fsOn()); };
   fsBtn.addEventListener('click', () => { /** @type {HTMLElement} */ (fsBtn).blur(); if (fsOn()) fsExit(); else fsEnter(); });
   document.addEventListener('fullscreenchange', fsSync); document.addEventListener('webkitfullscreenchange', fsSync); fsSync();
   const startFromCover = (/** @type {string} */ why) => {
