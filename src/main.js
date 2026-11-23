@@ -146,7 +146,19 @@ async function boot() {
   document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stopAll(); bgm.setHidden(document.hidden); });
   const skipIntro = (/** @type {string} */ why) => { if (!intro.blocking) return; if (intro.skip(why, performance.now())) { input.clearQueue(); sound.stop('sfx.book.open'); } syncIntroUi(); };
   // 表紙の開始の一押し（人の操作の中で音を有効にする）。用意を待つのは上限まで。そのあいだにタブ離脱・表示切替で終われば始めない
+  // 全画面（2026-11-23 作者「全画面をスマホ用に」）：右上の「全画面」で切りかえ。スマホ（指で触る画面）では、表紙の「はじめる」でそのまま全画面に。
+  // 全画面の仕組みが無いブラウザ（iPhone の Safari）と、ホーム画面から開いた（もう全画面の）ときは、ボタンを出さない
+  const fsEl = /** @type {any} */ (document.documentElement), fsDoc = /** @type {any} */ (document), fsBtn = $('fs-toggle');
+  const fsCan = !!(fsEl.requestFullscreen || fsEl.webkitRequestFullscreen);
+  const fsOn = () => !!(fsDoc.fullscreenElement || fsDoc.webkitFullscreenElement);
+  const fsApp = !!(window.matchMedia?.('(display-mode: fullscreen)').matches || window.matchMedia?.('(display-mode: standalone)').matches || /** @type {any} */ (navigator).standalone);
+  const fsEnter = () => { try { const p = (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen).call(fsEl, { navigationUI: 'hide' }); if (p && p.catch) p.catch(() => {}); } catch { /* 断られたら、そのまま */ } };
+  const fsExit = () => { try { const p = (fsDoc.exitFullscreen || fsDoc.webkitExitFullscreen).call(fsDoc); if (p && p.catch) p.catch(() => {}); } catch { /* そのまま */ } };
+  const fsSync = () => { fsBtn.hidden = !fsCan || fsApp; fsBtn.textContent = fsOn() ? '全画面をやめる' : '全画面'; };
+  fsBtn.addEventListener('click', () => { /** @type {HTMLElement} */ (fsBtn).blur(); if (fsOn()) fsExit(); else fsEnter(); });
+  document.addEventListener('fullscreenchange', fsSync); document.addEventListener('webkitfullscreenchange', fsSync); fsSync();
   const startFromCover = (/** @type {string} */ why) => {
+    if (fsCan && !fsApp && !fsOn() && window.matchMedia?.('(pointer: coarse)').matches) fsEnter(); // スマホは、はじめる一押しで全画面に（ブラウザは、押したときだけ全画面を許す）
     if (!intro.press(why, performance.now())) return;
     input.clearQueue(); syncIntroUi();
     const sOk = sound.unlock(why); bgm.unlock(why);

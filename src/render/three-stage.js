@@ -923,7 +923,7 @@ export function createThreeStage(canvasEl, assets) {
   // マップの手ざわり（stage.textures）：美術・演出室の元絵をそのまま張る（2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵
   const artCache = {}; let ART2 = null;
   // 内装の手ざわりと切り抜き（v01：床〜扉、v02：木・腰板・麻布・敷物と、切り抜きの灯り・瓶・ジョッキ・樽。2026-11-23 作者「銀鹿亭のテクスチャできたよ」）
-  const INN_KEYS = ['floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
+  const INN_KEYS = ['windowArch', 'flowerBox', 'pottery', 'bread', 'guestBook', 'keyRack', 'logBasket', 'floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
   // 元絵1枚が覆うマス数（横, 縦）。ドット絵にするときの細かさを決める
   const ART_TILES = { floor: [4, 4], wall: [4, 4], ceiling: [4, 4], brick: [1.5, 1.9], window: [1.3, 1.8], tabletop: [3, 1.8], counter: [7, 1.1], blanket: [2, 1.2], door: [1, 2.1] };
   // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）：マップの stage.townArt の絵を読んでおく（地面の模様と板の絵に使う）
@@ -991,7 +991,11 @@ export function createThreeStage(canvasEl, assets) {
   }
   /** 元絵の手ざわり（写しを作って繰り返し数を決める。写しはマップを替えるときに片づく）。無ければ null */
   /** 切り抜きの元絵の、絵のある範囲（px。美術・演出室の 追加元絵_生成一覧_v01.json の content_bounds_alpha128）と絵の大きさ */
-  const CUT = { rug: [[42, 32, 980, 863], 1024, 896], barrels: [[83, 28, 686, 739], 768, 768], bottles: [[37, 40, 987, 370], 1024, 384], candle: [[38, 19, 218, 493], 256, 512], lampHanging: [[150, 27, 360, 740], 512, 768], lampWall: [[19, 75, 492, 492], 512, 512] };
+  const CUT = { rug: [[42, 32, 980, 863], 1024, 896], barrels: [[83, 28, 686, 739], 768, 768], bottles: [[37, 40, 987, 370], 1024, 384], candle: [[38, 19, 218, 493], 256, 512], lampHanging: [[150, 27, 360, 740], 512, 768], lampWall: [[19, 75, 492, 492], 512, 512],
+    // 美術・演出室 v03（2026-11-23 作者「アーチ窓小物組める？」）：絵のある範囲 px と、元の絵の大きさ
+    windowArch: [[27, 52, 741, 988], 768, 1024], flowerBox: [[98, 11, 926, 309], 1024, 320], bread: [[18, 88, 494, 371], 512, 384], guestBook: [[18, 121, 494, 371], 512, 384],
+    keyRack: [[18, 18, 494, 443], 512, 512], logBasket: [[60, 18, 452, 494], 512, 512] };
+  const POT_CUPS = [[31, 106, 224, 246], [543, 106, 735, 246]]; // v03 pottery の生成りの杯2つ（皿2枚は正面から見た丸い絵なので、卓には寝かせられず使わない）
   const MUGS = [[37, 113, 158, 243], [242, 114, 361, 243], [446, 113, 568, 243]]; // mugs.png の木のジョッキ2つ・錫のジョッキ1つ（あとの2つは木の皿）
   /** 元絵の一部（b＝[x0,y0,x1,y1] px）だけを使う手ざわり。flip：左右を返す（壁の右側の灯りなど、物の向きだけ。キャラには使わない） */
   const cutT = (k, b, W, H, flip = false) => { const base = ART2?.[k]; if (!base) return null; const t = base.clone(); t.needsUpdate = true; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; const rx = (b[2] - b[0] + 1) / W, ry = (b[3] - b[1] + 1) / H; t.repeat.set(flip ? -rx : rx, ry); t.offset.set(flip ? (b[0] / W + rx) : b[0] / W, 1 - (b[3] + 1) / H); t.anisotropy = 8; return t; };
@@ -1201,11 +1205,27 @@ export function createThreeStage(canvasEl, assets) {
         solid(aw + 0.8, 0.4, 0.55, ah + 0.35, 0, stoneM);                                                   // 上の張り出し
       } else if (!(side < 0 && heightOf(map, 1, Math.floor(z)) > 0)) { // 左の壁に2階の回廊があるところには窓を付けない（2026-11-22 作者「左壁面の窓いらないかな」）
         const ww = 1.1 * S, wh = 1.5 * S, wy = HT * 0.5;
+        const arch = cutPlane('windowArch', 1.9 * S, { emissive: 0.55 }); // v03 アーチの窓（石のアーチ・木枠・生成りのカーテン）。ガラスの昼の光は少し自分で光らせる
+        if (arch) {
+          arch.position.set(out(0.03), wy, z); arch.rotation.y = ry; arch.castShadow = false; root.add(arch);
+          // 立体の石のアーチと窓台（2026-11-23 作者「アーチ窓感を出したい、出っ張りがないから」）：絵の窓のまわりに、壁と同じ石で厚みのあるアーチの枠を張り出し、
+          // 窓（絵）はその奥に。下に張り出した石の窓台、その前に花箱
+          const aw = arch.userData.w, ah = 1.9 * S, t = aw * 0.13, D = 0.28, top = ah / 2 - aw / 2;
+          const ring = new THREE.Shape(); ring.moveTo(-aw / 2, -ah / 2); ring.lineTo(aw / 2, -ah / 2); ring.lineTo(aw / 2, top); ring.absarc(0, top, aw / 2, 0, Math.PI, false); ring.lineTo(-aw / 2, -ah / 2);
+          const hole = new THREE.Path(); hole.moveTo(-aw / 2 + t, -ah / 2 + t * 0.4); hole.lineTo(-aw / 2 + t, top); hole.absarc(0, top, aw / 2 - t, Math.PI, 0, true); hole.lineTo(aw / 2 - t, -ah / 2 + t * 0.4); hole.lineTo(-aw / 2 + t, -ah / 2 + t * 0.4); ring.holes.push(hole);
+          const stoneT = artT('wall', 0.25, 0.25) ?? rep(plasterCanvas(), 0.25, 0.25, 1);
+          const rg = new THREE.ExtrudeGeometry(ring, { depth: D, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2, curveSegments: 24 });
+          const rm = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({ map: stoneT, roughness: 0.95 })); rm.castShadow = true; rm.receiveShadow = true;
+          const holder = new THREE.Group(); holder.position.set(out(0), wy, z); holder.rotation.y = ry; holder.add(rm); root.add(holder);
+          const sill = new THREE.Mesh(roundBox(aw + 0.35, 0.14, 0.42), new THREE.MeshStandardMaterial({ map: artT('wall', (aw + 0.35) / 4, 0.1) ?? null, roughness: 0.95 })); sill.position.set(0, -ah / 2 - 0.02, 0.21); sill.castShadow = true; sill.receiveShadow = true; holder.add(sill);
+          const fb = cutPlane('flowerBox', 0.55); if (fb) { fb.position.set(0, -ah / 2 - 0.36, 0.38); holder.add(fb); } // 窓台の前に花箱
+        } else {
         plane(ww, wh, winM, [out(0.18), wy, z], [0, ry, 0]);
         const frM = new THREE.MeshStandardMaterial({ map: artT('wood', 0.4, 0.4) ?? rep(woodCanvas(), 1, 1, 1), roughness: WOOD_ROUGH, color: WOOD_TINT });
         for (const dz of [-ww / 2 - 0.1, ww / 2 + 0.1]) solid(0.2, wh + 0.4, 0.35, wy, dz, frM);
         for (const dy of [-wh / 2 - 0.1, wh / 2 + 0.1]) solid(ww + 0.4, 0.2, 0.35, wy + dy, 0, frM);
         solid(ww + 0.7, 0.16, 0.6, wy - wh / 2 - 0.25, 0, frM); // 窓の下の台
+        }
       }
       const lx = side < 0 ? 0.7 : W - 0.7, ly = dungeon ? HT * 0.4 : Math.min(HT - 0.6, HT * 0.5 + 0.75 * S + 0.6); // 建物の中は窓の上
       let fx = lx, fy = ly; // 火の位置
@@ -1354,12 +1374,13 @@ export function createThreeStage(canvasEl, assets) {
           const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.04, 10), new THREE.MeshStandardMaterial({ color: 0x8a7a50, metalness: 0.5, roughness: 0.4 })); dish.position.set(0, y0 + 0.02, -d / 2); g.add(dish);
         }
         const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 })); flame.scale.set(cd ? 0.35 : 0.55, cd ? 0.45 : 0.7, 1); flame.position.set(0, fy, -d / 2 + 0.03); g.add(flame);
+        { const bb = (it.x + it.y) % 2 === 0 ? cutPlane('bread', 0.34) : null; if (bb) { bb.position.set(-w / 2 + 0.5, y0 + 0.17, -d / 2 + 0.12); g.add(bb); } } // v03 パン籠（卓1つおき）
         const L = new THREE.PointLight(0xffbc66, 8, 3.4, 1.6); L.position.set(0, y0 + 0.5, -d / 2); g.add(L); lights.push({ L, base: 7, ph: it.x + it.y, z: it.y + it.h, glow: flame, fire: true });
         const mugM = new THREE.MeshStandardMaterial({ color: 0x6a4a2a, roughness: 0.7 }), plateM = new THREE.MeshStandardMaterial({ color: 0x9a7a52, roughness: 0.85 });
         const n = Math.max(2, Math.round(w));
         for (let k = 0; k < n; k++) {
           const x = (k / Math.max(1, n - 1) - 0.5) * (w - 0.7), z = -d / 2 + (k % 2 ? 0.25 : -0.25) * d;
-          if (R() < 0.6) { const mc = cutPlane('mugs', 0.3, { b: MUGS[(R() * MUGS.length) | 0], W: 1024, H: 256 }); if (mc) { mc.position.set(x, y0 + 0.15, z); g.add(mc); } else { const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, y0 + 0.11, z); mug.castShadow = true; g.add(mug); } }
+          if (R() < 0.6) { const pot = R() < 0.5, mc = pot ? cutPlane('pottery', 0.22, { b: POT_CUPS[(R() * 2) | 0], W: 1024, H: 256 }) : cutPlane('mugs', 0.3, { b: MUGS[(R() * MUGS.length) | 0], W: 1024, H: 256 }); /* ジョッキと、v03 の陶器の杯を交ぜる */ if (mc) { mc.position.set(x, y0 + (pot ? 0.11 : 0.15), z); g.add(mc); } else { const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, y0 + 0.11, z); mug.castShadow = true; g.add(mug); } }
           else { const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.04, 12), plateM); pl.position.set(x, y0 + 0.02, z); g.add(pl); }
         }
       }
@@ -1405,6 +1426,8 @@ export function createThreeStage(canvasEl, assets) {
             const nk = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.04, 0.12, 6), bm); nk.position.set(x, y + 0.03 + bh + 0.06, zb + 0.22); g.add(nk);
           }
         }
+        { const gb = cutPlane('guestBook', 0.36); if (gb) { gb.position.set(w * 0.08, ch + 0.18, -d / 2 + 0.2); g.add(gb); } } // v03 宿帳（受付の台の上）
+        { const kr = cutPlane('keyRack', 0.62); if (kr) { kr.position.set(w / 2 - 0.7, sh + 0.42, zb + 0.08); g.add(kr); } } // v03 鍵掛け（受付の奥の壁、酒の棚の上）
         const mugM = new THREE.MeshStandardMaterial({ color: 0x8a6a40, roughness: 0.6, metalness: 0.2 });
         [-w * 0.3, -w * 0.1, w * 0.25].forEach((x, k) => { const mc = cutPlane('mugs', 0.3, { b: MUGS[k], W: 1024, H: 256 }); if (mc) { mc.position.set(x, ch + 0.15, -d / 2 + 0.1); g.add(mc); return; } const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, ch + 0.11, -d / 2 + 0.1); g.add(mug); });
       }
@@ -1419,6 +1442,7 @@ export function createThreeStage(canvasEl, assets) {
       { const top = nook ? nook.HT : 5.5, y0 = hh * 0.62 + 0.1; if (top > y0 + 0.2) box(sms(w * 0.62, top - y0, d * 0.55), w * 0.62, top - y0, d * 0.55, y0 + (top - y0) / 2, -d * 0.35); } // 煙突：炉棚から天井まで（2026-11-22 作者「暖炉は天井まで伸ばして」）
       const mouth = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.55, hh * 0.46), new THREE.MeshBasicMaterial({ map: texOf(fireboxCanvas()), transparent: true, alphaTest: 0.3 })); mouth.position.set(0, hh * 0.23, 0.01); g.add(mouth); // 炉の中（2026-11-23 作者「暖炉黒い部分はどうしようか違和感がある」：まっ黒の四角をやめ、上がアーチの、すすけたレンガの奥が火で照らされる絵に）
       const fire = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.95 })); fire.scale.set(1.4, 1.1, 1); fire.position.set(0, 0.35, 0.15); g.add(fire);
+      { const lb = cutPlane('logBasket', 0.85); if (lb) { lb.position.set(-w / 2 - 0.45, 0.425, -0.3); g.add(lb); } } // v03 薪籠（暖炉の左脇）
       // 揺れる炎（6コマを順に）と、舞い上がる火の粉
       // 炎（2026-11-23 美術・演出室 v02 hearth_flame：水彩の8コマ。1コマ 256×320、根もと (128,312)）と薪と熾火（hearth_logs、足もと (256,184)）。無ければコードの6コマ
       const flameArt = ART2?.flame, logsArt = ART2?.logs, nF = flameArt ? 8 : FIRE_FRAMES;

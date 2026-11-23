@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>STERNENRING NEXT（P2）</title>
+<!-- スマホで全画面（2026-11-23 作者「全画面をスマホ用に」）：ホーム画面に置いて開くと全画面。iPhone はこの方法だけ -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1b1a22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="STERNENRING">
+<link rel="apple-touch-icon" href="assets/icon/apple-touch-icon.png">
 <style>
   :root { --bg: #1b1a22; --ink: #efe7d4; --paper: #e8dfca; --edge: #9c8f74; --accent: #c9a25e; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden;
@@ -12,8 +20,8 @@
   [hidden] { display: none !important; }
   /* 右上：効果音の大きさ（DEV-BOOK-001 rev2）・曲の大きさ（rev3）と表示切替を横に並べる */
   #topright { position: fixed; top: max(10px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); display: flex; gap: 6px; }
-  #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { background: rgba(27,26,34,.72); color: var(--ink); border: 1px solid var(--edge); border-radius: 3px; padding: 5px 10px; font: 13px sans-serif; white-space: nowrap; }
-  @media (max-width: 420px) { #topright { gap: 4px; right: max(8px, env(safe-area-inset-right)); } #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { padding: 5px 6px; } }
+  #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle, #fs-toggle { background: rgba(27,26,34,.72); color: var(--ink); border: 1px solid var(--edge); border-radius: 3px; padding: 5px 10px; font: 13px sans-serif; white-space: nowrap; }
+  @media (max-width: 420px) { #topright { gap: 4px; right: max(8px, env(safe-area-inset-right)); } #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle, #fs-toggle { padding: 5px 6px; } }
   /* 右上のボタンが3つになったので（rev3）、幅460px以下では地名の下に「仮」を置き、ボタンと重ねない */
   @media (max-width: 460px) { body #hud { flex-direction: column; align-items: flex-start; gap: 4px; } }
   #perf { position: fixed; left: 12px; top: calc(max(10px, env(safe-area-inset-top)) + 34px); background: rgba(27,26,34,.8); color: #cfe3c0; padding: 2px 6px; font: 11px/1.4 monospace; pointer-events: none; white-space: pre-line; }
@@ -49,7 +57,7 @@
   @media (max-width: 400px) {
     #hud { top: calc(max(10px, env(safe-area-inset-top)) + 38px); }
     #topright { left: max(8px, env(safe-area-inset-left)); justify-content: flex-end; }
-    #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { font-size: 12px; padding: 5px 6px; }
+    #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle, #fs-toggle { font-size: 12px; padding: 5px 6px; }
     #perf { top: calc(max(10px, env(safe-area-inset-top)) + 102px); }
     body #cam-panel { top: calc(max(10px, env(safe-area-inset-top)) + 102px) !important; }
     #intro-skip { min-width: 76px; }
@@ -151,7 +159,7 @@ window.SR_PRE = (() => {
 <canvas id="stage" aria-label="フィールド（平面）" hidden></canvas>
 <button type="button" id="intro-cover" hidden aria-keyshortcuts="Enter Space"><span id="cover-label">クリックしてはじめる</span></button>
 <div id="hud"><span id="map-title"></span><span id="map-badge" hidden>仮配置</span></div>
-<div id="topright"><button type="button" id="sound-toggle">音：中</button><button type="button" id="bgm-toggle">曲：中</button><button type="button" id="room-toggle" hidden>内装：絵</button><button type="button" id="dev-toggle" aria-keyshortcuts="F2" title="開発者メニュー（F2）">開発</button><button type="button" id="status-toggle" aria-keyshortcuts="M">メニュー</button><button type="button" id="cam-toggle">カメラ</button><button type="button" id="render-toggle">表示：紙の舞台</button></div>
+<div id="topright"><button type="button" id="sound-toggle">音：中</button><button type="button" id="bgm-toggle">曲：中</button><button type="button" id="room-toggle" hidden>内装：絵</button><button type="button" id="fs-toggle" hidden>全画面</button><button type="button" id="dev-toggle" aria-keyshortcuts="F2" title="開発者メニュー（F2）">開発</button><button type="button" id="status-toggle" aria-keyshortcuts="M">メニュー</button><button type="button" id="cam-toggle">カメラ</button><button type="button" id="render-toggle">表示：紙の舞台</button></div>
 <div id="perf" hidden></div>
 <div id="dev-pos" hidden></div>
 <div id="msg" hidden role="status" aria-live="polite"></div>
