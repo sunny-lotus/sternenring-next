@@ -9,13 +9,14 @@ const KEY_DIR = /** @type {Record<string,string>} */ ({
 /** @param {import('../core/input.js').InputState} input */
 export function bindKeyboard(input) {
   window.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift') { input.run = true; return; } // 走る（押している間）
     if ((e.code === 'Enter' || e.code === 'Space' || e.code === 'KeyZ') && !e.repeat) { e.preventDefault(); input.pressAction(); return; } // 調べる
     const dir = KEY_DIR[e.code];
     if (!dir) return;
     e.preventDefault();
     if (!e.repeat) input.press(dir);
   });
-  window.addEventListener('keyup', (e) => { const dir = KEY_DIR[e.code]; if (dir) input.release(dir); });
+  window.addEventListener('keyup', (e) => { if (e.key === 'Shift') input.run = false; const dir = KEY_DIR[e.code]; if (dir) input.release(dir); });
   // 別ウィンドウへ移ったら押しっぱなしを解除する（旧 input.js の考え方）
   window.addEventListener('blur', () => { input.releaseAll(); input.clearQueue(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { input.releaseAll(); input.clearQueue(); } });

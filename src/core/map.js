@@ -72,6 +72,7 @@ export function validateMap(map, ctx) {
       const maxH = layer.band === 'backdrop' ? 40 : 12; // 奥の背景の板は高くてよい（2026-11-22 作者「背景をもっと高く」）
       if (it.standH !== undefined && !(typeof it.standH === 'number' && it.standH > 0 && it.standH <= maxH)) err(`stage ${it.asset} の standH（立てた板の高さ）は0より大きく${maxH}以下`);
       if (it.zOffset !== undefined && !(typeof it.zOffset === 'number' && it.zOffset >= 0 && it.zOffset <= 0.3)) err(`stage ${it.asset} の zOffset は0〜0.3`);
+      if (it.doorExit !== undefined && !(map.exits || []).some((/** @type {any} */ e) => e.id === it.doorExit)) err(`stage ${it.asset} の doorExit（開く扉の出入口）${it.doorExit} が出入口に無い`);
     }
   }
   // 隠し通路の範囲（この中にいるあいだだけ、手前の板の「のぞき穴」を小さくする。2026-11-22 作者）

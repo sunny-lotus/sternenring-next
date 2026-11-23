@@ -24,6 +24,56 @@ const snapDot = (v) => Math.round(v / DOT) * DOT;
 function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296; }
 function noise(g, w, h, R, a) { const im = g.getImageData(0, 0, w, h), d = im.data; for (let i = 0; i < d.length; i += 4) { const v = (R() - 0.5) * a; d[i] += v; d[i + 1] += v; d[i + 2] += v; } g.putImageData(im, 0, 0); }
 function canvas(w, h, draw) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); draw(c.getContext('2d'), c.width, c.height); return c; }
+/**
+ * 角の丸い箱（2026-11-23 作者「立体を描くときかくかくしすぎる」「いつも角は丸く表現するようなことできるの？」→「角を丸くする」）。
+ * BoxGeometry と同じ面の順（+x,-x,+y,-y,+z,-z）と絵の張り方のまま、角と辺だけを半径 r で丸める。
+ * 各軸の点を「はしの r の帯に K 本・まんなかに1本」に並べ、内側の箱（半分の大きさ − r）からはみ出した分を、その向きに長さ r の丸みへ置きなおす。
+ * r は一番短い辺の 0.45 倍まで（うすい板でも形がこわれない）。同じ大きさの箱は形を使い回す
+ */
+const ROUND_R = 0.06, ROUND_K = 2, WOBBLE = 0.018; // WOBBLE：手描きのうねりの大きさ（マス）
+/** 建物の中の木にかける色（掛け算）。赤みをおさえ、くすんだ自然な茶色に（2026-11-23 作者の内装の方針「赤みと艶を抑えた自然な茶色」） */
+const WOOD_TINT = 0xcdbfb0, WOOD_ROUGH = 0.95;
+const roundCache = new Map();
+function roundBox(w, h, d, r = ROUND_R) {
+  r = Math.min(r, Math.min(w, h, d) * 0.45);
+  const key = [w, h, d, r].map((v) => v.toFixed(4)).join(',');
+  const hit = roundCache.get(key); if (hit) return hit;
+  if (r < 1e-3) { const b = new THREE.BoxGeometry(w, h, d); roundCache.set(key, b); return b; }
+  const K = ROUND_K, half = [w / 2, h / 2, d / 2];
+  // まんなかの分け方は長さに合わせる（手描きのうねりを長い辺にも出すため。0.4マスに1本、最大24）
+  const Mid = half.map((hh) => Math.max(1, Math.min(24, Math.round((hh * 2 - 2 * r) / 0.4)))), Sn = Mid.map((m) => 2 * K + m);
+  const g = new THREE.BoxGeometry(2, 2, 2, Sn[0], Sn[1], Sn[2]);
+  const pos = g.attributes.position, nor = g.attributes.normal, uv = g.attributes.uv;
+  const remap = (c, a) => { // c は -1〜1（Sn[a] 等分の格子）→ はしの帯に寄せた座標
+    const hh = half[a], S = Sn[a], j = Math.round((c + 1) / 2 * S);
+    if (j <= K) return -hh + r * (j / K);
+    if (j >= S - K) return hh - r + r * ((j - (S - K)) / K);
+    return -hh + r + (hh * 2 - 2 * r) * ((j - K) / (S - 2 * K));
+  };
+  // 手描きのうねり（2026-11-23 作者「丸みと直線だけでなく、ほんの少しだけ、手書きのようにうねうね」）：面の向きに、ゆっくり変わる小さなずれ。
+  // 同じ点はどの面から見ても同じずれ（位置だけで決める）なので、角で割れない。大きさは短い辺に合わせて小さく
+  // 長い箱（額縁・棚板・壁ぎわの板など、ほかの面とぴったり接する物）はうねらせない：うねりで床や壁とくいちがい、くり返す黒い形が出た（2026-11-23 作者「これはなんだ」）
+  const amp = Math.max(w, h, d) > 3 ? 0 : Math.min(WOBBLE, Math.min(w, h, d) * 0.06), ph = (w * 3.1 + h * 1.7 + d * 2.3) % 6.283;
+  const wob = (x, y, z) => amp * (Math.sin(x * 2.1 + z * 1.3 + ph) * 0.6 + Math.sin(y * 2.7 - x * 1.1 + ph * 2) * 0.4);
+  const v = new THREE.Vector3(), inner = new THREE.Vector3(), dv = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    const old = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+    { // 絵の張り方：点を寄せたぶん、面の上の位置の割合で uv を置きなおす（そのままだと面のまんなかの絵が引き伸ばされる）
+      const f0 = old.map((c) => (c + 1) / 2), f1 = old.map((c, a2) => (remap(c, a2) + half[a2]) / (2 * half[a2]));
+      const ax = Math.abs(nor.getX(i)) > 0.5 ? [2, 1] : Math.abs(nor.getY(i)) > 0.5 ? [0, 2] : [0, 1]; // 面の上の2つの軸
+      const u0 = uv.getX(i), v0 = uv.getY(i), fit = (val, a2) => (Math.abs(val - f0[a2]) < 1e-4 ? f1[a2] : 1 - f1[a2]);
+      uv.setXY(i, fit(u0, ax[0]), fit(v0, ax[1]));
+    }
+    v.set(remap(old[0], 0), remap(old[1], 1), remap(old[2], 2));
+    // 下の面（床に接する所）は丸めない：脚や台の足もとが丸いと、床から浮いて見えた（2026-11-23 作者「机やいすの床に接する部分も丸くなってしまっている」）
+    inner.set(Math.max(-half[0] + r, Math.min(half[0] - r, v.x)), Math.max(-half[1], Math.min(half[1] - r, v.y)), Math.max(-half[2] + r, Math.min(half[2] - r, v.z)));
+    dv.subVectors(v, inner);
+    if (dv.lengthSq() > 1e-12) { dv.normalize(); const k = r + wob(v.x, v.y, v.z); v.copy(inner).addScaledVector(dv, k); nor.setXYZ(i, dv.x, dv.y, dv.z); }
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  pos.needsUpdate = true; nor.needsUpdate = true; uv.needsUpdate = true; g.computeBoundingBox(); g.computeBoundingSphere();
+  roundCache.set(key, g); return g;
+}
 function texOf(c, nearest = false) { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; if (nearest) { t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; } else t.anisotropy = 8; return t; }
 const PX = 48; // 板の絵の細かさ（1マスあたりのピクセル）
 // 内装をドット絵の手ざわりにする（2026-11-22 作者「試しに、銀鹿亭の内装を全部ドットにしてからテクスチャを張れる？」）。?pixelroom=1 のときだけ（見比べ用）
@@ -41,6 +91,17 @@ let PIXROOM = false;
  * riffle＝ページを何枚も続けてめくる（奥へは右から左へ、戻りは左から右へ。2026-11-23 作者「奥の場合は何枚かめくるのは？」「もっとめくる」）／curtain＝書き割りの幕が上がる・下りる／map＝見開きの地図を上から見て、光の点が奥（手前）のページへ渡る／layers＝紙の層がすべって入れかわる／light＝白い光（はじめの試し）
  */
 let DEEP = 'riffle';
+/** 建物に入るときの見せ方（2026-11-23 作者「銀鹿亭に入るときの演出を、いまは絵につっこんでいるかんじがするだけ」→ 4つの案を「全部試したい」。開発者の窓で切りかえる）
+ *  zoom＝いまの（扉へ寄って暗く）／doll＝人形の家のように正面が開いて光の中へ／fold＝飛び出す絵本の家がたたまれ、戸口の光へ／light＝扉の向こうの光が広がる／shelf＝本から書斎の本棚へ寄る */
+let NOOKIN = 'blur';
+/** ぼかして入るとき、主人公たちが戸口の奥へ歩くマス数（中に着いたときの立ち位置が、入口から1マス奥＝外では戸口から2マス奥にそろう） */
+const WALK_IN = 3;
+/** ぼかして出るとき：中では手前へ歩くマス数、外では戸口の奥から出てくるマス数（2026-11-23 作者「出るところも演出を」） */
+const WALK_OUT = 2, EMERGE = 1.6;
+/** 入る瞬間に広げる画角（度） */
+const FOV_BURST = 120;
+/** 切りかわりの前後に重ねる、中の色の濃さ（0〜1） */
+const VEIL = 0.7; // blur＝キャラはそのまま、まわりがぼけて中へ（2026-11-23 作者の案）。 // walk＝入口をくぐる（2026-11-23 作者「家をくぐったら、中、キャラはそのまま」）
 export const RIFFLE = Object.freeze({ n: 6, gap: 0.07, dur: 0.3 }); // 6枚。12枚・何枚もめくる録音の音も試したが、2026-11-23 作者が「もっとめくる」のときの形（6枚・1枚ごとにページをめくる音）に戻した // めくる枚数、1枚ごとの始まりのずれと、1枚がめくれる長さ（着く演出の割合）
 function pixCanvas(c, tilesW, tilesH, shade = false) {
   const w = Math.max(4, Math.round(tilesW * PIX_DOT)), h = Math.max(4, Math.round(tilesH * PIX_DOT));
@@ -438,6 +499,7 @@ function windowGlow(c, file, seed) {
  * 家（house-*・inn-*）は横いっぱいにして、高さは絵の形から（家ごとに屋根の高さが変わる）。
  * 吊るすもの（sign-*・awning-*・herbs）は板の上のほうに、それ以外は地面に立てて、形を変えずに入れる
  */
+const SHOW_H = { tree: 6, 'tree-small': 2.8, stall: 3.2, 'flower-stall': 3.2 };
 function townBoardCanvas(name, b, it) {
   const cfg = TOWN_CFG, imgs = TOWN_IMG; if (!cfg || !imgs) return null;
   let file = it.art || cfg.boards?.[name]; // it.art：地図で家の絵を決めているとき
@@ -451,12 +513,55 @@ function townBoardCanvas(name, b, it) {
     const df = cfg.doors?.[file]?.h, doorH = cfg.doorH;
     const h = df && doorH ? doorH / df : b.w * ar, w = h / ar; return { w, h, file, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) };
   }
+  // 見せる高さ（マス）が決まっている物は、絵の形のまま、足もとより大きく描く（木の枝や屋台の屋根は、足もと＝ぶつかる所より広がる）。
+  // キャラの背は約2.5マス（2026-11-23 作者「植木などのサイズを確認してほしい」：街路樹が2.6マス＝キャラとほぼ同じ、小さな木は0.9マスだった）
+  const showH = it.showH ?? SHOW_H[name];
+  if (showH) { const h = showH, w = h / ar; return { w, h, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) }; }
   const hang = /^(sign-|awning-|herbs)/.test(name);
-  return { h: b.h, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
+  const artH = hang ? b.h : Math.min(b.h, b.w * ar); // 絵が見えている高さ（マス）。板が高くても、絵は下に低く描かれることがある（花壇など）
+  return { h: b.h, artH, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
     let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
     if (hang && /^awning-/.test(name)) { w = W; h = Math.min(H * 0.45, W * ar); } // 庇は横いっぱい
     g.drawImage(im, (W - w) / 2, hang ? 0 : H - h, w, h);
   }) };
+}
+/**
+ * 入れる家の扉を切り抜く（2026-11-23 作者「ドアを切り取って開くようにできるかい？」）。
+ * 家の絵の扉の所を暗い入口（奥にほのかな灯り）に塗りかえ、扉だけの絵（まわりは透明）を返す。cut は townArt.doors[絵].cut（割合）
+ * @returns {{c: HTMLCanvasElement, x0:number, x1:number, y0:number, y1:number, hinge:string}|null}
+ */
+function cutDoor(townC, im, cut) {
+  if (!townC || !im || !cut) return null;
+  const W = townC.c.width, H = townC.c.height;
+  const x0 = cut.x0 * W, x1 = cut.x1 * W, y0 = cut.y0 * H, y1 = cut.y1 * H, ar = cut.arch * H, dw = x1 - x0, dh = y1 - y0;
+  const shape = (/** @type {CanvasRenderingContext2D} */ g, ox, oy) => { g.beginPath(); g.moveTo(x0 - ox, y1 - oy); g.lineTo(x0 - ox, y0 + ar - oy); g.ellipse((x0 + x1) / 2 - ox, y0 + ar - oy, dw / 2, ar, 0, Math.PI, 0); g.lineTo(x1 - ox, y1 - oy); g.closePath(); };
+  // 扉の絵（元の絵から、扉の形で切り出す）
+  const door = canvas(Math.ceil(dw), Math.ceil(dh), (g) => { shape(g, x0, y0); g.clip(); g.drawImage(townC.c, -x0, -y0); });
+  if (cut.hole) { // 入口（と窓のガラス）をくりぬく。くりぬいた所を白で描いた mask（家の絵と同じ大きさ）も返す
+    const g2 = townC.c.getContext('2d'), mask = canvas(W, H, (mg) => { mg.fillStyle = '#fff'; shape(mg, 0, 0); mg.fill(); });
+    g2.save(); g2.globalCompositeOperation = 'destination-out'; shape(g2, 0, 0); g2.fill(); g2.restore();
+    const mg = mask.getContext('2d');
+    for (const wd of cut.windows || []) { // 窓：ガラスの所をくりぬき、木の格子を描きなおす（2026-11-23 作者「この窓の部分もくりぬいて」。元の格子を残すと、切れぎれの黒い点になった）
+      const wx0 = wd.x0 * W, wx1 = wd.x1 * W, wy0 = wd.y0 * H, wy1 = wd.y1 * H, war = (wd.arch || 0) * H, ww = wx1 - wx0, wh = wy1 - wy0;
+      const wshape = (/** @type {CanvasRenderingContext2D} */ c) => { c.beginPath(); c.moveTo(wx0, wy1); c.lineTo(wx0, wy0 + war); c.ellipse((wx0 + wx1) / 2, wy0 + war, ww / 2, Math.max(1, war), 0, Math.PI, 0); c.lineTo(wx1, wy1); c.closePath(); };
+      g2.save(); g2.globalCompositeOperation = 'destination-out'; wshape(g2); g2.fill(); g2.restore();
+      mg.save(); mg.fillStyle = '#fff'; wshape(mg); mg.fill(); mg.restore();
+      g2.save(); wshape(g2); g2.clip(); g2.fillStyle = wd.bar || '#4e321e'; const bw = Math.max(2, ww * 0.035); // 格子：縦3本・横2本と、まわりの枠
+      for (const f of [0.25, 0.5, 0.75]) g2.fillRect(wx0 + ww * f - bw / 2, wy0, bw, wh);
+      for (const f of [0.36, 0.68]) g2.fillRect(wx0, wy0 + wh * f - bw / 2, ww, bw);
+      g2.lineWidth = bw * 1.4; g2.strokeStyle = wd.bar || '#4e321e'; wshape(g2); g2.stroke(); g2.restore();
+    }
+    return { c: door, x0: cut.x0, x1: cut.x1, y0: cut.y0, y1: cut.y1, hinge: 'none', hole: true, mask };
+  }
+  // 家の絵の扉の所：暗い入口。奥の床にほのかな暖かい灯り
+  const g = townC.c.getContext('2d'); g.save(); shape(g, 0, 0); g.clip();
+  const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, '#120a06'); gr.addColorStop(0.7, '#2a1a0e'); gr.addColorStop(1, '#5a3a1c');
+  g.fillStyle = gr; g.fillRect(x0, y0, dw, dh);
+  const gl = g.createRadialGradient((x0 + x1) / 2, y1, 1, (x0 + x1) / 2, y1, dw * 0.9); gl.addColorStop(0, 'rgba(255,190,110,.45)'); gl.addColorStop(1, 'rgba(255,190,110,0)');
+  g.fillStyle = gl; g.fillRect(x0, y0, dw, dh);
+  g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = Math.max(1, dw * 0.05); shape(g, 0, 0); g.stroke(); // 戸口のふちの影
+  g.restore();
+  return { c: door, x0: cut.x0, x1: cut.x1, y0: cut.y0, y1: cut.y1, hinge: cut.hinge || 'right' };
 }
 /** 地面の模様（町の絵）。size＝絵1枚が覆うマス数 @returns {CanvasPattern|null} */
 function townPattern(g, key, T, size) {
@@ -557,7 +662,72 @@ const coverCanvas = (aspect) => memo('cover:' + aspect.toFixed(2), () => canvas(
     for (const a of [0.25, 0.75, 1.25]) { g.save(); g.rotate(a); g.beginPath(); g.ellipse(26, 0, 22, 7, 0, 0, Math.PI * 2); g.fill(); g.restore(); }
     g.restore();
   }
+  g.save(); g.translate(w, h); g.rotate(Math.PI); coverTitle(g, w, h); g.restore(); // 表紙の面（本の下の面）に張ると上下左右が返るので、180度回して描く
   const v = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(160,110,70,.28)'); g.fillStyle = v; g.fillRect(0, 0, w, h); // ふちのすれ
+}));
+/**
+ * 表紙の題名（2026-11-23 作者「本のタイトル STERNEN RING をおしゃれに」）：革に押しこんだ金の箔押し。
+ * 題名を2行（STERNEN／RING）で字間を広く、上下に細い金の罫と小さな星。真ん中に星の輪の飾り（題名にちなんだ仮の飾り。紋章ではない）
+ * 文字は、どの端末にもある明朝・セリフの書体から選ぶ（ネットの書体は読まない）
+ */
+function coverTitle(g, w, h) {
+  const FONT = '"Cinzel", "Trajan Pro", "Palatino Linotype", "Book Antiqua", Palatino, "Noto Serif", Georgia, "Times New Roman", serif';
+  const gold = (y0, y1) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, '#f6e3a6'); gr.addColorStop(0.45, '#c9a050'); gr.addColorStop(0.55, '#a87a30'); gr.addColorStop(1, '#e8cc82'); return gr; };
+  /** 箔押し：押しこんだ影（左上の暗さ・右下の明るさ）の上に金 */
+  const foil = (draw, y0, y1) => {
+    g.save(); g.translate(-1.5, -1.5); g.fillStyle = 'rgba(8,4,2,.75)'; g.strokeStyle = 'rgba(8,4,2,.75)'; draw(); g.restore();
+    g.save(); g.translate(1.5, 1.5); g.fillStyle = 'rgba(160,110,70,.35)'; g.strokeStyle = 'rgba(160,110,70,.35)'; draw(); g.restore();
+    g.save(); g.fillStyle = gold(y0, y1); g.strokeStyle = gold(y0, y1); g.shadowColor = 'rgba(255,220,140,.25)'; g.shadowBlur = 3; draw(); g.restore();
+  };
+  const spaced = (text, y, size, track) => { // 字間を広げて真ん中にそろえる
+    g.font = `600 ${size}px ${FONT}`; g.textBaseline = 'alphabetic';
+    const ws = [...text].map((c) => g.measureText(c).width), total = ws.reduce((a, b) => a + b, 0) + track * (text.length - 1);
+    let x = (w - total) / 2; [...text].forEach((c, i) => { g.fillText(c, x, y); x += ws[i] + track; });
+  };
+  const star = (cx, cy, r, n = 4) => { g.beginPath(); for (let i = 0; i < n * 2; i++) { const a = -Math.PI / 2 + i * Math.PI / n, rr = i % 2 ? r * 0.32 : r; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.closePath(); g.fill(); };
+  const rule = (y) => { const L = w * 0.26; g.lineWidth = 2; g.beginPath(); g.moveTo(w / 2 - L, y); g.lineTo(w / 2 - 18, y); g.moveTo(w / 2 + 18, y); g.lineTo(w / 2 + L, y); g.stroke(); star(w / 2, y, 10); for (const sx of [-1, 1]) { g.beginPath(); g.arc(w / 2 + sx * (L + 6), y, 3, 0, Math.PI * 2); g.fill(); } };
+  const top = h * 0.2, big = Math.round(w * 0.118), small = Math.round(w * 0.118);
+  foil(() => rule(top), top - 12, top + 12);
+  foil(() => spaced('STERNEN', top + big * 1.35, big, big * 0.22), top + 20, top + big * 1.4);
+  foil(() => spaced('RING', top + big * 1.35 + small * 1.25, small, small * 0.42), top + big * 1.4, top + big * 1.4 + small * 1.3);
+  const ry = top + big * 1.35 + small * 1.25 + 34; foil(() => rule(ry), ry - 12, ry + 12);
+  // 星の輪：細い二重の輪に、小さな星を12（題名にちなむ）
+  const cy = h * 0.62, R = w * 0.17;
+  foil(() => {
+    g.lineWidth = 2.2; g.beginPath(); g.arc(w / 2, cy, R, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 1.2; g.beginPath(); g.arc(w / 2, cy, R * 0.86, 0, Math.PI * 2); g.stroke();
+    for (let i = 0; i < 12; i++) { const a = -Math.PI / 2 + i * Math.PI / 6; star(w / 2 + Math.cos(a) * R * 0.93, cy + Math.sin(a) * R * 0.93, i % 3 ? 7 : 12); }
+    star(w / 2, cy, R * 0.38, 4); star(w / 2, cy, R * 0.2, 4);
+  }, cy - R, cy + R);
+}
+/** 書斎の奥の本棚（v02 book_spines の背表紙を3段に並べ、段の間に棚板） @param {HTMLImageElement} img */
+const spineShelfCanvas = (img) => memo('spines', () => canvas(1024, 512, (g, w, h) => {
+  const rowH = 150, plank = 20; g.fillStyle = '#2a1a10'; g.fillRect(0, 0, w, h);
+  for (let r = 0; r < 3; r++) {
+    const y = 6 + r * (rowH + plank);
+    g.drawImage(img, (r * 341) % 1024, 0, 1024 - (r * 341) % 1024, 512, 0, y, w - (r * 341) % 1024, rowH); // 段ごとに少しずらして同じ並びに見せない
+    if ((r * 341) % 1024) g.drawImage(img, 0, 0, (r * 341) % 1024, 512, w - (r * 341) % 1024, y, (r * 341) % 1024, rowH);
+    const gr = g.createLinearGradient(0, y + rowH, 0, y + rowH + plank); gr.addColorStop(0, '#6a4428'); gr.addColorStop(1, '#3a2414'); g.fillStyle = gr; g.fillRect(0, y + rowH, w, plank); // 棚板
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, y, w, 10); // 上の棚板の影
+  }
+}));
+/** 暖炉の口の中：上がアーチの形。すすけた暗いレンガの奥の壁に、下の火から暖かい光が当たる（まわりは透明＝暖炉の石が見える） */
+const fireboxCanvas = () => memo('firebox', () => canvas(256, 214, (g, w, h) => {
+  const ar = h * 0.3; g.beginPath(); g.moveTo(0, h); g.lineTo(0, ar); g.ellipse(w / 2, ar, w / 2, ar, 0, Math.PI, 0); g.lineTo(w, h); g.closePath(); g.clip();
+  g.fillStyle = '#1c110b'; g.fillRect(0, 0, w, h);
+  const R = rnd(83); g.strokeStyle = 'rgba(70,40,26,.55)'; g.lineWidth = 2; // 奥の壁のレンガの目地（うすく）
+  for (let y = 18, row = 0; y < h; y += 22, row++) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); for (let x = (row % 2) * 26 + R() * 6; x < w; x += 52) { g.beginPath(); g.moveTo(x, y - 22); g.lineTo(x, y); g.stroke(); } }
+  const glow = g.createRadialGradient(w / 2, h * 1.02, 4, w / 2, h * 0.95, h * 0.95); glow.addColorStop(0, 'rgba(255,170,80,.85)'); glow.addColorStop(0.35, 'rgba(220,110,40,.45)'); glow.addColorStop(1, 'rgba(120,50,20,0)'); g.fillStyle = glow; g.fillRect(0, 0, w, h); // 火の照り返し
+  const soot = g.createLinearGradient(0, 0, 0, h * 0.6); soot.addColorStop(0, 'rgba(8,4,2,.85)'); soot.addColorStop(1, 'rgba(8,4,2,0)'); g.fillStyle = soot; g.fillRect(0, 0, w, h); // 上はすすで暗く
+  const side = g.createLinearGradient(0, 0, w, 0); side.addColorStop(0, 'rgba(0,0,0,.55)'); side.addColorStop(0.18, 'rgba(0,0,0,0)'); side.addColorStop(0.82, 'rgba(0,0,0,0)'); side.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = side; g.fillRect(0, 0, w, h); // 左右の奥行き
+}));
+/** 人形の家の中（入る演出 doll）：2階建ての部屋の断面。漆喰の壁と梁、木の床、まんなかに暖かい灯り（コードの仮の絵） */
+const roomCardCanvas = () => memo('roomcard', () => canvas(512, 512, (g, w, h) => {
+  g.fillStyle = '#ecd8b2'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#6a4428'; for (const y of [0, h * 0.46, h * 0.5]) g.fillRect(0, y, w, y ? h * 0.04 : h * 0.05); for (const x of [0, w * 0.32, w * 0.66, w - 16]) g.fillRect(x, 0, 16, h); // 梁と柱
+  g.fillStyle = '#8a5a34'; g.fillRect(0, h * 0.9, w, h * 0.1); g.fillRect(0, h * 0.46, w, h * 0.04); // 床
+  for (const [x, y] of [[w * 0.18, h * 0.3], [w * 0.5, h * 0.25], [w * 0.82, h * 0.3], [w * 0.3, h * 0.72], [w * 0.7, h * 0.72]]) { const gr = g.createRadialGradient(x, y, 2, x, y, w * 0.28); gr.addColorStop(0, 'rgba(255,210,130,.9)'); gr.addColorStop(1, 'rgba(255,190,110,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = '#fff2c8'; g.beginPath(); g.arc(x, y, 6, 0, Math.PI * 2); g.fill(); } // 灯り
+  const v = g.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.75); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(60,30,10,.55)'); g.fillStyle = v; g.fillRect(0, 0, w, h);
 }));
 /** 宿の床の敷物（深い赤に、縁どりと菱形の模様。使いこまれて少し色あせ） */
 const rugCanvas = () => canvas(512, 448, (g, w, h) => {
@@ -623,6 +793,28 @@ const hexCanvas = () => canvas(128, 128, (g) => {
 /** 切り抜きの板（両面に同じ絵）。影も絵の形で落ちる */
 /** レフ板（2026-11-22 作者「カメラからキャラにスポットライトかレフ板を置いて明るく」）：キャラの絵を少しだけ自分で光らせる */
 const CHAR_FILL = 0.22;
+/**
+ * キャラの色の調子（フィールドの絵だけ。元のドット絵のファイルは変えない）。2026-11-23 作者「ナハトの色が紫すぎるなあもっと黒っぽく特に髪を」：
+ * 紫の色（青が緑より強い色）だけを、彩度を落として暗くする。肌・金具など暖かい色はそのまま。髪（1コマの上から hair の割合まで）はもっと暗く
+ */
+const CHAR_TONE = { nacht: { sat: 0.6, dark: 0.8, hair: 0.4, hairSat: 0.2, hairDark: 0.5 } }; // 服は紫を少し残す（2026-11-23 作者「服はもう少し紫でもいい」）
+function toneSheet(id, img, fh) {
+  const t = CHAR_TONE[id]; if (!t || !img || typeof document === 'undefined') return img;
+  const c = document.createElement('canvas'); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+  const g = c.getContext('2d'); if (!g) return img; g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
+  for (let y = 0; y < c.height; y++) {
+    // 髪と服のさかいめは、なだらかに（くっきり分けると、フードの上だけ黒い帯になった。2026-11-23 作者の画像）
+    const f = (y % fh) / fh, k = Math.max(0, Math.min(1, (t.hair + 0.05 - f) / 0.1)), sat = t.sat + (t.hairSat - t.sat) * k, dark = t.dark + (t.hairDark - t.dark) * k;
+    for (let x = 0; x < c.width; x++) {
+      const i = (y * c.width + x) * 4; if (px[i + 3] === 0) continue;
+      const R = px[i], G = px[i + 1], B = px[i + 2]; if (!(B > G + 4)) continue; // 紫・青みの色だけ
+      const L = 0.3 * R + 0.59 * G + 0.11 * B;
+      px[i] = (L + (R - L) * sat) * dark; px[i + 1] = (L + (G - L) * sat) * dark; px[i + 2] = (L + (B - L) * sat) * dark;
+    }
+  }
+  g.putImageData(d, 0, 0); return c;
+}
 function fillMaterial(m, tex) { m.emissive = new THREE.Color(0xfff4e6); m.emissiveMap = tex; m.emissiveIntensity = CHAR_FILL; return m; }
 /** のぞき穴（2026-11-22 作者「スポットライトが当たるところだけすけるとかできる？」）：主人公より手前の板は、画面で主人公のまわりの丸だけを透かす。
  * uHole＝画面の位置（描画バッファのピクセル）と半径。板ごとの uHoleOn が 1 のときだけ穴をあける */
@@ -656,7 +848,7 @@ function boardMesh(tex, w, h) {
 export function createThreeStage(canvasEl, assets) {
   const style = assets.style ?? DEFAULT_STYLE;
   PIXROOM = new URLSearchParams(location.search).get('pixelroom') === '1';
-  const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, powerPreference: 'low-power' });
+  const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, stencil: true, powerPreference: 'low-power' }); // stencil：くりぬいた戸口の奥を、穴からだけ見せる
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.autoClear = false;
   canvasEl.style.imageRendering = 'auto';
@@ -664,6 +856,36 @@ export function createThreeStage(canvasEl, assets) {
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 400);
   // 暗転（マップを移るとき）：画面全体に重ねる板
   const fadeScene = new THREE.Scene(), fadeCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  // キャラ以外をぼかす（2026-11-23 作者「はいると、キャラはそのまま動かさないで、ほかはぼかされて、ぼかし最大になったら中にきりかわり、ぼかしから始まり、ぼかしをとっていく」）
+  // キャラは layer 1 だけ、ほかは layer 0。灯りは両方。ふだんのカメラは両方を写す。ぼかすときは、layer 0 を絵にしてぼかし、その上に layer 1（キャラ）をくっきり描く
+  camera.layers.enable(1);
+  const blurRT = [0, 1].map(() => new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, depthBuffer: true }));
+  const blurMat = new THREE.ShaderMaterial({ uniforms: { tDiffuse: { value: null }, dir: { value: new THREE.Vector2() } }, depthTest: false, depthWrite: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+    fragmentShader: 'uniform sampler2D tDiffuse; uniform vec2 dir; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv) * 0.227027; c += texture2D(tDiffuse, vUv + dir * 1.3846153846) * 0.3162162162; c += texture2D(tDiffuse, vUv - dir * 1.3846153846) * 0.3162162162; c += texture2D(tDiffuse, vUv + dir * 3.2307692308) * 0.0702702703; c += texture2D(tDiffuse, vUv - dir * 3.2307692308) * 0.0702702703; gl_FragColor = c; }' });
+  const blurScene = new THREE.Scene(); blurScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blurMat));
+  const blurOutMat = new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false }); const blurOutScene = new THREE.Scene(); blurOutScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blurOutMat));
+  let blurAmt = 0; // 0〜1
+  // 切りかわりの前後に、中の部屋のだいたいの色を背景にうっすら重ねる（2026-11-23 作者「切り替わる前後をもっと自然な感じに。ぼかしと同時に、色味をなんとなく重ねて」）。キャラには重ねない
+  const veilMat = new THREE.MeshBasicMaterial({ color: 0xd9a066, transparent: true, opacity: 0, depthTest: false, depthWrite: false, toneMapped: false }); const veilScene = new THREE.Scene(); veilScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), veilMat));
+  let veilAmt = 0;
+  // 中を組み立てているあいだ（0.2秒ほど）も画面を止めないように、切りかわる直前の画面を絵として取っておき、そのあいだ毎コマ描く（少しずつ寄る）
+  /** @type {any} */ let holdTex = null; /** @type {any} */ let holdBg = null; let holdOk = false, holdT0 = 0;
+  /* 取っておいた画面は、色の変換をせずそのまま描く（画面と同じ色の形式で取るため。sRGB の形式で取ろうとすると写しが失敗して真っ黒になった。2026-11-23 作者「一瞬黒くなる」） */
+  const holdMat = new THREE.ShaderMaterial({ uniforms: { map: { value: null }, op: { value: 1 } }, transparent: true, depthTest: false, depthWrite: false, toneMapped: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: 'uniform sampler2D map; uniform float op; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(map, vUv).rgb, op); }' }); const holdMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), holdMat); const holdScene = new THREE.Scene(); holdScene.add(holdMesh);
+  const grabHold = () => { // いま描いた画面を取っておく
+    const sz = renderer.getDrawingBufferSize(new THREE.Vector2());
+    if (!holdTex || holdTex.image.width !== sz.x || holdTex.image.height !== sz.y) { holdTex?.dispose(); holdTex = new THREE.FramebufferTexture(sz.x, sz.y); }
+    renderer.copyFramebufferToTexture(new THREE.Vector2(0, 0), holdTex); holdOk = true;
+  };
+  // 背景だけ（キャラを描く前）の写し。着いた直後に重ねるのはこちら：キャラまで重ねると、前後でキャラの位置が少しずれて残像になった（2026-11-23 作者「何かキャラの残像があるときがある」）
+  const grabBg = () => {
+    const sz = renderer.getDrawingBufferSize(new THREE.Vector2());
+    if (!holdBg || holdBg.image.width !== sz.x || holdBg.image.height !== sz.y) { holdBg?.dispose(); holdBg = new THREE.FramebufferTexture(sz.x, sz.y); }
+    renderer.copyFramebufferToTexture(new THREE.Vector2(0, 0), holdBg);
+  };
   const fadeMat = new THREE.MeshBasicMaterial({ color: 0x0a0a10, transparent: true, opacity: 0, depthTest: false }); fadeScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), fadeMat));
 
   // 灯り（試作と同じ組み合わせ）
@@ -693,10 +915,15 @@ export function createThreeStage(canvasEl, assets) {
   // キャラ（なびくドット絵）。読み終わるまで load が待つ
   const loader = new THREE.TextureLoader();
   const flutter = {};
+  // 書斎の元絵（美術・演出室 v02：本と書斎 desk_lamp・book_spines・desk_edge）。読めなければコードの仮の絵
+  /** @type {Record<string, any>} */ const bookArt = {};
+  const bookReady = Promise.all(['desk_lamp', 'book_spines', 'desk_edge'].map((n) => loader.loadAsync('assets/book/' + n + '.webp').then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bookArt[n] = t; }, () => {})));
   const flutterReady = Promise.all(Object.entries(FLUTTER).map(([id, path]) => loader.loadAsync(path).then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; flutter[id] = t; }, () => {})));
 
   // マップの手ざわり（stage.textures）：美術・演出室の元絵をそのまま張る（2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵
   const artCache = {}; let ART2 = null;
+  // 内装の手ざわりと切り抜き（v01：床〜扉、v02：木・腰板・麻布・敷物と、切り抜きの灯り・瓶・ジョッキ・樽。2026-11-23 作者「銀鹿亭のテクスチャできたよ」）
+  const INN_KEYS = ['floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
   // 元絵1枚が覆うマス数（横, 縦）。ドット絵にするときの細かさを決める
   const ART_TILES = { floor: [4, 4], wall: [4, 4], ceiling: [4, 4], brick: [1.5, 1.9], window: [1.3, 1.8], tabletop: [3, 1.8], counter: [7, 1.1], blanket: [2, 1.2], door: [1, 2.1] };
   // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）：マップの stage.townArt の絵を読んでおく（地面の模様と板の絵に使う）
@@ -732,7 +959,7 @@ export function createThreeStage(canvasEl, assets) {
   async function loadArt(m) {
     TOWN_CFG = null; TOWN_IMG = null; ART2 = null; const t = m.stage?.textures; if (!t || new URLSearchParams(location.search).get('innart') === '0') return;
     const out = {};
-    for (const k of ['floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door']) {
+    for (const k of INN_KEYS) {
       if (!t[k]) continue; const url = (t.base || '') + t[k];
       if (!(url in artCache)) artCache[url] = await loader.loadAsync(url).then((x) => { x.colorSpace = THREE.SRGBColorSpace; return x; }, () => null);
       if (!artCache[url]) continue;
@@ -742,10 +969,52 @@ export function createThreeStage(canvasEl, assets) {
     }
     ART2 = out;
   }
+  /**
+   * 次のマップの絵を先に読んでおく（2026-11-23 作者「ロードをする間を稼ぐために演出があると違和感なくなったりするのかな？」→「そうする」）。
+   * 出入口の「去る」演出のあいだに、町の絵・内装の手ざわり・敵の姿を読み、ほどき（decode）、手ざわりは GPU にも送っておく。
+   * load と同じ置き場（townCache・artCache・symCache）に入れるので、着いたときの load はそれを使う。いまの舞台には触らない
+   * @param {any} m
+   */
+  async function prefetchMap(m) {
+    if (!m) return;
+    const img = (/** @type {string} */ url) => new Promise((ok) => { const im = new Image(); im.onload = () => im.decode().catch(() => {}).then(() => ok(im)); im.onerror = () => ok(null); im.src = url; });
+    const jobs = [];
+    const t = m.stage?.townArt;
+    if (t) for (const f of new Set([...Object.values(t.ground || {}), ...Object.values(t.boards || {}).flat()])) { const url = (t.base || '') + f; if (!(url in townCache)) jobs.push(img(url).then((im) => { if (!(url in townCache)) townCache[url] = im; })); }
+    for (const e of m.encounters || []) for (const url of e.symbol || []) if (!(url in symCache)) jobs.push(img(url).then((im) => { if (!(url in symCache)) symCache[url] = im; }));
+    const tx = m.stage?.textures;
+    if (tx && new URLSearchParams(location.search).get('innart') !== '0') for (const k of INN_KEYS) {
+      if (!tx[k]) continue; const url = (tx.base || '') + tx[k]; if (url in artCache) continue;
+      jobs.push(loader.loadAsync(url).then(async (x) => { try { await x.image?.decode?.(); } catch { /* ほどけなくても張るときにほどく */ } x.colorSpace = THREE.SRGBColorSpace; if (!(url in artCache)) { artCache[url] = x; renderer.initTexture(x); } }, () => {}));
+    }
+    await Promise.all(jobs);
+  }
   /** 元絵の手ざわり（写しを作って繰り返し数を決める。写しはマップを替えるときに片づく）。無ければ null */
+  /** 切り抜きの元絵の、絵のある範囲（px。美術・演出室の 追加元絵_生成一覧_v01.json の content_bounds_alpha128）と絵の大きさ */
+  const CUT = { rug: [[42, 32, 980, 863], 1024, 896], barrels: [[83, 28, 686, 739], 768, 768], bottles: [[37, 40, 987, 370], 1024, 384], candle: [[38, 19, 218, 493], 256, 512], lampHanging: [[150, 27, 360, 740], 512, 768], lampWall: [[19, 75, 492, 492], 512, 512] };
+  const MUGS = [[37, 113, 158, 243], [242, 114, 361, 243], [446, 113, 568, 243]]; // mugs.png の木のジョッキ2つ・錫のジョッキ1つ（あとの2つは木の皿）
+  /** 元絵の一部（b＝[x0,y0,x1,y1] px）だけを使う手ざわり。flip：左右を返す（壁の右側の灯りなど、物の向きだけ。キャラには使わない） */
+  const cutT = (k, b, W, H, flip = false) => { const base = ART2?.[k]; if (!base) return null; const t = base.clone(); t.needsUpdate = true; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; const rx = (b[2] - b[0] + 1) / W, ry = (b[3] - b[1] + 1) / H; t.repeat.set(flip ? -rx : rx, ry); t.offset.set(flip ? (b[0] / W + rx) : b[0] / W, 1 - (b[3] + 1) / H); t.anisotropy = 8; return t; };
+  /** 切り抜きの紙の板（高さ h、幅は絵の縦横比）。まんなかが原点。無ければ null（前のコードの形にもどす） */
+  const cutPlane = (k, h, { b = CUT[k]?.[0], W = CUT[k]?.[1], H = CUT[k]?.[2], flip = false, emissive = 0 } = {}) => {
+    if (!b) return null; const t = cutT(k, b, W, H, flip); if (!t) return null;
+    const w = h * (b[2] - b[0] + 1) / (b[3] - b[1] + 1);
+    const mat = new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.35, roughness: 0.8, side: THREE.DoubleSide, ...(emissive ? { emissive: 0xffffff, emissiveMap: t, emissiveIntensity: emissive } : {}) });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.castShadow = true;
+    m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: t, alphaTest: 0.35 }); m.userData.w = w; return m;
+  };
   const artT = (k, rx = 1, ry = 1) => { const b = ART2?.[k]; if (!b) return null; const t = b.clone(); t.needsUpdate = true; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; };
+  /** @type {any[]} 中の扉（ちょうつがいで回る） */ let innerDoors = [];
+  /** @type {any} 書斎の奥の本棚（入る演出 shelf で寄る） */ let studyShelf = null;
+  /** @type {any} くりぬいた戸口の奥（カメラが家の正面より奥へ入ったら、穴の外にも描く） */ let holeRecess = null;
+  /** @type {any} ぼかして入るとき、外の最後のカメラ（主人公からのずれ）。中はここから始めて、キャラが画面の同じ所・同じ大きさに映るように（2026-11-23 作者「キャラが瞬間移動してしまう」） */ let carry = null;
+  let peekEntry = false; /** @type {any} 行き先のマップ（去る演出のあいだに main が知らせる） */ let nextMap = null;
+  /** @type {{p:number[], q:number[], fov:number}|null} 撮影の道具だけが使う、決めたカメラ */ let capturePose = null; // 中の眺めの写しへ寄って入った（着くときに暗くしない）
   let map = null, root = null, pages = null, actors = {}, boards = [], lights = [], fires = [], delayOf = riseDelayFn([]);
   const glowTex = texOf(glowCanvas());
+  // 入る演出の戸口の光（人形の家・たたむ・光）
+  const doorGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc878, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true, opacity: 0 }));
+  doorGlow.visible = false; doorGlow.renderOrder = 5; scene.add(doorGlow);
   /** @type {{HT:number, F:number}|null} ブックヌックの箱の大きさ（中のマップのとき） */ let nook = null;
   let interior = false, cssW = 1, cssH = 1, lastEye = [0, 0, 0], lastIntro = null, orbsShown = 0, lastEffect = '';
 
@@ -774,6 +1043,23 @@ export function createThreeStage(canvasEl, assets) {
   const riffleSheets = Array.from({ length: RIFFLE.n }, () => makeSheet()); // 奥へ何枚もめくる紙 // 本がひらくとき、表紙を追って白い見返しの紙が2枚めくれる（2026-11-23 作者「最初の本開くところチープな感じ」）
   /** 外のマップのページの絵（めくる紙に使う）。いまのと、ひとつ前の */
   let curPageTex = null, prevPageTex = null;
+  // めくる紙の表と裏：板とキャラが倒れて平らになったページを、真上から撮った絵（2026-11-23 作者「突然消えたり出てきたりする感をなくしたい」）。
+  // 前のページ（去る最後）と新しいページ（着いた最初）。撮れていないときは、地面だけのページの絵
+  const snapRT = [0, 1].map(() => { const t = new THREE.WebGLRenderTarget(16, 16); t.texture.colorSpace = THREE.SRGBColorSpace; return t; });
+  let snapPrevOk = false, snapCurOk = false;
+  const snapCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 300);
+  const snapPage = (/** @type {any} */ rt) => {
+    const { BW, BH } = bookSize(map), w = 2048, h = Math.round(2048 * BH / BW);
+    if (rt.width !== w || rt.height !== h) rt.setSize(w, h);
+    Object.assign(snapCam, { left: -BW / 2, right: BW / 2, top: BH / 2, bottom: -BH / 2 }); snapCam.updateProjectionMatrix();
+    snapCam.position.set(map.width / 2, 120, map.height / 2); snapCam.up.set(0, 0, -1); snapCam.lookAt(map.width / 2, 0, map.height / 2);
+    snapCam.layers.enable(1);
+    const hid = [turnMesh, ...riffleSheets.map((f) => f.group), ...flyleaves.map((f) => f.group), ...orbSprites, ...trailDots, doorGlow].filter((o) => o.visible);
+    hid.forEach((o) => { o.visible = false; });
+    const fog = scene.fog; scene.fog = null;
+    renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, snapCam); renderer.setRenderTarget(null);
+    scene.fog = fog; hid.forEach((o) => { o.visible = true; });
+  };
   const setTurnTex = (/** @type {any} */ m, /** @type {any} */ t) => { m.material.map = t || turnTex; m.material.emissiveMap = t || turnTex; m.material.needsUpdate = true; };
   /**
    * @param {any} sh 紙 @param {number} p 0＝めくる前のページに寝ている／1＝反対のページに寝ている @param {number} PW 片ページの横 @param {number} PH 縦
@@ -827,16 +1113,16 @@ export function createThreeStage(canvasEl, assets) {
     const edgeM = new THREE.MeshStandardMaterial({ map: edgeT, roughness: 1 }), stackTopM = new THREE.MeshStandardMaterial({ color: 0xd8c8a2, roughness: 1 });
     const make = (side) => { // side -1 左ページ / +1 右ページ。背（x=W/2）を軸に回る
       const pivot = new THREE.Group(); pivot.position.set(W / 2, 0, H / 2); root.add(pivot);
-      // 面の順 +x,-x,+y,-y,+z,-z。閉じた本では右半分の下の面（-y）が上を向く＝表紙の絵
-      const cover = new THREE.Mesh(new THREE.BoxGeometry(BW / 2 + M, 0.3, BH + 2 * M), [leatherM, leatherM, leatherM, side > 0 ? coverM : leatherM, leatherM, leatherM]);
+      // 面の順 +x,-x,+y,-y,+z,-z。閉じた本では左半分の下の面（-y）が上を向く＝表紙の絵（横書きの本：背が左、表紙は右から左へひらく。2026-11-23 作者「最初の本の開き方逆かな、だって横書きだから」）
+      const cover = new THREE.Mesh(roundBox(BW / 2 + M, 0.3, BH + 2 * M), [leatherM, leatherM, leatherM, side < 0 ? coverM : leatherM, leatherM, leatherM]);
       cover.position.set(side * (BW / 4 + M / 2), -0.36, 0); cover.receiveShadow = true; pivot.add(cover);
-      const stack = new THREE.Mesh(new THREE.BoxGeometry(BW / 2, 0.2, BH), [edgeM, edgeM, stackTopM, stackTopM, edgeM, edgeM]); // まわりは紙の重なり（小口） stack.position.set(side * BW / 4, -0.11, 0); pivot.add(stack);
+      const stack = new THREE.Mesh(roundBox(BW / 2, 0.2, BH), [edgeM, edgeM, stackTopM, stackTopM, edgeM, edgeM]); // まわりは紙の重なり（小口） stack.position.set(side * BW / 4, -0.11, 0); pivot.add(stack);
       const t = texOf(pageCv); t.repeat.set(0.5, 1); t.offset.set(side < 0 ? 0 : 0.5, 0);
       const page = new THREE.Mesh(new THREE.PlaneGeometry(BW / 2, BH), new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, bumpMap: fiberTex, bumpScale: 0.5 })); page.rotation.x = -Math.PI / 2; page.position.set(side * BW / 4, 0, 0); page.receiveShadow = true; pivot.add(page);
       return pivot;
     };
     pages = { left: make(-1), right: make(1) };
-    { const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, BH + 2 * M, 20), leatherM); spine.rotation.x = Math.PI / 2; spine.position.set(0, -0.42, 0); pages.left.add(spine); } // 背の丸み：本の背にそって奥から手前へのびる筒。ページより下に収める（2026-11-23 作者「これなに」：前は向きをまちがえて横向きになり、ページの上に黒い棒が出ていた）
+    { const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, BH + 2 * M, 20), leatherM); spine.rotation.x = Math.PI / 2; spine.position.set(0, -0.42, 0); pages.right.add(spine); } // 背の丸み：本の背にそって奥から手前へのびる筒。ページより下に収める（2026-11-23 作者「これなに」：前は向きをまちがえて横向きになり、ページの上に黒い棒が出ていた）
     // めくる紙のための、このマップのページの絵（root の外に持つので、マップを読みかえても次のめくりまで残る）
     if (prevPageTex && prevPageTex !== curPageTex) prevPageTex.dispose();
     prevPageTex = curPageTex; curPageTex = texOf(pageCv);
@@ -852,20 +1138,32 @@ export function createThreeStage(canvasEl, assets) {
     const deskT = texOf(woodCanvas()); deskT.wrapS = deskT.wrapT = THREE.RepeatWrapping; deskT.repeat.set(DW / 6, DD / 6); deskT.anisotropy = 8;
     const desk = new THREE.Mesh(new THREE.PlaneGeometry(DW, DD), new THREE.MeshStandardMaterial({ map: deskT, color: 0xc89a70, roughness: 0.55, metalness: 0.05 }));
     desk.rotation.x = -Math.PI / 2; desk.position.set(cx, -0.52, back + DD / 2); desk.receiveShadow = true; root.add(desk);
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(DW, 1.2, 0.6), new THREE.MeshStandardMaterial({ map: deskT, color: 0x9a7050, roughness: 0.6 })); edge.position.set(cx, -1.12, back + DD); root.add(edge); // 机の手前のふち
-    const shelfT = texOf(studyShelfCanvas()); shelfT.wrapS = THREE.RepeatWrapping; shelfT.repeat.set(3, 1); shelfT.anisotropy = 8;
-    const SW = DW * 1.4, SH = SW / 2 / 3 * 1.3;
+    const edgeSide = new THREE.MeshStandardMaterial({ map: deskT, color: 0x9a7050, roughness: 0.6 });
+    const edgeFront = bookArt.desk_edge ? (() => { const t = bookArt.desk_edge.clone(); t.needsUpdate = true; t.wrapS = THREE.RepeatWrapping; t.repeat.set(DW / 9.6, 1); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }); })() : edgeSide; // v02 desk_edge（1024×128＝高さ1.2で幅9.6）
+    const edge = new THREE.Mesh(roundBox(DW, 1.2, 0.6), [edgeSide, edgeSide, edgeSide, edgeSide, edgeFront, edgeSide]); edge.position.set(cx, -1.12, back + DD); root.add(edge); // 机の手前のふち
+    const shelfT = texOf(bookArt.book_spines ? spineShelfCanvas(bookArt.book_spines.image) : studyShelfCanvas()); shelfT.wrapS = shelfT.wrapT = THREE.RepeatWrapping; shelfT.anisotropy = 8;
+    const far = !!bookArt.book_spines; shelfT.repeat.set(far ? 9 : 3, far ? 2 : 1); // 本棚はもっと遠くに（2026-11-23 作者「もう少し本棚は遠くにある感じ」）：背表紙を小さく、たくさん並べる
+    const SW = DW * (far ? 2.0 : 1.4), SH = SW / 2 / 3 * 1.3 * (far ? 1.4 : 1);
     const shelf = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshStandardMaterial({ map: shelfT, roughness: 0.9, color: DAY ? 0xffffff : 0xb8a898 }));
-    shelf.position.set(cx, SH / 2 - 6, back - 4); shelf.material.fog = false; root.add(shelf);
+    shelf.position.set(cx, SH / 2 - 6, back - (far ? 16 : 4)); shelf.material.fog = false; root.add(shelf); studyShelf = shelf;
     // 机のランプ（左の奥）：真鍮の台と、だいだい色のガラスの笠。机と本の左側を暖かく照らす
     const lx = cx - BW / 2 - 6, lz = cz - BH * 0.2;
     const brass = new THREE.MeshStandardMaterial({ color: 0x8a6a30, roughness: 0.35, metalness: 0.7 });
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 0.4, 20), brass); base.position.set(lx, -0.32, lz); root.add(base);
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 6, 10), brass); pole.position.set(lx, 2.9, lz); root.add(pole);
-    const shade = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff9a40, emissiveIntensity: 0.9, roughness: 0.4, side: THREE.DoubleSide, transparent: true, opacity: 0.92 }));
-    shade.position.set(lx, 6.4, lz); root.add(shade);
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(7, 7, 1); glow.position.set(lx, 5.6, lz); root.add(glow);
-    const L = new THREE.PointLight(0xffb066, DAY ? 60 : 220, BW * 1.6, 1.4); L.position.set(lx, 5.4, lz); root.add(L);
+    let shadeY = 5.6; // 笠の高さ（光の玉と灯りをここに）
+    if (bookArt.desk_lamp) { // v02 desk_lamp の切り抜き（真鍮の台とだいだいのガラスの笠）。足もとを机に
+      const t = bookArt.desk_lamp.clone(); t.needsUpdate = true; const b = [47, 37, 466, 985]; t.repeat.set((b[2] - b[0] + 1) / 512, (b[3] - b[1] + 1) / 1024); t.offset.set(b[0] / 512, 1 - (b[3] + 1) / 1024);
+      const lh = 14, lw = lh * (b[2] - b[0] + 1) / (b[3] - b[1] + 1); // 大きく（2026-11-23 作者「このランプのサイズ感もっとでかくていいのでは見切れてもいい」）
+      shadeY = -0.52 + lh * 0.75; // 笠は絵の上から約0.25
+      const lp = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.35, roughness: 0.5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.25 }));
+      lp.position.set(lx, -0.52 + lh / 2, lz); lp.castShadow = true; lp.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: t, alphaTest: 0.35 }); root.add(lp);
+    } else {
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 0.4, 20), brass); base.position.set(lx, -0.32, lz); root.add(base);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 6, 10), brass); pole.position.set(lx, 2.9, lz); root.add(pole);
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff9a40, emissiveIntensity: 0.9, roughness: 0.4, side: THREE.DoubleSide, transparent: true, opacity: 0.92 }));
+      shade.position.set(lx, 6.4, lz); root.add(shade);
+    }
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(bookArt.desk_lamp ? 11 : 7, bookArt.desk_lamp ? 11 : 7, 1); glow.position.set(lx, shadeY, lz); root.add(glow);
+    const L = new THREE.PointLight(0xffb066, DAY ? 60 : 220, BW * 1.6, 1.4); L.position.set(lx, shadeY - 0.2, lz); root.add(L);
     lights.push({ L, base: L.intensity, ph: 0.5, z: lz, glow, lamp: true });
   }
 
@@ -880,12 +1178,12 @@ export function createThreeStage(canvasEl, assets) {
     const mat = (map, rough = 0.95) => new THREE.MeshStandardMaterial({ map, roughness: rough, metalness: 0 });
     const plane = (w, h, m, pos, rot) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); p.position.set(...pos); p.rotation.set(...rot); p.receiveShadow = true; root.add(p); return p; };
     // 箱の内側：床・左右の壁・奥の壁・天井
-    plane(W, H, mat(artT('floor', W / 4, H / 4) ?? rep(dungeon ? cobbleCanvas() : planksCanvas(), W / 4, H / 4, 4)), [W / 2, 0, H / 2], [-Math.PI / 2, 0, 0]);
+    { const fm = mat(artT('floor', W / 4, H / 4) ?? rep(dungeon ? cobbleCanvas() : planksCanvas(), W / 4, H / 4, 4)); if (!dungeon) fm.color.set(WOOD_TINT); plane(W, H, fm, [W / 2, 0, H / 2], [-Math.PI / 2, 0, 0]); }
     const wallC = dungeon ? brickCanvas(21, [128, 132, 118]) : plasterCanvas();
     plane(H, HT, mat(artT('wall', H / 4, HT / 4) ?? rep(wallC, H / 6, HT / 6, 6)), [0, HT / 2, H / 2], [0, Math.PI / 2, 0]);
     plane(H, HT, mat(artT('wall', H / 4, HT / 4) ?? rep(dungeon ? brickCanvas(33, [120, 124, 116]) : wallC, H / 6, HT / 6, 6)), [W, HT / 2, H / 2], [0, -Math.PI / 2, 0]);
     plane(W, HT, mat(artT('wall', W / 4, HT / 4) ?? rep(dungeon ? brickCanvas(45, [110, 112, 120]) : wallC, W / 6, HT / 6, 6)), [W / 2, HT / 2, 0], [0, 0, 0]);
-    plane(W, H, mat(artT('ceiling', W / 4, H / 4) ?? rep(beamsCanvas(), W / 4, H / 4, 4)), [W / 2, HT, H / 2], [Math.PI / 2, 0, 0]);
+    { const cm = mat(artT('ceiling', W / 4, H / 4) ?? rep(beamsCanvas(), W / 4, H / 4, 4)); if (!dungeon) cm.color.set(WOOD_TINT); plane(W, H, cm, [W / 2, HT, H / 2], [Math.PI / 2, 0, 0]); }
     // 壁の飾りと灯り：手前から奥へ、左右の壁に交互。建物の中は灯りのともる窓、ダンジョンは壁の灯り（たいまつ）と暗いくぼみ
     const winM = new THREE.MeshBasicMaterial({ map: artT('window') ?? (PIXROOM ? pixTex(windowCanvas(3, 4, dungeon ? '#16221a' : '#4a2416'), 1.1 * S, 1.5 * S) : texOf(windowCanvas(3, 4, dungeon ? '#16221a' : '#4a2416'))) });
     const alcoveM = new THREE.MeshStandardMaterial({ map: PIXROOM ? pixTex(alcoveCanvas(), 1.1 * S, 1.6 * S) : texOf(alcoveCanvas()), transparent: true, alphaTest: 0.3, roughness: 1 });
@@ -894,7 +1192,7 @@ export function createThreeStage(canvasEl, assets) {
       const x = side < 0 ? 0.03 : W - 0.03, ry = side < 0 ? Math.PI / 2 : -Math.PI / 2;
       // 壁の飾りも立体：くぼみ・窓のまわりに、張り出した石や木の枠（横から見ても厚みがある）
       const out = (dx) => (side < 0 ? dx : W - dx); // 壁から部屋の内側へ dx マス
-      const solid = (bw, bh, bd, y, dz, m) => { const bx = new THREE.Mesh(new THREE.BoxGeometry(bd, bh, bw), m); bx.position.set(out(bd / 2), y, z + dz); bx.castShadow = true; bx.receiveShadow = true; root.add(bx); };
+      const solid = (bw, bh, bd, y, dz, m) => { const bx = new THREE.Mesh(roundBox(bd, bh, bw), m); bx.position.set(out(bd / 2), y, z + dz); bx.castShadow = true; bx.receiveShadow = true; root.add(bx); };
       if (dungeon) {
         const aw = 2.2 * S / 2, ah = 3.2 * S / 2;
         plane(aw, ah, alcoveM, [x, ah / 2, z], [0, ry, 0]);
@@ -904,20 +1202,25 @@ export function createThreeStage(canvasEl, assets) {
       } else if (!(side < 0 && heightOf(map, 1, Math.floor(z)) > 0)) { // 左の壁に2階の回廊があるところには窓を付けない（2026-11-22 作者「左壁面の窓いらないかな」）
         const ww = 1.1 * S, wh = 1.5 * S, wy = HT * 0.5;
         plane(ww, wh, winM, [out(0.18), wy, z], [0, ry, 0]);
-        const frM = new THREE.MeshStandardMaterial({ map: rep(woodCanvas(), 1, 1, 1), roughness: 0.85 });
+        const frM = new THREE.MeshStandardMaterial({ map: artT('wood', 0.4, 0.4) ?? rep(woodCanvas(), 1, 1, 1), roughness: WOOD_ROUGH, color: WOOD_TINT });
         for (const dz of [-ww / 2 - 0.1, ww / 2 + 0.1]) solid(0.2, wh + 0.4, 0.35, wy, dz, frM);
         for (const dy of [-wh / 2 - 0.1, wh / 2 + 0.1]) solid(ww + 0.4, 0.2, 0.35, wy + dy, 0, frM);
         solid(ww + 0.7, 0.16, 0.6, wy - wh / 2 - 0.25, 0, frM); // 窓の下の台
       }
       const lx = side < 0 ? 0.7 : W - 0.7, ly = dungeon ? HT * 0.4 : Math.min(HT - 0.6, HT * 0.5 + 0.75 * S + 0.6); // 建物の中は窓の上
-      { // 灯りの金具（壁から突き出た腕と、灯りの皿）
+      let fx = lx, fy = ly; // 火の位置
+      const wl = cutPlane('lampWall', 0.95, { flip: side > 0 }); // 壁の灯りの切り抜き（美術・演出室 v02 lamp_wall）：腕木は壁の側、油皿は部屋の側。右の壁は左右を返す
+      if (wl) {
+        const ww = wl.userData.w; wl.position.set(out(ww / 2), ly - 0.1 * 0.95, z); root.add(wl);
+        fx = out(0.81 * ww); fy = ly; // 油皿の火（絵の横 0.81・上から 0.40）
+      } else { // 灯りの金具（壁から突き出た腕と、灯りの皿）
         const iron = new THREE.MeshStandardMaterial({ color: 0x2a2a30, roughness: 0.6, metalness: 0.5 });
-        const arm = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.1, 0.1), iron); arm.position.set(out(0.37), ly - 0.35, z); root.add(arm);
+        const arm = new THREE.Mesh(roundBox(0.75, 0.1, 0.1), iron); arm.position.set(out(0.37), ly - 0.35, z); root.add(arm);
         const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.12, 0.22, 8), iron); cup.position.set(lx, ly - 0.25, z); root.add(cup);
       }
-      const L = new THREE.PointLight(0xffb45a, dungeon ? 26 : 30, 9 * S / 2, 1.6); L.position.set(lx, ly, z); root.add(L);
+      const L = new THREE.PointLight(dungeon ? 0xffb45a : 0xffc46e, dungeon ? 26 : 30, 9 * S / 2, 1.6); L.position.set(fx, fy + 0.1, z + 0.1); // 蜂蜜色（2026-11-23 作者の内装の方針） root.add(L);
       const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 }));
-      g.scale.set(1.5 * S / 1.6, 1.5 * S / 1.6, 1); g.position.set(lx, ly, z); root.add(g);
+      g.scale.set(wl ? 0.7 : 1.5 * S / 1.6, wl ? 0.7 : 1.5 * S / 1.6, 1); g.position.set(fx, fy, z + 0.05); root.add(g);
       lights.push({ L, base: L.intensity, ph: z * 3 + side, z, glow: g });
     }
     const hasBackdrop = (map.stage.layers || []).some((l) => l.band === 'backdrop' && l.items.length);
@@ -929,51 +1232,44 @@ export function createThreeStage(canvasEl, assets) {
       const stepX = dungeon ? W : 6, stepZ = dungeon ? 9 : 5;
       const nx = Math.max(1, Math.round(W / stepX)), nz = Math.max(1, Math.round((H - 1) / stepZ));
       for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-        const x = W * (i + 0.5) / nx, z = (H - 1) * (j + 0.5) / nz + 0.5, chain = dungeon ? 1.6 : Math.min(1.4, HT * 0.25), y = HT - chain - 0.35;
-        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, chain, 5), iron); c.position.set(x, HT - chain / 2, z); root.add(c);
-        const cap = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.22, 6), iron); cap.position.set(x, y + 0.3, z); root.add(cap);
-        const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 6), lampGlass); lantern.position.set(x, y, z); root.add(lantern);
-        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.12, 0.1, 6), iron); base.position.set(x, y - 0.24, z); root.add(base);
-        const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 })); gl.scale.set(1.6, 1.6, 1); gl.position.set(x, y, z); root.add(gl);
+        const x = W * (i + 0.5) / nx, chain = dungeon ? 1.6 : Math.min(1.4, HT * 0.25), y = HT - chain - 0.35;
+        let z = (H - 1) * (j + 0.5) / nz + 0.5;
+        const nearUp = (/** @type {number} */ zz) => { for (let ty = 0; ty < H; ty++) for (let tx = 0; tx < W; tx++) if (heightOf(map, tx, ty) > 0 && Math.hypot(Math.max(tx - x, 0, x - tx - 1), Math.max(ty - zz, 0, zz - ty - 1)) < 1.2) return true; return false; };
+        while (!dungeon && nearUp(z) && z < H - 1.5) z += 0.5; // 2階の通路から離れる所まで手前へ（2026-11-23 作者「天井を低くして」）
+        const lh = cutPlane('lampHanging', (HT - y) / 0.776); // 吊りランプの切り抜き（v02 lamp_hanging）：鎖の上のはしを天井に、ガラスの火（絵の上から 0.776）を y に
+        if (lh) { lh.position.set(x, HT - lh.geometry.parameters.height / 2, z); root.add(lh); }
+        else {
+          const c = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, chain, 5), iron); c.position.set(x, HT - chain / 2, z); root.add(c);
+          const cap = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.22, 6), iron); cap.position.set(x, y + 0.3, z); root.add(cap);
+          const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 6), lampGlass); lantern.position.set(x, y, z); root.add(lantern);
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.12, 0.1, 6), iron); base.position.set(x, y - 0.24, z); root.add(base);
+        }
+        const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 })); gl.scale.set(lh ? 1.1 : 1.6, lh ? 1.1 : 1.6, 1); gl.position.set(x, y, z + 0.05); root.add(gl);
         // 光源の数が多いとスマホで重くなるので、実際に部屋を照らす光は建物の中の1つおきだけ（ほかは、にじみの光だけ）
-        const L = !dungeon && (i + j) % 2 === 0 ? new THREE.PointLight(0xffc070, 26, 9, 1.6) : null;
+        const L = !dungeon && (i + j) % 2 === 0 ? new THREE.PointLight(0xffc878, 26, 9, 1.6) : null;
         if (L) { L.position.set(x, y - 0.1, z); root.add(L); lights.push({ L, base: L.intensity, ph: x * 1.3 + z, z, glow: gl }); }
         else lights.push({ L: { intensity: 0 }, base: 0, ph: x * 1.3 + z, z, glow: gl });
       }
     }
-    const back = new THREE.PointLight(0xffb45a, 24, 10 * S / 2, 1.6); back.position.set(W / 2, HT * 0.45, 1.2); root.add(back); lights.push({ L: back, base: 24, ph: 1, z: 1.2 });
+    const backI = dungeon ? 24 : 14; // 建物の中は奥の壁を照らしすぎない（梁の下や隅に影を残す。2026-11-23 作者の内装の方針）
+    const back = new THREE.PointLight(0xffc06a, backI, 10 * S / 2, 1.6); back.position.set(W / 2, HT * 0.45, 1.2); root.add(back); lights.push({ L: back, base: backI, ph: 1, z: 1.2 });
     if (!dungeon) { // 壁の下の板張り（腰板）と、上の見切りの横木（2026-11-23 作者「銀鹿亭なんだかまだチープ」：白い壁だけでは平らに見えた）
       const panel = (t, rx) => { t.repeat.set(rx, 1); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.8, color: 0xb08868 }); };
       const ph = 1.3;
+      const wsc = artT('wainscot', 1, 1); // 腰板の元絵（v02 wainscot）：上のはしに見切りの横木まで描いてあるので、横木の箱は足さない。左右だけくり返す
       const strip = (len, x, z, ry) => {
-        const p = new THREE.Mesh(new THREE.BoxGeometry(len, ph, 0.08), panel(rep(planksCanvas(), 1, 1, 2), len / 3)); p.position.set(x, ph / 2, z); p.rotation.y = ry; p.receiveShadow = true; root.add(p);
-        const r = new THREE.Mesh(new THREE.BoxGeometry(len, 0.1, 0.16), panel(rep(woodCanvas(), 1, 1, 1), len / 3)); r.position.set(x, ph + 0.05, z); r.rotation.y = ry; root.add(r);
+        if (wsc) { const t = wsc.clone(); t.needsUpdate = true; t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.repeat.set(len / ph, 1); const p = new THREE.Mesh(roundBox(len, ph, 0.08), new THREE.MeshStandardMaterial({ map: t, roughness: WOOD_ROUGH, color: WOOD_TINT })); p.position.set(x, ph / 2, z); p.rotation.y = ry; p.receiveShadow = true; root.add(p); return; }
+        const p = new THREE.Mesh(roundBox(len, ph, 0.08), panel(rep(planksCanvas(), 1, 1, 2), len / 3)); p.position.set(x, ph / 2, z); p.rotation.y = ry; p.receiveShadow = true; root.add(p);
+        const r = new THREE.Mesh(roundBox(len, 0.1, 0.16), panel(rep(woodCanvas(), 1, 1, 1), len / 3)); r.position.set(x, ph + 0.05, z); r.rotation.y = ry; root.add(r);
       };
       strip(W, W / 2, 0.05, 0); strip(H, 0.05, H / 2, Math.PI / 2); strip(H, W - 0.05, H / 2, Math.PI / 2);
     }
     // 手前の木の額縁（本棚の箱のふち）
-    const woodT = PIXROOM ? pixTex(woodCanvas(), 1) : texOf(woodCanvas()), frameM = mat(woodT, 0.8);
-    for (const [w, h, x, y] of [[W + F * 2, F, W / 2, HT + F / 2], [W + F * 2, F, W / 2, -F / 2], [F, HT, -F / 2, HT / 2], [F, HT, W + F / 2, HT / 2]]) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.5 * S), frameM); b.position.set(x, y, H + 0.1 * S); root.add(b);
+    const woodT = artT('wood', 1, 1) ?? (PIXROOM ? pixTex(woodCanvas(), 1) : texOf(woodCanvas())), frameM = mat(woodT, WOOD_ROUGH); frameM.color.set(WOOD_TINT);
+    for (const [w, h, x, y] of [[W + F * 2, F, W / 2, HT + F / 2 + 0.03], [W + F * 2, F, W / 2, -F / 2 - 0.03], [F, HT, -F / 2 - 0.03, HT / 2], [F, HT, W + F / 2 + 0.03, HT / 2]]) {
+      const b = new THREE.Mesh(roundBox(w, h, 0.5 * S), frameM); b.position.set(x, y, H + 0.1 * S); root.add(b); // 額縁は床・壁・天井から少し外へずらす（内側の面が床や壁と同じ所で重なり、つなぎ目がちかちかした。2026-11-23 作者「このつなぎめがちかちかする」「この辺もちかちかする」）
     }
-    // 本棚：額縁のまわりの奥の板（穴あき）と、左右に背表紙の本、上下の棚板
-    const sh = new THREE.Shape(); sh.moveTo(-60, -40); sh.lineTo(60, -40); sh.lineTo(60, 40); sh.lineTo(-60, 40);
-    const hole = new THREE.Path(); hole.moveTo(-W / 2 - F, -F - HT / 2); hole.lineTo(W / 2 + F, -F - HT / 2); hole.lineTo(W / 2 + F, HT / 2 + F); hole.lineTo(-W / 2 - F, HT / 2 + F); sh.holes.push(hole);
-    const backShelf = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshStandardMaterial({ color: 0x120c08, roughness: 1 }));
-    backShelf.position.set(W / 2, HT / 2, H - 0.9 * S); root.add(backShelf);
-    const cols = [0x5a2a22, 0x2a3a5a, 0x3a4a2a, 0x6a4a1a, 0x4a2a4a, 0x2a2a2a, 0x7a5a3a];
-    const bandM = new THREE.MeshStandardMaterial({ color: 0xc9a050, roughness: 0.5, metalness: 0.4 });
-    for (const sd of [-1, 1]) {
-      let x = sd < 0 ? -F - 0.05 : W + F + 0.05; const end = sd < 0 ? -9 * S : W + 9 * S;
-      while (sd < 0 ? x > end : x < end) {
-        const bw = (0.18 + R() * 0.22) * S, bh = HT * (0.56 + R() * 0.3), bd = 1.1 * S;
-        const b = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), new THREE.MeshStandardMaterial({ color: cols[(R() * cols.length) | 0], roughness: 0.8 }));
-        b.position.set(x + sd * bw / 2, bh / 2 + 0.02, H - 0.25 * S); b.rotation.z = (R() - 0.5) * 0.03; root.add(b);
-        const band = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.01, 0.06 * S, bd + 0.02), bandM); band.position.set(b.position.x, bh * (0.78 + R() * 0.1), H - 0.25 * S); root.add(band);
-        x += sd * (bw + 0.02);
-      }
-    }
-    for (const y of [-F - 0.08 * S, HT + F]) { const s = new THREE.Mesh(new THREE.BoxGeometry(W + 22 * S, 0.16 * S, 1.6 * S), frameM); s.position.set(W / 2, y, H - 0.2 * S); root.add(s); }
+    // 手前の本棚（額縁のまわりの奥の板・左右の本・上下の棚板）は外した（2026-11-23 作者「ブックヌックスタイルやつの手前の本棚消していいよ」：カメラを近づけたので、画面の左右に大きく出ていた）
     // 本棚の前を照らす部屋のやわらかい灯り（入る・出るとき、遠くから本棚が見える）と、箱の中のうすい月明かり
     const room = new THREE.SpotLight(0xffd9a8, 60 * S * S, 40 * S, 0.55, 0.7, 1.6); room.position.set(W / 2 - 2 * S, 9 * S, H + 10 * S); room.target.position.set(W / 2, HT / 2, H); root.add(room, room.target);
     root.add(dungeon ? new THREE.AmbientLight(0x4a5478, 0.5) : new THREE.AmbientLight(0x5a4030, 0.3)); // 建物の中は暖かく暗めに
@@ -991,18 +1287,23 @@ export function createThreeStage(canvasEl, assets) {
     const tile = (c, rx, ry) => { const t = PIXROOM ? pixTex(c, 2) : texOf(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(Math.max(0.3, rx), Math.max(0.3, ry)); return t; };
     const M = (map, extra = {}) => new THREE.MeshStandardMaterial({ map, roughness: 0.92, ...extra });
     const g = new THREE.Group();
-    const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+    const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(roundBox(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
     if (name === 'stone-pillar') {
       const side = (s) => M(tile(brickCanvas(60 + s, [118, 120, 126]), s === 0 ? d / 2.2 : w / 2.2, h / 2.2)), cap = M(tile(brickCanvas(70, [96, 98, 104]), 1, 1));
       box([side(0), side(0), cap, cap, side(1), side(1)], w * 0.82, h, d * 0.82, h / 2);
       for (const y of [0.18, h - 0.18]) box(cap, w, 0.36, d, y); // 柱の下と上の、張り出した飾りの石
       return g;
     }
-    const woodM = M(tile(woodCanvas(), w / 2, h / 2)), woodD = M(tile(woodCanvas(), d / 2, h / 2)), woodTop = M(tile(woodCanvas(), w / 2, d / 2));
+    const wt = (rx, ry) => artT('wood', Math.max(0.3, rx), Math.max(0.3, ry)) ?? tile(woodCanvas(), rx, ry); // 家具の木（v02 wood_side）。1枚で約2マス
+    const WT = { color: WOOD_TINT, roughness: WOOD_ROUGH };
+    const woodM = M(wt(w / 2, h / 2), WT), woodD = M(wt(d / 2, h / 2), WT), woodTop = M(wt(w / 2, d / 2), WT);
     if (name === 'rug') { // 敷物（床に敷くだけ。通れる）
-      const r = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ map: PIXROOM ? pixTex(rugCanvas(), 2) : texOf(rugCanvas()), roughness: 1 })); r.rotation.x = -Math.PI / 2; r.position.set(0, 0.02, -d / 2); r.receiveShadow = true; g.add(r); return g;
+      const rugArt = cutT('rug', ...CUT.rug); // v02 rug（房のまわりは透明）
+      const r = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial(rugArt ? { map: rugArt, roughness: 1, transparent: true, alphaTest: 0.3 } : { map: PIXROOM ? pixTex(rugCanvas(), 2) : texOf(rugCanvas()), roughness: 1 })); r.rotation.x = -Math.PI / 2; r.position.set(0, 0.02, -d / 2); r.receiveShadow = true; g.add(r); return g;
     }
     if (name === 'barrels') { // 樽：たが（鉄の輪）の付いた木の樽を並べ、2つ以上なら上にもう1つ
+      const bp = cutPlane('barrels', w >= 2 ? 2.1 : 1.4); // v02 barrels（下に2つ・上に1つ）の切り抜き
+      if (bp) { bp.position.set(0, bp.geometry.parameters.height / 2, -d / 2); bp.receiveShadow = true; g.add(bp); return g; }
       const iron = new THREE.MeshStandardMaterial({ color: 0x2a2a30, roughness: 0.5, metalness: 0.6 }), bw = M(tile(woodCanvas(), 1, 1));
       const n = Math.max(1, Math.round(w)), r = Math.min(0.45, w / n / 2 - 0.02), bh = 1.05;
       const barrel = (x, y, z) => {
@@ -1017,25 +1318,48 @@ export function createThreeStage(canvasEl, assets) {
     if (name === 'pillar') { box([woodD, woodD, woodTop, woodTop, woodM, woodM], w * 0.7, h, d * 0.7, h / 2); return g; }
     // 家具は形で作る（2026-11-22 作者：「テーブルやばい」＝絵を貼った箱では木箱に見えた）。高さはキャラ（2.5マス）に合わせる
     const leg = (x, z, lh, s = 0.16) => box(woodD, s, lh, s, lh / 2, z).position.setX(x);
+    /**
+     * 曲線のある木の椅子（2026-11-23 作者「椅子は曲線を入れてほしい」）：角の丸い座面、少し外へ開いた丸い脚、上が弓なりの背板、
+     * 背の柱の上に丸い玉、背板と下の横木のあいだに細い丸棒3本。sz：卓のどちら側か（背は卓から遠い側）
+     */
+    const chairParts = (/** @type {THREE.Group} */ ch, /** @type {number} */ sz) => {
+      const add = (/** @type {THREE.BufferGeometry} */ geo, m, x, y, z, rx = 0, rz = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.set(rx, 0, rz); o.castShadow = true; o.receiveShadow = true; ch.add(o); return o; };
+      const seatS = new THREE.Shape(), sw = 0.25, sd = 0.23, cr = 0.09; // 座面：角の丸い四角
+      seatS.moveTo(-sw + cr, -sd); seatS.lineTo(sw - cr, -sd); seatS.quadraticCurveTo(sw, -sd, sw, -sd + cr); seatS.lineTo(sw, sd - cr); seatS.quadraticCurveTo(sw, sd, sw - cr, sd);
+      seatS.lineTo(-sw + cr, sd); seatS.quadraticCurveTo(-sw, sd, -sw, sd - cr); seatS.lineTo(-sw, -sd + cr); seatS.quadraticCurveTo(-sw, -sd, -sw + cr, -sd);
+      const seat = new THREE.ExtrudeGeometry(seatS, { depth: 0.04, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2, curveSegments: 8 });
+      add(seat, woodTop, 0, 0.58, 0, -Math.PI / 2);
+      for (const lx of [-0.19, 0.19]) for (const lz of [-0.17, 0.17]) add(new THREE.CylinderGeometry(0.035, 0.035, 0.58, 8), woodD, lx, 0.29, lz); // 脚（まっすぐ。2026-11-23 作者「いすってむずかしいな」→形を減らす）
+      const bz = sz * 0.19;
+      for (const lx of [-0.2, 0.2]) add(new THREE.CylinderGeometry(0.035, 0.035, 0.62, 8), woodD, lx, 0.9, bz); // 背の柱（玉はやめた）
+      const backS = new THREE.Shape(); backS.moveTo(-0.22, 0); backS.lineTo(0.22, 0); backS.lineTo(0.22, 0.34); backS.quadraticCurveTo(0, 0.46, -0.22, 0.34); backS.lineTo(-0.22, 0); // 上が弓なりの、1枚の大きな背板（丸棒と横木はやめた）
+      const back = new THREE.ExtrudeGeometry(backS, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2, curveSegments: 10 });
+      add(back, woodM, 0, 0.86, bz - 0.0175);
+    };
     if (it.region === 'table') { // 天板＋4本の脚＋まわりの丸椅子
       const th = 1.05, inset = 0.22;
       const topArt = artT('tabletop'); box([woodD, woodD, topArt ? M(topArt) : woodTop, woodTop, woodM, woodM], w, 0.14, d * 0.9, th);
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) leg(sx * (w / 2 - inset), -d / 2 + sz * (d * 0.45 - inset), th - 0.07);
-      for (const [sx, sz] of [[-0.62, 1], [0, 1], [0.62, 1], [-0.62, -1], [0.62, -1]].slice(0, Math.max(2, Math.round(w)) + 1)) { // 丸椅子
-        const st = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 10), woodTop); st.position.set(sx * w / 2, 0.62, -d / 2 + sz * (d * 0.45 + 0.35)); st.castShadow = true; g.add(st);
-        const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.6, 6), woodD); sl.position.set(st.position.x, 0.3, st.position.z); g.add(sl);
+      for (const [sx, sz] of [[-0.62, 1], [0, 1], [0.62, 1], [-0.62, -1], [0.62, -1]].slice(0, Math.max(2, Math.round(w)) + 1)) { // 背もたれのある木の椅子（2026-11-23 作者の内装の方針「背もたれのある木の椅子と卓」）。背は卓の反対側
+        const ch = new THREE.Group(); ch.position.set(sx * w / 2, 0, -d / 2 + sz * (d * 0.45 + 0.38)); g.add(ch);
+        chairParts(ch, sz);
       }
       { // 卓の上：ろうそく（小さな灯り）と、ジョッキ・木の皿（2026-11-23 作者「銀鹿亭なんだかまだチープ」）
         const R = rnd(it.x * 7 + it.y * 13 + 1), y0 = th + 0.07;
-        const wax = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0xf0e4c8, emissive: 0x402a10, roughness: 0.8 })); wax.position.set(0, y0 + 0.15, -d / 2); g.add(wax);
-        const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.04, 10), new THREE.MeshStandardMaterial({ color: 0x8a7a50, metalness: 0.5, roughness: 0.4 })); dish.position.set(0, y0 + 0.02, -d / 2); g.add(dish);
-        const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 })); flame.scale.set(0.55, 0.7, 1); flame.position.set(0, y0 + 0.38, -d / 2); g.add(flame);
-        const L = new THREE.PointLight(0xffa850, 7, 3.2, 1.6); L.position.set(0, y0 + 0.5, -d / 2); g.add(L); lights.push({ L, base: 7, ph: it.x + it.y, z: it.y + it.h, glow: flame, fire: true });
+        const cd = cutPlane('candle', 0.55); // v02 candle（真鍮の燭台とろうそく。火も描いてある）
+        let fy = y0 + 0.38;
+        if (cd) { cd.position.set(0, y0 + 0.275, -d / 2); g.add(cd); fy = y0 + 0.55 * 0.92; }
+        else {
+          const wax = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0xf0e4c8, emissive: 0x402a10, roughness: 0.8 })); wax.position.set(0, y0 + 0.15, -d / 2); g.add(wax);
+          const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.13, 0.04, 10), new THREE.MeshStandardMaterial({ color: 0x8a7a50, metalness: 0.5, roughness: 0.4 })); dish.position.set(0, y0 + 0.02, -d / 2); g.add(dish);
+        }
+        const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9 })); flame.scale.set(cd ? 0.35 : 0.55, cd ? 0.45 : 0.7, 1); flame.position.set(0, fy, -d / 2 + 0.03); g.add(flame);
+        const L = new THREE.PointLight(0xffbc66, 8, 3.4, 1.6); L.position.set(0, y0 + 0.5, -d / 2); g.add(L); lights.push({ L, base: 7, ph: it.x + it.y, z: it.y + it.h, glow: flame, fire: true });
         const mugM = new THREE.MeshStandardMaterial({ color: 0x6a4a2a, roughness: 0.7 }), plateM = new THREE.MeshStandardMaterial({ color: 0x9a7a52, roughness: 0.85 });
         const n = Math.max(2, Math.round(w));
         for (let k = 0; k < n; k++) {
           const x = (k / Math.max(1, n - 1) - 0.5) * (w - 0.7), z = -d / 2 + (k % 2 ? 0.25 : -0.25) * d;
-          if (R() < 0.6) { const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, y0 + 0.11, z); mug.castShadow = true; g.add(mug); }
+          if (R() < 0.6) { const mc = cutPlane('mugs', 0.3, { b: MUGS[(R() * MUGS.length) | 0], W: 1024, H: 256 }); if (mc) { mc.position.set(x, y0 + 0.15, z); g.add(mc); } else { const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, y0 + 0.11, z); mug.castShadow = true; g.add(mug); } }
           else { const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.04, 12), plateM); pl.position.set(x, y0 + 0.02, z); g.add(pl); }
         }
       }
@@ -1049,16 +1373,17 @@ export function createThreeStage(canvasEl, assets) {
     }
     if (name === 'stairs-down') { // 下り階段：床に開いた暗い口と、まわりの手すり
       const hole = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.1, d), new THREE.MeshBasicMaterial({ color: 0x0a0806 })); hole.rotation.x = -Math.PI / 2; hole.position.set(0, 0.012, -d / 2); g.add(hole);
-      for (let i = 0; i < 3; i++) { const s = new THREE.Mesh(new THREE.BoxGeometry(w * 1.05, 0.05, d / 4), woodTop); s.position.set(0, -0.15 - i * 0.25, -d * (0.2 + i * 0.25)); g.add(s); } // 口の中に見える段
+      for (let i = 0; i < 3; i++) { const s = new THREE.Mesh(roundBox(w * 1.05, 0.05, d / 4), woodTop); s.position.set(0, -0.15 - i * 0.25, -d * (0.2 + i * 0.25)); g.add(s); } // 口の中に見える段
       for (const sx of [-1, 1]) box(woodD, 0.1, 0.9, d, 0.45).position.setX(sx * w * 0.58);
       return g;
     }
     if (name === 'bed') { // 寝台：木の枠・敷き布団・掛け布・枕・頭の板
       const cloth = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1 });
       box([woodD, woodD, woodTop, woodTop, woodM, woodM], w, 0.45, d, 0.225);
-      box(cloth(0xe8dcc0), w - 0.12, 0.2, d - 0.12, 0.55);
+      const lin = (rx, ry) => { const t = artT('linen', rx, ry); return t ? M(t) : null; }; // v02 linen（生成りの麻布）
+      box(lin((w - 0.12) / 2, (d - 0.12) / 2) ?? cloth(0xe8dcc0), w - 0.12, 0.2, d - 0.12, 0.55);
       const blanketArt = artT('blanket'); box(blanketArt ? M(blanketArt) : cloth(0x5a3a6a), w - 0.06, 0.22, d * 0.62, 0.58, -d * 0.31 - 0.02);
-      box(cloth(0xf2ead6), w * 0.6, 0.16, 0.45, 0.72, -d + 0.4);
+      box(lin(w * 0.3, 0.25) ?? cloth(0xf2ead6), w * 0.6, 0.16, 0.45, 0.72, -d + 0.4);
       box([woodD, woodD, woodTop, woodTop, woodM, woodM], w, 1.1, 0.12, 0.55, -d + 0.06);
       return g;
     }
@@ -1071,6 +1396,8 @@ export function createThreeStage(canvasEl, assets) {
         box([woodD, woodD, woodTop, woodTop, woodM, woodM], w, sh, 0.12, sh / 2, zb);
         for (const y of [1.45, 1.95]) {
           box(woodTop, w, 0.06, 0.4, y, zb + 0.22);
+          const bpw = cutPlane('bottles', 0.42)?.userData.w; // v02 bottles（瓶7本と壺）の切り抜きを、棚の幅に並べる
+          if (bpw) { for (let x = -w / 2 + 0.1 + bpw / 2, k = 0; x + bpw / 2 < w / 2 + 0.05; x += bpw + 0.08, k++) { const bp = /** @type {any} */ (cutPlane('bottles', 0.42, { flip: (k + (y > 1.6 ? 1 : 0)) % 2 === 1 })); bp.position.set(x, y + 0.03 + 0.21, zb + 0.22); g.add(bp); } continue; }
           for (let x = -w / 2 + 0.25; x < w / 2 - 0.2; x += 0.2 + R() * 0.25) {
             if (R() < 0.15) continue;
             const bm = new THREE.MeshStandardMaterial({ color: bottleC[(R() * bottleC.length) | 0], roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.85 });
@@ -1079,23 +1406,40 @@ export function createThreeStage(canvasEl, assets) {
           }
         }
         const mugM = new THREE.MeshStandardMaterial({ color: 0x8a6a40, roughness: 0.6, metalness: 0.2 });
-        for (const x of [-w * 0.3, -w * 0.1, w * 0.25]) { const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, ch + 0.11, -d / 2 + 0.1); g.add(mug); }
+        [-w * 0.3, -w * 0.1, w * 0.25].forEach((x, k) => { const mc = cutPlane('mugs', 0.3, { b: MUGS[k], W: 1024, H: 256 }); if (mc) { mc.position.set(x, ch + 0.15, -d / 2 + 0.1); g.add(mc); return; } const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.22, 8), mugM); mug.position.set(x, ch + 0.11, -d / 2 + 0.1); g.add(mug); });
       }
       return g;
     }
     if (it.region === 'hearth') { // 暖炉：石の囲いと、暗い口の中の火
-      const sm = M(artT('brick', w / 1.5, 1.4) ?? tile(brickCanvas(80, [140, 120, 104]), w / 2, 1)), hh = 2.6;
-      box([sm, sm, sm, sm, sm, sm], w, hh, d * 0.7, hh / 2);
-      box([sm, sm, sm, sm, sm, sm], w + 0.3, 0.2, d * 0.7 + 0.25, hh * 0.62);                 // 炉棚
-      { const top = nook ? nook.HT : 5.5, y0 = hh * 0.62 + 0.1; if (top > y0 + 0.2) box([sm, sm, sm, sm, sm, sm], w * 0.62, top - y0, d * 0.55, y0 + (top - y0) / 2, -d * 0.35); } // 煙突：炉棚から天井まで（2026-11-22 作者「暖炉は天井まで伸ばして」）
-      const mouth = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.55, hh * 0.42), new THREE.MeshBasicMaterial({ color: 0x0a0604 })); mouth.position.set(0, hh * 0.21, 0.01); g.add(mouth);
+      // 石の大きさは、どの面でも同じに（面ごとに、面の大きさに合わせてくり返す。2026-11-23 作者「レンガ引き延ばされてる縮んでるのもある？」：1つの絵を大きさのちがう面に同じくり返しで貼っていた）。石は壁と同じ 4マスで絵1枚
+      const sf = (rx, ry) => M(artT('brick', rx / 1.5, ry / 1.9) ?? tile(brickCanvas(80, [140, 120, 104]), rx / 2, ry / 2)); /* レンガの絵1枚＝横1.5・縦1.9マス（2026-11-23 作者「暖炉の壁は赤でよかった」） */
+      const sms = (bw, bh, bd) => [sf(bd, bh), sf(bd, bh), sf(bw, bd), sf(bw, bd), sf(bw, bh), sf(bw, bh)], hh = 2.6;
+      box(sms(w, hh, d * 0.7), w, hh, d * 0.7, hh / 2);
+      box(sms(w + 0.3, 0.2, d * 0.7 + 0.25), w + 0.3, 0.2, d * 0.7 + 0.25, hh * 0.62);                 // 炉棚
+      { const top = nook ? nook.HT : 5.5, y0 = hh * 0.62 + 0.1; if (top > y0 + 0.2) box(sms(w * 0.62, top - y0, d * 0.55), w * 0.62, top - y0, d * 0.55, y0 + (top - y0) / 2, -d * 0.35); } // 煙突：炉棚から天井まで（2026-11-22 作者「暖炉は天井まで伸ばして」）
+      const mouth = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.55, hh * 0.46), new THREE.MeshBasicMaterial({ map: texOf(fireboxCanvas()), transparent: true, alphaTest: 0.3 })); mouth.position.set(0, hh * 0.23, 0.01); g.add(mouth); // 炉の中（2026-11-23 作者「暖炉黒い部分はどうしようか違和感がある」：まっ黒の四角をやめ、上がアーチの、すすけたレンガの奥が火で照らされる絵に）
       const fire = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.95 })); fire.scale.set(1.4, 1.1, 1); fire.position.set(0, 0.35, 0.15); g.add(fire);
       // 揺れる炎（6コマを順に）と、舞い上がる火の粉
-      const ft = texOf(flameCanvas()); ft.repeat.set(1 / FIRE_FRAMES, 1);
-      const flame = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.5, hh * 0.36), new THREE.MeshBasicMaterial({ map: ft, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-      flame.position.set(0, hh * 0.18, 0.03); g.add(flame);
+      // 炎（2026-11-23 美術・演出室 v02 hearth_flame：水彩の8コマ。1コマ 256×320、根もと (128,312)）と薪と熾火（hearth_logs、足もと (256,184)）。無ければコードの6コマ
+      const flameArt = ART2?.flame, logsArt = ART2?.logs, nF = flameArt ? 8 : FIRE_FRAMES;
+      let ft, flame;
+      if (flameArt) {
+        ft = flameArt.clone(); ft.needsUpdate = true; ft.wrapS = ft.wrapT = THREE.ClampToEdgeWrapping; ft.repeat.set(1 / 8, 1);
+        const fhH = hh * 0.42, fwW = fhH * 256 / 320, rootY = 0.17; // 根もと（絵の下から 8/320）を薪の上に
+        flame = new THREE.Mesh(new THREE.PlaneGeometry(fwW, fhH), new THREE.MeshBasicMaterial({ map: ft, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        flame.position.set(0, rootY - fhH * 8 / 320 + fhH / 2, 0.03); g.add(flame);
+      } else {
+        ft = texOf(flameCanvas()); ft.repeat.set(1 / FIRE_FRAMES, 1);
+        flame = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.5, hh * 0.36), new THREE.MeshBasicMaterial({ map: ft, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        flame.position.set(0, hh * 0.18, 0.03); g.add(flame);
+      }
+      if (logsArt) { // 薪と熾火：炎の手前に。足もとを炉の床に
+        const lt = logsArt.clone(); lt.needsUpdate = true; const lw = w * 0.5, lh = lw * 192 / 512;
+        const logs = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.3, roughness: 0.9, emissive: 0xff7a30, emissiveMap: lt, emissiveIntensity: 0.5 }));
+        logs.position.set(0, lh / 2 - lh * (192 - 184) / 192 + 0.01, 0.05); g.add(logs);
+      }
       const embers = []; for (let k = 0; k < 10; k++) { const e = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffa040, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); e.scale.set(0.09, 0.09, 1); g.add(e); embers.push({ s: e, ph: k / 10, dx: (k % 5 - 2) * 0.12 }); }
-      fires.push({ tex: ft, embers, y0: hh * 0.12, y1: hh * 0.62, w: w * 0.4 });
+      fires.push({ tex: ft, frames: nF, embers, y0: hh * 0.12, y1: hh * 0.62, w: w * 0.4 });
       const L = new THREE.PointLight(0xff8a3a, 20, 7, 1.6); L.position.set(0, 0.6, 0.6); g.add(L); lights.push({ L, base: 20, ph: 5, z: it.y + it.h, glow: fire, fire: true });
       return g;
     }
@@ -1119,28 +1463,41 @@ export function createThreeStage(canvasEl, assets) {
   function buildLevels(W, H) {
     let top = 0; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) top = Math.max(top, heightOf(map, x, y));
     const woodTop = texOf(planksCanvas()); woodTop.wrapS = woodTop.wrapT = THREE.RepeatWrapping;
-    const woodSide = texOf(woodCanvas()); woodSide.wrapS = woodSide.wrapT = THREE.RepeatWrapping;
-    const plank = new THREE.MeshStandardMaterial({ map: woodTop, roughness: 0.9 }), side = new THREE.MeshStandardMaterial({ map: woodSide, roughness: 0.85 });
+    const woodSide = artT('wood', 1, 1) ?? texOf(woodCanvas()); woodSide.wrapS = woodSide.wrapT = THREE.RepeatWrapping;
+    const plank = new THREE.MeshStandardMaterial({ map: woodTop, roughness: WOOD_ROUGH, color: WOOD_TINT }), side = new THREE.MeshStandardMaterial({ map: woodSide, roughness: WOOD_ROUGH, color: WOOD_TINT });
     const mats = [side, side, plank, side, side, side];
-    const box = (w, h, d, x, y, z, m = mats) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = true; b.receiveShadow = true; root.add(b); return b; };
+    // 2階の通路の床は、1階と同じ元絵の床（v01 floor。1枚で4マス）を、マスの位置に合わせて切り出して張る（2026-11-23 作者「2階のこの辺何とかしたい」：コードの暗い板だった）
+    /** @type {Map<string, any>} */ const floorMats = new Map();
+    const floorAt = (/** @type {number} */ x, /** @type {number} */ y) => {
+      const k = ((x % 4) + 4) % 4 + ',' + (((y % 4) + 4) % 4); let m = floorMats.get(k);
+      if (!m) { const t = artT('floor', 0.25, 0.25); if (!t) return mats; t.offset.set((((x % 4) + 4) % 4) / 4, 1 - ((((y % 4) + 4) % 4) + 1) / 4); m = [side, side, new THREE.MeshStandardMaterial({ map: t, roughness: WOOD_ROUGH, color: WOOD_TINT }), side, side, side]; floorMats.set(k, m); }
+      return m;
+    };
+    // 2階の床・段は1マスずつの箱を並べてつなぐので、角を丸くしない（丸くするとつなぎ目にすき間が見えた。2026-11-23 作者「つなぐところは丸くしないように」）
+    const box = (w, h, d, x, y, z, m = mats) => { const b = new THREE.Mesh(roundBox(w, h, d, 0), m); b.position.set(x, y, z); b.castShadow = true; b.receiveShadow = true; root.add(b); return b; };
     const q = mapQuery(map, { kinds: { floor: { passable: true }, door: { passable: true }, wall: {}, counter: {}, water: {}, bridge: { passable: true } } });
     const walk = (x, y) => q.passable(x, y);
     const rail = (x0, z0, x1, z1, y) => { // 手すり：柱2本と上の横木
       for (const [x, z] of [[x0, z0], [x1, z1]]) box(0.1, 0.95, 0.1, x, y + 0.475, z, side);
       const len = Math.hypot(x1 - x0, z1 - z0), r = box(len + 0.1, 0.08, 0.08, (x0 + x1) / 2, y + 0.95, (z0 + z1) / 2, side); r.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
     };
+    /** @type {Set<string>} */ const edgeFill = new Set();
     for (let y = 1; y < H; y++) for (let x = 0; x < W; x++) {
       const h = heightOf(map, x, y); if (h <= 0 || !walk(x, y)) continue;
       const Y = h * HU, cx = x + 0.5, cz = y + 0.5;
       if (h === top) { // 2階の通路
-        box(1, 0.28, 1, cx, Y - 0.14, cz);
-        if (y === 1) box(1, 0.28, 1, cx, Y - 0.14, cz - 1); // 奥の壁まで床をのばす（扉の下にすき間を作らない。作者「扉が地面から少し離れている」）
+        box(1, 0.28, 1, cx, Y - 0.14, cz, floorAt(x, y));
+        // 外まわりの壁のマス（奥・左・右のはし、角も）まで床をのばす（扉の下にすき間を作らない。作者「扉が地面から少し離れている」）。
+        // 前は奥と左だけで、左奥の角と右の壁ぞいに穴があいていた（2026-11-23 作者「2階の隅っこ穴アイテル」）
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+          if ((dx || dy) && (nx === 0 || nx === W - 1 || ny === 0) && nx >= 0 && nx < W && ny >= 0 && !(ny >= 1 && heightOf(map, nx, ny) > 0 && walk(nx, ny)) && !edgeFill.has(k)) { edgeFill.add(k); box(1, 0.28, 1, nx + 0.5, Y - 0.14, ny + 0.5, floorAt(nx, ny)); }
+        }
         // 部屋側（低い床がある側）に手すりと、ところどころ1階までの柱。回廊が曲がっても四方を見る（2026-11-22 左の壁ぞいにものばした）
         const open = (dx, dy) => { const nx = x + dx, ny = y + dy; return heightOf(map, nx, ny) < h - 1 && q.kindAt(nx, ny) !== 'wall' && q.kindAt(nx, ny) !== null; };
         if (open(0, 1)) { rail(x, y + 1, x + 1, y + 1, Y); if (x % 3 === 1) box(0.22, Y, 0.22, cx, Y / 2, y + 0.9, side); }
         if (open(1, 0)) { rail(x + 1, y, x + 1, y + 1, Y); if (y % 3 === 0) box(0.22, Y, 0.22, x + 0.9, Y / 2, cz, side); }
         if (open(-1, 0)) { rail(x, y, x, y + 1, Y); if (y % 3 === 0) box(0.22, Y, 0.22, x + 0.1, Y / 2, cz, side); }
-        if (x === 1) box(1, 0.28, 1, cx - 1, Y - 0.14, cz); // 左の壁まで床をのばす
       } else { // 階段：奥（yが小さい側）が高い。1マスを2段に
         box(1, Y, 0.5, cx, Y / 2, y + 0.25); box(1, Math.max(0.05, Y - HU / 2), 0.5, cx, Math.max(0.05, Y - HU / 2) / 2, y + 0.75);
         if (heightOf(map, x - 1, y) < h - 1 || !walk(x - 1, y)) rail(x, y + 1, x, y, Y - HU / 2); // 低い側（左）の手すり
@@ -1148,17 +1505,27 @@ export function createThreeStage(canvasEl, assets) {
     }
     // 奥の壁の出入口に扉（通路の高さ）
     const doorArt = artT('door'), doorM = doorArt ? new THREE.MeshStandardMaterial({ map: doorArt, roughness: 0.8 }) : new THREE.MeshStandardMaterial({ color: 0x4a2c18, roughness: 0.8 }), frameM2 = new THREE.MeshStandardMaterial({ color: 0x2e1a0e, roughness: 0.8 }), knob = new THREE.MeshStandardMaterial({ color: 0x9a8a5a, roughness: 0.4, metalness: 0.6 });
+    const darkM = new THREE.MeshBasicMaterial({ color: 0x0c0705 });
+    // 扉の裏（2026-11-23 作者「開いた向こうの扉は左右反対にしないとね」）：裏から見ると、ちょうつがいと取っ手は表と左右が逆になる。裏の面には左右を返した絵を張る
+    const doorBackArt = doorArt ? (() => { const t = doorArt.clone(); t.wrapS = THREE.RepeatWrapping; t.repeat.x = -1; t.offset.x = 1; t.needsUpdate = true; return t; })() : null;
+    const doorBackM = doorBackArt ? new THREE.MeshStandardMaterial({ map: doorBackArt, roughness: 0.8 }) : doorM, edgeM = frameM2;
+    const backWallDoor = [edgeM, edgeM, edgeM, edgeM, doorM, doorBackM], leftWallDoor = [doorM, doorBackM, edgeM, edgeM, edgeM, edgeM]; // 面の順：+x, -x, +y, -y, +z, -z
     for (const e of map.exits || []) {
       if (e.y === 0) { // 奥の壁の扉
         const Y = heightOf(map, e.x, 0) * HU, cx = e.x + 0.5;
-        box(1.0, 2.1, 0.12, cx, Y + 1.05, 0.08, doorM);
+        // 扉は左のちょうつがいで、部屋の側（手前）へ開く（2026-11-23 作者「銀鹿亭の中の扉も」）。戸口の奥は暗く
+        box(1.0, 2.1, 0.02, cx, Y + 1.05, 0.015, darkM);
+        const pv = new THREE.Group(); pv.position.set(cx - 0.5, Y, 0.08); root.add(pv);
+        const dm = box(1.0, 2.1, 0.12, 0.5, 1.05, 0, backWallDoor); pv.add(dm); const kn = box(0.09, 0.09, 0.08, 0.82, 1.0, 0.1, knob); pv.add(kn);
+        innerDoors.push({ pivot: pv, exit: e.id, x: e.x, y: e.y, sign: -1 });
         box(1.2, 0.14, 0.18, cx, Y + 2.15, 0.1, frameM2); for (const dx of [-0.55, 0.55]) box(0.12, 2.2, 0.18, cx + dx, Y + 1.1, 0.1, frameM2);
-        box(0.09, 0.09, 0.08, cx + 0.32, Y + 1.0, 0.18, knob);
       } else if (e.x === 0 && heightOf(map, 0, e.y) > 0) { // 左の壁の扉（回廊の高さ。2026-11-22 作者「左壁沿いにも部屋を」）
         const Y = heightOf(map, 0, e.y) * HU, cz = e.y + 0.5;
-        box(0.12, 2.1, 1.0, 0.08, Y + 1.05, cz, doorM);
+        box(0.02, 2.1, 1.0, 0.015, Y + 1.05, cz, darkM);
+        const pv = new THREE.Group(); pv.position.set(0.08, Y, cz + 0.5); root.add(pv); // ちょうつがいは手前の側
+        const dm = box(0.12, 2.1, 1.0, 0, 1.05, -0.5, leftWallDoor); pv.add(dm); const kn = box(0.08, 0.09, 0.09, 0.1, 1.0, -0.82, knob); pv.add(kn);
+        innerDoors.push({ pivot: pv, exit: e.id, x: e.x, y: e.y, sign: -1 });
         box(0.18, 0.14, 1.2, 0.1, Y + 2.15, cz, frameM2); for (const dz of [-0.55, 0.55]) box(0.18, 2.2, 0.12, 0.1, Y + 1.1, cz + dz, frameM2);
-        box(0.08, 0.09, 0.09, 0.18, Y + 1.0, cz - 0.32, knob);
         box(1, 0.28, 1, 0.5, Y - 0.14, cz); // 扉の下の床
       }
     }
@@ -1173,6 +1540,8 @@ export function createThreeStage(canvasEl, assets) {
       const artC = rc ? null : (ART[name] || ((w, h) => genericArt(w, h, boards.length + 5)))(b.w, b.h, it.x * 131 + it.y * 37 + 1); // 3つめ＝板ごとの seed（位置から決まるので、開き直しても同じ家）
       let art = rc ? texOf(rc, true) : PIXROOM && interior ? pixTex(artC, b.w, b.h) : texOf(artC);
       const townC = rc ? null : townBoardCanvas(name, b, it);
+      const doorCut = townC && it.doorExit ? cutDoor(townC, TOWN_IMG?.[townC.file], TOWN_CFG?.doors?.[townC.file]?.cut) : it.doorExit && it.cut && artC && !townC ? cutDoor({ c: artC }, true, it.cut) : null; // 入れる家の扉は切り抜く（絵を張る前に）。町の絵でない板（ダンジョンの門など）は、地図の it.cut で（2026-11-23 作者「ダンジョンに入るときも同様にしたい」）
+      if (doorCut && !townC) art.needsUpdate = true;
       if (townC) { if (townC.w && townC.w !== b.w) { b.x += (b.w - townC.w) / 2; b.w = townC.w; } b.h = townC.h; art =PIXROOM ? pixTex(townC.c, b.w, b.h) : texOf(townC.c); }
       if (it.encounter && SYM[it.encounter]) art = texOf(symbolCanvas(SYM[it.encounter], b.w, b.h), true); // 見えている敵は、戦う敵の姿 // 内装（絵柄）を「ドット」にすると町の絵もドットに
       const img = DAY && !interior && it.imageDay ? it.imageDay : it.image; // 昼は昼の背景
@@ -1185,7 +1554,7 @@ export function createThreeStage(canvasEl, assets) {
       if (interior && layer.band !== 'backdrop') {
         const solid = solidMesh(name, art, rc, b, it);
         const hinge = new THREE.Group(); hinge.position.set(b.x + b.w / 2, 0, it.y + it.h); hinge.add(solid); root.add(hinge);
-        boards.push({ hinge, mesh: solid, z: b.z, fade: it.fadeNearPlayer ? it : null, name: it.region ? `${it.asset}#${it.region}` : it.asset, solid: true });
+        boards.push({ hinge, mesh: solid, z: b.z, h: b.h, fade: it.fadeNearPlayer ? it : null, name: it.region ? `${it.asset}#${it.region}` : it.asset, solid: true, it });
         continue;
       }
       const mesh = boardMesh(art, b.w, b.h);
@@ -1199,11 +1568,93 @@ export function createThreeStage(canvasEl, assets) {
       const zb = interior && layer.band === 'backdrop' ? Math.max(b.z, 0) + 0.12 : b.z;
       if (pages) hinge.position.set(cx - map.width / 2, 0.01, zb - map.height / 2); else hinge.position.set(cx, 0.01, zb);
       hinge.add(mesh); parent.add(hinge);
-      boards.push({ hinge, mesh, z: b.z, x0: b.x, x1: b.x + b.w, h: b.h, band: layer.band, fade: it.fadeNearPlayer ? it : null, name: it.region ? `${it.asset}#${it.region}` : it.asset, enc: it.encounter ? `${map.id}:${it.encounter}` : null });
-      if (name === 'lamp') { const L = new THREE.PointLight(0xdde8ff, 10, 6, 1.6); L.position.set(0, b.h * 0.85, 0.4); hinge.add(L); lights.push({ L, base: 10, ph: cx, z: b.z }); } // 導機灯の淡い白
-      if (name === 'stall' || name === 'inn-front' || name === 'inn-tall') { const L = new THREE.PointLight(0xffb45a, 18, 9, 1.6); L.position.set(0, b.h * 0.45, 0.8); hinge.add(L); lights.push({ L, base: 18, ph: cx, z: b.z }); }
+      let door = null;
+      if (doorCut?.hole) { // くりぬいた入口と窓（2026-11-23 作者：入口を扉の付け根まで・奥を深く・ブックヌックのような箱に、窓もくりぬいて、奥に中の眺めの写し）
+        const cut = (townC ? TOWN_CFG?.doors?.[townC.file]?.cut : it.cut) || {}, D = 2.8; // 奥行き（写しの板が、後ろの町の景色の板より手前に来るように）
+        const dw = (doorCut.x1 - doorCut.x0) * b.w, dh = (doorCut.y1 - doorCut.y0) * b.h, cx0 = ((doorCut.x0 + doorCut.x1) / 2 - 0.5) * b.w, y0 = (1 - doorCut.y1) * b.h;
+        const holeTex = texOf(doorCut.c), uvPart = (/** @type {number} */ u0, /** @type {number} */ u1) => { const t = holeTex.clone(); t.needsUpdate = true; t.repeat.set(u1 - u0, 1); t.offset.set(u0, 0); return t; };
+        const fx = (/** @type {number} */ x) => (x - doorCut.x0) / (doorCut.x1 - doorCut.x0);
+        // くりぬいた所（入口と窓）の形を stencil に書く。奥の物は、この形の中だけに描く（家の後ろに箱が出っぱって見えない）
+        const mask = new THREE.Mesh(new THREE.PlaneGeometry(b.w, b.h), new THREE.MeshBasicMaterial({ map: texOf(doorCut.mask), alphaTest: 0.5, colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp }));
+        mask.position.set(0, b.h / 2, 0.005); mask.renderOrder = -2; hinge.add(mask);
+        const portal = (/** @type {any} */ m) => { m.stencilWrite = true; m.stencilRef = 1; m.stencilFunc = THREE.EqualStencilFunc; m.stencilFail = m.stencilZFail = m.stencilZPass = THREE.KeepStencilOp; return m; };
+        const recess = [];
+        // 開いた扉の板（左右）
+        // 扉の板の上のはし（leafTop）より上は透明に：アーチの内側の木の所もくりぬく（2026-11-23 作者「ここをくりぬいてほしい」）
+        const lt = cut.leafTop, Wp = doorCut.c.width, Hp = doorCut.c.height, px = (/** @type {number} */ f) => (f - cut.x0) / (cut.x1 - cut.x0) * Wp, py = (/** @type {number} */ f) => (f - cut.y0) / (cut.y1 - cut.y0) * Hp;
+        const leafCanvas = !lt ? null : canvas(Wp, Hp, (g) => {
+          g.drawImage(doorCut.c, 0, 0);
+          g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.moveTo(0, 0); g.lineTo(Wp, 0); g.lineTo(Wp, py(lt.outer)); g.lineTo(px(lt.ro), py(lt.outer));
+          for (let i = 1; i <= 16; i++) { const t = i / 16; g.lineTo(px(lt.ro + (lt.ri - lt.ro) * t), py(lt.outer + (lt.inner - lt.outer) * (1 - Math.sqrt(1 - t * t)))); } // 右の扉の上のはし（外→内）
+          g.lineTo(px(lt.li), py(lt.inner));
+          for (let i = 15; i >= 0; i--) { const t = i / 16; g.lineTo(px(lt.lo + (lt.li - lt.lo) * t), py(lt.outer + (lt.inner - lt.outer) * (1 - Math.sqrt(1 - t * t)))); } // 左の扉の上のはし（内→外）
+          g.lineTo(0, py(lt.outer)); g.closePath(); g.fill();
+        });
+        const leafTex = leafCanvas ? texOf(leafCanvas) : holeTex, leafPart = (/** @type {number} */ u0, /** @type {number} */ u1) => { const t = leafTex.clone(); t.needsUpdate = true; t.repeat.set(u1 - u0, 1); t.offset.set(u0, 0); return t; };
+        if (cut.mx0 && cut.mx1) for (const [u0, u1] of [[0, fx(cut.mx0)], [fx(cut.mx1), 1]]) {
+          const lw = (u1 - u0) * dw, leaf = new THREE.Mesh(new THREE.PlaneGeometry(lw, dh), new THREE.MeshStandardMaterial({ map: leafPart(u0, u1), transparent: true, alphaTest: 0.3, roughness: 0.9 }));
+          leaf.position.set(cx0 - dw / 2 + (u0 + u1) / 2 * dw, y0 + dh / 2, 0.02); hinge.add(leaf);
+        }
+        // 入口の奥の箱：床・左右の壁・天井に、中と同じ絵（ブックヌックのように）。中の床の模様と同じ位置合わせ（1枚4マス）
+        const box = it.peekBox, base = box?.base || '', tx = (/** @type {string} */ f, rx, ry, ox = 0, oy = 0) => { const t = loader.load(base + f); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.offset.set(ox, oy); t.anisotropy = 8; return t; };
+        const bh = dh * 1.04, lit = (/** @type {any} */ t) => portal(new THREE.MeshBasicMaterial({ map: t, color: box?.tint ?? 0xe8cfae, side: THREE.DoubleSide, fog: false }));
+        if (box) {
+          const FW = dw * 3, fxw = (box.frontX ?? 10.5) - FW / 2; // 床は横に広く（2026-11-23 作者「ゆかは横に広げよう」）。中の入口のまんなか（x）から、床の左のはし
+          const floor = new THREE.Mesh(new THREE.PlaneGeometry(FW, D), lit(tx(box.floor, FW / 4, D / 4, fxw / 4, 0))); floor.rotation.x = -Math.PI / 2; floor.position.set(cx0, y0 + 0.005, -D / 2); hinge.add(floor); recess.push(floor);
+          // 左右の壁は作らない（2026-11-23 作者「これいらないかな側面」：壁の板が浮いて見えた。横は奥の写しが見える）
+          const ch = box.ceilH ?? bh; // 天井は中と同じ高さ（2026-11-23 作者「天井が低すぎる」）
+          const top = new THREE.Mesh(new THREE.PlaneGeometry(dw * 3, D), lit(tx(box.ceiling, dw * 3 / 4, D / 4))); top.rotation.x = Math.PI / 2; top.position.set(cx0, y0 + ch, -D / 2); hinge.add(top); recess.push(top);
+        }
+        // 奥の写し：撮ったときのカメラ（peekPose：外の戸口から見たカメラの位置・向き・画角）に向けて、箱の奥より向こうに置く。写しの床と箱の床がつながる
+        let peekT = null, veil = 0xd9a066; if (it.peek) { peekT = loader.load(it.peek, (t) => { // 写しの平均の色（切りかわりに重ねる色）
+          try { const c = document.createElement('canvas'); c.width = c.height = 8; const g = /** @type {CanvasRenderingContext2D} */ (c.getContext('2d')); g.drawImage(t.image, 0, 0, 8, 8); const d = g.getImageData(0, 0, 8, 8).data; let r = 0, gg = 0, bb = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; bb += d[i + 2]; } const n = d.length / 4; if (holeRecess) holeRecess.veil = (Math.round(r / n) << 16) | (Math.round(gg / n) << 8) | Math.round(bb / n); } catch { /* 色が取れなければ、いつもの暖かい色 */ }
+        }); peekT.colorSpace = THREE.SRGBColorSpace; }
+        const pose = it.peekPose, ex = (map.exits || []).find((/** @type {any} */ e) => e.id === it.doorExit);
+        if (peekT && pose && ex) {
+          const cam = new THREE.Vector3(ex.x + 0.5 - (b.x + b.w / 2) + pose.rel[0], pose.rel[1], pose.rel[2]), qt = new THREE.Quaternion().fromArray(pose.q), fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(qt);
+          const L = (pose.rel[2] + D + 0.1) / Math.max(0.2, -fwd.z), h = 2 * L * Math.tan(pose.fov * Math.PI / 360), w = h * (pose.aspect || 1.6);
+          const inside = new THREE.Mesh(new THREE.PlaneGeometry(w, h), portal(new THREE.MeshBasicMaterial({ map: peekT, fog: false, toneMapped: false })));
+          inside.position.copy(cam).addScaledVector(fwd, L); inside.quaternion.copy(qt); hinge.add(inside); recess.unshift(inside);
+        } else if (peekT) {
+          const ph = dh * 1.7, pw = ph * (it.peekAspect || 1.6);
+          const inside = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), portal(new THREE.MeshBasicMaterial({ map: peekT, fog: false, toneMapped: false })));
+          inside.position.set(cx0, y0 - 0.2 + ph / 2, -D); hinge.add(inside); recess.unshift(inside);
+        } else {
+          const m0 = cut.mx0 ? fx(cut.mx0) : 0, m1 = cut.mx1 ? fx(cut.mx1) : 1;
+          const inside = new THREE.Mesh(new THREE.PlaneGeometry(dw, dh * 1.35), portal(new THREE.MeshBasicMaterial({ map: uvPart(m0, m1), fog: false })));
+          inside.position.set(cx0, y0 + dh * 1.35 / 2, -D); hinge.add(inside); recess.unshift(inside);
+        }
+        for (const m of recess) m.renderOrder = -1;
+        holeRecess = { recess, hinge, inside: recess[0], peek: !!peekT, h: dh * 1.35, sill: y0, veil };
+      }
+      if (doorCut && !doorCut.hole) { // 切り抜いた扉の板：ちょうつがいの側を軸に、家の中（奥）へ開く
+        const dw = (doorCut.x1 - doorCut.x0) * b.w, dh = (doorCut.y1 - doorCut.y0) * b.h, right = doorCut.hinge !== 'left';
+        const dm = boardMesh(PIXROOM ? pixTex(doorCut.c, dw, dh) : texOf(doorCut.c), dw, dh); dm.position.set(right ? -dw / 2 : dw / 2, dh / 2, 0);
+        if (!interior) holeMaterial(dm.material);
+        const pivot = new THREE.Group(); pivot.position.set(((right ? doorCut.x1 : doorCut.x0) - 0.5) * b.w, (1 - doorCut.y1) * b.h, 0.015); pivot.add(dm); hinge.add(pivot);
+        door = { pivot, exit: it.doorExit, sign: right ? 1 : -1 };
+      }
+      let roomCard = null;
+      if (it.doorExit && !interior) { // 人形の家の演出で、正面が開いたときに見える中の部屋（灯りのともった漆喰と梁と床。開くときだけ見せる）
+        roomCard = new THREE.Mesh(new THREE.PlaneGeometry(b.w * 0.96, b.h * 0.96), new THREE.MeshBasicMaterial({ map: texOf(roomCardCanvas()), fog: false }));
+        roomCard.position.set(0, b.h * 0.48, -0.06); roomCard.visible = false; hinge.add(roomCard);
+      }
+      boards.push({ hinge, mesh, door, doorExit: it.doorExit, roomCard, mw: b.w, artH: townC?.artH, z: b.z, x0: b.x, x1: b.x + b.w, h: b.h, band: layer.band, fade: it.fadeNearPlayer ? it : null, name: it.region ? `${it.asset}#${it.region}` : it.asset, enc: it.encounter ? `${map.id}:${it.encounter}` : null });
+      // 板の灯りは板（hinge）の中に入れない：板は倒れている間 visible=false で、そのたびに灯りの数が変わり、光の計算を全部組み直して止まっていた
+      // （2026-11-23 作者「飛び出す様子をかくかくしたくない」）。灯りはいつも見えるところに置き、板が倒れている間は明るさを0にする
+      const lightAt = (/** @type {number} */ color, /** @type {number} */ base, /** @type {number} */ dist, /** @type {number} */ y, /** @type {number} */ z) => { const L = new THREE.PointLight(color, 0, dist, 1.6); L.position.copy(hinge.position).add(new THREE.Vector3(0, y, z)); parent.add(L); const e = { L, base, ph: cx, z: b.z, hinge }; lights.push(e); return e; };
+      if (name === 'lamp') { // 街灯：暖かい色（2026-11-23 作者「色を暖かな感じに」）。本が開いて板が立ったあと、手前から奥へ順に灯る（作者「A 本と一緒に灯る」）
+        const e = lightAt(0xffc27a, 12, 6.5, b.h * 0.85, 0.4);
+        const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 }));
+        glow.position.copy(e.L.position).add(new THREE.Vector3(0, 0, -0.35)); glow.scale.set(1.1, 1.1, 1); parent.add(glow); // ガラスの中の明るさ
+        const ring = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: glowTex, color: 0xffb060, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.copy(hinge.position).add(new THREE.Vector3(0, 0.03, 0.6)); parent.add(ring); // 足もとに広がる光の輪
+        e.street = { glow, ring, litAt: /** @type {number|null} */ (null), delay: 0 };
+      }
+      if (name === 'stall' || name === 'inn-front' || name === 'inn-tall') lightAt(0xffb45a, 18, 9, b.h * 0.45, 0.8);
     }
     delayOf = riseDelayFn(boards.map((b) => b.z));
+    lights.filter((l) => l.street).sort((a, c) => c.z - a.z).forEach((l, i) => { l.street.delay = 0.25 + i * 0.28; }); // 手前（z が大きい）から順に
   }
 
   function actorMesh(id) {
@@ -1212,7 +1663,7 @@ export function createThreeStage(canvasEl, assets) {
     const we = pe && byId(pe.walk), ie = pe && byId(pe.idle);
     if (we?.style === 'chibi' && assets.images[we.id] && assets.images[ie?.id]) {
       const mk = (img) => { const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t; };
-      const walkT = mk(assets.images[we.id]), idleT = mk(assets.images[ie.id]);
+      const walkT = mk(toneSheet(id, assets.images[we.id], we.frame[1])), idleT = mk(toneSheet(id, assets.images[ie.id], (ie.frame || we.frame)[1]));
       const [fw, fh] = we.frame, h = fh * DOT, w = h * fw / fh; // ドットの大きさはみんな同じ（DOT）。絵の高さで背の高さが決まる（フレアは小柄）
       const mesh = boardMesh(walkT, w, h); fillMaterial(mesh.material, walkT); mesh.position.y = h / 2 - (fh - we.anchor[1]) / fh * h; // 足の裏（anchor）を地面に
       const hinge = new THREE.Group(); hinge.add(mesh); root.add(hinge);
@@ -1220,7 +1671,7 @@ export function createThreeStage(canvasEl, assets) {
       const fe = pe.faces && byId(pe.faces);
       let face = null;
       if (fe && assets.images[fe.id]) {
-        const ft = mk(assets.images[fe.id]), [cw, ch] = fe.cell;
+        const ft = mk(toneSheet(id, assets.images[fe.id], 1)), [cw, ch] = fe.cell; // 顔のレイヤーの前髪も髪と同じ色に（fh=1：ぜんぶ髪あつかい。肌はもともと変えない）（2026-11-23 作者「顔のレイヤーも黒にしないと」）
         const fm = new THREE.Mesh(new THREE.PlaneGeometry(w * cw / fw, h * ch / fh), fillMaterial(new THREE.MeshStandardMaterial({ map: ft, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), ft));
         hinge.add(fm); face = { e: fe, t: ft, mesh: fm, w, h, fw, fh };
       }
@@ -1266,20 +1717,54 @@ export function createThreeStage(canvasEl, assets) {
     }
   }
 
+  /**
+   * 先に準備（2026-11-23 作者「飛び出す様子をかくかくしたくない」）：板が起き上がる瞬間に、絵のほどき・GPUへの送りこみ・光の計算の組み立てが
+   * 一度に来て 90〜120ms 止まっていた。マップを開くとき（表紙を待つ間・めくりの裏）に、見えていない板の分もまとめてすませる
+   */
+  async function warmUp() {
+    scene.traverse((/** @type {any} */ o) => { if (o.isLight) o.layers.enable(1); }); // 灯りはキャラ（layer 1）も照らす
+    const t0 = performance.now(), seen = new Set();
+    scene.traverse((/** @type {any} */ o) => {
+      for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (!m) continue;
+        for (const k of ['map', 'emissiveMap', 'bumpMap', 'alphaMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'lightMap']) {
+          const t = m[k]; if (t?.isTexture && !seen.has(t)) seen.add(t);
+        }
+      }
+    });
+    // 絵を画面の側へ送るのは、1コマに少しずつ（123枚を一度に送ると0.2秒止まっていた。2026-11-23 作者「今もいったん止まって見えてしまう」）。合間に、取っておいた画面を描く
+    let tb = performance.now();
+    for (const t of seen) { renderer.initTexture(t); if (performance.now() - tb > 8) { await new Promise((res) => requestAnimationFrame(() => res(undefined))); tb = performance.now(); } }
+    await renderer.compileAsync(scene, camera); // 光の計算の組み立ては、待てるところで（並べて）すませる
+    // ぼかすとき（いったん絵に描く）の描き方も先に準備：はじめてぼかすコマで、全部の描き方を組み直して引っかかっていた（2026-11-23 作者「今もいったん止まって見えてしまう」）
+    renderer.setRenderTarget(blurRT[0]); await renderer.compileAsync(scene, camera); renderer.setRenderTarget(null);
+    renderer.compile(blurScene, fadeCam); renderer.compile(blurOutScene, fadeCam); renderer.compile(veilScene, fadeCam); renderer.compile(holdScene, fadeCam);
+    return { textures: seen.size, ms: Math.round(performance.now() - t0) };
+  }
+  let lastWarm = { textures: 0, ms: 0 }, loading = false;
+
   return {
     name: 'paper',
     async load(mapData) {
-      await flutterReady;
+      loading = true; holdT0 = performance.now() / 1000; if (holdOk) { holdMesh.scale.set(1, 1, 1); holdMat.uniforms.map.value = holdTex; holdMat.uniforms.op.value = 1; renderer.setRenderTarget(null); renderer.clear(); renderer.render(holdScene, fadeCam); } /* 読みはじめのコマから、取っておいた画面を出す */ // 組み立てている途中の舞台は描かない（半分の舞台を描くたびに光の計算を組み直して止まっていた）
+      try { await this.loadInner(mapData); } finally { loading = false; }
+    },
+    /** @param {any} mapData */
+    async loadInner(mapData) {
+      await flutterReady; await bookReady;
       if (root) { scene.remove(root); disposeTree(root); }
-      map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; lights = []; fires = []; cam.init = false;
+      map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; innerDoors = []; holeRecess = null; lights = []; fires = []; cam.init = false;
       interior = map.kind === 'interior'; nook = null;
       // ?perf=1：マップを開くときの各段の時間をコンソールに出す（2026-11-22 作者「町が出るまで時間がかかる理由」を調べるため）
       const PF = /[?&]perf=1/.test(location.search), pt = [performance.now()], mark = () => pt.push(performance.now());
       await loadArt(map); mark(); await loadTown(map); mark(); await loadSymbols(map); mark();
+      const nextFrame = () => new Promise((res) => requestAnimationFrame(() => res(undefined))); // 組み立ての合間に1コマ描く
+      await nextFrame();
       if (interior) buildInterior(); else buildExterior(); mark();
-      buildBoards(); mark();
+      await nextFrame();
+      buildBoards(); mark(); await nextFrame();
       buildExitMarks();
-      applyOrbs(map); mark();
+      applyOrbs(map); mark(); await nextFrame();
       if (PF) console.info('[perf] load', map.id, ['art', 'town', 'symbols', 'ground', 'boards', 'marks'].map((k, i) => k + ' ' + Math.round(pt[i + 1] - pt[i]) + 'ms').join(' / '));
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
@@ -1287,7 +1772,8 @@ export function createThreeStage(canvasEl, assets) {
       const tavern = interior && map.stage?.look !== 'dungeon'; // 建物の中は、部屋全体を照らす光を弱めて、灯りのまわりだけ暖かく（暗がりを作る。2026-11-23 作者「銀鹿亭なんだかまだチープ」）
       key.intensity = tavern ? 0.2 : interior ? 0.5 : DAY ? 2.6 : 1.6;
       key.color.set(DAY && !interior ? 0xfff8ec : 0xfff0d8);
-      hemi.intensity = DAY && !interior ? 1.7 : tavern ? 0.35 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : tavern ? 0xb08a68 : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
+      hemi.intensity = DAY && !interior ? 1.7 : tavern ? 0.28 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : tavern ? 0xa88c70 : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
+      lastWarm = await warmUp(); if (PF) console.info('[perf] warm', map.id, lastWarm.textures + '枚 ' + lastWarm.ms + 'ms');
     },
     resize(w, h, dpr) { cssW = Math.max(1, w); cssH = Math.max(1, h); renderer.setPixelRatio(Math.min(2, dpr || 1)); renderer.setSize(cssW, cssH, false); camera.aspect = cssW / cssH; camera.updateProjectionMatrix(); },
     /**
@@ -1295,48 +1781,74 @@ export function createThreeStage(canvasEl, assets) {
      * @param {{ intro?: { t:number, open:number, coverRad:number, zoom:number } | null, seconds?: number }} [fx]
      */
     draw(view, fx = {}) {
+      if (loading) { // 読んでいる間：切りかわる直前の画面があれば、それを少しずつ寄せながら描く（止まって見えないように）。無ければ前の絵のまま
+        if (holdOk) { const t = Math.min(1, (performance.now() / 1000 - holdT0) / 0.5), k = 1 + 0.035 * t; holdMesh.scale.set(k, k, 1); holdMat.uniforms.map.value = holdTex; holdMat.uniforms.op.value = 1; renderer.setRenderTarget(null); renderer.clear(); renderer.render(holdScene, fadeCam); }
+        return;
+      }
       if (!map) return;
+
       const intro = fx.intro ?? null, sec = fx.seconds ?? 0, now = performance.now() / 1000;
       lastIntro = intro;
       const W = map.width, H = map.height, { BW, BH } = bookSize(map);
       // 出入口の演出（2026-11-22 作者の決定）。view.effect：kind（page / nook-in / nook-out）・phase（leave / arrive）・p（0→1）
       const ef = view.effect || null, efk = ef ? `${ef.kind}:${ef.phase}` : '', ep = ef ? ef.p : 0;
+      // ぼかして出る（2026-11-23 作者「出るところも演出を」）：入るときの逆。中では主人公たちが手前（カメラのほう）へ歩き、まわりがぼけて、外では戸口の奥から歩いて出てくる
+      const exOf = (/** @type {any} */ id) => (map.exits || []).find((/** @type {any} */ e) => e.id === id);
+      const outL = NOOKIN === 'blur' && efk === 'nook-out:leave' && exOf(ef.exit)?.dir === 'down', outA = NOOKIN === 'blur' && efk === 'nook-out:arrive' && !!carry?.out;
+      // キャラの色：着いた直後は、前のマップの灯りで見えていた色から、少しずつ今の灯りの色へ（2026-11-23 作者「明かりの色も少しずつ移るように」）
+      const arriving = (efk === 'nook-in:arrive' && NOOKIN === 'blur') || outA, tintK = arriving && carry?.ratio ? 1 - Math.min(1, Math.max(0, ep / 0.6)) : 0;
+      const c01 = (/** @type {number} */ v) => Math.min(1, Math.max(0, v)), outDoor = outA ? exOf(carry.toExit) : null, emerge = outA && outDoor && (holeRecess || interior) ? -EMERGE * (1 - c01(ep / 0.6)) : 0,
+        emDir = new THREE.Vector3(...(({ up: [0, 0, 1], down: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0] })[outDoor?.dir] ?? [0, 0, 1])), /* 出てくる向き（扉の向きの反対） */ outward = outL ? WALK_OUT * c01((ep - 0.15) / 0.65) : 0;
       const cl = (/** @type {number} */ x) => Math.max(0, Math.min(1, x)), ez = (/** @type {number} */ x) => 1 - Math.pow(1 - cl(x), 3);
       lastEffect = efk;
       // 板の起き上がり：開始演出と同じ時間割（riseK）を借りる。riseT が null なら立ったまま
       let riseT = intro ? intro.t : null, fold = 1;
-      if (efk === 'page:leave') fold = 1 - ez(ep / 0.9);                              // いまのエリアの板とキャラが倒れる
+      if (efk === 'nook-in:leave' && NOOKIN === 'fold') fold = 1 - ez(cl((ep - 0.05) / 0.5)); // 飛び出す絵本の家や通りが、ページへ倒れてたたまれる
+      // 奥の板から手前の板、キャラの順に、波のように倒れる（2026-11-23 作者「めくるときの、たたむときだすときの突然消えたり出てきたりする感をなくしたい」→「両方を組み合わせる」）
+      let wave = null; // [始まり, 奥から手前までの時間差, 1枚が倒れる長さ]（演出の割合）
+      if (efk === 'page:leave') wave = [0, 0.4, 0.55];                              // いまのエリアの板とキャラが倒れる
       if (efk === 'page:arrive') riseT = ep < 0.52 ? 0 : RS + (ep - 0.52) / 0.48 * 1.25; // ページがめくれ終わってから、次のエリアの板が起き上がる
-      if (efk === 'nook-out:arrive' && pages) riseT = RS + ep * 1.3;                  // 外に出ると、板が起き上がって迎える
+      if (efk === 'nook-out:arrive' && pages && !outA) riseT = RS + ep * 1.3;                  // 外に出ると、板が起き上がって迎える
       // 背景に入りこむ（2026-11-23 作者「背景に入り込む演出試しに作ってみて」。試し）：
       //   離れる＝カメラが奥の背景の絵へ寄っていき、手前の板とキャラは手前から順にページへ倒れ、背景の絵だけが残って白い光に包まれる
       //   着く＝白い光が晴れると、次のエリアの板が奥から順に起き上がり、カメラは高いところから主人公のうしろへ下りてくる
       const diveL = efk === 'dive:leave', diveA = efk === 'dive:arrive';
-      if (diveL) fold = 1 - ez((ep - 0.1) / 0.6);
+      if (diveL) wave = [0.1, 0.3, 0.5];
       if (diveA) riseT = ep < 0.2 ? 0 : RS + (ep - 0.2) / 0.8 * 1.3;
       // 背景から出てくる（dive の戻り。2026-11-23 作者「戻るときは？」）：
       //   離れる＝カメラがうしろの高い所へ引いていき、板とキャラは奥から順に倒れ、白い光に包まれる
       //   着く＝白い光が晴れると、カメラは奥の背景の絵のすぐ前にいて、絵から抜け出すように主人公のうしろへ下がってくる。板は奥から順に起き上がる
       const emL = efk === 'emerge:leave', emA = efk === 'emerge:arrive';
-      if (emL) fold = 1 - ez((ep - 0.15) / 0.6);
+      if (emL) wave = [0.15, 0.3, 0.5];
       if (emA) riseT = ep < 0.15 ? 0 : RS + (ep - 0.15) / 0.85 * 1.3;
       const deep = diveL || diveA || emL || emA ? DEEP : null, deepIn = diveL || diveA, deepLeave = diveL || emL; // deepIn：奥へ（dive）か
       const riffle = deep === 'riffle', rEnd = (RIFFLE.n - 1) * RIFFLE.gap + RIFFLE.dur; // めくり終わる時刻（着く演出の割合）
       if (riffle && (diveA || emA)) riseT = ep < rEnd ? 0 : RS + (ep - rEnd) / (1 - rEnd) * 1.25; // めくり終わってから起き上がる
       if (deep === 'map' && (diveA || emA)) riseT = ep < 0.45 ? 0 : RS + (ep - 0.45) / 0.55 * 1.3; // 地図：光の点が着いてから起き上がる
-      const kOf = (/** @type {number} */ z, /** @type {boolean} */ isActor) => (riseT === null ? 1 : riseK(riseT, delayOf(z, isActor))) * fold;
+      const zfOf = (/** @type {number} */ z, /** @type {boolean} */ isActor) => delayOf(z, isActor) / (INTRO_TIMING.riseSpread + INTRO_TIMING.actorsAfter); // 0＝いちばん奥 … 1＝キャラ
+      const kOf = (/** @type {number} */ z, /** @type {boolean} */ isActor) => (riseT === null ? 1 : riseK(riseT, delayOf(z, isActor))) * fold * (wave ? 1 - ez(cl((ep - wave[0] - wave[1] * zfOf(z, isActor)) / wave[2])) : 1);
+      // 倒れた板は消さずに、ページに描かれた絵のように平らに残す（外の本のページの上だけ）。板どうし・ページと重ならないよう、手前の板ほど少し上に。
+      // 奥へ倒れてページからはみ出す長い板（家）は、倒れるにつれて縮めてページの中に収める
+      const flatLay = (/** @type {any} */ hinge, /** @type {number} */ k, /** @type {number} */ z, /** @type {number} */ h, /** @type {boolean} */ isActor) => {
+        const f = 1 - Math.min(1, Math.max(0, k)); if (!pages) { hinge.visible = k > 0.01; return; }
+        hinge.visible = true; hinge.position.y += f * (0.03 + 0.05 * zfOf(z, isActor));
+        const room = Math.max(0.5, z - (H / 2 - bookSize(map).BH / 2) - 0.3), fit = h > room ? room / h : 1; hinge.scale.y = 1 + (fit - 1) * f;
+      };
       // 本がひらく
       // 閉じた本は、表紙を上にして置いてある（右半分が左半分の上に重なっている）。ひらくと、右半分が背を軸に表紙ごと右へめくれて開く
       // （2026-11-22 作者：「クリックする前は、表紙が上に置かれているのでは」）
-      if (pages) { const open = intro ? intro.open : 1; pages.left.rotation.z = 0; pages.right.rotation.z = Math.PI * 0.995 * (1 - open); }
+      if (pages) { const open = intro ? intro.open : 1; pages.right.rotation.z = 0; pages.left.rotation.z = -Math.PI * 0.995 * (1 - open); } // 左半分（表紙）が右から左へひらく
       // 見返しの紙：表紙が開くのを少し遅れて追い、しなりながら右ページへ。表（はじめ上）は白い紙、裏は右ページの絵（着いたら右ページと同じ）
       flyleaves.forEach((f, k) => {
-        const open = intro && pages ? intro.open : 1, q = Math.max(0, Math.min(1, (open - 0.18 - 0.14 * k) / 0.62));
-        f.group.visible = !!(intro && pages) && open < 0.999 && q < 1;
+        // 紙は自分の時計で進む（表紙がひらき終わってもそのまま寝るまで動き、寝てから消す。2026-11-23 作者「ページがなくなるのが早い、消えている」：表紙がひらき終わった所で消していた）
+        const open = intro && pages ? intro.open : 1, x = intro ? intro.t / INTRO_TIMING.open : 9, q = Math.max(0, Math.min(1, (x - 0.25 - 0.12 * k) / 0.95));
+        const cap = open >= 0.999 ? 1 : (open - 0.08 - 0.05 * k) * 0.78 + 0.3 * Math.max(0, (open - 0.82) / 0.18) ** 2; // 表紙を追いこさない（めくる紙は手前の角が 1/0.78 倍先に進む）
+        const pf = Math.max(0, Math.min(ez(q), cap));
+        f.group.visible = !!(intro && pages) && pf < 0.999;
         if (!f.group.visible) return;
         if (f.A.material.map !== turnTex) setTurnTex(f.A, turnTex);
         if (f.B.material.map !== (curPageTex || turnTex)) setTurnTex(f.B, curPageTex);
-        f.group.position.set(W / 2, 0.04 + 0.012 * (flyleaves.length - k), H / 2); bendSheet(f, ez(q), BW / 2, BH, -1);
+        f.group.position.set(W / 2, 0.04 + 0.012 * (flyleaves.length - k), H / 2); bendSheet(f, pf, BW / 2, BH, 1); // 表紙を追って右から左へ。表紙を追いこさない（2026-11-23 作者「表紙よりも先にページがめくれている」：なめらかに速くなる動きで、途中で表紙を追いこしていた）
       });
       // めくれるページ（右から左へ。先のほうが遅れて、紙がしなる）
       const turning = efk === 'page:arrive' && !!pages && ep > 0.01 && ep < 0.56;
@@ -1345,14 +1857,15 @@ export function createThreeStage(canvasEl, assets) {
       riffleSheets.forEach((f, k) => {
         const q = riffle && (diveA || emA) && pages ? cl((ep - k * RIFFLE.gap) / RIFFLE.dur) : 0;
         f.group.visible = q > 0 && q < 1; if (!f.group.visible) return;
-        const last = k === RIFFLE.n - 1, ta = k === 0 ? prevPageTex : null, tb = last ? curPageTex : null;
+        const last = k === RIFFLE.n - 1, ta = k === 0 ? (snapPrevOk ? snapRT[0].texture : prevPageTex) : null, tb = last ? (snapCurOk ? snapRT[1].texture : curPageTex) : null;
         if (f.A.material.map !== (ta || turnTex)) setTurnTex(f.A, ta);
         if (f.B.material.map !== (tb || turnTex)) setTurnTex(f.B, tb);
         f.group.position.set(W / 2, 0.05 + 0.006 * (q < 0.5 ? RIFFLE.n - k : k), H / 2); bendSheet(f, ez(q), BW / 2, BH, deepIn ? 1 : -1);
       });
       if (turning) {
-        if (turnA.material.map !== (prevPageTex || turnTex)) setTurnTex(turnA, prevPageTex); // 表＝前のページ
-        if (turnB.material.map !== (curPageTex || turnTex)) setTurnTex(turnB, curPageTex); // 裏＝新しいページ
+        const ta = snapPrevOk ? snapRT[0].texture : prevPageTex, tb = snapCurOk ? snapRT[1].texture : curPageTex;
+        if (turnA.material.map !== (ta || turnTex)) setTurnTex(turnA, ta); // 表＝前のページ（倒れた板ごと）
+        if (turnB.material.map !== (tb || turnTex)) setTurnTex(turnB, tb); // 裏＝新しいページ（倒れた板ごと）
         turnMesh.position.set(W / 2, 0.05, H / 2); bendSheet(sheet, ez(ep / 0.54), BW / 2, BH, ef && ef.dir === 'left' ? -1 : 1); // 左へ出たら左からめくる
       }
       // 板：起き上がる（少し行きすぎて戻る）。手前の板は、主人公が近いと薄くなる
@@ -1360,7 +1873,7 @@ export function createThreeStage(canvasEl, assets) {
       for (const b of boards) {
         const keepBack = b.band === 'backdrop' && ((deep === 'light' && (diveL || emA)) || deep === 'curtain');
         const k = deep === 'layers' || keepBack ? 1 : kOf(b.z, false); // 背景に入りこむ・出てくるとき、背景の絵は倒さない（幕・紙の層は倒さない）
-        b.hinge.visible = k > 0.01; b.hinge.rotation.x = -Math.PI / 2 * (1 - k);
+        b.hinge.rotation.x = -Math.PI / 2 * (1 - k);
         { // 奥へ・手前への演出で板を動かす（もとの位置を覚えておき、毎回もどしてから足す）
           const hp = b.hinge.position; if (b.y0 === undefined) { b.y0 = hp.y; b.z0 = hp.z; }
           let dy = 0, dz = 0;
@@ -1371,20 +1884,24 @@ export function createThreeStage(canvasEl, assets) {
           }
           hp.y = b.y0 + dy; hp.z = b.z0 + dz;
         }
+        if (keepBack || deep === 'layers') { b.hinge.visible = true; b.hinge.scale.y = 1; } else flatLay(b.hinge, k, b.z, b.h || 1, false);
         if (b.enc && (view.defeated || []).includes(b.enc)) { b.hinge.visible = false; continue; } // 倒した見えている敵は消す
         let alpha = 1;
         // 外では、主人公より手前にあって主人公と重なる板（家・露店など）を透かす（2026-11-22 ノルンを広げたら、手前の家が主人公を隠した）
         // 主人公より手前の板は、主人公のまわりの丸（のぞき穴）だけ透かす。板のほかの所はそのまま
         // （前は「基本手前にあるやつは近づかなくても透けるように」で板ぜんぶを 0.35 にしていた。2026-11-22 作者「スポットライトが当たるところだけすけるとか」）
         const hole = b.mesh.material && b.mesh.material.userData && b.mesh.material.userData.holeOn;
-        if (hole) hole.value = !b.fade && b.z > lead.y + 0.7 ? 1 : 0;
+        const low = (b.artH ?? b.h ?? 99) < CHIBI_H; // キャラより低い物（荷箱・植木など）は透かさない（2026-11-23 作者「キャラよりひくいオブジェクトは別に透過しなくていい」）
+        if (hole) hole.value = !low && !b.fade && b.z > lead.y + 0.7 ? 1 : 0;
+        if (interior && b.solid && b.it && heightLerp(map, lead.x, lead.y) > 0 && lead.y + 0.5 < b.it.y + b.it.h && lead.x + 0.5 > b.it.x - 1 && lead.x + 0.5 < b.it.x + b.it.w + 1) alpha = 0.3; // 2階にいるとき、手前の物（暖炉の煙突）がキャラを隠すなら透かす（2026-11-23 2階の通路で煙突に隠れた）
         if (b.fade) { const it = b.fade; if (lead.x >= it.x - 1 && lead.x <= it.x + it.w && lead.y >= it.y - 2 && lead.y <= it.y + it.h) alpha = 0.4; }
         // カメラに近すぎる板は透かす（2026-11-22 作者「カメラに近すぎる家とかは透明にしてほしい」）。カメラ（前の絵の位置）から板のいちばん近い所までの
         // 横の距離が NEAR_FAR マスより近いと薄くなりはじめ、NEAR_NEAR マスでいちばん薄く（NEAR_MIN）
-        if (!interior && b.x1 !== undefined && b.band !== 'backdrop') {
+        if (!low && !interior && b.x1 !== undefined && b.band !== 'backdrop') {
           const dx = Math.max(b.x0 - lastEye[0], 0, lastEye[0] - b.x1), dz = lastEye[2] - b.z;
           if (dz > -0.5) { const dd = Math.hypot(dx, Math.max(0, dz)); if (dd < NEAR_FAR) alpha = Math.min(alpha, Math.round((NEAR_MIN + (1 - NEAR_MIN) * cl((dd - NEAR_NEAR) / (NEAR_FAR - NEAR_NEAR))) * 20) / 20); }
         }
+        if (b.doorExit !== undefined && ((efk === 'nook-in:leave' && (NOOKIN === 'walk' || NOOKIN === 'blur')) || outA)) { alpha = 1; if (hole) hole.value = 0; } // くぐる家は透かさない（カメラが近づいても家の正面と戸口が見えるように）
         if (b.solid) { // 立体（ブックヌックの箱）：箱ぜんぶを薄くする
           if ((b.alpha ?? 1) !== alpha) { b.alpha = alpha; b.mesh.traverse((o) => { if (o.material) for (const mt of [].concat(o.material)) { mt.transparent = true; mt.opacity = alpha; mt.depthWrite = alpha >= 1; } o.castShadow = alpha >= 1; }); }
           continue;
@@ -1395,18 +1912,22 @@ export function createThreeStage(canvasEl, assets) {
       const seen = new Set();
       for (const a of view.actors) {
         seen.add(a.id);
-        if (!actors[a.id]) { const am = actorMesh(a.id); if (!am) continue; actors[a.id] = am; }
-        const am = actors[a.id], k = kOf(a.y + 0.5, true);
-        am.hinge.visible = k > 0.01; am.hinge.rotation.x = -Math.PI / 2 * (1 - k);
+        if (!actors[a.id]) { const am = actorMesh(a.id); if (!am) continue; am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[a.id] = am; }
+        const am = actors[a.id], k = efk.startsWith('nook') ? 1 : kOf(a.y + 0.5, true);
+        { const r = carry?.ratio, t = tintK; for (const mt of [am.mesh.material, am.face?.mesh.material]) { if (!mt) continue; if (t > 0 && r) { mt.color.setRGB(1 + (r[0] - 1) * t, 1 + (r[1] - 1) * t, 1 + (r[2] - 1) * t); mt.emissive.setHex(0xfff4e6).multiply(mt.color); } else if (mt.color.r !== 1 || mt.color.g !== 1 || mt.color.b !== 1) { mt.color.setRGB(1, 1, 1); mt.emissive.setHex(0xfff4e6); } } } // 建物の出入りのあいだ（読みこみ中も）キャラは立ったまま（2026-11-23 作者「キャラはロード中も存在」）
+        am.hinge.rotation.x = -Math.PI / 2 * (1 - k);
         // 入るとき：キャラは入口の奥へ歩いて、入口の板の向こうに消える（カメラがキャラの絵に寄りすぎない）
-        const inward = efk === 'nook-in:leave' ? ez(ep / 0.45) * 1.8 : 0, sideDoor = ef?.at && ef.at.x === 0 && ef.at.y > 0; // 左の壁の扉では左へ歩いて消える
-        am.hinge.position.set(snapDot(a.x + 0.5) - (sideDoor ? inward : 0), 0.02 + heightLerp(map, a.x, a.y) * HU, snapDot(a.y + 0.62) - (sideDoor ? 0 : inward)); // ドット1つ分の刻みにそろえる。高さのあるマス（階段・2階の通路）では持ち上げる
+        const inward = efk === 'nook-in:leave' && NOOKIN === 'blur' ? WALK_IN * cl((ep - 0.15) / 0.65) /* 主人公たちも戸口の奥へ歩く（作者「主人公も奥へ進む」）。2マス奥＝中に着いたときの立ち位置と同じ */ : efk === 'nook-in:leave' ? (NOOKIN === 'walk' && !(ef?.at && ef.at.x === 0 && ef.at.y > 0) ? ep * 3.2 : ez(ep / 0.45) * 1.8) : 0, sideDoor = ef?.at && ef.at.x === 0 && ef.at.y > 0; // 左の壁の扉では左へ歩いて消える
+        am.hinge.position.set(snapDot(a.x + 0.5) - (sideDoor ? inward : 0), 0.02 + heightLerp(map, a.x, a.y) * HU, snapDot(a.y + 0.62) - (sideDoor ? 0 : inward) + outward + emDir.z * emerge); am.hinge.position.x += emDir.x * emerge;
+        if (emerge < 0 && outDoor && !interior && holeRecess?.sill) am.hinge.position.y += holeRecess.sill * cl((outDoor.y + 0.3 - am.hinge.position.z) / 0.5); // 戸口の中（敷居の高さ）から通りへ下りる
+        flatLay(am.hinge, k, a.y + 0.5, CHIBI_H, true);
+        if (inward > 0 && NOOKIN === 'blur' && ef?.at && holeRecess?.sill) am.hinge.position.y += holeRecess.sill * cl((ef.at.y + 0.3 - am.hinge.position.z) / 0.5); // 戸口をくぐったら敷居の高さへ // ドット1つ分の刻みにそろえる。高さのあるマス（階段・2階の通路）では持ち上げる
         if (am.sheet) { // 4方向のシート：向きの行・歩きのコマを選ぶ（左右は別の行。反転しない）
-          const s = a.motion === 'walk' ? am.sheet.walk : am.sheet.idle, f = sheetFrame(s.e, a.dir, a.animMs), img = s.t.image;
+          const walkIn = (inward > 0 && inward < WALK_IN && NOOKIN === 'blur') || (outward > 0 && outward < WALK_OUT) || emerge < 0, fdir = inward > 0 ? (sideDoor ? 'left' : 'up') : outward > 0 ? 'down' : emerge < 0 ? (emDir.x > 0 ? 'right' : emDir.x < 0 ? 'left' : emDir.z < 0 ? 'up' : 'down') : a.dir /* 出入りで歩くあいだは、みんな歩く向きを向く */, s = a.motion === 'walk' || walkIn ? am.sheet.walk : am.sheet.idle, f = sheetFrame(s.e, fdir, walkIn ? now * 1000 : a.animMs), img = s.t.image;
           const m = am.mesh.material; if (m.map !== s.t) { m.map = s.t; m.emissiveMap = s.t; am.mesh.customDepthMaterial.map = s.t; m.needsUpdate = true; }
           s.t.repeat.set(f.sw / img.width, f.sh / img.height); s.t.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height);
           if (am.face) { // 顔の層：このコマの顔の位置（コマごとに頭が少し動く）に、向き・表情のマスを置く
-            const F = am.face, e = F.e, list = e.anchors[a.motion === 'walk' ? 'walk' : 'idle'][a.dir], an = list && list[Math.round(f.sx / f.sw)], row = e.dirs.indexOf(a.dir);
+            const F = am.face, e = F.e, list = e.anchors[a.motion === 'walk' || walkIn ? 'walk' : 'idle'][fdir], an = list && list[Math.round(f.sx / f.sw)], row = e.dirs.indexOf(fdir);
             const expr = a.expression ?? window.SR_FACE?.[a.id] ?? 'normal', col = Math.max(0, e.expressions.indexOf(expr));
             F.mesh.visible = !!an && row >= 0;
             if (F.mesh.visible) {
@@ -1418,16 +1939,42 @@ export function createThreeStage(canvasEl, assets) {
         } else am.tex.offset.x = (Math.floor(now * FLUTTER_FPS + am.off) % FLUTTER_FRAMES) / FLUTTER_FRAMES;
       }
       for (const id of Object.keys(actors)) if (!seen.has(id)) actors[id].hinge.visible = false;
+      // 入れる家の扉（2026-11-23 作者「ドアを切り取って開くようにできるかい？」）：入るときは寄りながら開き、出てきたときは開いたまま着いて、閉まる
+      for (const b of boards) {
+        if (!b.door) continue;
+        let open = 0;
+        if (efk === 'nook-in:leave' && ef.exit === b.door.exit) open = ez(cl((ep - 0.05) / 0.4));
+        if (efk === 'nook-out:arrive') { const ex = (map.exits || []).find((/** @type {any} */ e) => e.id === b.door.exit); if (ex && Math.abs(lead.x - ex.x) + Math.abs(lead.y - ex.y) <= 2) open = outA ? 1 - ez(cl((ep - 0.6) / 0.35)) : 1 - ez(cl((ep - 0.3) / 0.45)); }
+        b.door.pivot.rotation.y = b.door.sign * open * Math.PI * 0.55;
+      }
+      for (const dr of innerDoors) { // 中の扉：入るときに開き、部屋から出てきたら開いたまま着いて閉まる
+        let open = 0;
+        if (ef && ef.phase === 'leave' && ef.exit === dr.exit) open = ez(cl((ep - 0.05) / 0.4));
+        if (ef && ef.phase === 'arrive' && Math.abs(lead.x - dr.x) + Math.abs(lead.y - dr.y) <= 1) open = 1 - ez(cl((ep - 0.3) / 0.45));
+        dr.pivot.rotation.y = dr.sign * open * Math.PI * 0.55; // 約100度、手前（外）へ開く（家の中へ開くと、暗い戸口の板に隠れて見えない）
+      }
       // 灯り：ブックヌックに入るときは、手前から奥へ順にともる（ちらつきながら）
       for (const l of lights) {
         let on = 1;
-        if (efk === 'nook-in:arrive') { const t0 = 0.1 + 0.5 * (1 - cl((l.z ?? 0) / H)); on = cl((ep - t0) / 0.14); if (on > 0 && on < 1) on *= 0.6 + 0.4 * Math.abs(Math.sin(now * 40 + l.ph)); }
+        if (efk === 'nook-in:arrive' && NOOKIN !== 'walk' && NOOKIN !== 'blur') { const t0 = 0.1 + 0.5 * (1 - cl((l.z ?? 0) / H)); on = cl((ep - t0) / 0.14); if (on > 0 && on < 1) on *= 0.6 + 0.4 * Math.abs(Math.sin(now * 40 + l.ph)); }
         const flick = l.fire ? 0.82 + 0.18 * Math.sin(now * 11.3 + l.ph) * Math.sin(now * 6.7) + 0.08 * Math.sin(now * 23) : 1 + Math.sin(now * 7 + l.ph) * 0.04; // 火はよくゆらめく
+        if (l.hinge && !l.hinge.visible) on = 0; // 板が倒れている間は消す（灯りの数は変えない）
+        if (l.street) { // 街灯：板が立ちきってから、順番が来たら灯る。ぽっと明るくなって一度ちらつき、落ちつく。倒れたら消えて、次に立ったらまた灯る
+          const lp = l.street;
+          if (!l.hinge.visible || 1 + l.hinge.rotation.x / (Math.PI / 2) < 0.98) lp.litAt = null; // 板が立ちきっていない
+          else if (lp.litAt === null) lp.litAt = now + lp.delay;
+          const t = lp.litAt === null ? -1 : now - lp.litAt;
+          const ig = t < 0 ? 0 : t < 0.07 ? 0.7 : t < 0.14 ? 0.15 : t < 0.5 ? 0.15 + 0.85 * ez((t - 0.14) / 0.36) : 1;
+          on *= ig;
+          const day = DAY && !interior ? 0.25 : 1;
+          lp.glow.material.opacity = 0.85 * ig * day;
+          const rs = 1.2 + 2.6 * ez(cl(t / 0.9)); lp.ring.scale.set(rs, rs, 1); lp.ring.material.opacity = 0.32 * ig * day;
+        }
         l.L.intensity = l.base * on * flick * (DAY && !interior ? 0.12 : 1); // 昼は灯りをほのかに
         if (l.glow) l.glow.material.opacity = 0.9 * on * (1 + Math.sin(now * 7 + l.ph) * 0.05);
       }
       for (const f of fires) {
-        f.tex.offset.x = (Math.floor(now * 9) % FIRE_FRAMES) / FIRE_FRAMES;
+        f.tex.offset.x = (Math.floor(now * 9) % f.frames) / f.frames;
         for (const e of f.embers) { const t = (now * 0.45 + e.ph) % 1; e.s.position.set(e.dx + Math.sin(now * 3 + e.ph * 9) * 0.08, f.y0 + (f.y1 - f.y0) * t, 0.08); e.s.material.opacity = (1 - t) * 0.9; }
       }
       // カメラ：主人公を追う（作者の決定：見下ろし10度・画角60度。?cam=1 の値があればそちらを使う）
@@ -1448,29 +1995,101 @@ export function createThreeStage(canvasEl, assets) {
       if (efk === 'page:leave') zoom = 1 - ez(ep);
       if (efk === 'page:arrive') zoom = ep < 0.55 ? 0 : ez((ep - 0.55) / 0.45);
       if (deep === 'riffle') zoom = deepLeave ? 1 - ez(ep) : ep < rEnd ? 0 : ez((ep - rEnd) / (1 - rEnd)); // 本全体を見て、めくって、寄る
-      if (efk === 'nook-out:arrive' && pages) zoom = ez((ep - 0.1) / 0.85);
+      if (efk === 'nook-out:arrive' && pages && !outA) zoom = ez((ep - 0.1) / 0.85);
       if (zoom < 1 && pages) { // 本全体を見るカメラから、ふだんのカメラへ寄る
         const p0 = 38 * Math.PI / 180, th = Math.tan(fov * Math.PI / 360), M = camera.aspect < 1 ? 5 : 2.5; // スマホ縦は、手前の角が切れないよう余白を広く
-        const half = BW / 2 - (intro && pages ? (BW / 4) * (1 - intro.open) : 0); // 閉じているあいだは、閉じた本（左半分）の大きさに合わせて寄る
+        const half = BW / 2 - (intro && pages ? (BW / 4) * (1 - intro.open) : 0); // 閉じているあいだは、閉じた本（右半分）の大きさに合わせて寄る
         const D = Math.max((half + M) / (th * camera.aspect), (BH / 2 + M) / th) * 1.08;
         wideD = D; // 本全体を見せているあいだは、もやを遠ざける（スマホ縦で本がもやに隠れた。2026-11-22）
-        const cxB = W / 2 - (intro ? (BW / 4) * (1 - intro.open) : 0); // 閉じているあいだは、閉じた本（左半分の位置）を真ん中に
+        const cxB = W / 2 + (intro ? (BW / 4) * (1 - intro.open) : 0); // 閉じているあいだは、閉じた本（右半分の位置）を真ん中に
         const wl = new THREE.Vector3(cxB, 0, H / 2), we = new THREE.Vector3(cxB, Math.sin(p0) * D, H / 2 + Math.cos(p0) * D);
         eye = we.lerp(eye, zoom); look.copy(wl.lerp(look, zoom));
       }
       // ブックヌックに入る：外では入口の暗がりへ寄って暗くなり、中では遠く（本棚の前）から額縁の中へ寄る
       let fade = view.transition || 0;
-      if (efk === 'nook-in:leave' && ef.at) {
+      doorGlow.visible = false; blurAmt = 0; veilAmt = 0;
+      for (const b of boards) if (b.doorExit !== undefined && b.mesh) { // 人形の家：入口の家の正面が、左のはしを軸に手前へ開く
+        const th = efk === 'nook-in:leave' && NOOKIN === 'doll' && ef.exit === b.doorExit ? ez(cl((ep - 0.05) / 0.5)) * 1.45 : 0, hw = (b.mw || 0) / 2;
+        b.mesh.rotation.y = -th; b.mesh.position.x = -hw + hw * Math.cos(th); b.mesh.position.z = hw * Math.sin(th);
+        if (b.roomCard) b.roomCard.visible = th > 0.01;
+      }
+      if (efk === 'nook-in:leave' && NOOKIN === 'blur') { // ぼかす：キャラはそのまま、まわりがぼけていく。カメラは主人公のすぐ後ろへ寄り、頭の上を越えて戸口をくぐり、家より奥まで進む
+        // （2026-11-23 作者「もっと主人公に近づいて、そして、家よりも奥まで進む演出を。後ろのスクリーンショットがぼかして映ることで、入った時にそこまで色味が変わらない」）
+        fade = 0; blurAmt = cl((ep - 0.15) / 0.85); // ぼけ方・色・画角は等速で（2026-11-23 作者「ぼかし方とかを等速にしたい」）
+        const lw = new THREE.Vector3(lead.x + 0.5, heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.62), head = lw.clone().add(new THREE.Vector3(0, 1.3, 0));
+        // 主人公はいつも見えるように（2026-11-23 作者「主人公も奥へ進む」「主人公はいつも見えていてほしい」）：カメラは、いちばん後ろの仲間の少し横・頭の上・後ろについて、主人公の頭を見る。
+        // 歩くにつれて後ろとの間をつめ、最後は家の正面より少し奥（中の始まりと同じ見え方）
+        // 2階の扉なら2階の高さで、左の壁の扉なら扉のほうを向いて（2026-11-23 作者「銀鹿亭の2階のはいるときドアに向かってほしい、1階の目線になってる」）
+        const walkNow = WALK_IN * cl((ep - 0.15) / 0.65), rearA = view.actors[view.actors.length - 1], sdIn = !!(ef.at && ef.at.x === 0 && ef.at.y > 0);
+        const dv = sdIn ? new THREE.Vector3(-1, 0, 0) : new THREE.Vector3(0, 0, -1), pv = sdIn ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(1, 0, 0), gyL = heightLerp(map, lead.x, lead.y) * HU;
+        const rear = new THREE.Vector3(rearA.x + 0.5, heightLerp(map, rearA.x, rearA.y) * HU, rearA.y + 0.62).addScaledVector(dv, walkNow), leadHead = new THREE.Vector3(lead.x + 0.5, gyL + 1.55, lead.y + 0.62).addScaledVector(dv, walkNow);
+        if (ef.at && holeRecess?.sill) { const up = (/** @type {any} */ v) => { v.y += holeRecess.sill * cl((ef.at.y + 0.3 - v.z) / 0.5); }; up(rear); up(leadHead); } // 戸口をくぐったら敷居の高さ（カメラもいっしょに上がる）
+        const near = cl((ep - 0.55) / 0.45), gap = 2.2 + (1.0 - 2.2) * near; // 画角を広げるのと同時に、ぐっと近づく（2026-11-23 作者「同時に距離も近づけて」）
+        const z1 = ez(cl(ep / 0.35)); eye.lerp(rear.clone().addScaledVector(pv, 0.8 + 0.5 * near).addScaledVector(dv, -gap).add(new THREE.Vector3(0, 1.95, 0)), z1); /* 近づくほど横へ：主人公が後ろの仲間に隠れないように。高さは頭の少し上＝見下ろす角度は低いまま（2026-11-23 作者「見下ろし角度はもっと低いまま」） */ look.lerp(leadHead, z1);
+        if (ef.at) {
+          const ax = ef.at.x + 0.5, az = ef.at.y;
+          camera.fov += (FOV_BURST - camera.fov) * cl((ep - 0.55) / 0.45); // 入る瞬間に画角を目いっぱい広げる（2026-11-23 作者「入る瞬間に画角を目いっぱい広げて」）。中はこの画角から、ふつうの画角へ戻る（carry.fov）
+          const ex = (map.exits || []).find((/** @type {any} */ e) => e.id === ef.exit), anchor = sdIn ? new THREE.Vector3(ef.at.x, gyL, ef.at.y + 0.5) : new THREE.Vector3(ax, gyL, az);
+          const turn = (/** @type {any} */ v) => (sdIn ? v.applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2) : v); // 左の壁の扉から入ったら、中（奥へ進む向き）に合わせて回しておく
+          veilAmt = VEIL * cl((ep - 0.55) / 0.45); veilMat.color.setHex(holeRecess?.veil ?? 0xd9a066); // 最後に向けて、中の色をうっすら重ねる
+          carry = { veil: holeRecess?.veil ?? 0xd9a066, door: true, eye: turn(eye.clone().sub(leadHead)), look: turn(look.clone().sub(leadHead)), fov: camera.fov, toExit: ex?.to?.exit, sill: holeRecess?.sill ?? 0 };
+        } else carry = { eye: eye.clone().sub(lw), look: look.clone().sub(lw), fov: camera.fov };
+        void head;
+      }
+      else if (efk === 'nook-in:leave' && ef.at && NOOKIN === 'walk' && !(ef.at.x === 0 && ef.at.y > 0)) { // 入口をくぐる：キャラの少し後ろ・目の高さから、いっしょに戸口を通りぬける
+        const at = ef.at, dy = heightOf(map, at.x, at.y) * HU, cz = at.y + 0.62 - ep * 3.2, q = ez(cl(ep / 0.45)), push = ez(cl((ep - 0.45) / 0.55));
+        eye.lerp(new THREE.Vector3(at.x + 0.5, 3.0 + dy, cz + 2.6 - 2.0 * push), q); look.lerp(new THREE.Vector3(at.x + 0.5, 1.3 + dy, cz - 4), q); // 仲間の頭の上を越えて（後ろの仲間の背中にぶつからないよう、目の高さより上から）
+        if (holeRecess?.peek) { // 奥の絵（中の眺めの写し）が画面の縦いっぱいになる所へ寄って、そのまま中に着く（暗くしない）
+          const wp = holeRecess.inside.getWorldPosition(new THREE.Vector3()), d = (holeRecess.h / 2) / Math.tan(camera.fov * Math.PI / 360), f = ez(cl((ep - 0.55) / 0.45));
+          eye.lerp(new THREE.Vector3(wp.x, wp.y, wp.z + d), f); look.lerp(wp, f); fade = 0; peekEntry = true;
+        } else { fade = cl((ep - 0.86) / 0.14); peekEntry = false; }
+      } else if (efk === 'nook-in:leave' && ef.at && NOOKIN !== 'zoom') {
+        const at = ef.at, dy = heightOf(map, at.x, at.y) * HU;
+        if (NOOKIN === 'shelf' && studyShelf && pages) { // 本から目を上げて、書斎の奥の本棚へ寄る
+          const q = ez(ep), sp = studyShelf.position;
+          eye.lerp(new THREE.Vector3(sp.x, sp.y + 1, sp.z + 9), q); look.lerp(new THREE.Vector3(sp.x, sp.y, sp.z), q); fade = cl((ep - 0.6) / 0.4);
+        } else {
+          const late = NOOKIN === 'doll' ? 0.35 : NOOKIN === 'fold' ? 0.3 : 0.15, q = ez(cl((ep - late) / (1 - late)));
+          eye.lerp(new THREE.Vector3(at.x + 0.5, 1.4 + dy, at.y + 2.4), q); look.lerp(new THREE.Vector3(at.x + 0.5, 1.0 + dy, at.y - 0.6), q);
+          const g0 = NOOKIN === 'light' ? 0.05 : NOOKIN === 'doll' ? 0.25 : 0.2, gq = cl((ep - g0) / (1 - g0));
+          doorGlow.visible = true; doorGlow.position.set(at.x + 0.5, 1.1 + dy, at.y + 0.2);
+          const big = NOOKIN === 'fold' ? 2.5 : 14; const sc = 1 + (big - 1) * ez(gq); doorGlow.scale.set(sc, sc, 1); doorGlow.material.opacity = Math.min(1, gq * 1.6);
+          fade = cl((ep - (NOOKIN === 'fold' ? 0.6 : 0.62)) / 0.38);
+        }
+      } else if (efk === 'nook-in:leave' && ef.at) {
         const q = ez(ep / 0.8), at = ef.at;
         const dy = heightOf(map, at.x, at.y) * HU; // 2階の通路の扉なら、その高さの扉へ寄る（2026-11-22 作者「ブックヌックの演出は扉に向かって」）
         if (at.x === 0 && at.y > 0) { eye.lerp(new THREE.Vector3(at.x + 2.6, 1.3 + dy, at.y + 0.5), q); look.lerp(new THREE.Vector3(at.x - 0.6, 1.0 + dy, at.y + 0.5), q); } // 左の壁の扉：横から寄る
         else { eye.lerp(new THREE.Vector3(at.x + 0.5, 1.3 + dy, at.y + 2.2), q); look.lerp(new THREE.Vector3(at.x + 0.5, 1.0 + dy, at.y - 0.6), q); }
         fade = cl((ep - 0.45) / 0.55);
       }
-      if (efk === 'nook-in:arrive') { const z = ez((ep - 0.3) / 0.7), HT = nook ? nook.HT : 7; eye.lerp(new THREE.Vector3(W / 2, eye.y + HT * 0.2, eye.z + HT * 1.6), 1 - z); look.lerp(new THREE.Vector3(W / 2, HT * 0.45, H), 1 - z); fade = 1 - cl(ep / 0.18); } // 暗い本棚を遠くから見る → 灯りがともる → 額縁の中へ寄る
-      if (efk === 'nook-out:leave') { const q = ez(ep), HT = nook ? nook.HT : 7; eye.add(new THREE.Vector3(0, HT * 0.2 * q, HT * 1.6 * q)); fade = cl((ep - 0.4) / 0.6); } // 本棚まで引いて暗くなる
-      if (efk === 'nook-out:arrive') fade = 1 - cl(ep / 0.15);
+      // くぐって着いたら：はじめの一瞬は、戸口の奥に置いた絵（tools/capture-peek.html で撮った、この眺め）と同じ所から、いつもの眺めへ引く
+      if (efk === 'nook-in:arrive' && NOOKIN === 'blur') { const q0 = cl(ep / 0.7), q = q0; /* 等速で、外の最後の見え方からいつもの眺めへ（ぼけ・画角・位置） */ /* はじめはゆっくり（外の最後と同じ見え方から） */ if (carry?.veil !== undefined) { veilAmt = VEIL * (1 - cl(ep / 0.55)); veilMat.color.setHex(carry.veil); } /* 同じ色を重ねた所から、ぼけと一緒に外す */ blurAmt = 1 - q; fade = 0; if (carry) { const inEx = carry.door ? (map.exits || []).find((/** @type {any} */ e) => e.id === carry.toExit) : null; /* 戸口から入った位置を、中の入口（手前のふち）に当てはめる。中の床は外の敷居の高さ */ const lw = inEx ? new THREE.Vector3(lead.x + 0.5, heightLerp(map, lead.x, lead.y) * HU + 1.55, lead.y + 0.62) /* 主人公の頭からのずれで受けわたす（どの部屋でも、主人公が画面の同じ所に。2026-11-23 2階の部屋で1マスずれた） */ : new THREE.Vector3(lead.x + 0.5, heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.62); eye.copy(lw.clone().add(carry.eye).lerp(eye, q)); look.copy(lw.clone().add(carry.look).lerp(look, q)); camera.fov = carry.fov + (camera.fov - carry.fov) * q; } } // 外の最後の見え方から、いつもの眺めへ // 中は、ぼけた所から始まって、だんだんはっきり
+      else if (efk === 'nook-in:arrive' && NOOKIN === 'walk') { const q = ez(cl((ep - 0.12) / 0.63)); eye.lerp(new THREE.Vector3(lead.x + 0.5, 3.0 + heightLerp(map, lead.x, lead.y) * HU, lead.y + 3.2), 1 - q); look.lerp(new THREE.Vector3(lead.x + 0.5, 1.3, lead.y - 4), 1 - q); /* くぐるときと同じ、仲間の頭の上・少し後ろから */ fade = peekEntry ? 0 : 1 - cl(ep / 0.12); }
+      else if (efk === 'nook-in:arrive') { const z = ez((ep - 0.3) / 0.7), HT = nook ? nook.HT : 7; eye.lerp(new THREE.Vector3(W / 2, eye.y + HT * 0.2, eye.z + HT * 1.6), 1 - z); look.lerp(new THREE.Vector3(W / 2, HT * 0.45, H), 1 - z); fade = 1 - cl(ep / 0.18); } // 暗い本棚を遠くから見る → 灯りがともる → 額縁の中へ寄る
+      if (outL) { // ぼかして出る（中）：カメラは主人公の前（手前）・頭の少し上から主人公を見て、主人公たちが歩いてくるのに合わせて下がる。最後に画角を広げ、外の色をうっすら重ねる
+        fade = 0; blurAmt = cl((ep - 0.15) / 0.85);
+        const head = new THREE.Vector3(lead.x + 0.5, 1.55 + heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.62 + outward), near = cl((ep - 0.55) / 0.45), gap = 2.4 + (1.2 - 2.4) * near;
+        const z1 = ez(cl(ep / 0.35)); eye.lerp(head.clone().add(new THREE.Vector3(0.6 + 0.4 * near, 0.4, gap)), z1); look.lerp(head, z1);
+        camera.fov += (FOV_BURST - camera.fov) * near;
+        const outVeil = nextMap?.kind === 'interior' ? 0xd9a066 : DAY ? 0xdfe4e6 : 0x3a3850; /* 行き先が建物の中（銀鹿亭の1階など）なら暖かい色 */ veilAmt = VEIL * near; veilMat.color.setHex(outVeil);
+        carry = { out: true, veil: outVeil, eye: eye.clone().sub(head), look: look.clone().sub(head), fov: camera.fov, toExit: exOf(ef.exit)?.to?.exit };
+      }
+      else if (efk === 'nook-out:leave') { const q = ez(ep), HT = nook ? nook.HT : 7; eye.add(new THREE.Vector3(0, HT * 0.2 * q, HT * 1.6 * q)); fade = cl((ep - 0.4) / 0.6); } // 本棚まで引いて暗くなる
+      if (outA) { // ぼかして出る（外）：中の最後と同じ見え方（主人公の前）から始まり、主人公たちが戸口から出てくるのについて、ぼけを取りながら、いつもの眺めへ
+        const q = cl(ep / 0.7); blurAmt = 1 - q; fade = 0; veilAmt = VEIL * (1 - cl(ep / 0.55)); veilMat.color.setHex(carry.veil);
+        const head = new THREE.Vector3(lead.x + 0.5 + emDir.x * emerge, 1.55 + heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.62 + emDir.z * emerge);
+        if (emerge < 0 && outDoor && !interior && holeRecess?.sill) head.y += holeRecess.sill * cl((outDoor.y + 0.3 - head.z) / 0.5);
+        // 中の最後の見え方（主人公の正面）を、出てくる向きに回してから始め、主人公のまわりを回って、いつもの眺めへ（2026-11-23 作者「左の部屋から出てくるときは工夫が必要だね、カメラの回転方向とか」）
+        const Yax = new THREE.Vector3(0, 1, 0), th = Math.atan2(emDir.x, emDir.z), o0 = carry.eye.clone().applyAxisAngle(Yax, th), l0 = carry.look.clone().applyAxisAngle(Yax, th), o1 = eye.clone().sub(head);
+        const a0 = Math.atan2(o0.x, o0.z), a1 = Math.atan2(o1.x, o1.z); let da = a1 - a0; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+        const ang = a0 + da * q, rr = Math.hypot(o0.x, o0.z) + (Math.hypot(o1.x, o1.z) - Math.hypot(o0.x, o0.z)) * q;
+        eye.copy(head).add(new THREE.Vector3(Math.sin(ang) * rr, o0.y + (o1.y - o0.y) * q, Math.cos(ang) * rr)); look.copy(head.clone().add(l0).lerp(look, q)); camera.fov = carry.fov + (camera.fov - carry.fov) * q;
+      }
+      else if (efk === 'nook-out:arrive') fade = 1 - cl(ep / 0.15);
       let fadeCol = 0x0a0a10;
+      if ((efk === 'nook-in:leave' || efk === 'nook-in:arrive') && (NOOKIN === 'light' || NOOKIN === 'doll')) fadeCol = 0xffe2b0;
+      if ((efk === 'nook-in:leave' || efk === 'nook-in:arrive') && NOOKIN === 'walk') fadeCol = 0x1a1008; // くぐる：戸口の暗がりで、ほんの一瞬だけ // 光の中へ入り、光の中から出てくる
       if (deep && deep !== 'light' && deep !== 'riffle') { // 幕・地図・紙の層：切りかわる一瞬だけ、部屋の色にうすく暗くする（地面の絵が入れかわる所を見せない）
         fadeCol = DAY ? ROOM_DAY : ROOM_NIGHT; fade = deepLeave ? 0.8 * cl((ep - 0.8) / 0.2) : 0.8 * (1 - cl(ep / 0.2));
         if (deep === 'curtain') { const q = deepLeave ? ez(ep) : 1 - ez(ep); eye.z += (deepIn ? -5 : 5) * (deepLeave ? q : -q); eye.y += 1.2 * q; } // 前へ進む（戻りはうしろへ下がる）
@@ -1506,7 +2125,15 @@ export function createThreeStage(canvasEl, assets) {
         s.visible = t > 0 && t < 1; if (!s.visible) return;
         s.position.set(lead.x + 0.5, 0.35, fromZ + (toZ - fromZ) * ez(t)); const sz = (i === 0 ? 2.4 : 1.4 - i * 0.12); s.scale.set(sz, sz, 1); s.material.opacity = i === 0 ? 1 : 0.7 - i * 0.08;
       });
-      camera.position.copy(eye); camera.lookAt(look); camera.updateProjectionMatrix();
+      { // ページの写し：去る最後（板が倒れきったところ）と、着いた最初（新しいページの板がまだ寝ているところ）
+        const leaveP = (efk === 'page:leave' || diveL || emL) && !!pages, arriveP = (efk === 'page:arrive' || diveA || emA) && !!pages;
+        if (leaveP && ep > 0.96) { snapPage(snapRT[0]); snapPrevOk = true; snapCurOk = false; }
+        else if (arriveP && !snapCurOk && (riseT === null || riseT <= RS)) { snapPage(snapRT[1]); snapCurOk = true; }
+        else if (!ef) { snapPrevOk = false; snapCurOk = false; }
+      }
+      camera.position.copy(eye); camera.lookAt(look);
+      if (capturePose) { camera.position.fromArray(capturePose.p); camera.quaternion.fromArray(capturePose.q); camera.fov = capturePose.fov; } // 撮影の道具（tools/capture-peek.html）が決めたカメラ
+      camera.updateProjectionMatrix();
       charSpot.position.copy(eye).add(new THREE.Vector3(0, 0.6, 0)); charSpot.target.position.set(lead.x + 0.5, 1.1 + heightLerp(map, lead.x, lead.y) * HU, lead.y + 0.6);
       charSpot.intensity = (zoom < 1 ? 2.2 * zoom : 2.2) * (DAY && !interior ? 0.4 : 1); // 本全体を見せるあいだは弱める。昼は日の光があるので弱く
       { // のぞき穴：主人公の足もと〜頭の上を画面に写し、その真ん中を中心、背の高さの0.85倍を半径にする（本全体を見せるあいだは閉じる）
@@ -1523,20 +2150,67 @@ export function createThreeStage(canvasEl, assets) {
       orbsShown = 0;
       const orbMul = efk === 'nook-in:arrive' ? cl((ep - 0.7) / 0.3) : 1;
       const ps = orbPositions(orbCfg.count, sec, { w: W, h: H });
-      orbSprites.forEach((s, i) => { const p = ps[i]; if (!p) { s.visible = false; return; } s.visible = p.alpha * orbMul > 0.01; if (!s.visible) return; s.position.set(p.x, p.y * 1.4, p.z); const sz = p.size * 1.6 * orbCfg.size; s.scale.set(sz, sz, 1); s.material.opacity = p.alpha * orbMul * orbCfg.alpha * 0.6; orbsShown++; });
-      renderer.clear(); renderer.render(scene, camera);
+      orbSprites.forEach((s, i) => { const p = ps[i]; if (!p) { s.visible = false; return; } s.visible = p.alpha * orbMul > 0.01; if (!s.visible) return; s.position.set(p.x, p.y * 1.4, p.z); const sz = p.size * 2.0 * orbCfg.size; s.scale.set(sz, sz, 1); s.material.opacity = Math.min(1, p.alpha * orbMul * orbCfg.alpha * 0.9); orbsShown++; }); // 2026-11-23 作者「オーブについてもう少し存在感あってもいい」：大きさ1.25倍・濃さ1.5倍
+      { // キャラの絵は、いつもカメラと平行に向ける（2026-11-23 作者「左の側面の部屋に入るとき、キャラクターがそのままだから、つねに、カメラと平行にしておいてほしい」）。回すだけで左右は返さない
+        const f = camera.getWorldDirection(new THREE.Vector3()), yaw = Math.atan2(-f.x, -f.z);
+        for (const id of Object.keys(actors)) { const h = actors[id].hinge; h.rotation.order = 'YXZ'; h.rotation.y = yaw; } // YXZ：起き上がり（x）のあとで向きを回す
+      }
+      if (holeRecess) { // くぐる途中、カメラが家の正面の面より奥に入ったら、戸口の奥を穴の外にも描く（穴を後ろから見ることになるため）
+        const wp = holeRecess.hinge.getWorldPosition(new THREE.Vector3()), inside = camera.position.z < wp.z;
+        for (const m of holeRecess.recess) if (m.material.stencilWrite === inside) { m.material.stencilWrite = !inside; }
+      }
+      const grabNow = ((efk === 'nook-in:leave' && NOOKIN === 'blur') || outL) && ep > 0.85, arriveNow = arriving;
+      const heroCol = () => { // 主人公の胸のあたり（4×4ピクセル）の、画面に出ている色
+        const am = actors[lead.id]; if (!am) return null;
+        const buf = renderer.getDrawingBufferSize(new THREE.Vector2()), c = [0, 0, 0]; let n = 0;
+        const gl = renderer.getContext(), a = new Uint8Array(64);
+        for (const hy of [0.7, 1.2, 1.7, 2.1]) { // 足・胸・顔・髪のあたり（4×4ピクセルずつ）
+          const v = am.hinge.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, hy, 0)).project(camera), px = Math.round((v.x + 1) / 2 * buf.x) - 2, py = Math.round((v.y + 1) / 2 * buf.y) - 2;
+          if (px < 0 || py < 0 || px > buf.x - 4 || py > buf.y - 4) continue;
+          gl.readPixels(px, py, 4, 4, gl.RGBA, gl.UNSIGNED_BYTE, a); for (let i = 0; i < 64; i += 4) { c[0] += a[i]; c[1] += a[i + 1]; c[2] += a[i + 2]; n++; }
+        }
+        return n ? c.map((x) => x / n) : null;
+      };
+      if (blurAmt > 0.002) { // キャラ以外をぼかして描き、その上にキャラをくっきり
+        const sz = renderer.getDrawingBufferSize(new THREE.Vector2()), w = Math.max(2, sz.x >> 1), h = Math.max(2, sz.y >> 1);
+        for (const t of blurRT) if (t.width !== w || t.height !== h) t.setSize(w, h);
+        camera.layers.disable(1); renderer.setRenderTarget(blurRT[0]); renderer.clear(); renderer.render(scene, camera);
+        const Rb = blurAmt * 5;
+        for (let i = 0; i < 4; i++) { // 4回くり返して、ぼかしを強く
+          blurMat.uniforms.tDiffuse.value = blurRT[0].texture; blurMat.uniforms.dir.value.set(Rb * (i + 1) / w, 0); renderer.setRenderTarget(blurRT[1]); renderer.render(blurScene, fadeCam);
+          blurMat.uniforms.tDiffuse.value = blurRT[1].texture; blurMat.uniforms.dir.value.set(0, Rb * (i + 1) / h); renderer.setRenderTarget(blurRT[0]); renderer.render(blurScene, fadeCam);
+        }
+        renderer.setRenderTarget(null); renderer.clear(); blurOutMat.map = blurRT[0].texture; renderer.render(blurOutScene, fadeCam);
+        if (veilAmt > 0.002) { veilMat.opacity = veilAmt; renderer.render(veilScene, fadeCam); }
+        if (grabNow) grabBg(); // 去る最後のほう：背景だけを取っておく
+        if (holdOk && holdBg && arriveNow) { const op = 1 - cl(ep / (outA ? 0.2 : 0.15)); if (op > 0.002) { holdMesh.scale.set(1, 1, 1); holdMat.uniforms.map.value = holdBg; holdMat.uniforms.op.value = op; renderer.render(holdScene, fadeCam); } } // 着いた直後：去る最後の背景を重ねて、すっと消す（キャラはその上にくっきり）
+        const bg = scene.background; scene.background = null; camera.layers.set(1); renderer.clearDepth(); renderer.render(scene, camera); scene.background = bg; camera.layers.set(0); camera.layers.enable(1);
+        if (grabNow && carry) carry.heroCol = heroCol(); // 去る最後：前の灯りでの主人公の色
+        if (arriveNow && carry?.heroCol && !carry.ratio) { const d = heroCol(); if (d) carry.ratio = d.map((x, i) => Math.min(10, Math.max(0.1, Math.pow((carry.heroCol[i] + 4) / (x + 4), 2.2))) /* 画面の色の比を、光の強さの比へ（2.2乗） */); } // 着いた最初：今の灯りでの色との比
+      } else { renderer.clear(); renderer.render(scene, camera); }
       if (fade > 0) { fadeMat.opacity = fade; renderer.render(fadeScene, fadeCam); }
+      if (grabNow) grabHold(); else if (!ef) holdOk = false; // 読みこみ中に見せる、キャラ込みの画面
+      // 着いた直後に背景どうしを重ねる（上のぼかしの描画の中）：切りかわりの前後の色と形がそのままつながる（2026-11-23 作者「色の重ね方を合わせて」）
     },
+    /** 次のマップの絵を先に読む（去る演出のあいだに。待たなくてよい） @param {any} m */
+    prefetch(m) { nextMap = m; return prefetchMap(m); },
     /** 内装をドット絵にするか（右上の「内装」ボタン。2026-11-22 作者「元絵もドットもどっちもあり」）。変えたら、いまのマップを読み直す */
+    /** いまのカメラ（位置・向き・画角）。撮影の道具（tools/capture-peek.html）が、入る直前の外のカメラを読むのに使う */
+    cameraPose: () => ({ p: camera.position.toArray(), q: camera.quaternion.toArray(), fov: camera.fov, aspect: camera.aspect }),
+    /** 撮影の道具だけ：カメラをこの位置・向き・画角に決める（null で戻す） @param {any} pose */
+    setCapturePose(pose) { capturePose = pose || null; },
     setPixelRoom(on) { PIXROOM = !!on; },
     /** 奥へ・手前へ移る演出の見せ方（読み直し不要） @param {string} s */
     setDeepStyle(s) { DEEP = ['riffle', 'curtain', 'map', 'layers', 'light'].includes(s) ? s : 'riffle'; },
     deepStyle: () => DEEP,
+    /** 建物に入るときの見せ方（読み直し不要） @param {string} s */
+    setNookStyle(s) { NOOKIN = ['blur', 'walk', 'zoom', 'doll', 'fold', 'light', 'shelf'].includes(s) ? s : 'blur'; },
+    nookStyle: () => NOOKIN,
     /** 昼・夜（変えたら、いまのマップを読み直す） @param {'day'|'night'} t */
     setTime(t) { DAY = t === 'day'; },
     time: () => (DAY ? 'day' : 'night'),
     pixelRoom: () => PIXROOM,
     dispose() { if (root) { scene.remove(root); disposeTree(root); } renderer.dispose(); map = null; },
-    debug: () => ({ name: 'paper', engine: 'three', drawCalls: renderer.info.render.calls, boards: boards.length, inner: [Math.round(cssW * renderer.getPixelRatio()), Math.round(cssH * renderer.getPixelRatio())], eye: [...lastEye], intro: lastIntro ? { ...lastIntro } : null, orbs: orbsShown, interior, actors: Object.keys(actors), effect: lastEffect, map: map?.id ?? null }),
+    debug: () => ({ name: 'paper', engine: 'three', drawCalls: renderer.info.render.calls, boards: boards.length, inner: [Math.round(cssW * renderer.getPixelRatio()), Math.round(cssH * renderer.getPixelRatio())], eye: [...lastEye], intro: lastIntro ? { ...lastIntro } : null, orbs: orbsShown, interior, actors: Object.keys(actors), effect: lastEffect, map: map?.id ?? null, warm: { ...lastWarm } }),
   };
 }

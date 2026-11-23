@@ -21,16 +21,16 @@
   "inputBuffer": 2,
   "effects": {
     "page": {
-      "leaveMs": 450,
+      "leaveMs": 800,
       "arriveMs": 2000
     },
     "nook-in": {
-      "leaveMs": 900,
+      "leaveMs": 1300,
       "arriveMs": 2600
     },
     "nook-out": {
-      "leaveMs": 800,
-      "arriveMs": 1700
+      "leaveMs": 1300,
+      "arriveMs": 2000
     },
     "floor": {
       "leaveMs": 500,

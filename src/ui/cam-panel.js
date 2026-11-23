@@ -7,7 +7,7 @@
 // - URL で始めの値を渡せる：?cam=1&pitch=15&fov=20
 // - 上書きは window.SR_CAM（paper-stage.js が読む）。ブラウザの保存領域は使わない。
 
-export const CAM_LIMITS = Object.freeze({ pitch: [3, 80], fov: [10, 90], dist: [3, 30] });
+export const CAM_LIMITS = Object.freeze({ pitch: [3, 80], fov: [10, 110], dist: [1.5, 30] }); // 2026-11-23 作者がブックヌックで画角90・距離3（いっぱい）まで試したので、もっと先まで試せるように広げた
 export const DIST_DEFAULT = 9; // three-stage.js のカメラの距離の既定（マス）。2026-11-22 作者の希望で距離もパネルで変えられるようにした
 export const CAM_DEFAULTS = Object.freeze({ pitchDeg: 50, fovDeg: 24 }); // paper-stage.js の既定と同じ
 

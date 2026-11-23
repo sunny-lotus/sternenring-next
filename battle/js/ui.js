@@ -2057,7 +2057,7 @@
       var WARPS = [['norn-inn-street', '銀鹿亭前'], ['norn-plaza', '広場'], ['silver-deer-1f', '銀鹿亭の中'], ['test-forest', '森'], ['test-dungeon', 'ダンジョン']];
       var FIGHTS = Object.keys(SR.encounters).filter(function (k) { return k !== 'random'; });
       var noRandom = false, showPos = false;
-      function sget() { var s = null; try { s = JSON.parse(SRS.getItem('sr-settings-v1')); } catch (e) {} return Object.assign({ se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', deep: 'riffle', walk: '1' }, s || {}); }
+      function sget() { var s = null; try { s = JSON.parse(SRS.getItem('sr-settings-v1')); } catch (e) {} return Object.assign({ se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', deep: 'riffle', walk: '1', nookin: 'blur' }, s || {}); }
       function sput(s) { try { SRS.setItem('sr-settings-v1', JSON.stringify(s)); } catch (e) {} try { parent.postMessage({ type: 'sr-settings' }, location.origin); } catch (e) {} }
       function sseg(key, opts) { var s = sget(); return '<div class="seg">' + opts.map(function (o) { return btn('data-dset="' + key + '" data-v="' + o[0] + '"', o[1], String(s[key]) === String(o[0])); }).join('') + '</div>'; }
       function btn(attrs, label, on) { return '<button class="btn mini' + (on ? ' on' : '') + '" data-nav ' + attrs + '>' + label + '</button>'; }
@@ -2073,6 +2073,7 @@
           '<span>表示</span>' + sseg('render', [['paper', '紙の舞台'], ['flat2d', '平面']]) +
           '<span>内装の絵柄</span>' + sseg('pixelRoom', [['false', '絵'], ['true', 'ドット']]) +
           '<span>奥への演出</span>' + sseg('deep', [['riffle', 'めくる'], ['curtain', '幕'], ['map', '地図'], ['layers', '紙の層'], ['light', '光']]) + // 2026-11-23 作者「1・3・4どれか」：見くらべる
+          '<span>入る演出</span>' + sseg('nookin', [['blur', 'ぼかす'], ['walk', 'くぐる'], ['doll', '人形の家'], ['fold', 'たたむ'], ['light', '光'], ['shelf', '本棚'], ['zoom', '前の']]) + // 2026-11-23 作者「全部試したい」：建物に入るときを見くらべる
           '<span>ワープ</span><div class="seg">' + WARPS.map(function (w) { return btn('data-dv="warp" data-v="' + w[0] + '"', w[1]); }).join('') + '</div>' +
           '<span>すぐ戦う</span><div class="seg">' + FIGHTS.map(function (k) { return btn('data-dv="fight" data-v="' + k + '"', SR.encounters[k].name); }).join('') + '</div>' +
           '<span>時期</span><div class="seg">' + [1, 2, 3].map(function (n) { return btn('data-dv="era" data-v="' + n + '"', SR.eraName[n], era === n); }).join('') + '</div>' +

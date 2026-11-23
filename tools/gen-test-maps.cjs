@@ -13,7 +13,7 @@ function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 16
   const stamp = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) g[j][i] = '#'; };
   // ダンジョンの入口（右上の岩肌の石のアーチ）
   const GX = 56; stamp(GX, 1, 4, 3); g[3][GX + 2] = 'D';
-  items.back.push({ asset: 'placeholder:dungeon-gate', x: GX, y: 1, w: 4, h: 3, standH: 4, zOffset: 0.1 });
+  items.back.push({ asset: 'placeholder:dungeon-gate', x: GX + 0.5, y: 1, w: 4, h: 3, standH: 5, zOffset: 0.1, doorExit: 'gate', cut: { x0: 0.3, x1: 0.7, y0: 0.42, y1: 1, arch: 0.14, hole: true }, peek: 'assets/interiors/test-dungeon/peek.webp', peekAspect: 1.6, peekPose: { rel: [0.006, 2.824, 8.144], q: [-0.0872, 0, 0, 0.9962], fov: 75, aspect: 1.6 } }); // 門の暗がりをくりぬき、奥に中の眺めの写し（2026-11-23 作者「ダンジョンに入るときも同様にしたい」）。注意：今の test-forest.json には、このスクリプトに無い south-path（手で足した出入口）がある
   const keep = (x, y, w, h) => (y + h > 5 && y < 10) /* 東西の道 */ || (x + w > GX - 2 && x < GX + 6 && y < 11) /* 入口の前 */ || (x < 12 && y > 3 && y < 12) /* 西の入口のまわり */;
   for (let gy = 2; gy < H - 3; gy += 5) for (let gx = 2; gx < W - 4; gx += 6) {
     const kind = R() < 0.5 ? 'pine' : R() < 0.5 ? 'rock' : 'bush';
@@ -38,7 +38,7 @@ function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 16
     encounters: [{ id: 'forest-beasts', x: 14, y: 10, battle: 'normal', note: '仮の見えている敵', symbol: ['battle/img/enemies/sr-norma.png'], symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵' }, {"id":"road-beasts","x":30,"y":8,"battle":"swarm","note":"仮の見えている敵（街道の上）：バトル試作の「子獣の群れ」", symbol: ['battle/img/enemies/sr-pup.png'], symbolNote: '2026-11-22 作者「ゆるい猫ではなく戦う敵のシンボルにしてほしい」：戦闘の敵のドット絵'}],
     // 街道（2026-11-22 作者「森は街道を作って」「街道の上はシンボルエンカウントのみ、街道以外ではランダム」）
     roads: [{"x":0,"y":6,"w":60,"h":3},{"x":57,"y":4,"w":3,"h":2}], randomEncounters: {"rate":0.08,"minSteps":8,"battles":["normal","swarm","elements","casters"],"note":"街道の外だけ。8歩をこえたら1歩ごとに8%（仮）"},
-    stage: { camera: { pitchDeg: 10, fovDeg: 60, follow: 'player', deadzone: [2, 1.5] }, floor: 'soil', orbs: {"count":26,"alpha":0.75,"color":[0.8,1,0.7],"size":1,"note":"森：木もれ日のような、緑がかった光の粒（仮）"}, layers: [
+    stage: { camera: { pitchDeg: 10, fovDeg: 75, distance: 6.5, follow: 'player', deadzone: [2, 1.5] }, floor: 'soil', orbs: {"count":26,"alpha":0.75,"color":[0.8,1,0.7],"size":1,"note":"森：木もれ日のような、緑がかった光の粒（仮）"}, layers: [
       { band: 'backdrop', items: [{ asset: 'placeholder:night-sky-ring', x: 0, y: 0, w: W, h: 1, standH: 6 }] },
       { band: 'back', items: items.back }, { band: 'mid', items: [...items.mid, { asset: 'placeholder:monster', x: 12, y: 10, w: 4, h: 1, standH: 3.4, zOffset: 0.05, encounter: 'forest-beasts' }, {"asset":"placeholder:monster","x":29,"y":8,"w":3,"h":1,"standH":3.1,"zOffset":0.05,"encounter":"road-beasts"}] }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
   });
@@ -61,7 +61,7 @@ function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 16
     ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
     exits: [{ id: 'front-gate', x: 5, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: 'test-forest', exit: 'gate', arrive: { x: 58, y: 4, dir: 'down' } } }],
     spawns: { default: { x: 5, y: H - 3, dir: 'up' } }, events: [],
-    stage: { look: 'dungeon', camera: { pitchDeg: 10, fovDeg: 60, follow: 'player' }, orbs: {"count":14,"alpha":0.6,"color":[0.62,0.75,1],"size":0.8,"note":"ダンジョン：青白い、ひんやりした光の粒（仮）"}, layers: [
+    stage: { look: 'dungeon', camera: { pitchDeg: 10, fovDeg: 90, distance: 3, follow: 'player' }, orbs: {"count":14,"alpha":0.6,"color":[0.62,0.75,1],"size":0.8,"note":"ダンジョン：青白い、ひんやりした光の粒（仮）"}, layers: [
       { band: 'backdrop', items: [{ asset: 'placeholder:dungeon-back-wall', x: 0, y: 0, w: W, h: 1, standH: 4 }] },
       { band: 'back', items: [] }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
   });

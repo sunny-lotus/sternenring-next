@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>戸口の奥の絵を撮る（道具）</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  #paper { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+</style>
+</head>
+<body>
+<canvas id="paper"></canvas>
+<script type="module">
+// 戸口の奥に置く「中の眺めの写し」を撮る道具（本編には入れない。tools/）。
+// 2026-11-23 作者「入る直前のカメラ設定のまま、中で撮影をしておいておくと、床のつながりがよく見える」「奥に置く位置の分遠くなるのを考えて撮影」：
+//   1) 外のマップ（ext）で、主人公が扉のマス（door）に立ったときのカメラを読む（スマホ縦の画面＝作者がふだん見る向きで）。
+//   2) そのカメラを、扉（外の戸口の面）から見た位置のまま、中のマップ（int）の入口（front。中の手前のふち）へ移して、キャラを置かずに中を撮る（横に広い窓で）。
+//   3) window.PEEK に、外の戸口から見たカメラの位置・向き・画角を出す → 地図の板の peekPose に書く（ゲームは、写しをこのカメラに向けて置く）。
+// 使い方：NEXT を丸ごと配る小さなサーバーで tools/capture-peek.html?ext=norn-inn-street&door=8,4&doorz=4&int=silver-deer-1f&front=10,13&sill=0.62 を開き、窓を 1600×1000 にして画面を撮る。
+import { loadGameData } from './src/data.js';
+import { createThreeStage } from './src/render/three-stage.js';
+const q = new URLSearchParams(location.search);
+const ext = q.get('ext') || 'norn-inn-street', int = q.get('int') || 'silver-deer-1f';
+const [dx, dy] = (q.get('door') || '8,4').split(',').map(Number), doorZ = Number(q.get('doorz') ?? 4);
+const [fx, fy] = (q.get('front') || '10,13').split(',').map(Number), sill = Number(q.get('sill') ?? 0); // sill：外の戸口の敷居の高さ（中の床をここにそろえる）
+const d = await loadGameData();
+const canvas = document.getElementById('paper');
+const stage = createThreeStage(canvas, { ledger: d.ledger, images: d.images, regions: d.regions, style: d.style });
+const ghost = (x, y) => ({ mapId: '', battle: null, message: null, defeated: [], transition: 0, effect: null, actors: [{ id: '(none)', x, y, tileX: x, tileY: y, dir: 'up', motion: 'idle', animMs: 0 }] });
+// 1) 外：扉のマスに立ったときのカメラ（縦長の画面で）
+await stage.load(d.maps[ext], d.collision);
+stage.resize(800, 1070, 1);
+for (let i = 0; i < 90; i++) stage.draw(ghost(dx, dy), { seconds: i / 60 });
+const pose = stage.cameraPose();
+const rel = [pose.p[0] - (dx + 0.5), pose.p[1], pose.p[2] - doorZ];
+// 2) 中：同じ向き・画角で、入口から同じだけ離れた所から（キャラなし）
+const H = d.maps[int].height;
+await stage.load(d.maps[int], d.collision);
+stage.resize(innerWidth, innerHeight, devicePixelRatio || 1);
+stage.setCapturePose({ p: [fx + 0.5 + rel[0], rel[1] - sill, H + rel[2]], q: pose.q, fov: pose.fov });
+const loop = () => { stage.draw(ghost(fx, fy - 1), { seconds: 2 }); requestAnimationFrame(loop); };
+loop();
+window.PEEK = { rel: rel.map((v) => Math.round(v * 1000) / 1000), q: pose.q.map((v) => Math.round(v * 10000) / 10000), fov: pose.fov, aspect: innerWidth / innerHeight };
+window.CAPTURE_READY = true;
+</script>
+</body>
+</html>

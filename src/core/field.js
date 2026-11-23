@@ -14,6 +14,7 @@ import { pickPage, applyEffects } from './record.js';
 export function createField(data) {
   const baseStepMs = data.world.stepMs ?? 160;
   let stepMs = baseStepMs; // 1マス歩く時間。開発者の窓の「歩く速さ」で短くできる（setStepScale）
+  const RUN = 0.55; let curStep = stepMs; // 走っている間（input.run）は 1マスの時間を 0.55倍に（2026-11-23 作者「SHIFTで早く動けるようにしてほしい」）
   const transitionMs = data.world.transitionMs ?? 240;
   /** @type {Record<string, {leaveMs:number, arriveMs:number}>} 出入口の演出の長さ（data/world.json の effects） */
   const effects = data.world.effects ?? {};
@@ -41,12 +42,14 @@ export function createField(data) {
   };
 
   /** @param {string} mapId @param {{x:number,y:number,dir:string}} at */
-  function placeParty(mapId, at) {
+  /** @param {string} mapId @param {any} at @param {{dx:number,dy:number}[]} [keep] 仲間の、主人公からの位置（そのまま並べたいとき） */
+  function placeParty(mapId, at, keep) {
     state.mapId = mapId;
     const q = queries[mapId];
     const lead = { id: data.party[0].id, x: at.x, y: at.y, dir: at.dir, from: null, t: 0, animMs: 0 };
-    const followers = data.party.slice(1).map((p) => {
-      const pos = placeFollower(q, at);
+    const followers = data.party.slice(1).map((p, i) => {
+      const k = keep?.[i], kx = k ? at.x + k.dx : 0, ky = k ? at.y + k.dy : 0;
+      const pos = k && q.passable(kx, ky) && !(kx === at.x && ky === at.y) ? { x: kx, y: ky } : placeFollower(q, at); // 同じ並び（立てない所なら、いつもの置き方）
       return { id: p.id, x: pos.x, y: pos.y, dir: at.dir, from: null, t: 0, animMs: 0 };
     });
     state.actors = [lead, ...followers];
@@ -167,7 +170,13 @@ export function createField(data) {
       const vert = back.dir === 'left' || back.dir === 'right', cand = vert ? { ...a, y: a.y + lane } : { ...a, x: a.x + lane };
       if (queries[exit.to.map].passable(cand.x, cand.y) && !queries[exit.to.map].exitAt(cand.x, cand.y)) at = cand;
     }
-    placeParty(exit.to.map, at);
+    // 建物に出入りするときは、外と同じ並び・同じ向きのまま（2026-11-23 作者「ほかのキャラが瞬間移動しています。同じ並び、同じ向きでそのまま」）
+    // 向きが変わる扉（左の壁の扉など）では、並びも同じだけ回す（2026-11-23 作者「左の部屋から出てくるときは工夫が必要だね」：前は並びが変わって見えた）
+    const prev = state.actors, D4 = ['up', 'right', 'down', 'left'], i0 = prev[0] ? D4.indexOf(prev[0].dir) : -1, i1 = D4.indexOf(at.dir);
+    const turns = i0 >= 0 && i1 >= 0 ? (i1 - i0 + 4) % 4 : -1;
+    const rot = (/** @type {number} */ dx, /** @type {number} */ dy) => { for (let n = 0; n < turns; n++) [dx, dy] = [-dy, dx]; return { dx, dy }; }; // 右回りに turns 回
+    const keep = (kind === 'nook-in' || kind === 'nook-out') && turns >= 0 ? prev.slice(1).map((f) => rot(f.x - prev[0].x, f.y - prev[0].y)) : undefined;
+    placeParty(exit.to.map, at, keep);
     state.transfers++;
     state.transferLog.push({ from: fromMap, to: exit.to.map, exit: exit.id });
     state.arriveKind = kind;
@@ -196,11 +205,13 @@ export function createField(data) {
       return;
     }
     let carry = 0;
+    if (!moving()) curStep = input.run ? stepMs * RUN : stepMs; // 1歩の途中では変えない（位置が跳ねないように）
     if (moving()) {
-      for (const a of state.actors) if (a.from) { a.t += dt; a.animMs += dt; }
+      for (const a of state.actors) if (a.from) { a.t += dt; a.animMs += dt * stepMs / curStep; } // 走るときは足も速く
       const p = player();
-      if (p.t < stepMs) return;
-      carry = Math.min(p.t - stepMs, stepMs);
+      if (p.t < curStep) return;
+      carry = Math.min(p.t - curStep, curStep);
+      curStep = input.run ? stepMs * RUN : stepMs;
       for (const a of state.actors) if (a.from) { a.from = null; a.t = 0; }
       if (checkExit()) { input.clearQueue(); return; }
       if (randomEncounter()) { for (const a of state.actors) a.animMs = 0; input.clearQueue(); return; }
@@ -224,7 +235,7 @@ export function createField(data) {
         ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       actors: state.actors.map((a) => {
-        const k = a.from ? Math.min(1, a.t / stepMs) : 1;
+        const k = a.from ? Math.min(1, a.t / curStep) : 1;
         const fx = a.from ? a.from.x : a.x, fy = a.from ? a.from.y : a.y;
         return { id: a.id, x: fx + (a.x - fx) * k, y: fy + (a.y - fy) * k, tileX: a.x, tileY: a.y, dir: a.dir, motion: a.from ? 'walk' : 'idle', animMs: a.animMs };
       }),
@@ -264,6 +275,8 @@ export function createField(data) {
     state, update, view, endBattle, setParty, closeMessage, dev, transitionMs,
     get stepMs() { return stepMs; },
     /** 歩く速さの倍率（1＝ふつう。開発用。2026-11-23 作者「急ぎたいように」） @param {number} k */
+    /** 確かめ用のワープ（?warp=マップ:x,y[,向き]。2026-11-23 作者「テストの時ワープとか使ったら？」）。行けないマスなら何もしない @param {string} mapId @param {number} x @param {number} y @param {string} [dir] */
+    warp(mapId, x, y, dir = 'up') { if (!data.maps[mapId] || !queries[mapId].passable(x, y)) return false; state.leaving = null; state.transitionLeft = 0; state.arriveKind = null; placeParty(mapId, { x, y, dir }); return true; },
     setStepScale(k) { stepMs = baseStepMs / Math.max(0.5, Math.min(4, Number(k) || 1)); },
   };
 }

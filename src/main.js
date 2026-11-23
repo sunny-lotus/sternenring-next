@@ -44,6 +44,10 @@ async function boot() {
   /** @type {any} */ (window).SR_RECORD_STORE = storeFor(record, () => saver.schedule());
   window.addEventListener('pagehide', () => saver.now());
   const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party, record, onRecordChange: () => saver.schedule() });
+  { // 確かめ用：?warp=test-forest:58,4（,up）で、その場所から始める（開発のときだけ使う URL。カメラの ?cam=1 と同じあつかい）
+    const w = (params.get('warp') || '').match(/^([\w-]+):(\d+),(\d+)(?:,(up|down|left|right))?$/);
+    if (w) field.warp(w[1], Number(w[2]), Number(w[3]), w[4] || 'up');
+  }
   // 調べたときの言葉（仮の文。data/dialogue.json）
   const dialogue = await dialogueP;
   const assets = { ledger: d.ledger, images: d.images, regions: d.regions, style: d.style };
@@ -126,13 +130,14 @@ async function boot() {
   syncBgmUi();
   // 設定の統一（2026-11-22 作者「設定を統一しよう」）：曲・効果音の大きさ、表示、内装は、メニューの「設定」（フィールドと戦闘で共通）で決め、
   // 冒険の記録の sr-settings-v1 に保存する。起動したとき・メニューで変えたとき（sr-settings）に、ここで当てる。右上はメニューだけにした
-  const readSettings = () => { let s = {}; try { s = JSON.parse(record.store['sr-settings-v1'] || '{}') || {}; } catch { s = {}; } return { se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', deep: 'riffle', ...s }; };
+  const readSettings = () => { let s = {}; try { s = JSON.parse(record.store['sr-settings-v1'] || '{}') || {}; } catch { s = {}; } return { se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', deep: 'riffle', nookin: 'blur', ...s }; };
   const applySettings = () => {
     const s = readSettings(), lv = (/** @type {string} */ v) => (SOUND_LEVELS.some((l) => l.id === v) ? v : 'mid');
     if (params.get('mute') !== '1') { sound.setLevel(lv(s.se)); bgm.setLevel(lv(s.bgm)); syncSoundUi(); syncBgmUi(); }
     if (!params.get('render') && renderers.paper) { const m = s.render === 'flat2d' ? 'flat2d' : 'paper'; if (m !== mode) { mode = m; showMode(); } }
     const r = renderers.paper; if (r?.setPixelRoom && r.pixelRoom() !== !!s.pixelRoom) { r.setPixelRoom(!!s.pixelRoom); shown = ''; }
     if (r?.setDeepStyle) r.setDeepStyle(s.deep);
+    if (r?.setNookStyle) r.setNookStyle(s.nookin); // 建物に入るときの演出（開発者の窓で見くらべる。2026-11-23 作者「全部試したい」）
     field.setStepScale(Number(s.walk) || 1); // 歩く速さ（開発者の窓だけ。2026-11-23 作者「移動速度の調整も開発のみできるように」） // 奥へ・手前へ移る演出（開発者の窓で見くらべる。2026-11-23）
     const tm = s.time === 'day' ? 'day' : 'night'; if (r?.setTime && r.time() !== tm) { r.setTime(tm); shown = ''; } // 時間（昼・夜）。変えたらマップを読み直す
     syncRoomUi();
@@ -192,16 +197,23 @@ async function boot() {
   /** 足もとの足音の種類：木の床のマップは木、町の石畳（stage.paved）の上は石、ほかは布（2026-11-23 作者「石の上の足音使ってみて」） */
   const stepSet = (/** @type {any} */ m, /** @type {number} */ x, /** @type {number} */ y) => m?.footsteps === 'wood' ? STEP_WOOD
     : (m?.stage?.paved || []).some((/** @type {any} */ p) => x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h) ? STEP_STONE : STEP_SOFT;
+  let loadingMap = false, prefetched = '';
   const draw = async () => {
     const r = renderers[mode];
     if (field.state.mapId !== shown) {
       shown = field.state.mapId; const m = d.maps[shown];
-      await r.load(m, d.collision);
+      loadingMap = true; // 読んでいる間は、出入口の演出を進めない（読み終えてから続きを見せる。2026-11-23 作者「飛び出す様子をかくかくしたくない」）
+      try { await r.load(m, d.collision); } finally { loadingMap = false; }
       if (!boot.map) boot.map = performance.now();
       $('map-title').textContent = m.title; $('map-badge').hidden = m.status !== 'provisional';
       syncRoomUi();
       camUi?.sync();
       if (mode === 'paper') { intro.shown(performance.now()); syncIntroUi(); }
+    }
+    { // 去る演出が始まったら、行き先のマップの絵を先に読む（演出のあいだに読み終え、着いたときの待ちを短く）
+      const ef = field.view().effect;
+      if (ef?.phase === 'leave' && ef.exit) { const to = d.maps[shown]?.exits?.find((/** @type {any} */ e) => e.id === ef.exit)?.to?.map; if (to && to !== prefetched) { prefetched = to; r.prefetch?.(d.maps[to]); } }
+      else if (!ef) prefetched = '';
     }
     const t0 = performance.now();
     const pose = intro.pose(t0);
@@ -226,7 +238,11 @@ async function boot() {
     // 扉（id に door がある出入口）を通るとき、離れはじめに開く音、着いた側で閉まる音。1回の転送で1回ずつ
     if (ev && /door/.test(ev.exit || '')) {
       const key = `${field.state.transfers}:${ev.phase}`;
-      if (doorCue !== key) { doorCue = key; sound.play(ev.phase === 'leave' ? 'sfx.door.open' : 'sfx.door.close'); }
+      if (doorCue !== key) {
+        doorCue = key; sound.play(ev.phase === 'leave' ? 'sfx.door.open' : 'sfx.door.close');
+        // 玄関の鈴（2026-11-23 作者「ちりんちりんていう音を玄関はいったらいれたい」）：出入口に bell: true がある扉に入るとき、扉が開く音に少し遅れて
+        if (ev.phase === 'leave' && d.maps[shown]?.exits?.find((/** @type {any} */ e) => e.id === ev.exit)?.bell) setTimeout(() => sound.play('sfx.door.bell'), 250);
+      }
     }
     // 足音：2マスに1回（2026-11-23 作者「足音間隔が狭すぎる」：前は1マスごと）。木の床のマップ（footsteps: wood）は木の足音4つ、ほかは布の足音2つを順に
     if (field.state.steps !== stepCueAt) {
@@ -359,7 +375,7 @@ async function boot() {
     const btn = /** @type {HTMLButtonElement} */ (battleUi.box.querySelector('#battle-back')); btn.textContent = 'フィールドへ戻る'; btn.classList.add('done');
   });
   // 演出中は歩かない。方向の入力が来たら演出を終える（その入力では歩かない）。ステータスを開いているあいだも歩かない
-  startLoop((dt) => { syncMsg(); if (showPos) { const a = field.state.actors[0]; posEl.textContent = `${field.state.mapId}  (${a.x}, ${a.y})  ${a.dir}`; } if (field.state.battle && !battleUi && !battleClosing) openBattle(field.state.battle); if (statusUi || battleClosing) { input.clearQueue(); return; } if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
+  startLoop((dt) => { syncMsg(); if (showPos) { const a = field.state.actors[0]; posEl.textContent = `${field.state.mapId}  (${a.x}, ${a.y})  ${a.dir}`; } if (field.state.battle && !battleUi && !battleClosing) openBattle(field.state.battle); if (statusUi || battleClosing) { input.clearQueue(); return; } if (loadingMap) return; if (gateInput(intro, input, skipIntro, dt)) field.update(dt, input); }, () => { draw(); });
   $('status').hidden = true;
   // 確認用の読み取り口（状態を書きかえない）。検証役・自動確認がマップと位置を読むために使う。
   window.STERNENRING_NEXT = Object.freeze({

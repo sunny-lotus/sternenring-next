@@ -8,7 +8,7 @@ const fs = require('fs'), path = require('path');
 const out = path.join(__dirname, '..', 'data', 'maps', 'norn-inn-street.json');
 const HOUSE = require('./norn-house-art.cjs');
 const W = 44, H = 18;
-const INN_ART = 'house_e_archway.webp', INN_DOOR_X = 8;
+const INN_ART = 'inn_silver_deer.webp', INN_DOOR_X = 8; // 2026-11-23 銀鹿亭の正面の絵が届いた（前は仮に house_e_archway）
 const g = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (x === 0 || y === 0 || x === W - 1 || y === H - 1 ? '#' : '.')));
 const wall = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) g[j][i] = '#'; };
 const items = { back: [], mid: [], front: [] };
@@ -18,8 +18,12 @@ const put = (band, asset, x, y, w, h, standH, zOffset = 0, solid = true) => { if
 // 2026-11-23 作者「家のドアとキャラの大きさを同じくらいにしてほしい」：家の絵はドアがキャラと同じ高さ（tools/norn-house-art.cjs）になる大きさで立てる。
 // 家が大きくなったので、通りを 34 → 44 マスに広げ、家の数を減らした。家の絵は地図で決める（art）。足もとの幅＝絵の幅（四捨五入）
 const house = (asset, art, x, zOffset = 0) => { const sz = HOUSE.boardSize(art), w = Math.round(sz.w); put('back', asset, x, 1, w, 4, Math.round(sz.h * 10) / 10, zOffset); items.back.at(-1).art = art; return { x, w, door: x + (w - sz.w) / 2 + HOUSE.ART[art].x * sz.w }; };
-//   x=1〜3 は細い路地（奥に荷箱と木）
-const inn = house('inn-tall', INN_ART, 4); // 銀鹿亭（いまは仮に house_e_archway の扉を入口にしている。2026-11-22 作者「酒場っぽくないのと、入れるスペースがないように見える」。本当の正面は美術・演出室に依頼中）。入口 (8,4) が絵の扉の真ん中に来る位置
+//   x=1〜2 は細い路地（奥に荷箱と木）
+const inn = house('inn-tall', INN_ART, 3); // 銀鹿亭（いまは仮に house_e_archway の扉を入口にしている。2026-11-22 作者「酒場っぽくないのと、入れるスペースがないように見える」。本当の正面は美術・演出室に依頼中）。入口 (8,4) が絵の扉の真ん中に来る位置
+items.back.at(-1).doorExit = 'inn-door';
+items.back.at(-1).peek = 'assets/interiors/silver-deer/peek_1f.webp'; items.back.at(-1).peekAspect = 1.6;
+items.back.at(-1).peekPose = { rel: [-0.002, 2.824, 9.148], q: [-0.0872, 0, 0, 0.9962], fov: 75, aspect: 1.6 }; // 写しを撮ったカメラ（外の戸口から見た、入る直前のカメラ。tools/capture-peek.html の window.PEEK）。写しはこのカメラに向けて置く（2026-11-23 作者「入る直前のカメラ設定のまま、中で撮影を」）
+items.back.at(-1).peekBox = { base: 'assets/interiors/silver-deer/', floor: 'floor.webp', wall: 'stone_beige.webp', ceiling: 'ceiling.webp', frontX: 10.5, tint: 0xfff0dc, ceilH: 7 }; // 1階の壁は石（2026-11-23 作者「一回の壁は石壁にしたい」）・天井を低く（「天井を低くして」） // 入口の奥の箱に、中と同じ床・壁・天井（2026-11-23 作者「奥行きまでのテクスチャは床横の壁天井は中のものと同じものを使って箱型に」） // 横に広い写し（明るくぼかしたもの。2026-11-23 作者「横を広くして」「明るくしてぼかして」） // 戸口の奥に置く、中に着いた直後の眺め（tools/capture-peek.html で撮った。2026-11-23 作者「中に入ったやつのスクリーンショットをおいたら？」） // この家の扉は切り抜いて、入るときに開く（2026-11-23 作者「ドアを切り取って開くようにできるかい？」）
 if (Math.floor(inn.door) !== INN_DOOR_X) throw new Error(`銀鹿亭の絵の扉が入口のマスからずれている：${inn.door.toFixed(2)}`);
 //   x=14 は細い路地
 house('house-tall', 'house_f_corner.webp', 15, 0.02);
@@ -38,16 +42,16 @@ g[4][INN_DOOR_X] = 'D'; // 銀鹿亭の入口
 put('back', 'awning-green', 19, 4, 3, 1, 3.9, 0.25, false); // 角の家の1階の窓の上
 put('back', 'awning-red', 28, 4, 3, 1, 3.9, 0.25, false);
 put('back', 'awning-wheat', 36, 4, 3, 1, 3.9, 0.25, false); // 段の破風の家のドアの上
-put('back', 'sign-deer', 11, 4, 2, 1, 5.4, 0.25, false); // 覚えてもらう目印：銀の鹿の看板（入口の右、2階の窓の横）
+put('back', 'sign-deer', 13, 4, 2, 1, 4.6, 0.25, false); // 覚えてもらう目印：銀の鹿の看板（銀鹿亭の右の角から突き出す。2026-11-23 正面の絵にかえたので、窓にかからない所へ）
 put('back', 'sign-bread', 15, 4, 1, 1, 5, 0.25, false);
 put('back', 'sign-shoe', 31, 4, 1, 1, 5, 0.25, false);
 put('back', 'sign-cup', 34, 4, 1, 1, 5, 0.25, false);
 put('mid', 'crates', 6, 5, 1, 1, 1.3, 0.05); // 宿の入口の脇の旅人の荷物
-put('mid', 'planter', 10, 5, 1, 1, 1.4, 0.05); // 入口の脇の花鉢
+// 入口の脇の花鉢は外した（2026-11-23 作者「右下のかだん、さいずちっさ　なくていいかな」：家を大きくしたら小さく見えた）
 
 // 導機灯（大通りに一定の間隔で）
 for (const x of [4, 17, 31, 40]) put('mid', 'lamp', x, 10, 1, 1, 3.8, 0.05);
-put('mid', 'tree', 1, 9, 2, 1, 4.2, 0.05); // 通りの木
+put('mid', 'tree', 1, 9, 1, 1, 6, 0.05); // 通りの木（ぶつかるのは幹の1マスだけ。絵は高さ6マスで枝が広がる。2026-11-23 作者「ぶつかりの判定が広すぎたりするところがある」）
 
 // 南側（手前）：屋台が並び、そのうしろにも家。屋台の間はすき間をあけ、手前の家並みの路地へ抜けられる
 for (const [x, w] of [[6, 3], [12, 3], [26, 3], [35, 3]]) put('mid', 'stall', x, 11, w, 2, 2.6, 0.05);
@@ -69,17 +73,17 @@ const m = {
   width: W, height: H, tileSize: 32, legend: { '.': 'floor', '#': 'wall', D: 'door' },
   ground: { tileset: 'tiles.pipoya-town', fill: 'paving', wall: 'wall', rows: null },
   exits: [
-    { id: 'inn-door', x: INN_DOOR_X, y: 4, dir: 'up', effect: 'nook-in', to: { map: 'silver-deer-1f', exit: 'front-door', arrive: { x: 10, y: 12, dir: 'up' } } },
+    { id: 'inn-door', x: INN_DOOR_X, y: 4, dir: 'up', effect: 'nook-in', bell: true, to: { map: 'silver-deer-1f', exit: 'front-door', arrive: { x: 10, y: 11, dir: 'up' } } }, // 着く所は入口から1マス奥（2026-11-23 外で戸口の奥へ歩いた並びとそろえる）
     { id: 'east-street', x: EX, y: EY, span: 3, dir: 'right', effect: 'page', to: { map: 'norn-plaza', exit: 'west-street', arrive: { x: 1, y: 10, dir: 'right' } } },
   ],
   spawns: { default: { x: 8, y: 6, dir: 'down' } },
   events: [],
   collision: g.map((r) => r.join('')),
   stage: {
-    camera: { pitchDeg: 10, fovDeg: 60, follow: 'player', deadzone: [2, 1.5] },
+    camera: { pitchDeg: 10, fovDeg: 75, distance: 6.5, follow: 'player', deadzone: [2, 1.5] },
     // 光の玉は場所ごとに変える（2026-11-22 作者「オーブは場所によって変えるようにしたい」）。値は仮
     floor: 'cobble',
-    townArt: { doorH: HOUSE.DOOR_H, doors: HOUSE.doorsForMap(), "note":"ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ","base":"assets/town/norn/","ground":{"paved":"tex_cobble_street.webp","grass":"tex_grass.webp"},"boards":{"house-*":["house_home_2f.webp","house_a_narrow.webp","house_b_sideroof.webp","house_c_stepgable.webp","house_d_workshop.webp","house_e_archway.webp","house_f_corner.webp"],"inn-tall":"house_e_archway.webp","lamp":"lamp_post.webp","stall":"stall.webp","flower-stall":"flower_stall.webp","cart":"cart.webp","planter":"planter.webp","flowerbed":"flowerbed.webp","tree":"tree_street.webp","tree-small":"tree_small.webp","herbs":"herbs_drying.webp","awning-green":"awnings-1.webp","awning-red":"awnings-2.webp","awning-wheat":"awnings-3.webp","sign-bread":"signs-1.webp","sign-shoe":"signs-2.webp","sign-cup":"signs-3.webp","sign-deer":"signs-4.webp"}}, // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）
+    townArt: { doorH: HOUSE.DOOR_H, doors: HOUSE.doorsForMap(), "note":"ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ","base":"assets/town/norn/","ground":{"paved":"tex_cobble_street.webp","grass":"tex_grass.webp"},"boards":{"house-*":["house_home_2f.webp","house_a_narrow.webp","house_b_sideroof.webp","house_c_stepgable.webp","house_d_workshop.webp","house_e_archway.webp","house_f_corner.webp"],"inn-tall":"inn_silver_deer.webp","lamp":"lamp_post.webp","stall":"stall.webp","flower-stall":"flower_stall.webp","cart":"cart.webp","planter":"planter.webp","flowerbed":"flowerbed.webp","tree":"tree_street.webp","tree-small":"tree_small.webp","herbs":"herbs_drying.webp","awning-green":"awnings-1.webp","awning-red":"awnings-2.webp","awning-wheat":"awnings-3.webp","sign-bread":"signs-1.webp","sign-shoe":"signs-2.webp","sign-cup":"signs-3.webp","sign-deer":"signs-4.webp"}}, // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）
     paved: [{"x":0,"y":5,"w":W,"h":9}], // 石畳は通り（5〜13行目）だけ。ほかは土か芝生（作者「道や広場は石畳、ほかは土か芝生」） // 仮の床：石畳（2026-11-22 作者「床を仮に作ってほしい」）
     orbs: {"count":10,"alpha":0.5,"color":[1,0.86,0.62],"size":0.7,"note":"町：導機灯や窓の灯りに舞う、暖かいほこりの粒（仮）"},
     layers: [

@@ -29,7 +29,7 @@ test('paper-stage.js の既定値とパネルの既定値が同じ', () => {
   assert.ok(src.includes(`cfg.fovDeg ?? ${CAM_DEFAULTS.fovDeg};`), 'fov の既定');
 });
 
-test('作者の決定（2026-11-22 13:20ごろ）：すべてのマップの見下ろす角度は床から10度・画角60度、パネルの範囲に入る', () => {
+test('作者の決定（2026-11-22 13:20ごろ／2026-11-23 「カメラを距離を近く画角を広くするとミニチュア感が出ていい」）：すべてのマップの見下ろす角度は床から10度・画角75度・距離6.5（ブックヌックは90度・3。2026-11-23 作者「ブックヌックは覗き込む感をだしたい」）、パネルの範囲に入る', () => {
   const world = readJson('data/world.json');
   const ids = (world.maps || []).map((m) => (typeof m === 'string' ? m : m.id));
   assert.ok(ids.length >= 2, '一覧からマップを読めること');
@@ -38,7 +38,9 @@ test('作者の決定（2026-11-22 13:20ごろ）：すべてのマップの見�
     const c = m.stage?.camera;
     assert.ok(c, `${id}: stage.camera がある`);
     assert.equal(c.pitchDeg, 10, `${id}: pitchDeg`);
-    assert.equal(c.fovDeg, 60, `${id}: fovDeg`);
+    const nook = m.kind === 'interior'; // ブックヌック（建物の中）はもっと近く広く（2026-11-23 作者「ブックヌックの時には、もっとしていい」）
+    assert.equal(c.fovDeg, nook ? 90 : 75, `${id}: fovDeg`);
+    assert.equal(c.distance, nook ? 3 : 6.5, `${id}: distance`);
     assert.ok(c.fovDeg >= CAM_LIMITS.fov[0] && c.fovDeg <= CAM_LIMITS.fov[1], `${id}: fovDeg ${c.fovDeg}`);
     assert.ok(c.pitchDeg >= CAM_LIMITS.pitch[0] && c.pitchDeg <= CAM_LIMITS.pitch[1]);
   }

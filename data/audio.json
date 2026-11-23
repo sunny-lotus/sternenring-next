@@ -457,6 +457,32 @@
       },
       "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。扉を通ったあと、着いた側で（閉まる音）（同日 作者「ドアの音もうるさいかな」で小さくした）",
       "sha256": "12d20fcd993d1c899a8e6f119a4b3b007e2a808e408e261ab503d070d2ac1036"
+    },
+    {
+      "id": "sfx.door.bell",
+      "path": "assets/audio/field/door_bell.mp3",
+      "sourcePath": "assets/audio/field/door_bell.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "24567e81a227446157ca3c09ffe9df2d8229191b2016df2d5543fcc74bb2bc04",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV はまなびひろばの公開音源と同じもの）"
+      },
+      "sourceFile": "door_bell.wav",
+      "durationSeconds": 3.533,
+      "gain": 0.35,
+      "status": "adopted",
+      "assignedTo": "field.door.bell",
+      "recording": {
+        "file": "production 外：OneDrive/教材作成/manabi-portal/common/audio/plaza-enter-doorbell-v1.wav（まなびひろばの「入る音」）",
+        "original": "BigSoundBank「Shop doorbell chime」素材番号3588（作者 Joseph SARDIN、CC0 1.0）https://bigsoundbank.com/carillon-commercant-s3588.html 。まなびひろばで前後の無音を整理・音量と端のフェードを調整したもの（音程・鳴り方は元のまま。manabi-portal/docs/audio/NAVIGATION-SE.md）",
+        "sha256": "3228a968fd54c6e04eec60aa45ab797cf615d2389a744675978f4bb48f2ac844",
+        "start": 0,
+        "end": 3.533,
+        "note": "まなびひろばの公開音源をそのまま写した（WAV は同じハッシュ）。MP3 にしただけ"
+      },
+      "license": "CC0-1.0",
+      "use": "2026-11-23 作者「あとまなび広場で使っていた」「ちりんちりんていう音を玄関はいったらいれたい」。銀鹿亭の玄関（出入口の bell: true）に入るとき、扉が開く音のあとに",
+      "sha256": "3228a968fd54c6e04eec60aa45ab797cf615d2389a744675978f4bb48f2ac844"
     }
   ],
   "bgmNote": "曲（DEV-BOOK-001 rev3）。作者指定の完成版ケルト街BGM v30（production/claude/assets/BGM-TOWN-CELTIC-V30.json、作者「音楽はケルトのやつ」）。原WAV outputs/SR_街BGM_ケルト_完成版_v30.wav をそのまま写した（再合成・切詰め・速度変更なし。sha256 照合済み、元のファイルは変えていない）。ループは音源全体 [0, 3024000) フレーム、導入2小節も毎周。bgmByMap は今の仮の試験区画だけの割当で、正式な他マップや物語場面への割当は確定しない。",

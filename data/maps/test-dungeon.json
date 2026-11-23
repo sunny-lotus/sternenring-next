@@ -116,7 +116,8 @@
     "look": "dungeon",
     "camera": {
       "pitchDeg": 10,
-      "fovDeg": 60,
+      "fovDeg": 90,
+      "distance": 3,
       "follow": "player"
     },
     "orbs": {

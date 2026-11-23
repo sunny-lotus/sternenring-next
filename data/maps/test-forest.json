@@ -260,7 +260,8 @@
   "stage": {
     "camera": {
       "pitchDeg": 10,
-      "fovDeg": 60,
+      "fovDeg": 75,
+      "distance": 6.5,
       "follow": "player",
       "deadzone": [
         2,
@@ -300,12 +301,39 @@
         "items": [
           {
             "asset": "placeholder:dungeon-gate",
-            "x": 56,
+            "x": 56.5,
             "y": 1,
             "w": 4,
             "h": 3,
-            "standH": 4,
-            "zOffset": 0.1
+            "standH": 5,
+            "zOffset": 0.1,
+            "doorExit": "gate",
+            "cut": {
+              "x0": 0.3,
+              "x1": 0.7,
+              "y0": 0.42,
+              "y1": 1,
+              "arch": 0.14,
+              "hole": true
+            },
+            "peek": "assets/interiors/test-dungeon/peek.webp",
+            "peekAspect": 1.6,
+            "note": "2026-11-23 作者「ダンジョンに入るときも同様にしたい、中の写真を撮って張っておくスタイル」：門の暗がりをくりぬき、奥に中の眺めの写し（tools/capture-peek.html で撮り、peek-tone.py dark で暗くぼかした）",
+            "peekPose": {
+              "rel": [
+                0.006,
+                2.824,
+                8.144
+              ],
+              "q": [
+                -0.0872,
+                0,
+                0,
+                0.9962
+              ],
+              "fov": 75,
+              "aspect": 1.6
+            }
           },
           {
             "asset": "placeholder:pine",

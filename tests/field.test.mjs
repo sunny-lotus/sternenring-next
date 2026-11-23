@@ -38,11 +38,11 @@ test('壁で止まる（向きだけ変わる）', () => {
 });
 
 test('家具（植えこみ・机・カウンター）で止まる', () => {
-  // 2026-11-22 作者の決定で広場の噴水を外したので、広場は植えこみ(3〜5,13〜15)で確かめる
+  // 2026-11-22 作者の決定で広場の噴水を外したので、広場は植えこみで確かめる。2026-11-23 作者「花壇後ろ直後は歩けるように」で、ぶつかるのは手前の1列(3〜5,15)だけ
   const a = makeField(PLAZA);
   tap(a.field, a.input, 'left', 7); // (12,11)→(5,11)
-  tap(a.field, a.input, 'down', 3); // (5,12) の下は植えこみ(5,13)
-  assert.deepEqual(pos(a.field), { x: 5, y: 12, dir: 'down' });
+  tap(a.field, a.input, 'down', 5); // 植えこみのすぐ後ろ(5,13)(5,14)は歩ける。(5,15)が植えこみ
+  assert.deepEqual(pos(a.field), { x: 5, y: 14, dir: 'down' });
   const b = makeField({ map: 'silver-deer-1f', spawn: 'default' }); // (10,11)
   tap(b.field, b.input, 'up', 12); // 奥の列(y=1)は吹き抜けの2階の通路（高さ5）なので、1階からは y=2 で止まる（2026-11-22）
   assert.deepEqual(pos(b.field), { x: 10, y: 2, dir: 'up' });
@@ -112,27 +112,27 @@ test('並び直し：広場に下向きで着くと、後ろ(5,5)は扉なので
   assert.deepEqual(placeFollower(mapQuery(tiny, d.collision), { x: 1, y: 1, dir: 'up' }), { x: 1, y: 1 });
 });
 
-test('銀鹿亭前の通り → 銀鹿亭一階：宿の入口で転送、上向きで(10,12)、ヴォルトは(9,12)', () => {
+test('銀鹿亭前の通り → 銀鹿亭一階：宿の入口で転送、上向きで(10,11)、ヴォルトは外と同じ並びで真後ろ(10,12)（2026-11-23 作者「同じ並び、同じ向きでそのまま」「主人公も奥へ進む」）', () => {
   const { field, input } = makeField();
   walk(field, input, STREET_TO_DOOR);
   assert.equal(field.state.mapId, 'silver-deer-1f');
-  assert.deepEqual(pos(field), { x: 10, y: 12, dir: 'up' });
-  assert.deepEqual([field.state.actors[1].x, field.state.actors[1].y], [9, 12]);
+  assert.deepEqual(pos(field), { x: 10, y: 11, dir: 'up' });
+  assert.deepEqual([field.state.actors[1].x, field.state.actors[1].y, field.state.actors[1].dir], [10, 12, 'up']);
   assert.equal(field.state.transfers, 1);
 });
 
-test('銀鹿亭一階 → 銀鹿亭前の通り：出入口で転送、下向きで(8,5)、ヴォルトは横(9,5)（後ろは宿の入口）', () => {
+test('銀鹿亭一階 → 銀鹿亭前の通り：出入口で転送、下向きで(8,5)、ヴォルトは中と同じ並びで真後ろ(8,4)（2026-11-23 作者「同じ並び、同じ向きでそのまま」）', () => {
   const { field, input } = makeField({ map: 'silver-deer-1f', spawn: 'default' });
   tap(field, input, 'down', 2); // (10,11)→(10,12)→扉(10,13)
   assert.equal(field.state.mapId, 'norn-inn-street');
   assert.deepEqual(pos(field), { x: 8, y: 5, dir: 'down' });
-  assert.deepEqual([field.state.actors[1].x, field.state.actors[1].y], [9, 5]);
+  assert.deepEqual([field.state.actors[1].x, field.state.actors[1].y, field.state.actors[1].dir], [8, 4, 'down']);
 });
 
 test('往復ループしない：扉へ向かうキーを押し続けても転送は1回だけ', () => {
   const { field, input } = makeField({ map: 'silver-deer-1f', spawn: 'default' });
   input.press('down');
-  run(field, input, 3000); // 押しっぱなし3秒
+  run(field, input, 4500); // 押しっぱなし4.5秒（出る演出 1.3秒＋着く 2.0秒のあと。2026-11-23 出る演出を長くした）
   assert.equal(field.state.transfers, 1);
   assert.equal(field.state.mapId, 'norn-inn-street');
   assert.equal(pos(field).dir, 'down');
@@ -156,7 +156,7 @@ test('2往復：銀鹿亭前 → 一階 → 銀鹿亭前 → 一階 → 銀鹿�
   for (let k = 0; k < 2; k++) {
     if (k === 0) walk(field, input, STREET_TO_DOOR); else tap(field, input, 'up');
     assert.equal(field.state.mapId, 'silver-deer-1f');
-    tap(field, input, 'down');
+    tap(field, input, 'down', 2); // 着く所は入口から1マス奥（2026-11-23）なので、出るまで2歩
     assert.equal(field.state.mapId, 'norn-inn-street');
     assert.deepEqual(pos(field), { x: 8, y: 5, dir: 'down' });
   }
@@ -401,4 +401,26 @@ test('歩く速さ（開発者の窓）：setStepScale で1マスの時間が変
   assert.equal(field.stepMs, base);
   field.setStepScale(2); assert.equal(field.stepMs, base / 2);
   field.setStepScale(1); assert.equal(field.stepMs, base);
+});
+
+test('SHIFT で走る：押している間は1マスの時間が短く、同じ時間で遠くへ（2026-11-23 作者「SHIFTで早く動けるようにしてほしい」）', () => {
+  const go = (/** @type {boolean} */ runK) => {
+    const { field, input } = makeField(PLAZA);
+    const x0 = pos(field).x;
+    input.run = runK; input.press('left'); run(field, input, 800); input.release('left'); input.run = false; run(field, input, 400);
+    return x0 - pos(field).x;
+  };
+  const walkN = go(false), runN = go(true);
+  assert.ok(walkN >= 4 && walkN <= 6, `歩き ${walkN}マス`);
+  assert.ok(runN >= walkN * 1.6, `走り ${runN}マス（歩き ${walkN}）`);
+});
+
+test('確かめ用のワープ：行けるマスへは移る、行けないマス・ないマップでは何もしない（2026-11-23 作者「テストの時ワープとか使ったら？」）', () => {
+  const { field } = makeField();
+  assert.equal(field.warp('test-forest', 58, 4, 'up'), true);
+  assert.equal(field.state.mapId, 'test-forest');
+  assert.deepEqual(pos(field), { x: 58, y: 4, dir: 'up' });
+  assert.equal(field.warp('test-forest', 0, 0), false);
+  assert.equal(field.warp('no-such-map', 1, 1), false);
+  assert.equal(field.state.mapId, 'test-forest');
 });

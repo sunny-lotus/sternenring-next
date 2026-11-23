@@ -38,7 +38,7 @@ DEV-DESIGN-001（受入済み）の `examples/AGENTS.next.md` をもとに、DEV
 - 型は JSDoc と `// @ts-check`。外部パッケージは使わない。ただし three.js 0.160.0 だけは `src/vendor/three/`（MIT、LICENSE 同梱）に置いて使う（作者の決定 2026-11-22 14:35「NEXTの見た目は試作に合わせる・three.js を同梱してよい」）。ネットから読まない。
 - 紙の舞台はいま `src/render/three-stage.js`（three.js 版。見た目の基準は `STERNENRING_Codex/試作_飛び出す絵本`・`試作_ブックヌック`）。外のマップは本の見開き、`kind: interior` はブックヌック（箱の内側）。これまでの素の WebGL1 版 `paper-stage.js` は、three.js 版が作れないときの予備と、`?stage=webgl1` での見比べ用に残す。
 - 紙の舞台の計算は `src/render/paper-math.js`（Node でテスト）、WebGL は `src/render/paper-stage.js`。テクスチャは最近傍・ミップマップなし、UV は常に u0<u1（左右反転しない）。ふち・影は板の真後ろ（boardNormal の逆）へ下げる。
-- カメラ：マップの `stage.camera` の `pitchDeg 10`・`fovDeg 60` が作者の決定（2026-11-22 13:20）。新しいマップもそろえる（tests/cam.test.mjs）。`?cam=1` の調整パネル（`src/ui/cam-panel.js`、上書きは `window.SR_CAM`、保存しない）は作者の決定で残す。消さない。
+- カメラ：マップの `stage.camera` の `pitchDeg 10`・`fovDeg 75`・`distance 6.5` が作者の決定（2026-11-22 13:20 に 10度・60度、2026-11-23 作者「カメラを距離を近く画角を広くするとミニチュア感が出ていい」で 75度・6.5 に。ブックヌック（kind: interior）は作者「ブックヌックの時には、もっとしていい」で 85度・4.5、さらに作者「ブックヌックは覗き込む感をだしたい」（パネルで試した値）で 90度・3）。新しいマップもそろえる（tests/cam.test.mjs）。`?cam=1` の調整パネル（`src/ui/cam-panel.js`、上書きは `window.SR_CAM`、保存しない）は作者の決定で残す。消さない。
 - 変更したら `node --test tests/*.test.mjs` を通し、実ブラウザで確かめたことだけを報告に書く。
 
 ## 起動

@@ -10,6 +10,7 @@ export class InputState {
     /** @type {string[]} */ this.queue = [];
     /** @type {string[]} */ this.heldStack = [];
     this.enabled = true;
+    /** 走る（SHIFT を押している間。2026-11-23 作者「SHIFTで早く動けるようにしてほしい」） */ this.run = false;
   }
   /** 方向キーを押した（キーリピートは呼ばない） @param {string} dir */
   press(dir) {
@@ -21,7 +22,7 @@ export class InputState {
   }
   /** @param {string} dir */
   release(dir) { this.heldStack = this.heldStack.filter((d) => d !== dir); }
-  releaseAll() { this.heldStack = []; }
+  releaseAll() { this.heldStack = []; this.run = false; }
   clearQueue() { this.queue = []; }
   /** 次の1歩の方向（先行入力が先、なければ押しっぱなし） */
   next() { return this.queue.shift() ?? this.held(); }

@@ -40,8 +40,8 @@ test('音の台帳：本の録音の採用5点がそろい、ファイルのハ�
   }
 });
 
-test('足音と扉の音（2026-11-23 作者の録音）：木の床4・布4・石4・扉2。切り出した WAV と MP3 のハッシュが台帳と同じ、元の録音の出どころと切り出し位置がある、足音は小さめ', () => {
-  assert.deepEqual(FIELD.map((s) => s.id).sort(), ['sfx.door.close', 'sfx.door.open', 'sfx.step.soft01', 'sfx.step.soft02', 'sfx.step.soft03', 'sfx.step.soft04', 'sfx.step.stone01', 'sfx.step.stone02', 'sfx.step.stone03', 'sfx.step.stone04', 'sfx.step.wood01', 'sfx.step.wood02', 'sfx.step.wood03', 'sfx.step.wood04']);
+test('足音と扉の音（2026-11-23 作者の録音）：木の床4・布4・石4・扉2・玄関の鈴1（まなびひろばと同じ CC0 の音）。切り出した WAV と MP3 のハッシュが台帳と同じ、元の録音の出どころと切り出し位置がある、足音は小さめ', () => {
+  assert.deepEqual(FIELD.map((s) => s.id).sort(), ['sfx.door.bell', 'sfx.door.close', 'sfx.door.open', 'sfx.step.soft01', 'sfx.step.soft02', 'sfx.step.soft03', 'sfx.step.soft04', 'sfx.step.stone01', 'sfx.step.stone02', 'sfx.step.stone03', 'sfx.step.stone04', 'sfx.step.wood01', 'sfx.step.wood02', 'sfx.step.wood03', 'sfx.step.wood04']);
   for (const s of FIELD) {
     assert.equal(createHash('sha256').update(readFileSync(join(root, s.sourcePath))).digest('hex'), s.sha256, s.sourcePath);
     assert.equal(createHash('sha256').update(readFileSync(join(root, s.path))).digest('hex'), s.encoded.sha256, s.path);
