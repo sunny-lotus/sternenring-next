@@ -62,17 +62,34 @@ SR.Battle = function (opts) {
   function ETH() {   // 敵の一撃が味方に与える倍率（見込み用）
     var a = heroes.filter(function (v) { return v.pos < 3; }), eg = EG(), p = SR.LV_GAP_POW == null ? 1 : SR.LV_GAP_POW;
     if (!a.length) return eg;
-    return a.reduce(function (s, v) { var g = v.gs || 1; return s + g * Math.pow(eg / g, p) * (v.hf || 1); }, 0) / a.length * (SR.enemyAtkMulAt ? SR.enemyAtkMulAt((enemies[0] && enemies[0].lv) || 1) : SR.enemyAtkMul || 1);
+    return a.reduce(function (s, v) { return s + dmgBase(enemies[0] || { gs: eg }, v) * (v.hf || 1); }, 0) / a.length * (SR.enemyAtkMulAt ? SR.enemyAtkMulAt((enemies[0] && enemies[0].lv) || 1) : SR.enemyAtkMul || 1);
   }
   function HF() { var a = heroes.filter(function (v) { return v.pos < 3; }); return a.length ? a.reduce(function (s, v) { return s + (v.hf || 1); }, 0) / a.length : 1; }
   // 2026-11-22 サニー：Lvごとの上限はつけない。かわりに「ふだんの一撃」の何倍にもなる大きな一撃は、伸びがゆるやかになる（足すほど必ず増えるが、跳ね上がりすぎない）。
   // ふだんの一撃＝100×相手のLvの倍率×Lv差。2倍までは そのまま、その先は 2＋1.2×log(1＋(倍−2)/2)。最後に9999で止まる（限界突破で外れる）
   function softDmg(src, n, dst) {
     if (!src || !src.hero || !dst || !SR.softDmg) return n;
-    var T = 100 * (dst.gs || 1) * gapOf(src, dst), x = n / T, k = SR.softDmg;
+    var T = 100 * dmgBase(src, dst), x = n / T, k = SR.softDmg;
     return x <= k.knee ? n : T * (k.knee + k.slope * Math.log(1 + (x - k.knee) / k.knee));
   }
   function capDmg(src, n, dst) { n = softDmg(src, n, dst); return src && src.limitBreak ? n : Math.min(SR.DMG_CAP || 1e9, n); }
+  // 2026-11-24 サニー「受ける側のレベルではなく与える側のダメージにして欲しい」：ダメージの数字は、与える側（攻める側）のLvの倍率で決める。
+  // 受ける側のLvでは数字は変わらない（前は受ける側の倍率が基本で、Lvの高い相手ほど数字が大きく出た）。
+  // 味方より強い敵は、HP（下の hpScaleOf）と攻撃の強さ（e.dgs、戦いの始めに決める）を、Lv差の0.35乗の分だけにそろえる（Lv差が効きすぎないように）
+  function dmgBase(src, dst) { return src.dgs || src.gs || 1; }
+  function frontAvgLv() { var f = heroes.filter(function (v) { return v.pos < 3; }); return f.length ? Math.max(1, f.reduce(function (s, v) { return s + (v.lv || 1); }, 0) / f.length) : 0; }
+  function strongScale(lv, at) {   // 味方の平均Lv（at）より強い敵の倍率：Lv10以下は味方のLvと同じ。それより上は「味方のLvの倍率×Lv差の0.35乗」
+    var avg = frontAvgLv(); if (!avg || lv <= avg) return null;
+    if (lv <= (SR.EASY_LV || 0)) return at(avg);
+    return at(avg) * Math.pow(SR.lvScale(lv) / SR.lvScale(avg), SR.LV_GAP_POW == null ? 0.35 : SR.LV_GAP_POW);
+  }
+  // 敵のHPの倍率。味方（前に出る3人の平均Lv）より強い敵は、HPを「味方のLvの敵のHP×Lv差の0.35乗」にする：
+  // ダメージの数字は与える側で決まるので、そのままだとLv差がとても強く効く（Lv1でLv20の敵に約280回）。倒すまでの回数を前と同じにそろえる（2026-11-22 サニー「Lv差が効きすぎないように」）。
+  // Lv10以下の敵は慣れの期間：味方よりLvが上でも、味方のLvの敵と同じHP。味方より弱い敵は、その敵のLvのHPのまま（Lvを上げると楽に倒せる）
+  function hpScaleOf(e, bz) {
+    var own = SR.enemyHpScale(e.lv || 1, bz), st = strongScale(e.lv || 1, function (l) { return SR.enemyHpScale(l, bz); });
+    return st == null ? own : Math.min(own, st);
+  }
   function gapOf(src, dst) {   // Lv差の効き目。Lv10までの「慣れの期間」は、Lvが足りなくても不利にならない（上回っているときの有利だけ残す）
     var g = Math.pow((src.gs || 1) / (dst.gs || 1), SR.LV_GAP_POW == null ? 1 : SR.LV_GAP_POW), E = SR.EASY_LV || 0;
     if (src.hero && g < 1 && (dst.lv || 1) <= E) g = 1;
@@ -80,7 +97,8 @@ SR.Battle = function (opts) {
     return g;
   }
   function atkMulOf(src) { return src.hero ? 1 : (SR.enemyAtkMulAt ? SR.enemyAtkMulAt(src.lv || 1) : SR.enemyAtkMul || 1); }
-  heroes.concat(enemies).forEach(function (u) { var bz = isBoss || u.type === "twin", hs = !u.hero && SR.enemyHpScale ? SR.enemyHpScale(u.lv || 1, bz) * (bz ? 1 : SR.normalHpMul || 1) : u.gs; u.hp = Math.round(u.hp * S * hs); u.maxHp = Math.round(u.maxHp * S * hs); if (u.heal) u.heal *= S * hs; });   // 敵の回復はHPの倍率に合わせる
+  enemies.forEach(function (e) { var st = SR.lvScale ? strongScale(e.lv || 1, SR.lvScale) : null; if (st != null) e.dgs = Math.min(e.gs || 1, st); });   // 2026-11-24 味方より強い敵の攻撃の強さ
+  heroes.concat(enemies).forEach(function (u) { var bz = isBoss || u.type === "twin", hs = !u.hero && SR.enemyHpScale ? hpScaleOf(u, bz) * (bz ? 1 : SR.normalHpMul || 1) : u.gs; u.hp = Math.round(u.hp * S * hs); u.maxHp = Math.round(u.maxHp * S * hs); if (u.heal) u.heal *= S * hs; });   // 敵の回復はHPの倍率に合わせる
   heroes.forEach(function (u) { var h = Math.min(SR.HP_CAP || 9999, SR.heroHp ? SR.heroHp(u.lv || 1) : u.maxHp); u.hf = h / u.maxHp; u.maxHp = h; u.hp = h; });   // 味方のHPはゆるい伸び。受けるダメージ・回復も hf をかける
   // 2026-11-22 サニー：MPもLvで伸びる。ステータスのパッシブ（だれでも付けられる）
   heroes.forEach(function (u) {
@@ -220,8 +238,7 @@ SR.Battle = function (opts) {
     if (dst.hero) amount *= 1 - bon(dst, 'guard');   // 守りの型
     if (hasSt(dst, 'freeze')) amount *= SR.statusFx.freeze;
     if (hasSt(src, 'daze')) amount *= SR.statusFx.daze;
-    var gsD = dst.gs || 1, gap = gapOf(src, dst);
-    amount = capDmg(src, amount * S * gsD * gap * (dst.hf || 1) * atkMulOf(src), dst);   // Lvの倍率（Lv差はゆるく）・上限9999
+    amount = capDmg(src, amount * S * dmgBase(src, dst) * (dst.hf || 1) * atkMulOf(src), dst);   // 与える側のLvの倍率（2026-11-24）・上限9999
     if (src.hero && amount > (stat.maxHit || 0)) { stat.maxHit = amount; stat.maxHitBy = src.name; }
     dst.hp = Math.max(0, dst.hp - amount);
     var kLoss = previous - dst.k;
@@ -881,7 +898,7 @@ SR.Battle = function (opts) {
     if (hasSt(e, 'freeze')) mul *= SR.statusFx.freeze;
     if (e.vuln > 0) mul *= 1.25;   // 脆化法
     if (u.limitBreak && hits === 1 && !a.all && !a.scatter) hp *= SR.LIMIT_BREAK.single || 1;   // 限界突破：1発の技が重い
-    var dmg = capDmg(u, hp * mul * S * (e.gs || 1) * gapOf(u, e) / hits, e) * hits;   // 上限9999は1発ごと
+    var dmg = capDmg(u, hp * mul * S * dmgBase(u, e) / hits, e) * hits;   // 上限9999は1発ごと
     return { kd: kd, dmg: dmg, breaks: breaks, kills: dmg >= e.hp, phen: ph };
   }
   function scoreAttack(u, a, e, th) {

@@ -1501,9 +1501,11 @@ export function createThreeStage(canvasEl, assets) {
           const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -SEAT)];
           for (const mt of [m, am.face?.mesh.material]) if (mt) { mt.clippingPlanes = clip; mt.needsUpdate = true; }
           renderer.localClippingEnabled = true;
-          const lt = sh.t.clone(); lt.needsUpdate = true; lt.repeat.set(f.sw / img.width, f.sh * HIP / img.height); lt.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); // 絵の下の3割（脚）
-          const legs = new THREE.Mesh(new THREE.PlaneGeometry(bw, SEAT), fillMaterial(new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), lt));
-          legs.position.set(fwd * 0.2, SEAT / 2 - am.hinge.position.y, 0.002); legs.castShadow = true; am.hinge.add(legs);
+          // 脚の絵は腰より少し上（LAP）まで取って、座面より上にも重ねる（2026-11-24 作者「座った時に、椅子の部分が腰に見えないように」：上半身と脚のあいだに座面のふちが帯のように見えた）
+          const LAP = 0.08, EXT = bh * LAP; // EXT：座面より上に重ねる高さ（絵の LAP 分）
+          const lt = sh.t.clone(); lt.needsUpdate = true; lt.repeat.set(f.sw / img.width, f.sh * (HIP + LAP) / img.height); lt.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); // 絵の下の3割と少し（脚と腰）
+          const legs = new THREE.Mesh(new THREE.PlaneGeometry(bw, SEAT + EXT), fillMaterial(new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), lt));
+          legs.position.set(fwd * 0.2, (SEAT + EXT) / 2 - am.hinge.position.y, 0.006); legs.castShadow = true; am.hinge.add(legs);
         } else if (n.pose === 'sit') {
           const bh = am.mesh.geometry.parameters.height; am.hinge.position.y = 0.6 - bh * 0.32; // 腰（足もとから背の3割ほど。デフォルメで頭が大きい）を座面の高さ 0.6 に
           const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.62)]; // 座面より下は描かない（卓の下から足が見えないように）

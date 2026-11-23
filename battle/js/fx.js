@@ -183,19 +183,7 @@ window.SR = window.SR || {};
       if (hero) { add('fxflash red', '', 400); add('fxword red sm', 'BREAK', 1150, clampX(p.x, p.w, 70), p.y); quake(2); return; }
       SR.fx.shatter(p.x, p.y);   // 画面が割れる
       add('fxbk-dim', '', 1300);
-      add('fxbk-core', '', 700, p.x, p.y);
-      add('fxbk-ring', '', 900, p.x, p.y); add('fxbk-ring r2', '', 1100, p.x, p.y);
-      var lines = '';
-      for (var i = 0; i < 11; i++) {
-        var a = Math.PI * 2 * i / 11 + rnd(-.25, .25), pts = '170,170', r = 0;
-        for (var j = 0; j < 4; j++) { r += rnd(24, 44); var b = a + rnd(-.4, .4); pts += ' ' + (170 + Math.cos(b) * r).toFixed(0) + ',' + (170 + Math.sin(b) * r).toFixed(0); }
-        lines += '<polyline points="' + pts + '" style="animation-delay:' + (i * 0.012).toFixed(3) + 's"/>';
-      }
-      add('fxcrack bk', '<svg viewBox="0 0 340 340" width="100%" height="100%">' + lines + '</svg>', 1100, p.x, p.y);
-      for (var k = 0; k < 20; k++) {   // ガラスの破片：大きさ・形・回り方を少しずつ変える
-        var ang = rnd(0, Math.PI * 2), d = rnd(110, 260), s = rnd(.6, 1.5);
-        add('fxbk-shard s' + (k % 4), '', 1100, p.x, p.y, { '--dx': Math.cos(ang) * d + 'px', '--dy': Math.sin(ang) * d * .8 + rnd(20, 60) + 'px', '--rt': rnd(-720, 720) + 'deg', '--sc': s.toFixed(2), '--dl': rnd(0, .08).toFixed(2) + 's' });
-      }
+      // 2026-11-24 サニー「ブレイクの前のチープなエフェクト部分は消して欲しい」：敵のまわりの光の玉・輪・白いひびの線・小さな破片は消した（画面が割れる演出と BREAK の文字は残す）
       add('fxbk-title', '<i class="ln"></i><b data-t="BREAK">BREAK</b><i class="ln"></i><small>守りが崩れた　順番が下がる</small>', 1500, p.w / 2, Math.max(70, Math.min(p.h * .42, p.y - 20)));
       try { if (SR.stage3d && SR.stage3d.hit && el && el.id) SR.stage3d.hit(el.id.replace(/^u-/, ''), 3, '#9fe0ff'); } catch (e) {}
       quake(3);
