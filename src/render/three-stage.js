@@ -1483,7 +1483,7 @@ export function createThreeStage(canvasEl, assets) {
     for (const n of map.stage?.npcs || []) {
       if (n.sprite) { // キャラの絵で置く（2026-11-23 作者「ナハトたちで置いてみる？」）：立ち姿の1コマ目（正面は顔の層も）。座る客は、腰が座面に来るまで沈め、座面より下は切る
         const am = actorMesh(n.sprite); if (!am || !am.sheet) continue;
-        const dir = n.facing === 'back' ? 'up' : 'down', sh = am.sheet.idle, f = sheetFrame(sh.e, dir, 0), img = sh.t.image, m = am.mesh.material;
+        const dir = n.facing === 'back' ? 'up' : n.facing === 'left' || n.facing === 'right' ? n.facing : 'down', sh = am.sheet.idle, f = sheetFrame(sh.e, dir, 0), img = sh.t.image, m = am.mesh.material;
         m.map = sh.t; m.emissiveMap = sh.t; m.needsUpdate = true; sh.t.repeat.set(f.sw / img.width, f.sh / img.height); sh.t.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height);
         if (am.face) {
           const F = am.face, e = F.e, list = e.anchors.idle[dir], an = list && list[Math.round(f.sx / f.sw)], row = e.dirs.indexOf(dir), col = Math.max(0, e.expressions.indexOf('normal'));
@@ -1491,7 +1491,20 @@ export function createThreeStage(canvasEl, assets) {
           if (F.mesh.visible) { const [cw, ch] = e.cell, fi = F.t.image; F.mesh.position.set(((an[0] + cw / 2) / F.fw - 0.5) * F.w, am.mesh.position.y + (0.5 - (an[1] + ch / 2) / F.fh) * F.h, 0.004); F.t.repeat.set(cw / fi.width, ch / fi.height); F.t.offset.set(col * cw / fi.width, 1 - (row + 1) * ch / fi.height); }
         }
         am.hinge.position.set(n.x, 0, n.z);
-        if (n.pose === 'sit') {
+        if (n.pose === 'sit' && (dir === 'left' || dir === 'right')) {
+          // 横向きに椅子に座る（2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」）：
+          // 椅子を置き（背は後ろ）、腰（足もとから背の3割強）を座面に。腰から下は、前へずらして座面から床までちぢめる（ひざから下が椅子の前に下りて見える）
+          const fwd = dir === 'right' ? 1 : -1, SEAT = 0.62, HIP = 0.33;
+          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); ch.position.set(n.x, 0, n.z - 0.26); ch.rotation.y = -fwd * Math.PI / 2; root.add(ch); // 絵の板より少し奥に置く（背板が体の前に出ないように）
+          const bh = am.mesh.geometry.parameters.height, bw = am.mesh.geometry.parameters.width, footY = am.mesh.position.y - bh / 2; // 絵の下のはし（足の裏より少し下）
+          am.hinge.position.y = SEAT - (bh * HIP + footY); // 腰を座面に
+          const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -SEAT)];
+          for (const mt of [m, am.face?.mesh.material]) if (mt) { mt.clippingPlanes = clip; mt.needsUpdate = true; }
+          renderer.localClippingEnabled = true;
+          const lt = sh.t.clone(); lt.needsUpdate = true; lt.repeat.set(f.sw / img.width, f.sh * HIP / img.height); lt.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); // 絵の下の3割（脚）
+          const legs = new THREE.Mesh(new THREE.PlaneGeometry(bw, SEAT), fillMaterial(new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), lt));
+          legs.position.set(fwd * 0.2, SEAT / 2 - am.hinge.position.y, 0.002); legs.castShadow = true; am.hinge.add(legs);
+        } else if (n.pose === 'sit') {
           const bh = am.mesh.geometry.parameters.height; am.hinge.position.y = 0.6 - bh * 0.32; // 腰（足もとから背の3割ほど。デフォルメで頭が大きい）を座面の高さ 0.6 に
           const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.62)]; // 座面より下は描かない（卓の下から足が見えないように）
           for (const mt of [m, am.face?.mesh.material]) if (mt) { mt.clippingPlanes = clip; mt.needsUpdate = true; }
@@ -1577,6 +1590,7 @@ export function createThreeStage(canvasEl, assets) {
       const back = new THREE.ExtrudeGeometry(backS, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2, curveSegments: 10 });
       add(back, woodM, 0, 0.86, bz - 0.0175);
     };
+    if (name === 'chair') { chairParts(g, 1); return g; } // 1つだけの椅子（横向きに座る客の椅子。2026-11-24 作者「横向きいすをおいてやってみて」）
     if (it.region === 'table') { // 天板＋4本の脚＋まわりの丸椅子
       const th = 1.05, inset = 0.22;
       const topArt = artT('tabletop'); box([woodD, woodD, topArt ? M(topArt) : woodTop, woodTop, woodM, woodM], w, 0.14, d * 0.9, th);

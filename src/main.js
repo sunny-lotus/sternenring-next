@@ -250,7 +250,7 @@ async function boot() {
     }
     // 扉と足音（2026-11-23 作者「足音とドアの音など録音したから入れてほしい」）：
     // 扉（id に door がある出入口）を通るとき、離れはじめに開く音、着いた側で閉まる音。1回の転送で1回ずつ
-    if (ev && /door/.test(ev.exit || '')) {
+    if (ev && /door|^house-/.test(ev.exit || '')) { // house-NN＝町の家の扉（2026-11-24 作者「入る時の音も入れてね」）
       const key = `${field.state.transfers}:${ev.phase}`;
       if (doorCue !== key) {
         doorCue = key; sound.play(ev.phase === 'leave' ? 'sfx.door.open' : 'sfx.door.close');
