@@ -46,7 +46,7 @@ const SELF_CHECK_HEADER = 'x-next-selfcheck';
 const ownAddresses = () => new Set(Object.values(os.networkInterfaces()).flat().filter(Boolean).map((n) => n.address));
 
 function createServer({ root, log = console.log, own = ownAddresses(), battleRoot = path.resolve(root, 'battle') }) {
-  const allowed = ['index.html', 'src', 'data', 'assets'];
+  const allowed = ['index.html', 'sw.js', 'src', 'data', 'assets']; // sw.js：公開ページでプログラムをいつも新しく読む仕組み（手もとでは ?sw=1 のときだけ使う）
   const battleAllowed = ['index.html', 'formation.html', 'js', 'img', 'audio', 'manifest.json'];
   const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.css': 'text/css; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.webmanifest': 'application/manifest+json; charset=utf-8' };
   const seen = new Set();

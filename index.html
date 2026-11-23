@@ -173,5 +173,9 @@ window.SR_PRE = (() => {
 <button type="button" id="intro-skip" hidden>とばす</button>
 <div id="status">読み込み中…</div>
 <script type="module" src="src/main.js"></script>
+<script>
+// 公開ページでは、プログラムをいつも新しい版で読む（sw.js。2026-11-24 公開したすぐあとに古いプログラムが残って、扉の音が鳴らなかった）。手もとの試遊（127.0.0.1）は ?sw=1 のときだけ
+if ('serviceWorker' in navigator && (/\.github\.io$/.test(location.hostname) || /[?&]sw=1/.test(location.search))) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
 </body>
 </html>
