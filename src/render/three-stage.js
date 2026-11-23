@@ -1151,8 +1151,8 @@ export function createThreeStage(canvasEl, assets) {
     const pageCv = pageCanvas(map), leather = texOf(leatherCanvas()), coverT = texOf(coverCanvas((BH + 2 * M) / (BW / 2 + M)));
     leather.wrapS = leather.wrapT = THREE.RepeatWrapping; leather.repeat.set(2, 2);
     const edgeT = texOf(pageEdgeCanvas()); edgeT.wrapS = edgeT.wrapT = THREE.RepeatWrapping; edgeT.repeat.set(6, 1);
-    const leatherM = new THREE.MeshStandardMaterial({ map: leather, roughness: 0.7, bumpMap: leather, bumpScale: 1.2 });
-    const coverM = new THREE.MeshStandardMaterial({ map: coverT, roughness: 0.65, bumpMap: coverT, bumpScale: 1.5 });
+    const leatherM = new THREE.MeshPhysicalMaterial({ map: leather, roughness: 0.62, bumpMap: leather, bumpScale: 1.2, clearcoat: 0.35, clearcoatRoughness: 0.45, envMap: getStudyEnv(), envMapIntensity: 0.55 }); // 革：うすいつやと書斎の映りこみ（2026-11-23 作者「本と机とランプはリアルに」）
+    const coverM = new THREE.MeshPhysicalMaterial({ map: coverT, roughness: 0.6, bumpMap: coverT, bumpScale: 1.5, clearcoat: 0.4, clearcoatRoughness: 0.4, envMap: getStudyEnv(), envMapIntensity: 0.6 });
     const edgeM = new THREE.MeshStandardMaterial({ map: edgeT, roughness: 1 }), stackTopM = new THREE.MeshStandardMaterial({ color: 0xd8c8a2, roughness: 1 });
     const make = (side) => { // side -1 左ページ / +1 右ページ。背（x=W/2）を軸に回る
       const pivot = new THREE.Group(); pivot.position.set(W / 2, 0, H / 2); root.add(pivot);
@@ -1176,15 +1176,38 @@ export function createThreeStage(canvasEl, assets) {
    * 本のまわり：書斎の机の上（2026-11-23 作者が「書斎の机の上」を選んだ）。木の机の天板に本を置き、奥に本棚、左に机のランプ。
    * 机・本棚の絵はコードで描いた仮（元絵は美術・演出室に依頼中：desk_wood.png・study_backdrop.png）
    */
+  /**
+   * 書斎だけの映りこみ（2026-11-23 作者「ランプと本と机だけはリアルにして、中身は絵本の世界みたいにしたい」）：
+   * 暗い木の部屋・左上のランプの暖かい光・奥の本棚の色・右上のうすい窓の光を、小さな場面に置き、ぼかした映りこみの絵（PMREM）にする。
+   * 机・本の革・ランプの真鍮とガラスにだけ張る（scene.environment にはしない＝本の中の板やキャラには映りこまない）
+   */
+  let studyEnv = null;
+  const getStudyEnv = () => {
+    if (studyEnv) return studyEnv;
+    const es = new THREE.Scene(), bm = (/** @type {number[]} */ c) => new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(c[0], c[1], c[2]), side: THREE.BackSide });
+    const room = new THREE.Mesh(new THREE.BoxGeometry(40, 20, 40), bm([0.06, 0.035, 0.02])); es.add(room); // 暗い木の部屋
+    const panel = (/** @type {number[]} */ c, /** @type {number[]} */ pos, /** @type {number[]} */ size) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(size[0], size[1]), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(c[0], c[1], c[2]), side: THREE.DoubleSide })); m.position.set(pos[0], pos[1], pos[2]); m.lookAt(0, 0, 0); es.add(m); };
+    panel([3.2, 1.9, 0.8], [-9, 7, -3], [3, 3]);     // 左上のランプ（暖かい。強すぎると机のつやに大きな光の玉が出た）
+    panel([0.35, 0.16, 0.09], [0, 3, -19], [36, 10]); // 奥の本棚（赤茶）
+    panel([0.9, 1.0, 1.25], [14, 9, 6], [6, 8]);      // 右上の窓（うすく青白い）
+    panel([0.25, 0.14, 0.07], [0, -9.5, 0], [40, 40]); // 机の面の照り返し
+    const pm = new THREE.PMREMGenerator(renderer); studyEnv = pm.fromScene(es, 0.03).texture; pm.dispose();
+    return studyEnv;
+  };
   function buildStudy(W, H, BW, BH) {
     const cx = W / 2, cz = H / 2, DW = BW * 3, DD = BH + 22, back = cz - BH / 2 - 10;
     const deskT = texOf(woodCanvas()); deskT.wrapS = deskT.wrapT = THREE.RepeatWrapping; deskT.repeat.set(DW / 6, DD / 6); deskT.anisotropy = 8;
-    const desk = new THREE.Mesh(new THREE.PlaneGeometry(DW, DD), new THREE.MeshStandardMaterial({ map: deskT, color: 0xc89a70, roughness: 0.55, metalness: 0.05 }));
+    const env = getStudyEnv();
+    const desk = new THREE.Mesh(new THREE.PlaneGeometry(DW, DD), new THREE.MeshPhysicalMaterial({ map: deskT, color: 0xc89a70, roughness: 0.5, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.35, envMap: env, envMapIntensity: 0.4 })); // ニスを塗った机（ランプの光がつやに映る）
     desk.rotation.x = -Math.PI / 2; desk.position.set(cx, -0.52, back + DD / 2); desk.receiveShadow = true; root.add(desk);
-    const edgeSide = new THREE.MeshStandardMaterial({ map: deskT, color: 0x9a7050, roughness: 0.6 });
+    const edgeSide = new THREE.MeshPhysicalMaterial({ map: deskT, color: 0x9a7050, roughness: 0.55, clearcoat: 0.7, clearcoatRoughness: 0.3, envMap: env, envMapIntensity: 0.6 });
     const edgeFront = bookArt.desk_edge ? (() => { const t = bookArt.desk_edge.clone(); t.needsUpdate = true; t.wrapS = THREE.RepeatWrapping; t.repeat.set(DW / 9.6, 1); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }); })() : edgeSide; // v02 desk_edge（1024×128＝高さ1.2で幅9.6）
     const edge = new THREE.Mesh(roundBox(DW, 1.2, 0.6), [edgeSide, edgeSide, edgeSide, edgeSide, edgeFront, edgeSide]); edge.position.set(cx, -1.12, back + DD); root.add(edge); // 机の手前のふち
-    const shelfT = texOf(bookArt.book_spines ? spineShelfCanvas(bookArt.book_spines.image) : studyShelfCanvas()); shelfT.wrapS = shelfT.wrapT = THREE.RepeatWrapping; shelfT.anisotropy = 8;
+    // 奥の本棚はピントの外（2026-11-23 作者「後ろの本棚もピンとぼけすると現実っぽいかな」）：絵を先にぼかしておく（画面全体をぼかすより軽く、本の中の世界には関わらない）。
+    // くり返して張るので、まわりに同じ絵を並べてからぼかし、真ん中の1枚を切り出す（つなぎ目が暗くならない）
+    const shelfSrc = bookArt.book_spines ? spineShelfCanvas(bookArt.book_spines.image) : studyShelfCanvas(), sw0 = shelfSrc.width, sh0 = shelfSrc.height;
+    const shelfBlur = canvas(sw0, sh0, (g) => { const big = canvas(sw0 * 3, sh0 * 3, (b) => { for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) b.drawImage(shelfSrc, i * sw0, j * sh0); }); const bl = canvas(sw0 * 3, sh0 * 3, (b) => { b.filter = 'blur(' + Math.max(2, Math.round(sw0 / 160)) + 'px)'; b.drawImage(big, 0, 0); }); g.drawImage(bl, sw0, sh0, sw0, sh0, 0, 0, sw0, sh0); });
+    const shelfT = texOf(shelfBlur); shelfT.wrapS = shelfT.wrapT = THREE.RepeatWrapping; shelfT.anisotropy = 8;
     const far = !!bookArt.book_spines; shelfT.repeat.set(far ? 9 : 3, far ? 2 : 1); // 本棚はもっと遠くに（2026-11-23 作者「もう少し本棚は遠くにある感じ」）：背表紙を小さく、たくさん並べる
     const SW = DW * (far ? 2.0 : 1.4), SH = SW / 2 / 3 * 1.3 * (far ? 1.4 : 1);
     const shelf = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshStandardMaterial({ map: shelfT, roughness: 0.9, color: DAY ? 0xffffff : 0xb8a898 }));
@@ -1196,7 +1219,7 @@ export function createThreeStage(canvasEl, assets) {
     { // 立体の机のランプ（2026-11-23 作者「置いてある机のランプはリアルにしたい、3Dで」）：元絵 v02 desk_lamp と同じ形を、ろくろで回した形（LatheGeometry）で作る。
       // 丸い台・細い柱と節・波打つふちのだいだい色のガラスの笠（真鍮の骨とふち）・鋲のついた笠の頭・てっぺんの飾り。高さは前の絵と同じ約14
       const g = new THREE.Group(); g.position.set(lx, -0.52, lz); root.add(g);
-      const brassM = new THREE.MeshStandardMaterial({ color: 0xc29a4c, roughness: 0.38, metalness: 0.65, emissive: 0x2a1a08, emissiveIntensity: 0.4 });
+      const brassM = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.3, metalness: 0.9, envMap: getStudyEnv(), envMapIntensity: 1.3 }); // 真鍮：書斎を映す
       const lathe = (/** @type {number[][]} */ pts, /** @type {any} */ mat, seg = 40) => { const m = new THREE.Mesh(new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg), mat); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
       // 台と柱（足もと→上へ）
       lathe([[0, 0], [2.15, 0], [2.18, 0.18], [2.0, 0.42], [1.55, 0.6], [1.25, 0.85], [0.75, 1.05], [0.42, 1.3], [0.3, 1.7], [0.3, 2.05], [0.48, 2.15], [0.5, 2.4], [0.3, 2.55], [0.21, 2.7], [0.21, 8.3], [0.36, 8.45], [0.4, 8.8], [0.3, 9.0], [0.24, 9.3], [0, 9.32]], brassM);
@@ -1205,7 +1228,7 @@ export function createThreeStage(canvasEl, assets) {
       const shadeG = new THREE.LatheGeometry(shadePts, 64), sp = shadeG.attributes.position;
       for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), z = sp.getZ(i), y = sp.getY(i), ang = Math.atan2(z, x), low = Math.max(0, 1 - (y - 9.42) / 0.5); sp.setY(i, y - low * 0.16 * (1 - Math.abs(Math.cos(ang * 6)))); } // 10か所でふちが少し下がる（波）
       shadeG.computeVertexNormals();
-      const glassM = new THREE.MeshStandardMaterial({ color: 0xd86a20, emissive: 0xe0661a, emissiveIntensity: 0.6, roughness: 0.45, metalness: 0, transparent: true, opacity: 0.95, side: THREE.DoubleSide }); // 光りすぎると白っぽくなるので、だいだい色を濃く、自分の光はひかえめに
+      const glassM = new THREE.MeshPhysicalMaterial({ color: 0xd86a20, emissive: 0xe0661a, emissiveIntensity: 0.6, roughness: 0.4, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.12, envMap: getStudyEnv(), envMapIntensity: 0.9, transparent: true, opacity: 0.95, side: THREE.DoubleSide }); // ガラスの表のつや // 光りすぎると白っぽくなるので、だいだい色を濃く、自分の光はひかえめに
       const shade = new THREE.Mesh(shadeG, glassM); shade.castShadow = true; g.add(shade);
       // 笠の骨（真鍮の細い線）とふち
       for (let k = 0; k < 12; k++) { const ang = k / 12 * Math.PI * 2, path = new THREE.CatmullRomCurve3(shadePts.map((v) => new THREE.Vector3(Math.cos(ang) * (v.x + 0.02), v.y, Math.sin(ang) * (v.x + 0.02)))); const rib = new THREE.Mesh(new THREE.TubeGeometry(path, 16, 0.05, 5, false), brassM); g.add(rib); }
