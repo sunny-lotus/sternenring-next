@@ -78,5 +78,10 @@ for (const [outId, short] of SRC) {
 const wp = path.join(ROOT, 'data', 'world.json'), world = JSON.parse(fs.readFileSync(wp, 'utf8'));
 world.maps = world.maps.filter((id) => !id.startsWith('norn-house-')).concat(made);
 fs.writeFileSync(wp, JSON.stringify(world, null, 2) + '\n');
+// 曲：家の中も町と同じ曲（2026-11-24 作者「家の中も同じ曲で」）。出入りで頭に戻さない
+const ap = path.join(ROOT, 'data', 'audio.json'), audio = JSON.parse(fs.readFileSync(ap, 'utf8'));
+for (const k of Object.keys(audio.bgmByMap)) if (k.startsWith('norn-house-')) delete audio.bgmByMap[k];
+for (const id of made) audio.bgmByMap[id] = audio.bgmByMap['norn-plaza'];
+fs.writeFileSync(ap, JSON.stringify(audio, null, 2) + '\n');
 for (const f of fs.readdirSync(MAPS)) if (f.startsWith('norn-house-') && !made.includes(f.replace('.json', ''))) fs.unlinkSync(path.join(MAPS, f));
 console.log('作った部屋', made.length);

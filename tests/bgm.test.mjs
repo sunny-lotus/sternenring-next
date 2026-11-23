@@ -43,7 +43,7 @@ test('曲の台帳：作者指定の v30、ファイルのハッシュ・周波�
 });
 
 test('曲の割当：今の仮の広場・銀鹿亭一階・客室A〜Dは同じ曲（屋内外・客室の出入りで頭に戻さない。2026-11-22 作者「客室も曲変わらないように」）', () => {
-  const town = ['norn-inn-street', 'norn-plaza', 'silver-deer-1f', 'silver-deer-room-a', 'silver-deer-room-b', 'silver-deer-room-c', 'silver-deer-room-d'];
+  const town = ['norn-inn-street', 'norn-plaza', 'silver-deer-1f', 'silver-deer-room-a', 'silver-deer-room-b', 'silver-deer-room-c', 'silver-deer-room-d', ...world.maps.filter((/** @type {string} */ m) => m.startsWith('norn-house-'))]; // 町の家の中も同じ曲（2026-11-24 作者「家の中も同じ曲で」）
   assert.deepEqual(Object.keys(audio.bgmByMap).sort(), [...town, 'test-dungeon', 'test-forest'].sort());
   for (const [m, id] of Object.entries(audio.bgmByMap)) { assert.ok(world.maps.includes(m), m); assert.equal(id, town.includes(m) ? ID : 'bgm.field.hikari-no-arpeggio', m); } // 町以外は光のアルペジオ（2026-11-22 作者）
 });
