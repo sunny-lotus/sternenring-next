@@ -354,6 +354,19 @@ const ART = {
     g.fillStyle = '#0a0810'; g.beginPath(); g.moveTo(W * 0.42, H); g.lineTo(W * 0.42, H * 0.5); g.quadraticCurveTo(W / 2, H * 0.32, W * 0.58, H * 0.5); g.lineTo(W * 0.58, H); g.fill(); noise(g, W, H, rnd(16), 20); }),
   pillar: (w, h) => canvas(w * PX, h * PX, (g, W, H) => { g.fillStyle = '#5a3a22'; g.fillRect(W * 0.2, 0, W * 0.6, H); g.fillStyle = '#7a5636'; g.fillRect(W * 0.3, 0, W * 0.15, H); noise(g, W, H, rnd(14), 16); }),
 };
+/**
+ * 仮の客（モブ）の絵（2026-11-23 作者「酒場でこれからモブを入れるのに、どうやって座らせるのか」→「まずは2と3」）。
+ * 本当の見た目は美術・演出室に頼むまでの仮。うすい影のような人の形（頭・肩・外套）。back＝後ろ姿（顔を描かない）。tone＝外套の色
+ */
+function mobCanvas(tone, back) {
+  return canvas(96, 192, (g, W, H) => {
+    g.fillStyle = tone; g.beginPath(); g.moveTo(W * 0.22, H * 0.98); g.quadraticCurveTo(W * 0.18, H * 0.5, W * 0.3, H * 0.36); g.lineTo(W * 0.7, H * 0.36); g.quadraticCurveTo(W * 0.82, H * 0.5, W * 0.78, H * 0.98); g.closePath(); g.fill(); // 外套
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(W * 0.48, H * 0.4, W * 0.04, H * 0.55); // 合わせ目
+    g.fillStyle = back ? '#4a3a2e' : '#d8b896'; g.beginPath(); g.ellipse(W * 0.5, H * 0.25, W * 0.17, H * 0.1, 0, 0, 7); g.fill(); // 頭（後ろ姿は髪）
+    g.fillStyle = '#4a3a2e'; g.beginPath(); g.ellipse(W * 0.5, H * 0.19, W * 0.18, H * 0.065, 0, Math.PI, 0); g.fill(); // 髪の上
+    g.strokeStyle = 'rgba(40,30,24,.55)'; g.lineWidth = 2; g.stroke();
+  });
+}
 const genericArt = (w, h, seed) => houseArt(w, h, '#7a6a5a', '#3a2a22', seed);
 
 // ---- 本・部屋の手ざわり ----
@@ -1027,6 +1040,7 @@ export function createThreeStage(canvasEl, assets) {
   };
   const artT = (k, rx = 1, ry = 1) => { const b = ART2?.[k]; if (!b) return null; const t = b.clone(); t.needsUpdate = true; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; };
   /** @type {any[]} 中の扉（ちょうつがいで回る） */ let innerDoors = [];
+  /** @type {any[]} 仮の客の絵（カメラのほうを向ける） */ let npcHinges = [];
   /** @type {any} 書斎の奥の本棚（入る演出 shelf で寄る） */ let studyShelf = null;
   /** @type {any} くりぬいた戸口の奥（カメラが家の正面より奥へ入ったら、穴の外にも描く） */ let holeRecess = null;
   /** @type {any} ぼかして入るとき、外の最後のカメラ（主人公からのずれ）。中はここから始めて、キャラが画面の同じ所・同じ大きさに映るように（2026-11-23 作者「キャラが瞬間移動してしまう」） */ let carry = null;
@@ -1318,6 +1332,16 @@ export function createThreeStage(canvasEl, assets) {
     root.add(dungeon ? new THREE.AmbientLight(0x4a5478, 0.5) : new THREE.AmbientLight(0x5a4030, 0.3)); // 建物の中は暖かく暗めに
     { const shelfL = new THREE.PointLight(0xffc890, 30 * S, 14 * S, 1.4); shelfL.position.set(W / 2, HT * 0.55, H + 3 * S); root.add(shelfL); } // 額縁と本棚を前から照らす（2026-11-22 作者「客室もブックヌックぽく」：本棚が暗くて見えなかった）
     if (map.heights) buildLevels(W, H);
+    // 仮の客（地図の stage.npcs）：sit＝卓の奥の椅子に座る（下半身は卓の天板にかくれるよう、座面の高さまで沈める）、stand＝立つ。
+    // 絵はいつもカメラのほうを向く（キャラと同じ）。ぶつからない（仮）
+    for (const n of map.stage?.npcs || []) {
+      // 座る客は、絵の上の半分（腰から上）だけを座面の高さ（0.6）に置く：卓の下は空いているので、足まで描くと卓の下から見えた
+      const hgt = 2.4, sit = n.pose === 'sit', part = sit ? 0.56 : 1, t = texOf(mobCanvas(n.tone || '#6a5a4a', n.facing === 'back'));
+      if (sit) { t.repeat.set(1, part); t.offset.set(0, 1 - part); }
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(hgt / 2, hgt * part), new THREE.MeshStandardMaterial({ map: t, transparent: true, alphaTest: 0.4, roughness: 1 }));
+      mesh.position.y = (sit ? 0.6 : 0) + hgt * part / 2; mesh.castShadow = true;
+      const hinge = new THREE.Group(); hinge.position.set(n.x, 0, n.z); hinge.add(mesh); root.add(hinge); npcHinges.push(hinge);
+    }
     pages = null; scene.background = new THREE.Color(0x07060c); scene.fog = new THREE.FogExp2(0x0b0912, 0.028 / S);
   }
 
@@ -1333,7 +1357,15 @@ export function createThreeStage(canvasEl, assets) {
     const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(roundBox(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
     if (name === 'stone-pillar') {
       const pa = artT('pillar'); // 森の元絵 v01 dungeon_pillar（上下の飾りの石まで描いた柱）。四方に絵を張る
-      if (pa) { pa.wrapS = pa.wrapT = THREE.ClampToEdgeWrapping; const pm = M(pa), top = M(artT('wall', 0.25, 0.25) ?? pa); box([pm, pm, top, top, pm, pm], w * 0.8, h, d * 0.8, h / 2); return g; }
+      if (pa) { // 絵の、柱の胴・上の飾り石・下の台を切り出して、それぞれ立体に張る（2026-11-23 作者「柱が変」：絵をそのまま箱の四方に張ったので、絵のまわりの透明な所が黒く、横から黒い板に見えた）
+        const crop = (/** @type {number} */ u0, /** @type {number} */ u1, /** @type {number} */ v0, /** @type {number} */ v1) => { const t = artT('pillar'); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.repeat.set(u1 - u0, v1 - v0); t.offset.set(u0, v0); return M(t); };
+        const shaft = crop(0.24, 0.755, 0.116, 0.858), capM = crop(0.1, 0.893, 0.858, 0.986), baseM = crop(0.135, 0.86, 0.015, 0.116);
+        const sw = Math.min(w, d) * 0.5, ch = h * 0.13, bh = h * 0.105;
+        box(shaft, sw, h - ch - bh, sw, bh + (h - ch - bh) / 2);
+        box(capM, sw * 1.53, ch, sw * 1.53, h - ch / 2);
+        box(baseM, sw * 1.4, bh, sw * 1.4, bh / 2);
+        return g;
+      }
       const side = (s) => M(tile(brickCanvas(60 + s, [118, 120, 126]), s === 0 ? d / 2.2 : w / 2.2, h / 2.2)), cap = M(tile(brickCanvas(70, [96, 98, 104]), 1, 1));
       box([side(0), side(0), cap, cap, side(1), side(1)], w * 0.82, h, d * 0.82, h / 2);
       for (const y of [0.18, h - 0.18]) box(cap, w, 0.36, d, y); // 柱の下と上の、張り出した飾りの石
@@ -1802,7 +1834,7 @@ export function createThreeStage(canvasEl, assets) {
     async loadInner(mapData) {
       await flutterReady; await bookReady;
       if (root) { scene.remove(root); disposeTree(root); }
-      map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; innerDoors = []; holeRecess = null; lights = []; fires = []; cam.init = false;
+      map = mapData; root = new THREE.Group(); scene.add(root); actors = {}; innerDoors = []; npcHinges = []; holeRecess = null; lights = []; fires = []; cam.init = false;
       interior = map.kind === 'interior'; nook = null;
       // ?perf=1：マップを開くときの各段の時間をコンソールに出す（2026-11-22 作者「町が出るまで時間がかかる理由」を調べるため）
       const PF = /[?&]perf=1/.test(location.search), pt = [performance.now()], mark = () => pt.push(performance.now());
@@ -2226,7 +2258,8 @@ export function createThreeStage(canvasEl, assets) {
       }
       { // キャラの絵は、いつもカメラと平行に向ける（2026-11-23 作者「左の側面の部屋に入るとき、キャラクターがそのままだから、つねに、カメラと平行にしておいてほしい」）。回すだけで左右は返さない
         const f = camera.getWorldDirection(new THREE.Vector3()), yaw = Math.atan2(-f.x, -f.z);
-        for (const id of Object.keys(actors)) { const h = actors[id].hinge; h.rotation.order = 'YXZ'; h.rotation.y = yaw; } // YXZ：起き上がり（x）のあとで向きを回す
+        for (const id of Object.keys(actors)) { const h = actors[id].hinge; h.rotation.order = 'YXZ'; h.rotation.y = yaw; }
+        for (const h of npcHinges) h.rotation.y = yaw; // YXZ：起き上がり（x）のあとで向きを回す
       }
       if (holeRecess) { // くぐる途中、カメラが家の正面の面より奥に入ったら、戸口の奥を穴の外にも描く（穴を後ろから見ることになるため）
         const wp = holeRecess.hinge.getWorldPosition(new THREE.Vector3()), inside = camera.position.z < wp.z;

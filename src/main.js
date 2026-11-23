@@ -314,6 +314,7 @@ async function boot() {
     setTimeout(() => fx.remove(), 1700);
   };
   const openBattle = (/** @type {{battle:string}} */ b) => {
+    if (statusUi) { const sb = statusUi; statusUi = null; sb.remove(); } // 開発者の窓・メニューから戦闘を始めたら、窓は閉じる（開いたままだと、戦闘のあと歩けなかった。2026-11-23 作者「逃げたら歩けなくなった」）
     // エンカウントの演出（2026-11-22 作者「エンカウント時の演出も追加」）：白く光ったあと、金のふちの斬撃が3本走って暗転。そのあいだに戦闘を読み込む
     encounterFx();
     const box = document.createElement('div'); box.id = 'battle-overlay';
@@ -375,7 +376,7 @@ async function boot() {
   $('dev-toggle').addEventListener('click', () => { /** @type {HTMLElement} */ ($('dev-toggle')).blur(); openStatus('fdev'); });
   window.addEventListener('message', (ev) => {
     if (ev.origin !== location.origin) return;
-    if (ev.data?.type === 'sr-battle-close') { if (statusUi) closeStatus(); else if (battleUi) closeBattle(); return; } // メニューを閉じる／戦闘の結果の「フィールドへ戻る」
+    if (ev.data?.type === 'sr-battle-close') { const fromBattle = !!battleUi && ev.source === /** @type {HTMLIFrameElement|null} */ (battleUi.box.querySelector('iframe'))?.contentWindow; if (fromBattle) closeBattle(); else if (statusUi) closeStatus(); else if (battleUi) closeBattle(); return; } // 送ってきた画面を閉じる（2026-11-23 作者「バトルで逃げたら歩けなくなった」：開発者の窓が開いたままだと、戦闘ではなく窓のほうを閉じていた） // メニューを閉じる／戦闘の結果の「フィールドへ戻る」
     if (ev.data?.type === 'sr-settings') { applySettings(); return; } // メニューの「設定」で変えた
     if (ev.data?.type === 'sr-dev') { devAction(ev.data); return; } // 開発者メニュー
     if (ev.data?.type === 'sr-dev-open') { openStatus('fdev'); return; } // メニューの中で F2
