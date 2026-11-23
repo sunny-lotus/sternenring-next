@@ -54,6 +54,54 @@
           "dir": "right"
         }
       }
+    },
+    {
+      "id": "house-01",
+      "x": 17,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-street-01",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-02",
+      "x": 26,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-street-02",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-03",
+      "x": 37,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-street-03",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -69,7 +117,7 @@
     "#.############.##################.#######..#",
     "#..###########.########.#########.########.#",
     "#..###########.########.#########.#######..#",
-    "#..#####D#####.########.#########.#######..#",
+    "#..#####D#####.##D#####.##D######.###D###..#",
     "#.....#....................................#",
     "#..........................................D",
     "#..........................................D",
@@ -300,7 +348,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.02,
-            "art": "house_f_corner.webp"
+            "art": "house_f_corner.webp",
+            "doorExit": "house-01"
           },
           {
             "asset": "placeholder:house-ochre",
@@ -310,7 +359,8 @@
             "h": 4,
             "standH": 9.1,
             "zOffset": 0.04,
-            "art": "house_home_2f.webp"
+            "art": "house_home_2f.webp",
+            "doorExit": "house-02"
           },
           {
             "asset": "placeholder:house-mid",
@@ -320,7 +370,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0.02,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "house-03"
           },
           {
             "asset": "placeholder:awning-green",

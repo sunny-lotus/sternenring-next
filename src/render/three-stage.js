@@ -11,7 +11,9 @@ import * as THREE from '../vendor/three/three.module.js';
 import { DEFAULT_STYLE, placeBoard } from './paper-math.js';
 import { riseDelayFn, riseK, orbPositions, INTRO_TIMING } from './book-intro.js';
 /** 書斎の奥の本物らしい背景の絵（assets/book/study_backdrop.webp）。美術・演出室から届いたら true にする（無いうちは読みに行かない） */
-const STUDY_BACKDROP = false;
+const STUDY_BACKDROP = true;
+/** 奥の背景の絵をぼかすか（2026-11-24 作者「ぼかしなしで一回作ってみて」→ いまは false） */
+const STUDY_BLUR = false; // 2026-11-24 作者「ぼかさないほうがいい」でくっきりに戻した（その前：作者「空気との境界線がくっきりしすぎている」→奥がくっきりだとランプが切り抜きに見えるので、少しだけぼかす（前の1/6より弱い1/3）
 const RS = INTRO_TIMING.riseStart; // 板が起き上がりはじめる時刻（開始演出の時間割を、ページめくりなどでも借りる）
 import { sheetFrame } from './sprites.js';
 import { mapQuery } from '../core/map.js';
@@ -609,7 +611,7 @@ function pageCanvas(map) { // 羊皮紙のページ（見開きの大きさ）�
   const T = 32, { BW, BH } = bookSize(map), PW = Math.round(BW * T), PH = Math.round(BH * T);
   const mc = mapCanvas(map, T), ox = Math.round((PW - mc.width) / 2), oy = Math.round((PH - mc.height) / 2);
   return canvas(PW, PH, (g) => {
-    const R = rnd(3); g.fillStyle = '#e9dcbc'; g.fillRect(0, 0, PW, PH);
+    const R = rnd(3); g.fillStyle = '#e9dcbc'; g.fillRect(0, 0, PW, PH); if (BOOK_IMG.paper_page) fillTiled(g, BOOK_IMG.paper_page, PW, PH, 0.75); // 届いた紙の絵（2026-11-24 美術・演出室）
     g.drawImage(mc, ox, oy);
     const W = PW, H = PH;
     for (const side of [0, 1]) { // ページごとの、ふちの焼けと飾り線
@@ -672,15 +674,20 @@ const studyShelfCanvas = () => memo('shelf', () => canvas(1024, 512, (g, w, h) =
 // 本の革（仮の絵。2026-11-23 作者「最初の本開くところチープな感じ」「本はテクスチャで質感を出す」。元絵 leather_cover.png を美術・演出室に依頼中）
 /** 革の手ざわり：細かいしぼ（粒）と、しわの線、むら */
 function leatherGrain(g, w, h, R) {
+  if (BOOK_IMG.leather_cover) { fillTiled(g, BOOK_IMG.leather_cover, w, h, w / 1024 * 0.75); return; } // 届いた革の絵（2026-11-24 美術・演出室）
   g.fillStyle = '#3b2214'; g.fillRect(0, 0, w, h);
   for (let i = 0; i < 60; i++) { const x = R() * w, y = R() * h, r = 20 + R() * 70, gr = g.createRadialGradient(x, y, 0, x, y, r); const c = R() < 0.5 ? '70,40,22' : '30,16,9'; gr.addColorStop(0, `rgba(${c},.35)`); gr.addColorStop(1, `rgba(${c},0)`); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); } // むら
   { const im = g.getImageData(0, 0, w, h), d = im.data; for (let i = 0; i < d.length; i += 4) { const l = R(); const v = l < 0.04 ? -38 - l * 600 : l < 0.065 ? 18 : 0; if (v) { d[i] += v; d[i + 1] += v * 0.8; d[i + 2] += v * 0.6; } } g.putImageData(im, 0, 0); } // しぼ（点を1つずつ描くと表紙で5万回になり、起動が遅くなった。2026-11-23 作者「はじめの読み込みが遅い」で、画素を直接さわるようにした）
   g.lineWidth = 0.8; for (let i = 0; i < 40; i++) { g.strokeStyle = 'rgba(15,8,4,.35)'; let x = R() * w, y = R() * h; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (R() - 0.5) * 30; y += (R() - 0.5) * 30; g.lineTo(x, y); } g.stroke(); } // しわ
 }
+/** 届いた質感の元絵（革・紙・小口・机の木目）の画像。無ければコードで描いた仮の絵のまま @type {Record<string, any>} */
+const BOOK_IMG = {};
+/** 画像をくり返して塗る（scale：画像1枚をキャンバスの何ピクセルに描くかの比） */
+function fillTiled(g, img, w, h, scale) { const tw = Math.max(8, Math.round(img.width * scale)), th = Math.max(8, Math.round(img.height * scale)); for (let y = 0; y < h; y += th) for (let x = 0; x < w; x += tw) g.drawImage(img, x, y, tw, th); }
 /** 作った絵を覚えておく（マップを読みなおすたびに作りなおさない。起動を速く） @type {Map<string, HTMLCanvasElement>} */
 const canvasMemo = new Map();
 const memo = (/** @type {string} */ k, /** @type {() => HTMLCanvasElement} */ f) => { let c = canvasMemo.get(k); if (!c) { c = f(); canvasMemo.set(k, c); } return c; };
-const leatherCanvas = () => memo('leather', () => canvas(256, 256, (g, w, h) => leatherGrain(g, w, h, rnd(9))));
+const leatherCanvas = () => memo('leather', () => canvas(512, 512, (g, w, h) => leatherGrain(g, w, h, rnd(9))));
 /** 表紙（表紙の大きさの絵）：革に、型押しの二重の枠と四隅の飾り、ふちのすれ（明るい）と、うすれた金の線 */
 const coverCanvas = (aspect) => memo('cover:' + aspect.toFixed(2), () => canvas(768, Math.round(768 * aspect), (g, w, h) => {
   const R = rnd(19); leatherGrain(g, w, h, R);
@@ -701,13 +708,24 @@ const coverCanvas = (aspect) => memo('cover:' + aspect.toFixed(2), () => canvas(
  * 文字は、どの端末にもある明朝・セリフの書体から選ぶ（ネットの書体は読まない）
  */
 function coverTitle(g, w, h) {
+  const FR = rnd(57); // 箔の粒・はげの並び（毎回同じ）
   const FONT = '"Cinzel", "Trajan Pro", "Palatino Linotype", "Book Antiqua", Palatino, "Noto Serif", Georgia, "Times New Roman", serif';
   const gold = (y0, y1) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, '#f6e3a6'); gr.addColorStop(0.45, '#c9a050'); gr.addColorStop(0.55, '#a87a30'); gr.addColorStop(1, '#e8cc82'); return gr; };
   /** 箔押し：押しこんだ影（左上の暗さ・右下の明るさ）の上に金 */
   const foil = (draw, y0, y1) => {
     g.save(); g.translate(-1.5, -1.5); g.fillStyle = 'rgba(8,4,2,.75)'; g.strokeStyle = 'rgba(8,4,2,.75)'; draw(); g.restore();
     g.save(); g.translate(1.5, 1.5); g.fillStyle = 'rgba(160,110,70,.35)'; g.strokeStyle = 'rgba(160,110,70,.35)'; draw(); g.restore();
-    g.save(); g.fillStyle = gold(y0, y1); g.strokeStyle = gold(y0, y1); g.shadowColor = 'rgba(255,220,140,.25)'; g.shadowBlur = 3; draw(); g.restore();
+    // 金箔の質感（2026-11-24 作者「文字もテクスチャにしようかな」）：別の紙に金を描いて、細かい粒・よこの細いすじをのせ、ところどころ箔がはげて革がのぞくようにしてから重ねる
+    const main = g, fc = canvas(w, h, (f) => {
+      g = f; f.fillStyle = gold(y0, y1); f.strokeStyle = gold(y0, y1); draw();
+      f.globalCompositeOperation = 'source-atop';
+      for (let i = 0; i < 5200; i++) { const x = FR() * w, y = y0 + FR() * (y1 - y0 + 40) - 20, l = FR(); f.fillStyle = l < 0.5 ? `rgba(255,244,200,${0.25 + FR() * 0.35})` : `rgba(90,58,18,${0.2 + FR() * 0.3})`; f.fillRect(x, y, 1 + FR() * 1.4, 1 + FR() * 1.4); } // 箔の細かい粒
+      for (let i = 0; i < 160; i++) { const y = y0 - 20 + FR() * (y1 - y0 + 40); f.fillStyle = FR() < 0.5 ? 'rgba(255,240,190,0.12)' : 'rgba(80,50,15,0.12)'; f.fillRect(0, y, w, 0.8); } // よこの細いすじ
+      f.globalCompositeOperation = 'destination-out';
+      for (let i = 0; i < 520; i++) { const x = FR() * w, y = y0 - 20 + FR() * (y1 - y0 + 40), r = 0.5 + FR() * (FR() < 0.12 ? 3.2 : 1.3); f.fillStyle = `rgba(0,0,0,${0.45 + FR() * 0.5})`; f.beginPath(); f.ellipse(x, y, r * (1 + FR()), r, FR() * 3, 0, Math.PI * 2); f.fill(); } // 箔のはげ（革がのぞく）
+      f.globalCompositeOperation = 'source-over';
+    });
+    g = main; g.save(); g.shadowColor = 'rgba(255,220,140,.22)'; g.shadowBlur = 3; g.drawImage(fc, 0, 0); g.restore();
   };
   const spaced = (text, y, size, track) => { // 字間を広げて真ん中にそろえる
     g.font = `600 ${size}px ${FONT}`; g.textBaseline = 'alphabetic';
@@ -789,6 +807,32 @@ const cobbleCanvas = () => canvas(512, 512, (g, w, h) => { // 石畳：丸い石
     g.fillStyle = gr; g.beginPath(); g.ellipse(cx, cy, rx, ry, R(), 0, Math.PI * 2); g.fill(); }
   noise(g, w, h, R, 18); });
 const beamsCanvas = () => canvas(256, 256, (g, w, h) => { const R = rnd(3); g.fillStyle = '#0c0a08'; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 32) { g.fillStyle = '#16110c'; g.fillRect(x, 0, 26, h); } noise(g, w, h, R, 14); });
+/** 古い真鍮の質感（仮の絵。2026-11-24 作者「テクスチャ張るとかできないか」）：ろくろの向き（横）に細い筋、くすみ（緑がかった茶）のむら、小さな傷。[色, つや] */
+const brassCanvases = () => memo('brass', () => {
+  const R = rnd(31), W = 512, H = 512, blots = Array.from({ length: 46 }, () => [R() * W, R() * H, 10 + R() * 60, R()]);
+  const col = canvas(W, H, (g, w, h) => {
+    g.fillStyle = '#c8a058'; g.fillRect(0, 0, w, h);
+    for (const [x, y, r, k] of blots) { for (const dx of [-w, 0, w]) { const gr = g.createRadialGradient(x + dx, y, 0, x + dx, y, r); gr.addColorStop(0, k < 0.6 ? 'rgba(70,52,24,0.38)' : 'rgba(90,96,60,0.28)'); gr.addColorStop(1, 'rgba(70,52,24,0)'); g.fillStyle = gr; g.fillRect(x + dx - r, y - r, r * 2, r * 2); } } // くすみ・緑青のむら
+    for (let i = 0; i < 900; i++) { const y = R() * h, a = 0.04 + R() * 0.1; g.fillStyle = R() < 0.5 ? `rgba(255,236,190,${a})` : `rgba(60,40,15,${a})`; g.fillRect(0, y, w, 0.6 + R() * 1.2); } // ろくろの細い筋
+    for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(40,28,12,${0.15 + R() * 0.25})`; g.lineWidth = 0.6; const x = R() * w, y = R() * h, l = 4 + R() * 18, an = R() * Math.PI; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(an) * l, y + Math.sin(an) * l); g.stroke(); } // 小さな傷
+  });
+  const rough = canvas(W, H, (g, w, h) => {
+    g.fillStyle = 'rgb(120,120,120)'; g.fillRect(0, 0, w, h);
+    for (const [x, y, r] of blots) { for (const dx of [-w, 0, w]) { const gr = g.createRadialGradient(x + dx, y, 0, x + dx, y, r); gr.addColorStop(0, 'rgba(210,210,210,0.55)'); gr.addColorStop(1, 'rgba(210,210,210,0)'); g.fillStyle = gr; g.fillRect(x + dx - r, y - r, r * 2, r * 2); } } // くすんだ所はつやが鈍い
+    for (let i = 0; i < 600; i++) { const v = 90 + R() * 70; g.fillStyle = `rgba(${v},${v},${v},0.25)`; g.fillRect(0, R() * h, w, 0.6 + R()); }
+  });
+  return [col, rough];
+});
+/** 笠の色ガラスの質感（仮の絵。2026-11-24 作者「おねがい」＝笠にも質感を）：だいだいの濃淡が流れるむら（古い色ガラス）、たての細いすじ、小さな気泡。左右はつながる（ろくろで一周する） */
+const glassCanvas = () => memo('lampGlass', () => canvas(512, 256, (g, w, h) => {
+  const R = rnd(47); g.fillStyle = '#e8a060'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 60; i++) { // 濃淡が流れるむら（たてに少し長い）
+    const x = R() * w, y = R() * h, rx = 14 + R() * 50, ry = rx * (1.2 + R() * 1.6), dark = R() < 0.55;
+    for (const dx of [-w, 0, w]) { g.save(); g.translate(x + dx, y); g.scale(1, ry / rx); const gr = g.createRadialGradient(0, 0, 0, 0, 0, rx); gr.addColorStop(0, dark ? 'rgba(150,60,18,0.35)' : 'rgba(255,214,150,0.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(-rx, -rx, rx * 2, rx * 2); g.restore(); }
+  }
+  for (let i = 0; i < 260; i++) { const x = R() * w, a = 0.03 + R() * 0.07; g.fillStyle = R() < 0.5 ? `rgba(255,230,180,${a})` : `rgba(120,50,15,${a})`; g.fillRect(x, 0, 0.6 + R() * 1.6, h); } // たての細いすじ
+  for (let i = 0; i < 90; i++) { const x = R() * w, y = R() * h, r = 0.6 + R() * 1.8; g.fillStyle = 'rgba(255,240,210,0.55)'; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.strokeStyle = 'rgba(110,45,12,0.35)'; g.lineWidth = 0.5; g.stroke(); } // 小さな気泡
+}));
 const woodCanvas = () => canvas(256, 256, (g, w, h) => { const R = rnd(11); g.fillStyle = '#3a2414'; g.fillRect(0, 0, w, h); for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(${20 + R() * 30},${10 + R() * 14},4,.35)`; g.lineWidth = 1 + R() * 2; const y = R() * h; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + R() * 8 - 4, w * 0.7, y + R() * 8 - 4, w, y); g.stroke(); } noise(g, w, h, R, 12); });
 const windowCanvas = (cols, rows, frame) => canvas(128, 192, (g, w, h) => { // 光る窓：あたたかい灯りと窓わく
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#fff3b0'); gr.addColorStop(0.6, '#ffc861'); gr.addColorStop(1, '#ff9a3a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
@@ -949,8 +993,8 @@ export function createThreeStage(canvasEl, assets) {
   const flutter = {};
   // 書斎の元絵（美術・演出室 v02：本と書斎 desk_lamp・book_spines・desk_edge）。読めなければコードの仮の絵
   /** @type {Record<string, any>} */ const bookArt = {};
-  const bookReady = Promise.all([...['desk_lamp', 'book_spines', 'desk_edge', ...(STUDY_BACKDROP ? ['study_backdrop'] : [])].map((n) => ['assets/book/' + n + '.webp', n]), ...['wall', 'wainscot', 'wood_side'].map((n) => ['assets/interiors/silver-deer/' + n + '.webp', 'st_' + n]), ['assets/backdrops/norn_day_v02.jpg', 'st_paint']]
-    .map(([url, n]) => loader.loadAsync(url).then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bookArt[n] = t; }, () => {}))); // st_＊：書斎の壁・腰板・窓・木（2026-11-23 作者「簡単な書斎」）
+  const bookReady = Promise.all([...['desk_lamp', 'book_spines', 'desk_edge', 'leather_cover', 'paper_page', 'page_edge', 'desk_wood', 'lamp_brass', 'lamp_glass', ...(STUDY_BACKDROP ? ['study_backdrop'] : [])].map((n) => ['assets/book/' + n + '.webp', n]), ...['wall', 'wainscot', 'wood_side'].map((n) => ['assets/interiors/silver-deer/' + n + '.webp', 'st_' + n]), ['assets/backdrops/norn_day_v02.jpg', 'st_paint']]
+    .map(([url, n]) => loader.loadAsync(url).then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; bookArt[n] = t; BOOK_IMG[n] = t.image; }, () => {}))); // leather_cover・paper_page・page_edge・desk_wood：美術・演出室 2026-11-24 の本と机の質感。st_＊：書斎の壁・腰板・窓・木（2026-11-23 作者「簡単な書斎」）
   const flutterReady = Promise.all(Object.entries(FLUTTER).map(([id, path]) => loader.loadAsync(path).then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; flutter[id] = t; }, () => {})));
 
   // マップの手ざわり（stage.textures）：美術・演出室の元絵をそのまま張る（2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵
@@ -1153,16 +1197,16 @@ export function createThreeStage(canvasEl, assets) {
     const { BW, BH } = bookSize(map); // 見開きの大きさ（縦横の比率はどのエリアも同じ。地図は真ん中）
     const pageCv = pageCanvas(map), leather = texOf(leatherCanvas()), coverT = texOf(coverCanvas((BH + 2 * M) / (BW / 2 + M)));
     leather.wrapS = leather.wrapT = THREE.RepeatWrapping; leather.repeat.set(2, 2);
-    const edgeT = texOf(pageEdgeCanvas()); edgeT.wrapS = edgeT.wrapT = THREE.RepeatWrapping; edgeT.repeat.set(6, 1);
+    const edgeT = bookArt.page_edge ? bookArt.page_edge.clone() : texOf(pageEdgeCanvas()); edgeT.needsUpdate = true; edgeT.wrapS = edgeT.wrapT = THREE.RepeatWrapping; edgeT.repeat.set(bookArt.page_edge ? 2 : 6, 1); // 届いた小口の絵（2026-11-24）
     const leatherM = new THREE.MeshPhysicalMaterial({ map: leather, roughness: 0.62, bumpMap: leather, bumpScale: 1.2, clearcoat: 0.35, clearcoatRoughness: 0.45, envMap: getStudyEnv(), envMapIntensity: 0.55 }); // 革：うすいつやと書斎の映りこみ（2026-11-23 作者「本と机とランプはリアルに」）
     const coverM = new THREE.MeshPhysicalMaterial({ map: coverT, roughness: 0.6, bumpMap: coverT, bumpScale: 1.5, clearcoat: 0.4, clearcoatRoughness: 0.4, envMap: getStudyEnv(), envMapIntensity: 0.6 });
-    const edgeM = new THREE.MeshStandardMaterial({ map: edgeT, roughness: 1 }), stackTopM = new THREE.MeshStandardMaterial({ color: 0xd8c8a2, roughness: 1 });
+    const edgeM = new THREE.MeshStandardMaterial({ map: edgeT, roughness: 1 }), stackTopM = new THREE.MeshStandardMaterial({ map: bookArt.paper_page || null, color: bookArt.paper_page ? 0xffffff : 0xd8c8a2, roughness: 1 });
     const make = (side) => { // side -1 左ページ / +1 右ページ。背（x=W/2）を軸に回る
       const pivot = new THREE.Group(); pivot.position.set(W / 2, 0, H / 2); root.add(pivot);
       // 面の順 +x,-x,+y,-y,+z,-z。閉じた本では左半分の下の面（-y）が上を向く＝表紙の絵（横書きの本：背が左、表紙は右から左へひらく。2026-11-23 作者「最初の本の開き方逆かな、だって横書きだから」）
       const cover = new THREE.Mesh(roundBox(BW / 2 + M, 0.3, BH + 2 * M), [leatherM, leatherM, leatherM, side < 0 ? coverM : leatherM, leatherM, leatherM]);
       cover.position.set(side * (BW / 4 + M / 2), -0.36, 0); cover.receiveShadow = true; pivot.add(cover);
-      const stack = new THREE.Mesh(roundBox(BW / 2, 0.2, BH), [edgeM, edgeM, stackTopM, stackTopM, edgeM, edgeM]); // まわりは紙の重なり（小口） stack.position.set(side * BW / 4, -0.11, 0); pivot.add(stack);
+      const stack = new THREE.Mesh(roundBox(BW / 2, 0.2, BH), [edgeM, edgeM, stackTopM, stackTopM, edgeM, edgeM]); /* まわりは紙の重なり（小口） */ stack.position.set(side * BW / 4, -0.11, 0); stack.castShadow = true; stack.receiveShadow = true; pivot.add(stack); // 2026-11-24：前は行末のコメントの中に入りこんで、本に置かれていなかった
       const t = texOf(pageCv); t.repeat.set(0.5, 1); t.offset.set(side < 0 ? 0 : 0.5, 0);
       const page = new THREE.Mesh(new THREE.PlaneGeometry(BW / 2, BH), new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, bumpMap: fiberTex, bumpScale: 0.5 })); page.rotation.x = -Math.PI / 2; page.position.set(side * BW / 4, 0, 0); page.receiveShadow = true; pivot.add(page);
       return pivot;
@@ -1199,9 +1243,9 @@ export function createThreeStage(canvasEl, assets) {
   };
   function buildStudy(W, H, BW, BH) {
     const cx = W / 2, cz = H / 2, DW = BW * 3, DD = BH + 22, back = cz - BH / 2 - 10;
-    const deskT = texOf(woodCanvas()); deskT.wrapS = deskT.wrapT = THREE.RepeatWrapping; deskT.repeat.set(DW / 6, DD / 6); deskT.anisotropy = 8;
+    const deskT = bookArt.desk_wood ? bookArt.desk_wood.clone() : texOf(woodCanvas()); deskT.needsUpdate = true; deskT.wrapS = deskT.wrapT = THREE.RepeatWrapping; deskT.repeat.set(bookArt.desk_wood ? DW / 26 : DW / 6, bookArt.desk_wood ? DD / 26 : DD / 6); deskT.anisotropy = 8; // 届いた机の木目（2026-11-24 美術・演出室）
     const env = getStudyEnv();
-    const desk = new THREE.Mesh(new THREE.PlaneGeometry(DW, DD), new THREE.MeshPhysicalMaterial({ map: deskT, color: 0xc89a70, roughness: 0.5, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.35, envMap: env, envMapIntensity: 0.4 })); // ニスを塗った机（ランプの光がつやに映る）
+    const desk = new THREE.Mesh(new THREE.PlaneGeometry(DW, DD), new THREE.MeshPhysicalMaterial({ map: deskT, color: bookArt.desk_wood ? 0x9a8070 : 0xc89a70, roughness: 0.5, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.35, envMap: env, envMapIntensity: 0.4 })); // ニスを塗った机（ランプの光がつやに映る）
     desk.rotation.x = -Math.PI / 2; desk.position.set(cx, -0.52, back + DD / 2); desk.receiveShadow = true; root.add(desk);
     const edgeSide = new THREE.MeshPhysicalMaterial({ map: deskT, color: 0x9a7050, roughness: 0.55, clearcoat: 0.7, clearcoatRoughness: 0.3, envMap: env, envMapIntensity: 0.6 });
     const edgeFront = bookArt.desk_edge ? (() => { const t = bookArt.desk_edge.clone(); t.needsUpdate = true; t.wrapS = THREE.RepeatWrapping; t.repeat.set(DW / 9.6, 1); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }); })() : edgeSide; // v02 desk_edge（1024×128＝高さ1.2で幅9.6）
@@ -1214,10 +1258,20 @@ export function createThreeStage(canvasEl, assets) {
     const tex = (/** @type {any} */ c, rx = 1, ry = 1) => { const t = texOf(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; };
     // 本物らしい背景の絵（美術・演出室に依頼中：assets/book/study_backdrop.webp）があれば、立体の壁・本棚・額の代わりに、机の奥へぼかして置く（2026-11-23 作者「やっぱり向こう側はリアルな背景をぼかして入れよう」）
     if (bookArt.study_backdrop) {
-      const im = bookArt.study_backdrop.image, bw = DW * 2.4, bh = bw * im.height / im.width;
-      const small = canvas(Math.max(2, Math.round(im.width / 6)), Math.max(2, Math.round(im.height / 6)), (g, w, h) => g.drawImage(im, 0, 0, w, h)); // 縮めてから引きのばして、やわらかくぼかす
-      const bd = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: texOf(small), color: DAY ? 0xb0a898 : 0x8a8078, toneMapped: true, fog: false }));
-      bd.position.set(cx, -6 + bh / 2, back - 12); root.add(bd); /* 2026-11-23 作者「その背景は少し遠くてもいいかも」：5→12、幅も1.9→2.4倍 */ studyShelf = bd;
+      const im = bookArt.study_backdrop.image, bw = DW * 1.25, bh = bw * im.height / im.width;
+      const small = canvas(Math.max(2, Math.round(im.width / 3)), Math.max(2, Math.round(im.height / 3)), (g, w, h) => g.drawImage(im, 0, 0, w, h)); // 縮めてから引きのばして、やわらかくぼかす
+      const REP = 5, bt = STUDY_BLUR ? texOf(small) : bookArt.study_backdrop; bt.wrapS = THREE.RepeatWrapping; bt.repeat.set(REP, 1); bt.offset.set((1 - REP) / 2 % 1, 0); bt.needsUpdate = true; /* 2026-11-24 作者「同じ絵でいいから横につなげて」：左右にくり返す */
+      const bdG = new THREE.PlaneGeometry(bw * REP, bh, REP * 24, 1), bp = bdG.attributes.position, bc = [];
+      for (let i = 0; i < bp.count; i++) { // 明るさ：まん中の1枚はそのまま、右どなりからはぐっと暗く（2026-11-24 作者「右側もっと暗く」：くり返した絵の左はしの明るい柱が目立った）、左は少しずつ暗く
+        const u = bp.getX(i) / bw, k = u > 0.36 ? Math.max(0.2, 1 - (u - 0.36) / 0.15 * 0.8) : u < -0.5 ? Math.max(0.4, 1 - (-0.5 - u) * 0.5) : 1;
+        bc.push(k, k, k);
+      }
+      bdG.setAttribute('color', new THREE.Float32BufferAttribute(bc, 3));
+      const bd = new THREE.Mesh(bdG, new THREE.MeshBasicMaterial({ vertexColors: true, map: bt, color: DAY ? 0xd8d0c4 : 0xb0a498, toneMapped: true, fog: false }));
+      bd.position.set(cx, -6 - DW * 0.02 + bh * 0.22, back - 34); /* 2026-11-24 作者「もう少し背景上に高くして」 */ /* 2026-11-24 作者「壁が近すぎる、もっと遠くへ」：12→34 */ root.add(bd); /* 本棚と額が見える高さに下げる。 2026-11-23 作者「その背景は少し遠くてもいいかも」：5→12、幅も1.9→2.4倍 */ studyShelf = bd;
+      { const fc = canvas(8, 128, (fg, w, h) => { const gr = fg.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(12,7,4,0.85)"); gr.addColorStop(0.45, "rgba(12,7,4,0.35)"); gr.addColorStop(1, "rgba(12,7,4,0)"); fg.fillStyle = gr; fg.fillRect(0, 0, w, h); });
+        const fd = new THREE.Mesh(new THREE.PlaneGeometry(DW, 9), new THREE.MeshBasicMaterial({ map: texOf(fc), transparent: true, depthWrite: false, toneMapped: false })); fd.rotation.x = -Math.PI / 2; fd.position.set(cx, -0.5, back + 4.5); root.add(fd); } // 机の奥のはしを暗くかすませる（背景とのさかいが一本の線に見えた）
+      { const dk = new THREE.Mesh(new THREE.PlaneGeometry(bw * 4, bh * 4), new THREE.MeshBasicMaterial({ color: 0x140c07, fog: false })); dk.position.set(cx, bd.position.y, back - 34.5); root.add(dk); } // 横長の画面で絵のはしの外が見えても、暗い壁に見えるように
     } else {
     const BZ = back - 5, WW = DW * 1.7, /* 2026-11-23 作者「もっと壁に近くていい」：10→5 */ /* 2026-11-23 作者「部屋広すぎ、もう少し壁近くていいよ」：26→10 */ WH = 70, floorY = -6, tint = DAY ? 0xffffff : 0xa89888;
     const wallImg = bookArt.st_wall?.image, wainImg = bookArt.st_wainscot?.image, woodImg = bookArt.st_wood?.image;
@@ -1256,13 +1310,16 @@ export function createThreeStage(canvasEl, assets) {
     }
     }
     // 机のランプ（左の奥）：真鍮の台と、だいだい色のガラスの笠。机と本の左側を暖かく照らす
-    const lx = cx - BW / 2 - 9, lz = cz - BH * 0.42; // 2026-11-23 作者「ランプはもう少し左奥に」
+    const lx = cx - BW / 2 - 9, lz = cz - BH * 0.42 - 5; /* 2026-11-24 作者「もう少し後ろでもいいな」：5だけ奥へ。 2026-11-24 一度本の左うしろへ動かしたが、作者「そしたらランプの位置戻していいよ」で本の左横に戻した */ // 2026-11-23 作者「ランプはもう少し左奥に」
     const brass = new THREE.MeshStandardMaterial({ color: 0x8a6a30, roughness: 0.35, metalness: 0.7 });
     let shadeY = 5.6; // 笠の高さ（光の玉と灯りをここに）
     { // 立体の机のランプ（2026-11-23 作者「置いてある机のランプはリアルにしたい、3Dで」）：元絵 v02 desk_lamp と同じ形を、ろくろで回した形（LatheGeometry）で作る。
       // 丸い台・細い柱と節・波打つふちのだいだい色のガラスの笠（真鍮の骨とふち）・鋲のついた笠の頭・てっぺんの飾り。高さは前の絵と同じ約14
       const g = new THREE.Group(); g.position.set(lx, -0.52, lz); root.add(g);
-      const brassM = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.3, metalness: 0.9, envMap: getStudyEnv(), envMapIntensity: 1.3, side: THREE.DoubleSide }); // 真鍮：書斎を映す（裏からも見えるように：柱のてっぺんが穴に見えた）
+      const [bCol, bRough] = brassCanvases(), bMap = bookArt.lamp_brass ? bookArt.lamp_brass.clone() : texOf(bCol), bRM = texOf(bRough); bMap.needsUpdate = true; // 届いた真鍮の絵（2026-11-24 美術・演出室 lamp_brass） for (const t of [bMap, bRM]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 3); t.anisotropy = 8; } bRM.colorSpace = THREE.NoColorSpace;
+      const brassM = new THREE.MeshStandardMaterial({ map: bMap, roughnessMap: bRM, color: bookArt.lamp_brass ? 0xffe6c0 : 0xc4a070, roughness: 0.9, metalness: 0.85, envMap: getStudyEnv(), envMapIntensity: 0.8, side: THREE.DoubleSide }); /* 質感の絵を貼る（2026-11-24 作者「テクスチャ張るとかできないか」） */ /* 2026-11-24 作者「ランプだけやっぱり浮いている」：つるつるの金色→少し古びた、落ち着いたつやに */ // 真鍮：書斎を映す（裏からも見えるように：柱のてっぺんが穴に見えた）
+      const softEdge = (/** @type {any} */ m, /** @type {number} */ w) => { m.transparent = true; m.onBeforeCompile = (/** @type {any} */ sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n{ float ef = abs(dot(normalize(normal), normalize(vViewPosition))); gl_FragColor.a *= smoothstep(0.0, ' + w.toFixed(2) + ', ef); }'); }; m.customProgramCacheKey = () => 'softEdge' + w; return m; };
+      softEdge(brassM, 0.22); // 輪郭のところだけ少し透けて、まわりになじむ（2026-11-24 作者「輪郭柔らかく見えるような気がするんだよね、現実だったらもっと」）
       const lathe = (/** @type {number[][]} */ pts, /** @type {any} */ mat, seg = 40) => { const m = new THREE.Mesh(new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg), mat); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
       // 台と柱（足もと→上へ）
       lathe([[0, 0], [2.15, 0], [2.18, 0.18], [2.0, 0.42], [1.55, 0.6], [1.25, 0.85], [0.75, 1.05], [0.42, 1.3], [0.3, 1.7], [0.3, 2.05], [0.48, 2.15], [0.5, 2.4], [0.3, 2.55], [0.21, 2.7], [0.21, 8.3], [0.36, 8.45], [0.4, 8.8], [0.3, 9.0], [0.24, 9.3], [0, 9.32]], brassM);
@@ -1271,8 +1328,9 @@ export function createThreeStage(canvasEl, assets) {
       const shadeG = new THREE.LatheGeometry(shadePts, 64), sp = shadeG.attributes.position;
       for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), z = sp.getZ(i), y = sp.getY(i), ang = Math.atan2(z, x), low = Math.max(0, 1 - (y - 9.42) / 0.5); sp.setY(i, y - low * 0.16 * (1 - Math.abs(Math.cos(ang * 6)))); } // 10か所でふちが少し下がる（波）
       shadeG.computeVertexNormals();
-      const glassM = new THREE.MeshPhysicalMaterial({ color: 0xd86a20, emissive: 0xe0661a, emissiveIntensity: 0.6, roughness: 0.4, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.12, envMap: getStudyEnv(), envMapIntensity: 0.9, transparent: true, opacity: 0.95, side: THREE.DoubleSide }); // ガラスの表のつや // 光りすぎると白っぽくなるので、だいだい色を濃く、自分の光はひかえめに
-      const shade = new THREE.Mesh(shadeG, glassM); shade.castShadow = true; g.add(shade);
+      const gT = bookArt.lamp_glass ? bookArt.lamp_glass.clone() : texOf(glassCanvas()); gT.needsUpdate = true; gT.wrapS = THREE.RepeatWrapping; gT.repeat.set(bookArt.lamp_glass ? 1 : 2, 1); // 届いた色ガラスの絵（2026-11-24 美術・演出室 lamp_glass） gT.anisotropy = 8; /* 笠に色ガラスの質感（作者「おねがい」） */
+      const glassM = new THREE.MeshPhysicalMaterial({ map: gT, emissiveMap: gT, color: bookArt.lamp_glass ? 0xffc890 : 0xe08038, emissive: bookArt.lamp_glass ? 0xffb070 : 0xf08a38, emissiveIntensity: 0.5, roughness: 0.45, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.2, envMap: getStudyEnv(), envMapIntensity: 0.5, transparent: true, opacity: 0.95, side: THREE.DoubleSide }); // ガラスの表のつや // 光りすぎると白っぽくなるので、だいだい色を濃く、自分の光はひかえめに
+      softEdge(glassM, 0.3); const shade = new THREE.Mesh(shadeG, glassM); shade.castShadow = true; g.add(shade);
       // 笠の骨（真鍮の細い線）とふち
       for (let k = 0; k < 12; k++) { const ang = k / 12 * Math.PI * 2, path = new THREE.CatmullRomCurve3(shadePts.map((v) => new THREE.Vector3(Math.cos(ang) * (v.x + 0.02), v.y, Math.sin(ang) * (v.x + 0.02)))); const rib = new THREE.Mesh(new THREE.TubeGeometry(path, 16, 0.05, 5, false), brassM); g.add(rib); }
       const rim = new THREE.Mesh(new THREE.TorusGeometry(3.12, 0.07, 6, 64), brassM); rim.rotation.x = Math.PI / 2; rim.position.y = 9.36; g.add(rim);
@@ -1283,10 +1341,19 @@ export function createThreeStage(canvasEl, assets) {
       lathe([[0.3, 9.2], [0.34, 9.35], [0.3, 9.55], [0.3, 9.95], [0.26, 10.05], [0, 10.07]], brassM, 24); // 電球をはめる口金（柱のてっぺんから電球まで。2026-11-23 作者「電球浮いている」）
       const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffe2a0 })); bulb.position.y = 10.38; g.add(bulb);
       shadeY = -0.52 + 10.6;
+      { const sc = canvas(128, 128, (cg, w, h) => { const gr = cg.createRadialGradient(w / 2, h / 2, w * 0.18, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,0.7)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.35)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); cg.fillStyle = gr; cg.fillRect(0, 0, w, h); });
+        const sh = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 6.2), new THREE.MeshBasicMaterial({ map: texOf(sc), transparent: true, depthWrite: false, toneMapped: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = 0.02; g.add(sh); } // 足もとの影：机に置いてあるように見せる（作者「ランプだけ浮いている」）
     }
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(8, 8, 1); glow.position.set(lx, shadeY, lz); root.add(glow);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.8 })); glow.scale.set(5.6, 1.6, 1); glow.position.set(lx, shadeY - 1.15, lz); glow.material.color.set(0xb07040); root.add(glow); /* 2026-11-24 作者「笠回りの光が丸すぎる」：笠をつつむ丸い光の玉をやめ、笠の下の口から少しこぼれる横長のうすい光に */
     const L = new THREE.PointLight(0xffb066, DAY ? 60 : 220, BW * 1.6, 1.4); L.position.set(lx, shadeY - 0.2, lz); root.add(L);
     lights.push({ L, base: L.intensity, ph: 0.5, z: lz, glow, lamp: true });
+    { // 笠の下から机へ落ちる光の輪（2026-11-24 作者「いいね。あとは光だ」）：電球から真下へ向けたスポットライト。ふちはやわらかく、台・柱・本の影を机に落とす
+      const sp = new THREE.SpotLight(0xffc27a, DAY ? 120 : 420, BW * 1.3, 1.0, 0.75, 1.4);
+      sp.position.set(lx, shadeY - 0.25, lz); sp.target.position.set(lx + 1.2, -0.52, lz + 2.5); root.add(sp, sp.target);
+      sp.castShadow = true; sp.shadow.mapSize.set(1024, 1024); sp.shadow.camera.near = 0.3; sp.shadow.bias = -0.0008; sp.shadow.radius = 4;
+      lights.push({ L: sp, base: sp.intensity, ph: 0.5, z: lz, lamp: true });
+      L.intensity *= 0.7; lights[lights.length - 2].base = L.intensity; // 部屋全体へのまわりの光は少しひかえめに（光の輪が目立つように）
+    }
   }
 
   function buildInterior() { // ブックヌック：本棚にはまった、手前が開いた箱の内側（試作_ブックヌックと同じ作り）

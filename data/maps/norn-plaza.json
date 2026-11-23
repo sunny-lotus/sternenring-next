@@ -20,11 +20,11 @@
     "#.######........######..########.......................#",
     "#.######........######..########........##########.....#",
     "#.######........######..########........##########.....#",
-    "#.######........######..########........##########.....#",
+    "#.##D###........##D###..##D#####........####D#####.....#",
     "#......................................................#",
     "#......................................................#",
     "#.####...........####..................................#",
-    "#.####...........####..................................#",
+    "#.####...........#D##..................................#",
     "D......................................................D",
     "D......................................................D",
     "D......................................................D",
@@ -32,25 +32,25 @@
     "#.......................##########......#######........#",
     "#..###............###...##########......################",
     "#.......................##########......################",
-    "#.......................##########......################",
+    "#.......................###D######......###D#####D######",
     "#......................................................#",
     "#......................................................#",
     "#..............#######...........................#######",
     "#######........#################........################",
     "#######........#################........################",
-    "#######........#################........################",
+    "###D###........###D######D######........##D########D####",
     "#..............##....##................................#",
     "#......................................................#",
     "########.......#################.......................#",
     "########.......#################........##########.....#",
     "########.......#################........##########.....#",
-    "########.......#################........##########.....#",
+    "####D###.......##D########D#####........####D#####.....#",
     "#......................................................#",
     "#......................................................#",
     "#......................................................#",
     "########.......###################......##########.....#",
     "########.......###################......##########.....#",
-    "########.......###################......##########.....#",
+    "####D###.......#D###########D#####......####D#####.....#",
     "#................##.......................##...........#",
     "#......................................................#",
     "#......................................................#",
@@ -111,6 +111,342 @@
           "x": 1,
           "y": 6,
           "dir": "right"
+        }
+      }
+    },
+    {
+      "id": "house-01",
+      "x": 4,
+      "y": 5,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-01",
+        "exit": "door",
+        "arrive": {
+          "x": 3,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-02",
+      "x": 18,
+      "y": 5,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-02",
+        "exit": "door",
+        "arrive": {
+          "x": 3,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-03",
+      "x": 26,
+      "y": 5,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-03",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-04",
+      "x": 27,
+      "y": 17,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-04",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-05",
+      "x": 43,
+      "y": 17,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-05",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-06",
+      "x": 18,
+      "y": 23,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-06",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-07",
+      "x": 51,
+      "y": 23,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-07",
+        "exit": "door",
+        "arrive": {
+          "x": 3,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-08",
+      "x": 4,
+      "y": 29,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-08",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-09",
+      "x": 17,
+      "y": 29,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-09",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-10",
+      "x": 26,
+      "y": 29,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-10",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-11",
+      "x": 18,
+      "y": 9,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-11",
+        "exit": "door",
+        "arrive": {
+          "x": 3,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-12",
+      "x": 44,
+      "y": 5,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-12",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-13",
+      "x": 49,
+      "y": 17,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-13",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-14",
+      "x": 3,
+      "y": 23,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-14",
+        "exit": "door",
+        "arrive": {
+          "x": 3,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-15",
+      "x": 25,
+      "y": 23,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-15",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-16",
+      "x": 42,
+      "y": 23,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-16",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-17",
+      "x": 44,
+      "y": 29,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-17",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-18",
+      "x": 4,
+      "y": 35,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-18",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-19",
+      "x": 16,
+      "y": 35,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-19",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-20",
+      "x": 28,
+      "y": 35,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-20",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "house-21",
+      "x": 44,
+      "y": 35,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-house-plaza-21",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
         }
       }
     }
@@ -315,7 +651,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "house-01"
           },
           {
             "asset": "placeholder:house-front",
@@ -325,7 +662,8 @@
             "h": 4,
             "standH": 10.4,
             "zOffset": 0.1,
-            "art": "house_a_narrow.webp"
+            "art": "house_a_narrow.webp",
+            "doorExit": "house-02"
           },
           {
             "asset": "placeholder:house-front",
@@ -335,7 +673,8 @@
             "w": 8,
             "h": 4,
             "standH": 8.8,
-            "zOffset": 0.08
+            "zOffset": 0.08,
+            "doorExit": "house-03"
           },
           {
             "asset": "placeholder:house-front",
@@ -345,7 +684,8 @@
             "w": 10,
             "h": 4,
             "standH": 8.8,
-            "zOffset": 0.09
+            "zOffset": 0.09,
+            "doorExit": "house-04"
           },
           {
             "asset": "placeholder:house-front",
@@ -355,7 +695,8 @@
             "w": 7,
             "h": 4,
             "standH": 9.8,
-            "zOffset": 0.1
+            "zOffset": 0.1,
+            "doorExit": "house-05"
           },
           {
             "asset": "placeholder:house-front",
@@ -365,7 +706,8 @@
             "w": 7,
             "h": 4,
             "standH": 9.8,
-            "zOffset": 0
+            "zOffset": 0,
+            "doorExit": "house-06"
           },
           {
             "asset": "placeholder:house-front",
@@ -375,7 +717,8 @@
             "w": 6,
             "h": 4,
             "standH": 10.4,
-            "zOffset": 0.04
+            "zOffset": 0.04,
+            "doorExit": "house-07"
           },
           {
             "asset": "placeholder:house-front",
@@ -385,7 +728,8 @@
             "w": 7,
             "h": 4,
             "standH": 9.8,
-            "zOffset": 0.1
+            "zOffset": 0.1,
+            "doorExit": "house-08"
           },
           {
             "asset": "placeholder:house-front",
@@ -395,7 +739,8 @@
             "w": 9,
             "h": 4,
             "standH": 9.1,
-            "zOffset": 0.05
+            "zOffset": 0.05,
+            "doorExit": "house-09"
           },
           {
             "asset": "placeholder:house-front",
@@ -405,7 +750,8 @@
             "w": 8,
             "h": 4,
             "standH": 8.8,
-            "zOffset": 0.06
+            "zOffset": 0.06,
+            "doorExit": "house-10"
           }
         ]
       },
@@ -428,7 +774,8 @@
             "h": 2,
             "standH": 10.4,
             "zOffset": 0.05,
-            "art": "house_a_narrow.webp"
+            "art": "house_a_narrow.webp",
+            "doorExit": "house-11"
           },
           {
             "asset": "placeholder:planter",
@@ -454,7 +801,8 @@
             "w": 10,
             "h": 3,
             "standH": 8.9,
-            "zOffset": 0.03
+            "zOffset": 0.03,
+            "doorExit": "house-12"
           },
           {
             "asset": "placeholder:house-small",
@@ -464,7 +812,8 @@
             "w": 8,
             "h": 3,
             "standH": 8.8,
-            "zOffset": 0.02
+            "zOffset": 0.02,
+            "doorExit": "house-13"
           },
           {
             "asset": "placeholder:house-small",
@@ -474,7 +823,8 @@
             "w": 6,
             "h": 3,
             "standH": 10.4,
-            "zOffset": 0.06
+            "zOffset": 0.06,
+            "doorExit": "house-14"
           },
           {
             "asset": "placeholder:house-small",
@@ -484,7 +834,8 @@
             "w": 10,
             "h": 3,
             "standH": 8.8,
-            "zOffset": 0.02
+            "zOffset": 0.02,
+            "doorExit": "house-15"
           },
           {
             "asset": "placeholder:house-small",
@@ -494,7 +845,8 @@
             "w": 9,
             "h": 3,
             "standH": 9.1,
-            "zOffset": 0.02
+            "zOffset": 0.02,
+            "doorExit": "house-16"
           },
           {
             "asset": "placeholder:house-small",
@@ -504,7 +856,8 @@
             "w": 10,
             "h": 3,
             "standH": 8.9,
-            "zOffset": 0.07
+            "zOffset": 0.07,
+            "doorExit": "house-17"
           },
           {
             "asset": "placeholder:house-small",
@@ -514,7 +867,8 @@
             "w": 7,
             "h": 3,
             "standH": 9.8,
-            "zOffset": 0.1
+            "zOffset": 0.1,
+            "doorExit": "house-18"
           },
           {
             "asset": "placeholder:house-small",
@@ -524,7 +878,8 @@
             "w": 9,
             "h": 3,
             "standH": 9.1,
-            "zOffset": 0.03
+            "zOffset": 0.03,
+            "doorExit": "house-19"
           },
           {
             "asset": "placeholder:house-small",
@@ -534,7 +889,8 @@
             "w": 10,
             "h": 3,
             "standH": 8.9,
-            "zOffset": 0.01
+            "zOffset": 0.01,
+            "doorExit": "house-20"
           },
           {
             "asset": "placeholder:house-small",
@@ -544,7 +900,8 @@
             "w": 10,
             "h": 3,
             "standH": 8.9,
-            "zOffset": 0.08
+            "zOffset": 0.08,
+            "doorExit": "house-21"
           },
           {
             "asset": "placeholder:planter",
