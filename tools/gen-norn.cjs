@@ -51,12 +51,14 @@ for (let ry = 2; ry < H - 5; ry += 6) {
 }
 // 路地の入口に植えこみを少し
 for (let ry = 2; ry < H - 5; ry += 6) for (let x = 2; x < W - 3; x++) if (R() < 0.04 && !keep(x, ry + 4, 2, 1) && inside(x, ry + 4, 2, 1) && inside(x, ry + 5, 2, 1)) { stamp(x, ry + 4, 2, 1); items.mid.push({ asset: 'placeholder:planter', x, y: ry + 4, w: 2, h: 1, standH: 1.2, zOffset: 0 }); x += 3; }
-for (let k = -1; k <= 1; k++) { g[GY + k][GX] = 'D'; g[11 + k][0] = 'D'; } // 東西の出入口は3マス（2026-11-22 作者「エリア移動の入り口をもう少し広く」） // 西の端：ページをめくって見開き「銀鹿亭前の通り」へ（2026-11-22 景観案）
+for (let k = -1; k <= 1; k++) { g[GY + k][GX] = 'D'; g[11 + k][0] = 'D'; }
+for (let x = 13; x <= 15; x++) g[0][x] = 'D'; // 北の端：奥の背景の絵に入りこんで森へ（2026-11-23 作者「背景に入り込む演出試しに作ってみて」。試しの出入口） // 東西の出入口は3マス（2026-11-22 作者「エリア移動の入り口をもう少し広く」） // 西の端：ページをめくって見開き「銀鹿亭前の通り」へ（2026-11-22 景観案）
 const m = JSON.parse(JSON.stringify(base));
 m.width = W; m.height = H; m.collision = g.map((r) => r.join(''));
 m.provenance = base.provenance + ' 2026-11-22 作者の指示で 56×40 に広げた（tools/gen-norn.cjs。元の広場は左上にそのまま。東と南の通りは仮の配置）。';
 m.exits = base.exits.filter((e) => e.id !== 'east-road' && e.id !== 'inn-door');
 m.exits.push({ id: 'west-street', x: 0, y: 10, span: 3, dir: 'left', effect: 'page', to: { map: 'norn-inn-street', exit: 'east-street', arrive: { x: 42, y: 6, dir: 'left' } } });
+m.exits.push({ id: 'north-path', x: 13, y: 0, span: 3, dir: 'up', effect: 'dive', to: { map: 'test-forest', exit: 'south-path', arrive: { x: 30, y: 28, dir: 'up' } } }); // 試し：奥へ
 m.exits.push({ id: 'east-road', x: GX, y: GY - 1, span: 3, dir: 'right', effect: 'page', to: { map: 'test-forest', exit: 'west-road', arrive: { x: 1, y: 6, dir: 'right' } } });
 { const { layers, ...rest } = m.stage; m.stage = { ...rest, townArt: { doorH: HOUSE.DOOR_H, doors: HOUSE.doorsForMap(), "note":"ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ","base":"assets/town/norn/","ground":{"paved":"tex_cobble_street.webp","grass":"tex_grass.webp"},"boards":{"house-*":["house_home_2f.webp","house_a_narrow.webp","house_b_sideroof.webp","house_c_stepgable.webp","house_d_workshop.webp","house_e_archway.webp","house_f_corner.webp"],"inn-tall":"house_merchant_3f.webp","lamp":"lamp_post.webp","stall":"stall.webp","flower-stall":"flower_stall.webp","cart":"cart.webp","planter":"planter.webp","flowerbed":"flowerbed.webp","tree":"tree_street.webp","tree-small":"tree_small.webp","herbs":"herbs_drying.webp","awning-green":"awnings-1.webp","awning-red":"awnings-2.webp","awning-wheat":"awnings-3.webp","sign-bread":"signs-1.webp","sign-shoe":"signs-2.webp","sign-cup":"signs-3.webp","sign-deer":"signs-4.webp"}}, floor: 'cobble', paved: [{"x":1,"y":1,"w":23,"h":18},{"x":0,"y":9,"w":56,"h":5},{"x":10,"y":14,"w":5,"h":25},{"x":36,"y":1,"w":4,"h":38}] /* 石畳は元の広場・東西の大通り・南の通り・東の通りだけ */, orbs: {"count":10,"alpha":0.5,"color":[1,0.86,0.62],"size":0.7,"note":"町：導機灯や窓の灯りに舞う、暖かいほこりの粒（仮）"}, layers }; } // 光の玉は場所ごとに（仮）
 for (const l of m.stage.layers) {

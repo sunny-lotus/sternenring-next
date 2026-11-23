@@ -16,7 +16,7 @@
   @media (max-width: 420px) { #topright { gap: 4px; right: max(8px, env(safe-area-inset-right)); } #render-toggle, #sound-toggle, #bgm-toggle, #room-toggle, #cam-toggle, #status-toggle, #dev-toggle { padding: 5px 6px; } }
   /* 右上のボタンが3つになったので（rev3）、幅460px以下では地名の下に「仮」を置き、ボタンと重ねない */
   @media (max-width: 460px) { body #hud { flex-direction: column; align-items: flex-start; gap: 4px; } }
-  #perf { position: fixed; left: 12px; top: calc(max(10px, env(safe-area-inset-top)) + 34px); background: rgba(27,26,34,.8); color: #cfe3c0; padding: 2px 6px; font: 11px/1.4 monospace; pointer-events: none; }
+  #perf { position: fixed; left: 12px; top: calc(max(10px, env(safe-area-inset-top)) + 34px); background: rgba(27,26,34,.8); color: #cfe3c0; padding: 2px 6px; font: 11px/1.4 monospace; pointer-events: none; white-space: pre-line; }
   #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 12px; display: flex; gap: 8px; align-items: center; pointer-events: none; }
   #map-title { background: rgba(27,26,34,.72); padding: 4px 10px; border: 1px solid var(--edge); border-radius: 3px; font-size: 15px; letter-spacing: .08em; }
   #map-badge { background: var(--paper); color: #4a4436; padding: 2px 6px; border-radius: 2px; font-size: 11px; font-family: sans-serif; }
@@ -107,6 +107,44 @@
   #battle-overlay.status.devwin iframe { background: transparent; animation: none; box-shadow: none; }
   #battle-overlay.status.devwin #battle-back { top: auto; bottom: 8px; }
 </style>
+<script>
+// データ（JSON）も、プログラムが届くのを待たずに、ここで読みはじめる。src/data.js・src/main.js が SR_PRE.take で受け取る（1回だけ。受け取らなければふつうに読む）
+window.SR_PRE = (() => {
+  const got = {};
+  const get = (p) => got[p] || (got[p] = fetch(p, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw Error(p + ' を読めません (' + r.status + ')'); return r.json(); }));
+  const soft = (pr) => { pr.catch(() => {}); return pr; }; // 先読みの失敗は、本番で読むときに出す
+  ['data/world.json', 'data/collision.json', 'data/assets.json', 'data/stage-style.json', 'data/audio.json', 'data/dialogue.json'].forEach((p) => soft(get(p)));
+  soft(get('data/world.json').then((w) => w.maps.forEach((id) => soft(get('data/maps/' + id + '.json')))));
+  const imgs = [];
+  soft(get('data/assets.json').then((l) => l.assets.forEach((a) => {
+    if (a.regionsPath) soft(get(a.regionsPath));
+    if (a.path && /\.png$/.test(a.path)) { const im = new Image(); im.src = a.path; imgs.push(im); } // キャラの絵も先に
+  })));
+  return { take(p) { const pr = got[p]; delete got[p]; return pr; } };
+})();
+</script>
+<!-- 読み込みを早く（2026-11-23 作者「公開サイトの読み込みを早くする方法」）：プログラムを1つ読んでから次を知る順番待ちをやめ、はじめに全部たのむ -->
+<link rel="modulepreload" href="src/main.js">
+<link rel="modulepreload" href="src/data.js">
+<link rel="modulepreload" href="src/core/map.js">
+<link rel="modulepreload" href="src/core/input.js">
+<link rel="modulepreload" href="src/core/field.js">
+<link rel="modulepreload" href="src/core/loop.js">
+<link rel="modulepreload" href="src/core/party.js">
+<link rel="modulepreload" href="src/core/record.js">
+<link rel="modulepreload" href="src/render/flat2d.js">
+<link rel="modulepreload" href="src/render/paper-stage.js">
+<link rel="modulepreload" href="src/render/paper-math.js">
+<link rel="modulepreload" href="src/render/three-stage.js">
+<link rel="modulepreload" href="src/render/book-intro.js">
+<link rel="modulepreload" href="src/render/sprites.js">
+<link rel="modulepreload" href="src/render/camera.js">
+<link rel="modulepreload" href="src/ui/controls.js">
+<link rel="modulepreload" href="src/ui/cam-panel.js">
+<link rel="modulepreload" href="src/save.js">
+<link rel="modulepreload" href="src/audio/sound.js">
+<link rel="modulepreload" href="src/audio/bgm.js">
+<link rel="modulepreload" href="src/vendor/three/three.module.js">
 </head>
 <body>
 <canvas id="paper" aria-label="フィールド（紙の舞台）"></canvas>

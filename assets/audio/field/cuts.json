@@ -1,0 +1,128 @@
+{
+ "step_wood_01": {
+  "source": "足音_木の床_ノイズ低減.wav",
+  "start": 2.132,
+  "end": 2.512,
+  "group": "wood",
+  "gainDb": 8.9,
+  "seconds": 0.38,
+  "sourceSha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd"
+ },
+ "step_wood_02": {
+  "source": "足音_木の床_ノイズ低減.wav",
+  "start": 2.802,
+  "end": 3.152,
+  "group": "wood",
+  "gainDb": 8.9,
+  "seconds": 0.35,
+  "sourceSha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd"
+ },
+ "step_wood_03": {
+  "source": "足音_木の床_ノイズ低減.wav",
+  "start": 3.554,
+  "end": 3.934,
+  "group": "wood",
+  "gainDb": 8.9,
+  "seconds": 0.38,
+  "sourceSha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd"
+ },
+ "step_wood_04": {
+  "source": "足音_木の床_ノイズ低減.wav",
+  "start": 4.296,
+  "end": 4.676,
+  "group": "wood",
+  "gainDb": 8.9,
+  "seconds": 0.38,
+  "sourceSha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd"
+ },
+ "step_soft_01": {
+  "source": "足音_布系_録音04_ノイズ低減.wav",
+  "start": 5.738,
+  "end": 5.998,
+  "group": "soft",
+  "gainDb": 23.3,
+  "seconds": 0.26,
+  "sourceSha256": "d1f1f5df537057a9218fd89b4a5550a107f5936316b73770a55ad86cba7d8e77"
+ },
+ "step_soft_02": {
+  "source": "足音_布系_録音04_ノイズ低減.wav",
+  "start": 7.047,
+  "end": 7.307,
+  "group": "soft",
+  "gainDb": 23.3,
+  "seconds": 0.26,
+  "sourceSha256": "d1f1f5df537057a9218fd89b4a5550a107f5936316b73770a55ad86cba7d8e77"
+ },
+ "step_soft_03": {
+  "source": "assets/audio/field/source/rec04_2.5-4.7_denoise.wav",
+  "start": 0.348,
+  "end": 0.608,
+  "group": "soft",
+  "gainDb": 23.3,
+  "seconds": 0.26,
+  "sourceSha256": "bd91e3084aa2aa35768409359f4fd66536e952d8e071cc378eab8be33ac6cd73"
+ },
+ "step_soft_04": {
+  "source": "assets/audio/field/source/rec04_2.5-4.7_denoise.wav",
+  "start": 1.836,
+  "end": 2.096,
+  "group": "soft",
+  "gainDb": 23.3,
+  "seconds": 0.26,
+  "sourceSha256": "bd91e3084aa2aa35768409359f4fd66536e952d8e071cc378eab8be33ac6cd73"
+ },
+ "step_stone_01": {
+  "source": "足音_石の上_仮_録音43_ノイズ低減.wav",
+  "start": 1.647,
+  "end": 1.867,
+  "group": "stone",
+  "gainDb": 9.9,
+  "seconds": 0.22,
+  "sourceSha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f"
+ },
+ "step_stone_02": {
+  "source": "足音_石の上_仮_録音43_ノイズ低減.wav",
+  "start": 2.279,
+  "end": 2.499,
+  "group": "stone",
+  "gainDb": 9.9,
+  "seconds": 0.22,
+  "sourceSha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f"
+ },
+ "step_stone_03": {
+  "source": "足音_石の上_仮_録音43_ノイズ低減.wav",
+  "start": 2.951,
+  "end": 3.171,
+  "group": "stone",
+  "gainDb": 9.9,
+  "seconds": 0.22,
+  "sourceSha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f"
+ },
+ "step_stone_04": {
+  "source": "足音_石の上_仮_録音43_ノイズ低減.wav",
+  "start": 3.667,
+  "end": 3.887,
+  "group": "stone",
+  "gainDb": 9.9,
+  "seconds": 0.22,
+  "sourceSha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f"
+ },
+ "door_open": {
+  "source": "ドア開閉_ノイズ低減.wav",
+  "start": 2.1,
+  "end": 3.9,
+  "group": "door_open",
+  "gainDb": 13.5,
+  "seconds": 1.8,
+  "sourceSha256": "9997315183bf92fd04fb5c0f65aa11dd44687ad6a1baaffcad30a23e89720490"
+ },
+ "door_close": {
+  "source": "ドア開閉_ノイズ低減.wav",
+  "start": 6.95,
+  "end": 8.05,
+  "group": "door",
+  "gainDb": -2.7,
+  "seconds": 1.1,
+  "sourceSha256": "9997315183bf92fd04fb5c0f65aa11dd44687ad6a1baaffcad30a23e89720490"
+ }
+}

@@ -7,14 +7,14 @@
 
 /** 時間割（秒）。参照試作の尺を元にした仮の値。歩行へ自然に移ることを優先し、方向の入力でいつでも終わる。 */
 export const INTRO_TIMING = Object.freeze({
-  open: 0.9,        // 本がひらく
-  riseStart: 0.9,   // 板が起き上がりはじめる（本がひらき終わってから）
+  open: 2.2,        // 本がひらく（2026-11-23 作者「本が開く演出はやすぎるかも」で 0.9→2.2。全体も 2.8→4.4）
+  riseStart: 2.2,   // 板が起き上がりはじめる（本がひらき終わってから）
   riseSpread: 0.6,  // 奥の板から手前の板までの時間差
   riseDur: 0.55,    // 1枚が起き上がる長さ
   actorsAfter: 0.15,// キャラの板は、いちばん手前の板より少しあと
-  zoomStart: 1.2,   // カメラが主人公へ寄りはじめる
-  zoomDur: 1.6,     // 寄る長さ
-  end: 2.8,         // 終わり（ここで歩けるようになる）
+  zoomStart: 2.6,   // カメラが主人公へ寄りはじめる
+  zoomDur: 1.8,     // 寄る長さ
+  end: 4.4,         // 終わり（ここで歩けるようになる）
   skipGraceMs: 220, // 方向の入力でとばしたあと、この間は歩かない（短く押しただけなら1歩も進まない。押しつづければ歩く）
   // rev4：表紙の「タップしてはじめる」（プロデュース室の判断 2026-11-22 14:23）
   startWaitMs: 800, // 開始の一押しのあと、音が有効になる／効果音を読み終えるのを待つ上限。過ぎたら無音のまま本がひらく（待ち続けない）
@@ -59,7 +59,7 @@ export function riseK(t, delay, T = INTRO_TIMING) {
  *   zoom：カメラの寄り（0＝本全体、1＝ふだんのカメラ）
  */
 export function introPose(t, T = INTRO_TIMING) {
-  const open = easeOut(t / T.open);
+  const x = clamp01(t / T.open), open = x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; // 重い表紙：ゆっくり持ち上がり、まん中で速く、ゆっくり寝る
   return { t, open, coverRad: (1 - open) * Math.PI / 2 * 0.98, zoom: easeOut((t - T.zoomStart) / T.zoomDur), done: t >= T.end };
 }
 

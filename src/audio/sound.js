@@ -17,6 +17,8 @@ export const DEFAULT_LEVEL = 'mid';
 
 /** 「本がひらく音」を鳴らしてよい、演出の始まりからの遅れ（秒）。これより遅く有効になったら鳴らさない（絵と音がずれるため） */
 export const OPEN_CUE_WINDOW = 0.15;
+/** 「本がひらく音」を鳴らす、演出の始まりからの遅れ（秒）。表紙がゆっくり持ち上がるので、音のいちばん大きい所（頭から約0.2秒）が表紙の動き出しに来るように（2026-11-23 作者「初めに開くのも音が早い」） */
+export const OPEN_CUE_DELAY = 0.5;
 
 /** 音量ボタンを押したときの次の段階（中→大→なし→小→中…） @param {string} id */
 export function nextLevel(id) {
@@ -36,6 +38,7 @@ export function nextLevel(id) {
 export function decideOpenCue(o) {
   if (o.already) return { decided: true, play: false, offset: 0, reason: o.already };
   if (o.introPhase !== 'playing') return { decided: o.introPhase === 'done', play: false, offset: 0, reason: 'not-playing' };
+  if (o.introT < 0) return { decided: false, play: false, offset: 0, reason: 'waiting' }; // 鳴らす時刻（呼ぶ側が OPEN_CUE_DELAY を引いた introT）はまだ
   if (o.introT > OPEN_CUE_WINDOW) return { decided: true, play: false, offset: 0, reason: o.ctxState !== 'running' ? 'locked' : !o.loaded ? 'not-loaded' : 'late' };
   if (o.level === 'off') return { decided: true, play: false, offset: 0, reason: 'muted' };
   if (o.ctxState !== 'running' || !o.loaded) return { decided: false, play: false, offset: 0, reason: 'waiting' };
@@ -64,6 +67,8 @@ export function createSound(ledger, opts = {}) {
   const log = [];
   let loaded = false, unlockedBy = '';
 
+  /** @type {Record<string, number>} */
+  const gainById = Object.fromEntries(ledger.sounds.map((/** @type {any} */ s) => [s.id, typeof s.gain === 'number' ? Math.min(1, Math.max(0, s.gain)) : 1]));
   const gainOf = (/** @type {string} */ id) => SOUND_LEVELS.find((l) => l.id === id)?.gain ?? 0;
   try {
     if (!AC) throw Error('Web Audio が使えません');
@@ -110,15 +115,19 @@ export function createSound(ledger, opts = {}) {
     /**
      * 1つ鳴らす。同じ id が鳴っていれば止めてから鳴らす（重ねない）。鳴らせないときは何もしない（あとで鳴らし直さない）。
      * @param {string} id @param {number} [offset] 音の頭から飛ばす秒
+     * @param {{ rate?: number, vol?: number }} [vary] 高さ（再生の速さ）と大きさの掛け算（足音を毎回少し変える。大きさは増幅しない）
      * @returns {boolean} 鳴らしたか
      */
-    play(id, offset = 0) {
+    play(id, offset = 0, vary = {}) {
       if (!ctx || !master || ctx.state !== 'running' || level === 'off') return false;
       const buf = buffers[id];
       if (!buf || offset >= buf.duration) return false;
       this.stop(id);
       const src = ctx.createBufferSource();
-      src.buffer = buf; src.connect(master);
+      src.buffer = buf;
+      const g = Math.min(1, (gainById[id] ?? 1) * (vary.vol ?? 1)); // 音ごとの大きさ（台帳の gain。足音は小さく。増幅しない）
+      if (vary.rate) src.playbackRate.value = vary.rate;
+      if (g < 1) { const n = ctx.createGain(); n.gain.value = g; src.connect(n); n.connect(master); } else src.connect(master);
       src.onended = () => { if (playing.get(id) === src) playing.delete(id); };
       src.start(0, offset);
       playing.set(id, src);

@@ -29,6 +29,7 @@ export function validateMap(map, ctx) {
   const unknown = [...new Set((map.collision || []).join(''))].filter((c) => !(c in legend));
   if (unknown.length) err(`凡例に無い文字 ${unknown.join('')}`);
   for (const [ch, kind] of Object.entries(legend)) if (!(kind in ctx.collision.kinds)) err(`凡例 ${ch} の種類 ${kind} が衝突表に無い`);
+  if (map.footsteps !== undefined && !['wood', 'soft'].includes(map.footsteps)) err(`footsteps（足音）は wood か soft`); // 2026-11-23 作者の録音の足音
   if (errs.length) return errs; // 形が壊れていると以下の判定が意味を持たない
 
   const q = mapQuery(map, ctx.collision);

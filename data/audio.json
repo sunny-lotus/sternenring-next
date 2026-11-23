@@ -93,6 +93,370 @@
       "assignedTo": "menu.close",
       "use": "フィールドのメニューを閉じるとき（2026-11-22 作者「閉じる音使ってよ」）",
       "sha256": "d6612775aaab91aff8dc0f221619316a540a94b17cf74bef63e262a00d0cfd24"
+    },
+    {
+      "id": "sfx.step.wood01",
+      "path": "assets/audio/field/step_wood_01.mp3",
+      "sourcePath": "assets/audio/field/step_wood_01.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "bf58371d8cbdfe144385b45acc933db0cc59657ba8eb159ad392b7791d859b67",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_wood_01.wav",
+      "durationSeconds": 0.38,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.wood",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_木の床_ノイズ低減.wav",
+        "original": "レコーディング (5).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd",
+        "start": 2.132,
+        "end": 2.512,
+        "gainDb": 8.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。木の床の足音（銀鹿亭の中など、footsteps: wood のマップ）。4つを順に鳴らす（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "0f887d0bade76fbba24b37734a1950912f22058a15a3d2d52c485c2845b99bfb"
+    },
+    {
+      "id": "sfx.step.wood02",
+      "path": "assets/audio/field/step_wood_02.mp3",
+      "sourcePath": "assets/audio/field/step_wood_02.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "ac8e879f885e840f66aac3653d692287460850928a320061fb83a2de40bf4106",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_wood_02.wav",
+      "durationSeconds": 0.35,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.wood",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_木の床_ノイズ低減.wav",
+        "original": "レコーディング (5).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd",
+        "start": 2.802,
+        "end": 3.152,
+        "gainDb": 8.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "a8cba2c6f8795d59a078566e1620fe74c6c595c712db353de4330839a7ac713f"
+    },
+    {
+      "id": "sfx.step.wood03",
+      "path": "assets/audio/field/step_wood_03.mp3",
+      "sourcePath": "assets/audio/field/step_wood_03.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "0ce7d3499a07f6609b7e753262edcfab4387766c999f9da1743ff930565e270e",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_wood_03.wav",
+      "durationSeconds": 0.38,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.wood",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_木の床_ノイズ低減.wav",
+        "original": "レコーディング (5).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd",
+        "start": 3.554,
+        "end": 3.934,
+        "gainDb": 8.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "9f405be98e75278bbeb25040b152badd8381e966eb2e5803d7fd88c7b5eae59a"
+    },
+    {
+      "id": "sfx.step.wood04",
+      "path": "assets/audio/field/step_wood_04.mp3",
+      "sourcePath": "assets/audio/field/step_wood_04.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "56713d989546ae3016901cde1366ee51d0d8d354473ca26addec33f8b80b99d6",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_wood_04.wav",
+      "durationSeconds": 0.38,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.wood",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_木の床_ノイズ低減.wav",
+        "original": "レコーディング (5).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "54da0c0c315aa1e267fb823d793bd947a8a55b77de3b758ae41de4379e076bbd",
+        "start": 4.296,
+        "end": 4.676,
+        "gainDb": 8.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "8c41946fba2a0d5d8cb134d211e67d0f10ae34d0d891cc04b0cb61eac5ae3307"
+    },
+    {
+      "id": "sfx.step.soft01",
+      "path": "assets/audio/field/step_soft_01.mp3",
+      "sourcePath": "assets/audio/field/step_soft_01.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "571f2f5fe47a4b1443790e6676819f2d1caae5556c44594f1c5ac6eab9513dc5",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_soft_01.wav",
+      "durationSeconds": 0.26,
+      "gain": 0.06,
+      "status": "adopted",
+      "assignedTo": "field.footstep.soft",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_布系_録音04_ノイズ低減.wav",
+        "original": "レコーディング (4).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者が出どころを直した）",
+        "sha256": "d1f1f5df537057a9218fd89b4a5550a107f5936316b73770a55ad86cba7d8e77",
+        "start": 5.738,
+        "end": 5.998,
+        "gainDb": 23.3,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。布の足音（外の通り・広場・森など、木の床でないマップ）。2つを順に鳴らす（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "968d80ee13e195bf3a2a6603e1a3a621ff3150466506e25cb5f8a1f1e61b336a"
+    },
+    {
+      "id": "sfx.step.soft02",
+      "path": "assets/audio/field/step_soft_02.mp3",
+      "sourcePath": "assets/audio/field/step_soft_02.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "754bad1fc9103311daf7973b7e1323be415f209645a9f2e8a0ea90d923d7b54c",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_soft_02.wav",
+      "durationSeconds": 0.26,
+      "gain": 0.06,
+      "status": "adopted",
+      "assignedTo": "field.footstep.soft",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_布系_録音04_ノイズ低減.wav",
+        "original": "レコーディング (4).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者が出どころを直した）",
+        "sha256": "d1f1f5df537057a9218fd89b4a5550a107f5936316b73770a55ad86cba7d8e77",
+        "start": 7.047,
+        "end": 7.307,
+        "gainDb": 23.3,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "cf295ac381579b37f09153a4fdde816432b5a5c1730633899ca513f64023ad03"
+    },
+    {
+      "id": "sfx.step.soft03",
+      "path": "assets/audio/field/step_soft_03.mp3",
+      "sourcePath": "assets/audio/field/step_soft_03.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "fc2ef5083332f488ae50bcd776d6b7f15533ff6d4e956119e49f25024951528e",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_soft_03.wav",
+      "durationSeconds": 0.26,
+      "gain": 0.06,
+      "status": "adopted",
+      "assignedTo": "field.footstep.soft",
+      "recording": {
+        "file": "assets/audio/field/source/rec04_2.5-4.7_denoise.wav",
+        "original": "OneDrive/ドキュメント/サウンド レコーディング/レコーディング (4).wav の2.5〜4.7秒（作者が録音。2026-11-23 Claude が tools/denoise-wav.py で、3.3〜4.1秒で測った雑音を減らした）",
+        "sha256": "bd91e3084aa2aa35768409359f4fd66536e952d8e071cc378eab8be33ac6cd73",
+        "start": 0.348,
+        "end": 0.608,
+        "gainDb": 23.3,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（雑音を減らした歩）（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "87a35b3969874f29d2fd1f22d0196cf70c66a03cfc47c1e0edcf404ba054e9a4"
+    },
+    {
+      "id": "sfx.step.soft04",
+      "path": "assets/audio/field/step_soft_04.mp3",
+      "sourcePath": "assets/audio/field/step_soft_04.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "0b90802adda8098d7e0df72d10c1cc767cb18cab93cf6542c5f1bcd18b21481a",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_soft_04.wav",
+      "durationSeconds": 0.26,
+      "gain": 0.06,
+      "status": "adopted",
+      "assignedTo": "field.footstep.soft",
+      "recording": {
+        "file": "assets/audio/field/source/rec04_2.5-4.7_denoise.wav",
+        "original": "OneDrive/ドキュメント/サウンド レコーディング/レコーディング (4).wav の2.5〜4.7秒（作者が録音。2026-11-23 Claude が tools/denoise-wav.py で、3.3〜4.1秒で測った雑音を減らした）",
+        "sha256": "bd91e3084aa2aa35768409359f4fd66536e952d8e071cc378eab8be33ac6cd73",
+        "start": 1.836,
+        "end": 2.096,
+        "gainDb": 23.3,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（雑音を減らした歩）（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "1ed8b9b1b76b67dde6fce23e3bd65a8d2eb040c2826dd59aa13f1112320a3bf7"
+    },
+    {
+      "id": "sfx.step.stone01",
+      "path": "assets/audio/field/step_stone_01.mp3",
+      "sourcePath": "assets/audio/field/step_stone_01.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "4d939df962383dfbf71cbd063d30562c9e13e5eb0a948bb8e8cddfa89678af65",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_stone_01.wav",
+      "durationSeconds": 0.22,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.stone",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_石の上_仮_録音43_ノイズ低減.wav",
+        "original": "レコーディング (43).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者「石の上の足音使ってみて」）",
+        "sha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f",
+        "start": 1.647,
+        "end": 1.867,
+        "gainDb": 9.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。石の上の足音（町の石畳＝stage.paved の上）。4つからランダムに（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "328492c7daf21374ac86f15271d86e5d0967a6904e478a0fb8ae68204d062e31"
+    },
+    {
+      "id": "sfx.step.stone02",
+      "path": "assets/audio/field/step_stone_02.mp3",
+      "sourcePath": "assets/audio/field/step_stone_02.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "95135e62b84a0aab615755fc7e20bc46200a92fa328e79e2948237e511a4b59e",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_stone_02.wav",
+      "durationSeconds": 0.22,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.stone",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_石の上_仮_録音43_ノイズ低減.wav",
+        "original": "レコーディング (43).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者「石の上の足音使ってみて」）",
+        "sha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f",
+        "start": 2.279,
+        "end": 2.499,
+        "gainDb": 9.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "c7f4db8ccf2e32370fa606c82c081e3d939aaaeff706a86eec99109b9e4de03c"
+    },
+    {
+      "id": "sfx.step.stone03",
+      "path": "assets/audio/field/step_stone_03.mp3",
+      "sourcePath": "assets/audio/field/step_stone_03.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "4b5d89f97ce9f06d3509ffe131d56eba5417153bdfd62c396b5104872fb4f393",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_stone_03.wav",
+      "durationSeconds": 0.22,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.stone",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_石の上_仮_録音43_ノイズ低減.wav",
+        "original": "レコーディング (43).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者「石の上の足音使ってみて」）",
+        "sha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f",
+        "start": 2.951,
+        "end": 3.171,
+        "gainDb": 9.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "e9479a5d766dd1d4cddff0bb18068afc0a5b2d5851d2265a7765c6dade9f6123"
+    },
+    {
+      "id": "sfx.step.stone04",
+      "path": "assets/audio/field/step_stone_04.mp3",
+      "sourcePath": "assets/audio/field/step_stone_04.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "8deb7e103692fc7429be6461ccf9b8b05e46ed12fe6f9cdd2031235779fee5cb",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "step_stone_04.wav",
+      "durationSeconds": 0.22,
+      "gain": 0.07,
+      "status": "adopted",
+      "assignedTo": "field.footstep.stone",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/足音_石の上_仮_録音43_ノイズ低減.wav",
+        "original": "レコーディング (43).wav（作者が録音、ChatGPT のノイズ低減版。2026-11-23 作者「石の上の足音使ってみて」）",
+        "sha256": "855b68ed21df98efa424d72b9a683de2043d9e4a47da96a52de31136fa09aa6f",
+        "start": 3.667,
+        "end": 3.887,
+        "gainDb": 9.9,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。同上（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "sha256": "8d2dd4b88aee8570863f85f63febed2bbf88afb085c381c23b1826584cb9718c"
+    },
+    {
+      "id": "sfx.door.open",
+      "path": "assets/audio/field/door_open.mp3",
+      "sourcePath": "assets/audio/field/door_open.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "e73832c59d29d0598ca80bb23894084678ad0af6475c6bfcee6142312778e20d",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "door_open.wav",
+      "durationSeconds": 1.8,
+      "gain": 0.3,
+      "status": "adopted",
+      "assignedTo": "field.door",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/ドア開閉_ノイズ低減.wav",
+        "original": "レコーディング (3).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "9997315183bf92fd04fb5c0f65aa11dd44687ad6a1baaffcad30a23e89720490",
+        "start": 2.1,
+        "end": 3.9,
+        "gainDb": 13.5,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。扉を通るとき（id に door がある出入口。宿の入口・客室の扉）、入る・出る演出の始まりに（同日 作者「ドアの音もうるさいかな」で小さくした）",
+      "sha256": "eed3e49062e0480804dc7e1fbd7990d328626a1b1b9cdd624f286ed3ab186670"
+    },
+    {
+      "id": "sfx.door.close",
+      "path": "assets/audio/field/door_close.mp3",
+      "sourcePath": "assets/audio/field/door_close.wav",
+      "encoded": {
+        "codec": "mp3 VBR（LAME）",
+        "sha256": "c509ecb263dc940c9a9645cd6ad9c9be58663a49baf891de9ecf1676e7eed9e3",
+        "note": "ゲームは MP3 を鳴らす（sourcePath の WAV は切り出したもの）"
+      },
+      "sourceFile": "door_close.wav",
+      "durationSeconds": 1.1,
+      "gain": 0.3,
+      "status": "adopted",
+      "assignedTo": "field.door",
+      "recording": {
+        "file": "production 外：OneDrive/ドキュメント/ChatGPT/物語/outputs/ドア開閉_ノイズ低減.wav",
+        "original": "レコーディング (3).wav（作者が録音、ChatGPT のノイズ低減版）",
+        "sha256": "9997315183bf92fd04fb5c0f65aa11dd44687ad6a1baaffcad30a23e89720490",
+        "start": 6.95,
+        "end": 8.05,
+        "gainDb": -2.7,
+        "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
+      },
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。扉を通ったあと、着いた側で（閉まる音）（同日 作者「ドアの音もうるさいかな」で小さくした）",
+      "sha256": "12d20fcd993d1c899a8e6f119a4b3b007e2a808e408e261ab503d070d2ac1036"
     }
   ],
   "bgmNote": "曲（DEV-BOOK-001 rev3）。作者指定の完成版ケルト街BGM v30（production/claude/assets/BGM-TOWN-CELTIC-V30.json、作者「音楽はケルトのやつ」）。原WAV outputs/SR_街BGM_ケルト_完成版_v30.wav をそのまま写した（再合成・切詰め・速度変更なし。sha256 照合済み、元のファイルは変えていない）。ループは音源全体 [0, 3024000) フレーム、導入2小節も毎周。bgmByMap は今の仮の試験区画だけの割当で、正式な他マップや物語場面への割当は確定しない。",

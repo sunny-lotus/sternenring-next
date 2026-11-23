@@ -12,7 +12,8 @@ import { pickPage, applyEffects } from './record.js';
  * @param {{ maps: Record<string, any>, collision: any, world: any, party: {id:string}[], record?: import("./record.js").AdventureRecord, onRecordChange?: () => void, rng?: () => number }} data
  */
 export function createField(data) {
-  const stepMs = data.world.stepMs ?? 160;
+  const baseStepMs = data.world.stepMs ?? 160;
+  let stepMs = baseStepMs; // 1マス歩く時間。開発者の窓の「歩く速さ」で短くできる（setStepScale）
   const transitionMs = data.world.transitionMs ?? 240;
   /** @type {Record<string, {leaveMs:number, arriveMs:number}>} 出入口の演出の長さ（data/world.json の effects） */
   const effects = data.world.effects ?? {};
@@ -220,8 +221,8 @@ export function createField(data) {
       transition: state.arriveKind || !transitionMs ? 0 : state.transitionLeft / transitionMs,
       // 出入口の演出：kind（page / nook-in / nook-out）、phase（leave＝転送の前・arrive＝転送のあと）、p（0→1）、at（踏んだ出入口のマス）
       effect: state.leaving
-        ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y } }
-        : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir } : null,
+        ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
+        : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / stepMs) : 1;
         const fx = a.from ? a.from.x : a.x, fy = a.from ? a.from.y : a.y;
@@ -259,5 +260,10 @@ export function createField(data) {
     reviveFoes() { state.defeated = []; },
   };
 
-  return { state, update, view, endBattle, setParty, closeMessage, dev, stepMs, transitionMs };
+  return {
+    state, update, view, endBattle, setParty, closeMessage, dev, transitionMs,
+    get stepMs() { return stepMs; },
+    /** 歩く速さの倍率（1＝ふつう。開発用。2026-11-23 作者「急ぎたいように」） @param {number} k */
+    setStepScale(k) { stepMs = baseStepMs / Math.max(0.5, Math.min(4, Number(k) || 1)); },
+  };
 }

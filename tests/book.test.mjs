@@ -14,12 +14,12 @@ test('流れ：本がひらく → 板が起き上がる → カメラが寄る�
   assert.ok(p0.coverRad > 1.5, 'はじめは閉じている（ページが立っている）');
   assert.equal(p0.zoom, 0, 'はじめは本全体');
   const pOpen = introPose(T.open);
-  assert.equal(pOpen.coverRad, 0, '0.9秒でひらき終わる');
+  assert.equal(pOpen.coverRad, 0, 'open 秒でひらき終わる');
   assert.ok(T.riseStart >= T.open, '板はひらき終わってから起き上がる');
   assert.ok(T.zoomStart > T.riseStart && T.zoomStart < T.riseStart + T.riseSpread + T.riseDur, 'カメラは板が立ちはじめたころから寄る');
   assert.equal(introPose(T.end).zoom, 1, '終わりでカメラはふだんの位置');
   assert.equal(introPose(T.end).done, true);
-  assert.ok(T.end <= 3.5, '長すぎない（歩行へ自然に移る）');
+  assert.ok(T.end <= 5, '長すぎない（歩行へ自然に移る。2026-11-23 作者「本が開く演出はやすぎるかも」で 3.5→5 秒まで）');
   assert.ok(T.riseStart + T.riseSpread + T.actorsAfter + T.riseDur <= T.end, '終わる前にすべての板が立つ');
 });
 

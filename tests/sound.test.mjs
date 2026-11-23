@@ -22,10 +22,12 @@ const ADOPTED = {
   'book_close_soft_v01_denoise.wav': 'd6612775aaab91aff8dc0f221619316a540a94b17cf74bef63e262a00d0cfd24',
 };
 
-test('音の台帳：採用の5点がそろい、ファイルのハッシュが採用時と同じ', () => {
-  assert.equal(audio.sounds.length, 5);
-  assert.deepEqual(audio.sounds.map((s) => s.sourceFile).sort(), Object.keys(ADOPTED).sort());
-  for (const s of audio.sounds) {
+const BOOK = audio.sounds.filter((s) => s.path.startsWith('assets/audio/book/'));
+const FIELD = audio.sounds.filter((s) => s.path.startsWith('assets/audio/field/'));
+test('音の台帳：本の録音の採用5点がそろい、ファイルのハッシュが採用時と同じ', () => {
+  assert.equal(BOOK.length, 5);
+  assert.deepEqual(BOOK.map((s) => s.sourceFile).sort(), Object.keys(ADOPTED).sort());
+  for (const s of BOOK) {
     assert.ok(s.path.startsWith('assets/audio/'), s.id);
     const file = join(root, s.sourcePath || s.path); // 採用の WAV（ゲームが鳴らすのは軽い MP3＝path）
     assert.ok(existsSync(file), s.sourcePath);
@@ -38,13 +40,24 @@ test('音の台帳：採用の5点がそろい、ファイルのハッシュが�
   }
 });
 
-test('割り当てたのは「本がひらく音」「ページをめくる音」3つ「本を閉じる音」。割当待ちの音はコードから鳴らさない', () => {
-  const assigned = audio.sounds.filter((s) => s.assignedTo).map((s) => s.id);
+test('足音と扉の音（2026-11-23 作者の録音）：木の床4・布4・石4・扉2。切り出した WAV と MP3 のハッシュが台帳と同じ、元の録音の出どころと切り出し位置がある、足音は小さめ', () => {
+  assert.deepEqual(FIELD.map((s) => s.id).sort(), ['sfx.door.close', 'sfx.door.open', 'sfx.step.soft01', 'sfx.step.soft02', 'sfx.step.soft03', 'sfx.step.soft04', 'sfx.step.stone01', 'sfx.step.stone02', 'sfx.step.stone03', 'sfx.step.stone04', 'sfx.step.wood01', 'sfx.step.wood02', 'sfx.step.wood03', 'sfx.step.wood04']);
+  for (const s of FIELD) {
+    assert.equal(createHash('sha256').update(readFileSync(join(root, s.sourcePath))).digest('hex'), s.sha256, s.sourcePath);
+    assert.equal(createHash('sha256').update(readFileSync(join(root, s.path))).digest('hex'), s.encoded.sha256, s.path);
+    assert.ok(s.recording?.sha256?.length === 64 && s.recording.end > s.recording.start, s.id);
+    assert.ok(s.gain > 0 && s.gain <= 1, s.id);
+    if (s.id.startsWith('sfx.step.')) assert.ok(s.gain <= 0.4, `${s.id} 足音は小さめ`);
+  }
+});
+
+test('割り当てたのは「本がひらく音」「ページをめくる音」3つ「本を閉じる音」と足音・扉の音。割当待ちの音はコードから鳴らさない', () => {
+  const assigned = audio.sounds.filter((s) => s.assignedTo && s.path.startsWith('assets/audio/book/')).map((s) => s.id);
   assert.deepEqual(assigned.sort(), ['sfx.book.close', 'sfx.book.open', 'sfx.page.turn01', 'sfx.page.turn02', 'sfx.page.turn03']); // 本を閉じる音は 2026-11-22 作者「閉じる音使ってよ」でメニューを閉じるときに // ページをめくる音は 2026-11-22 作者「ページめくりの音を入れてほしい」
   const text = srcFiles().map((p) => readFileSync(p, 'utf8')).join('\n');
   for (const s of audio.sounds.filter((x) => !x.assignedTo)) assert.ok(!text.includes(s.id), `${s.id} がコードにある`);
   assert.ok(text.includes("'sfx.book.open'"));
-  for (const id of ['sfx.page.turn01', 'sfx.page.turn02', 'sfx.page.turn03']) assert.ok(text.includes("'" + id + "'"), id);
+  for (const id of ['sfx.page.turn01', 'sfx.page.turn02', 'sfx.page.turn03', ...FIELD.map((s) => s.id)]) assert.ok(text.includes("'" + id + "'"), id);
 });
 
 const base = { introPhase: 'playing', introT: 0, ctxState: 'running', loaded: true, level: 'mid', already: '' };
@@ -53,6 +66,11 @@ test('本がひらく音：音が有効なら演出の始まりで鳴らす（�
   assert.deepEqual(decideOpenCue(base), { decided: true, play: true, offset: 0, reason: 'played' });
   const late = decideOpenCue({ ...base, introT: 0.1 });
   assert.equal(late.play, true); assert.equal(late.offset, 0.1);
+});
+
+test('本がひらく音：鳴らす時刻の前（introT がまだ負）は決めずに待つ（2026-11-23 作者「初めに開くのも音が早い」で OPEN_CUE_DELAY だけ遅らせる）', () => {
+  const d = decideOpenCue({ ...base, introT: -0.3 });
+  assert.equal(d.decided, false); assert.equal(d.play, false);
 });
 
 test('本がひらく音：音が有効でないまま始まったら鳴らさない。あとで有効になっても遅れて鳴らさない', () => {

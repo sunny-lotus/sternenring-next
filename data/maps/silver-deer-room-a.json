@@ -4,6 +4,7 @@
   "id": "silver-deer-room-a",
   "title": "銀鹿亭・客室（仮）",
   "kind": "interior",
+  "footsteps": "wood",
   "status": "provisional",
   "provenance": "2026-11-22 作者の指示（相談チャット）で作った仮の客室。銀鹿亭の吹き抜けの2階の通路の扉から入る。正式な間取りは4室の確定待ち。",
   "width": 9,

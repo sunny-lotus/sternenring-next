@@ -365,3 +365,40 @@ test('開発者メニュー：ワープ・すぐ戦う・ランダムの戦闘�
   field.dev.reviveFoes();
   assert.deepEqual(field.view().defeated, []);
 });
+
+test('扉の音のために：宿の入口を通ると、離れるあいだも着いたあとも view.effect.exit が通った出入口の id（2026-11-23）', () => {
+  const { field, input, d } = makeField();
+  tap(field, input, 'up', 1);
+  input.press('up'); input.release('up'); run(field, input, field.stepMs + 20);
+  assert.deepEqual([field.view().effect?.phase, field.view().effect?.exit], ['leave', 'inn-door']);
+  run(field, input, d.world.effects['nook-in'].leaveMs + 20);
+  assert.equal(field.state.mapId, 'silver-deer-1f');
+  assert.deepEqual([field.view().effect?.phase, field.view().effect?.exit], ['arrive', 'inn-door']);
+  assert.equal(d.maps['silver-deer-1f'].footsteps, 'wood', '銀鹿亭の中は木の床の足音');
+});
+
+test('奥へ（試し）：広場の北の道は「背景に入りこむ」演出（dive）で森の南へ。森の南の道から広場の北へ戻れる（2026-11-23）', () => {
+  const { field, input, d } = makeField({ map: 'norn-plaza', spawn: 'default' }); // (12,11)
+  tap(field, input, 'right', 1); tap(field, input, 'up', 10); // (13,1)
+  assert.deepEqual(pos(field), { x: 13, y: 1, dir: 'up' });
+  input.press('up'); input.release('up'); run(field, input, field.stepMs + 20);
+  assert.deepEqual([field.view().effect?.kind, field.view().effect?.phase], ['dive', 'leave']);
+  run(field, input, d.world.effects.dive.leaveMs + 20);
+  assert.equal(field.state.mapId, 'test-forest');
+  assert.deepEqual(pos(field), { x: 30, y: 28, dir: 'up' }); // 出入口の左の列から入ったので、左の列に着く
+  assert.deepEqual([field.view().effect?.kind, field.view().effect?.phase], ['dive', 'arrive']);
+  run(field, input, d.world.effects.dive.arriveMs + 20);
+  tap(field, input, 'down', 1);
+  // 戻りは「背景から出てくる」（tap は離れる・着く演出を待つので、着いた演出の種類で確かめる）
+  assert.equal(field.state.mapId, 'norn-plaza');
+  assert.equal(field.state.arriveKind, 'emerge');
+  assert.deepEqual(pos(field), { x: 13, y: 1, dir: 'down' });
+});
+
+test('歩く速さ（開発者の窓）：setStepScale で1マスの時間が変わり、1でもとに戻る（2026-11-23）', () => {
+  const { field, d } = makeField();
+  const base = d.world.stepMs;
+  assert.equal(field.stepMs, base);
+  field.setStepScale(2); assert.equal(field.stepMs, base / 2);
+  field.setStepScale(1); assert.equal(field.stepMs, base);
+});

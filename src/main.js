@@ -1,17 +1,17 @@
 // @ts-check
 // 起動だけ。部品を組み立てて loop を回す。冒険の記録は src/core/record.js、保存は src/save.js（2026-11-22 作者「NEXTが冒険の記録を持つ」）。
 // 描画は2つ：紙の舞台（paper・WebGL）と平面（flat2d・Canvas 2D の予備）。右上のボタンか ?render=flat2d で切りかえる。
-import { loadGameData } from './data.js';
+import { loadGameData, getJson } from './data.js';
 import { InputState } from './core/input.js';
 import { createField } from './core/field.js';
 import { startLoop } from './core/loop.js';
 import { createFlat2d } from './render/flat2d.js';
 import { createPaperStage } from './render/paper-stage.js';
-import { createThreeStage } from './render/three-stage.js';
+import { createThreeStage, RIFFLE } from './render/three-stage.js';
 import { bindKeyboard, bindTouchpad } from './ui/controls.js';
 import { createCamPanel } from './ui/cam-panel.js';
 import { createIntro, shouldPlayIntro, gateInput, startWhenReady, INTRO_TIMING } from './render/book-intro.js';
-import { createSound, decideOpenCue, nextLevel, SOUND_LEVELS } from './audio/sound.js';
+import { createSound, decideOpenCue, nextLevel, SOUND_LEVELS, OPEN_CUE_DELAY } from './audio/sound.js';
 import { createBgm, decideBgm } from './audio/bgm.js';
 import { storeFor, formationOf, goldOf, fieldSkills, intimacyOf, linkOpenOf } from './core/record.js';
 import { loadRecord, createSaver } from './save.js';
@@ -21,9 +21,11 @@ const params = new URLSearchParams(location.search);
 
 async function boot() {
   // 音の台帳は、ゲームのデータと並べて読む。読めなくても無音で進む（音はゲームの進行に要らない）
-  const audioLedger = fetch('data/audio.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : { sounds: [] }), () => ({ sounds: [] }));
-  const dialogueP = fetch('data/dialogue.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : { lines: {} }), () => ({ lines: {} })); // 調べたときの言葉も、はじめに並べて読む
-  const d = await loadGameData();
+  const audioLedger = getJson('data/audio.json').catch(() => ({ sounds: [] }));
+  const dialogueP = getJson('data/dialogue.json').catch(() => ({ lines: {} })); // 調べたときの言葉も、はじめに並べて読む
+  let day = false; try { day = JSON.parse(loadRecord().store['sr-settings-v1'] || '{}')?.time === 'day'; } catch { day = false; } // 昼の設定なら昼の背景を先に読む
+  const d = await loadGameData({ day });
+  const boot = { data: performance.now(), stage: 0, map: 0, draw: 0 }; // 起動にかかった時間（?perf=1 で右上に出す。2026-11-23 作者「はじめの読み込みが遅い　クロームでやると」）
   if (d.errors.length) { $('status').textContent = `データに問題があるため起動しません：\n${d.errors.join('\n')}`; $('status').classList.add('error'); return; }
   const input = new InputState({ buffer: d.world.inputBuffer });
   // ?lead=volt など：その仲間を先頭にして動かす（作者が歩きの絵を確かめるため。2026-11-22 作者「ヴォルトだけ動かしたい」）
@@ -61,6 +63,7 @@ async function boot() {
   // ?stage=webgl1 で、これまでの素の WebGL 版を見られる（見比べ用）
   try { renderers.paper = params.get('stage') === 'webgl1' ? createPaperStage(paperCanvas, assets) : createThreeStage(paperCanvas, assets); }
   catch (e) { paperError = /** @type {Error} */ (e).message; try { renderers.paper = createPaperStage(paperCanvas, assets); } catch (e2) { paperError += ` / ${/** @type {Error} */ (e2).message}`; } }
+  boot.stage = performance.now();
   let mode = params.get('render') === 'flat2d' || !renderers.paper ? 'flat2d' : 'paper';
   let shown = '';
   const fit = () => {
@@ -108,7 +111,9 @@ async function boot() {
   const sound = createSound(ledger, { level: startLevel });
   let openCue = '';
   // 曲（rev3）：効果音とは別の経路・別の音量。マップの割当（data/audio.json の bgmByMap）どおりに流し、開始演出のあいだは流さない
-  const bgm = createBgm(ledger, { level: startLevel });
+  /** @type {() => void} */ let firstDrawn = () => {};
+  const afterFirstDraw = new Promise((res) => { firstDrawn = () => res(undefined); setTimeout(res, 4000); }); // 描けなくても4秒で読みはじめる
+  const bgm = createBgm(ledger, { level: startLevel, after: afterFirstDraw });
   const bgmByMap = ledger.bgmByMap || {};
   for (const ev of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(ev, () => { sound.unlock(ev); bgm.unlock(ev); }, { capture: true, passive: true });
   const soundBtn = $('sound-toggle');
@@ -121,12 +126,14 @@ async function boot() {
   syncBgmUi();
   // 設定の統一（2026-11-22 作者「設定を統一しよう」）：曲・効果音の大きさ、表示、内装は、メニューの「設定」（フィールドと戦闘で共通）で決め、
   // 冒険の記録の sr-settings-v1 に保存する。起動したとき・メニューで変えたとき（sr-settings）に、ここで当てる。右上はメニューだけにした
-  const readSettings = () => { let s = {}; try { s = JSON.parse(record.store['sr-settings-v1'] || '{}') || {}; } catch { s = {}; } return { se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', ...s }; };
+  const readSettings = () => { let s = {}; try { s = JSON.parse(record.store['sr-settings-v1'] || '{}') || {}; } catch { s = {}; } return { se: 'mid', bgm: 'mid', render: 'paper', pixelRoom: false, time: 'night', deep: 'riffle', ...s }; };
   const applySettings = () => {
     const s = readSettings(), lv = (/** @type {string} */ v) => (SOUND_LEVELS.some((l) => l.id === v) ? v : 'mid');
     if (params.get('mute') !== '1') { sound.setLevel(lv(s.se)); bgm.setLevel(lv(s.bgm)); syncSoundUi(); syncBgmUi(); }
     if (!params.get('render') && renderers.paper) { const m = s.render === 'flat2d' ? 'flat2d' : 'paper'; if (m !== mode) { mode = m; showMode(); } }
     const r = renderers.paper; if (r?.setPixelRoom && r.pixelRoom() !== !!s.pixelRoom) { r.setPixelRoom(!!s.pixelRoom); shown = ''; }
+    if (r?.setDeepStyle) r.setDeepStyle(s.deep);
+    field.setStepScale(Number(s.walk) || 1); // 歩く速さ（開発者の窓だけ。2026-11-23 作者「移動速度の調整も開発のみできるように」） // 奥へ・手前へ移る演出（開発者の窓で見くらべる。2026-11-23）
     const tm = s.time === 'day' ? 'day' : 'night'; if (r?.setTime && r.time() !== tm) { r.setTime(tm); shown = ''; } // 時間（昼・夜）。変えたらマップを読み直す
     syncRoomUi();
   };
@@ -179,11 +186,18 @@ async function boot() {
   let uiPhase = intro.phase;
   const PAGE_TURNS = ['sfx.page.turn01', 'sfx.page.turn02', 'sfx.page.turn03'];
   let pageCueAt = -1, pageCueN = 0;
+  let doorCue = '', stepCueAt = 0, lastStep = '', riffleCue = -1;
+  const STEP_WOOD = ['sfx.step.wood01', 'sfx.step.wood02', 'sfx.step.wood03', 'sfx.step.wood04'], STEP_SOFT = ['sfx.step.soft01', 'sfx.step.soft02', 'sfx.step.soft03', 'sfx.step.soft04'];
+  const STEP_STONE = ['sfx.step.stone01', 'sfx.step.stone02', 'sfx.step.stone03', 'sfx.step.stone04'];
+  /** 足もとの足音の種類：木の床のマップは木、町の石畳（stage.paved）の上は石、ほかは布（2026-11-23 作者「石の上の足音使ってみて」） */
+  const stepSet = (/** @type {any} */ m, /** @type {number} */ x, /** @type {number} */ y) => m?.footsteps === 'wood' ? STEP_WOOD
+    : (m?.stage?.paved || []).some((/** @type {any} */ p) => x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h) ? STEP_STONE : STEP_SOFT;
   const draw = async () => {
     const r = renderers[mode];
     if (field.state.mapId !== shown) {
       shown = field.state.mapId; const m = d.maps[shown];
       await r.load(m, d.collision);
+      if (!boot.map) boot.map = performance.now();
       $('map-title').textContent = m.title; $('map-badge').hidden = m.status !== 'provisional';
       syncRoomUi();
       camUi?.sync();
@@ -192,7 +206,7 @@ async function boot() {
     const t0 = performance.now();
     const pose = intro.pose(t0);
     if (!openCue) { // 本がひらく音：演出の始まりに間に合ったときだけ鳴らす（一度決めたら決め直さない）
-      const c = decideOpenCue({ introPhase: intro.phase, introT: pose ? pose.t : 0, ctxState: sound.state, loaded: sound.loaded, level: sound.level, already: openCue });
+      const c = decideOpenCue({ introPhase: intro.phase, introT: pose ? pose.t - OPEN_CUE_DELAY : 0, ctxState: sound.state, loaded: sound.loaded, level: sound.level, already: openCue });
       if (c.decided) openCue = c.play && !sound.play('sfx.book.open', c.offset) ? 'play-failed' : c.reason;
     }
     // ページをめくる音（2026-11-22 作者「ページめくりの音を入れてほしい」）：外どうしの出入口でページがめくれはじめるとき（着いた直後）に、
@@ -202,17 +216,39 @@ async function boot() {
       pageCueAt = field.state.transfers;
       sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]);
     }
+    // 奥へ何枚もめくるとき：1枚めくれはじめるごとに、本のページをめくる音（作者の本の録音3つを順に）
+    // （2026-11-23 何枚もめくる録音の音も試したが、作者が「もっとめくる」のときの形に戻した）
+    if (ev && (ev.kind === 'dive' || ev.kind === 'emerge') && ev.phase === 'arrive' && renderers.paper?.deepStyle?.() === 'riffle') {
+      const k = Math.min(RIFFLE.n - 1, Math.floor(ev.p / RIFFLE.gap)), key = field.state.transfers * 100 + k;
+      if (ev.p < (RIFFLE.n - 1) * RIFFLE.gap + 0.02 && riffleCue !== key) { riffleCue = key; sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]); }
+    }
+    // 扉と足音（2026-11-23 作者「足音とドアの音など録音したから入れてほしい」）：
+    // 扉（id に door がある出入口）を通るとき、離れはじめに開く音、着いた側で閉まる音。1回の転送で1回ずつ
+    if (ev && /door/.test(ev.exit || '')) {
+      const key = `${field.state.transfers}:${ev.phase}`;
+      if (doorCue !== key) { doorCue = key; sound.play(ev.phase === 'leave' ? 'sfx.door.open' : 'sfx.door.close'); }
+    }
+    // 足音：2マスに1回（2026-11-23 作者「足音間隔が狭すぎる」：前は1マスごと）。木の床のマップ（footsteps: wood）は木の足音4つ、ほかは布の足音2つを順に
+    if (field.state.steps !== stepCueAt) {
+      const n = field.state.steps - stepCueAt; stepCueAt = field.state.steps;
+      if (n > 0 && field.state.steps % 2 === 0 && !ev && !field.state.battle) { const me = field.state.actors[0], set = stepSet(d.maps[field.state.mapId], me.x, me.y);
+        // ランダムに選ぶ（同じ音は続けない）。高さ ±6%・大きさ ±15% も毎回少し変える（2026-11-23 作者「足音ランダムにしてほしい」）
+        let k = Math.floor(Math.random() * set.length); if (set[k] === lastStep && set.length > 1) k = (k + 1 + Math.floor(Math.random() * (set.length - 1))) % set.length;
+        lastStep = set[k]; sound.play(set[k], 0, { rate: 0.94 + Math.random() * 0.12, vol: 0.85 + Math.random() * 0.3 }); }
+    }
     if (intro.phase !== uiPhase) { uiPhase = intro.phase; syncIntroUi(); } // 最後まで再生して終わったときなど
     const b = decideBgm({ mapId: field.state.mapId, byMap: bgmByMap, current: bgm.wanted, introBlocking: intro.blocking });
     if (b.action !== 'keep' && b.action !== 'none') bgm.want(b.want);
     r.draw(field.view(), { intro: pose, seconds: reducedMotion ? 0 : t0 / 1000 });
+    if (boot.map && !boot.draw) { boot.draw = performance.now(); firstDrawn(); console.info(`[perf] 起動 ${(boot.draw / 1000).toFixed(2)}秒：データ ${(boot.data / 1000).toFixed(2)} / 舞台 ${((boot.stage - boot.data) / 1000).toFixed(2)} / 町 ${((boot.map - boot.stage) / 1000).toFixed(2)} / 最初の描画 ${((boot.draw - boot.map) / 1000).toFixed(2)}`); }
     const now = performance.now();
     perf.drawMs = now - t0; perf.frames++; perf.worstMs = Math.max(perf.worstMs, now - perf.last); perf.last = now;
     if (now - perf.since >= 1000) {
       perf.fps = Math.round(perf.frames * 1000 / (now - perf.since));
       if (!perfEl.hidden) {
         const dbg = r.debug();
-        perfEl.textContent = `${mode}  ${perf.fps}fps  最長${Math.round(perf.worstMs)}ms  描画${perf.drawMs.toFixed(1)}ms${dbg.drawCalls != null ? `  draw${dbg.drawCalls}  板${dbg.boards}` : ''}  内部${(dbg.inner || [dbg.W, dbg.H]).join('×')}`;
+        perfEl.textContent = `${boot.draw ? `起動${(boot.draw / 1000).toFixed(1)}秒（データ${(boot.data / 1000).toFixed(1)} 舞台${((boot.stage - boot.data) / 1000).toFixed(1)} 町${((boot.map - boot.stage) / 1000).toFixed(1)} 描画${((boot.draw - boot.map) / 1000).toFixed(1)}）
+` : ''}${mode}  ${perf.fps}fps  最長${Math.round(perf.worstMs)}ms  描画${perf.drawMs.toFixed(1)}ms${dbg.drawCalls != null ? `  draw${dbg.drawCalls}  板${dbg.boards}` : ''}  内部${(dbg.inner || [dbg.W, dbg.H]).join('×')}`;
       }
       perf.frames = 0; perf.since = now; perf.worstMs = 0;
     }

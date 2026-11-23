@@ -42,7 +42,7 @@ export function checkBuffer(buf, spec) {
 /**
  * ブラウザで曲を流す部品。音が使えない端末・読込失敗でも、ゲームは無音で進む。
  * @param {{ bgm?: { id:string, path:string, sampleRateHz:number, frames:number, channels:number }[] }} ledger data/audio.json
- * @param {{ level?: string }} [opts] 始めの曲の音量（?mute=1 のとき 'off'）
+ * @param {{ level?: string, after?: Promise<any> }} [opts] 始めの曲の音量（?mute=1 のとき 'off'）・after：これが済んでから曲を読む
  */
 export function createBgm(ledger, opts = {}) {
   const tracks = ledger.bgm || [];
@@ -117,6 +117,7 @@ export function createBgm(ledger, opts = {}) {
   const ready = (async () => {
     if (!ctx) return;
     try {
+      if (opts.after) await opts.after; // 曲（大きいファイル）は、最初の絵が出てから読む（2026-11-23 作者「公開サイトの読み込みを早くする方法」）
       await Promise.all(tracks.map(async (t) => {
         const r = await fetch(t.path, { cache: 'no-cache' });
         if (!r.ok) throw Error(`${t.path} を読めません (${r.status})`);
