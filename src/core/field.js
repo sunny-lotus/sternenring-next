@@ -52,9 +52,14 @@ export function createField(data) {
     state.mapId = mapId;
     const q = queries[mapId];
     const lead = { id: data.party[0].id, x: at.x, y: at.y, dir: at.dir, from: null, t: 0, animMs: 0 };
+    // 仲間は1人ずつ、前の人のうしろ（だめなら横）の空いたマスに並ぶ（2026-11-24 5人になって、前は全員が主人公のうしろの同じマスに重なっていた）
+    /** @type {{x:number,y:number}[]} */ const taken = [{ x: at.x, y: at.y }];
     const followers = data.party.slice(1).map((p, i) => {
       const k = keep?.[i], kx = k ? at.x + k.dx : 0, ky = k ? at.y + k.dy : 0;
-      const pos = k && q.passable(kx, ky) && !(kx === at.x && ky === at.y) ? { x: kx, y: ky } : placeFollower(q, at); // 同じ並び（立てない所なら、いつもの置き方）
+      let pos = k && q.passable(kx, ky) && !taken.some((t) => t.x === kx && t.y === ky) ? { x: kx, y: ky } : null; // 同じ並び（立てない所なら、いつもの置き方）
+      if (!pos) { for (let j = taken.length - 1; j >= 0 && !pos; j--) { const c = placeFollower(q, { ...taken[j], dir: at.dir }, taken); if (!taken.some((t) => t.x === c.x && t.y === c.y)) pos = c; } }
+      if (!pos) pos = taken[taken.length - 1]; // どこも空いていなければ、すぐ前の人と重なる（前と同じ）
+      taken.push(pos);
       return { id: p.id, x: pos.x, y: pos.y, dir: at.dir, from: null, t: 0, animMs: 0 };
     });
     state.actors = [lead, ...followers]; state.npcFace = {};
@@ -242,6 +247,8 @@ export function createField(data) {
       effect: state.leaving
         ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
+      // きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：出来事に sparkle があり、その旗がまだ立っていない所
+      sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag])).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })),
       npcs: (data.maps[state.mapId].npcs || []).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / curStep) : 1;

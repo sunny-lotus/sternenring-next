@@ -7,13 +7,14 @@ import { DIR_VEC } from './map.js';
  * （DEV-DESIGN-001 examples/check-examples.mjs の placeFollower と同じ順）
  * @param {{ passable:(x:number,y:number)=>boolean, exitAt:(x:number,y:number)=>any }} q
  * @param {{x:number,y:number,dir:string}} arrive
+ * @param {{x:number,y:number}[]} [taken] もう人が立っているマス（5人になって同じマスに重ならないように。2026-11-24）
  */
-export function placeFollower(q, arrive) {
+export function placeFollower(q, arrive, taken = []) {
   const [dx, dy] = DIR_VEC[arrive.dir];
   const cands = [[-dx, -dy], [dy, dx], [-dy, -dx]];
   for (const [cx, cy] of cands) {
     const x = arrive.x + cx, y = arrive.y + cy;
-    if (q.passable(x, y) && !q.exitAt(x, y)) return { x, y };
+    if (q.passable(x, y) && !q.exitAt(x, y) && !taken.some((t) => t.x === x && t.y === y)) return { x, y };
   }
   return { x: arrive.x, y: arrive.y };
 }

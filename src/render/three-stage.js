@@ -861,8 +861,11 @@ const flameCanvas = () => canvas(96 * FIRE_FRAMES, 128, (g, W, H) => {
 const plasterCanvas = () => canvas(256, 256, (g, w, h) => { g.fillStyle = '#b8a27c'; g.fillRect(0, 0, w, h); g.fillStyle = '#4a2e1a'; g.fillRect(0, 0, w, 10); g.fillRect(0, h - 14, w, 14); g.fillRect(0, 0, 12, h); noise(g, w, h, rnd(22), 26); });
 // 光の玉：2026-11-22 作者の選択で六角形（ふちの線つき）から、線のない、ふちのぼやけた丸い光の粒にした
 // （明るい石畳の上では、六角形の輪郭だけが浮いて「何かの印」に見えた）
+// 2026-11-24 作者「やっぱり前の六角形の方が良かったかな〜」で、試作_飛び出す絵本と同じ六角形（ふちの線つき）にもどした
 const hexCanvas = () => canvas(128, 128, (g) => {
-  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 62); gr.addColorStop(0, 'rgba(240,244,255,.6)'); gr.addColorStop(0.35, 'rgba(215,222,255,.3)'); gr.addColorStop(1, 'rgba(200,210,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); });
+  g.translate(64, 64); g.beginPath(); for (let k = 0; k < 6; k++) { const a = Math.PI / 6 + k * Math.PI / 3; g.lineTo(Math.cos(a) * 56, Math.sin(a) * 56); } g.closePath();
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 60); gr.addColorStop(0, 'rgba(220,225,255,.34)'); gr.addColorStop(0.8, 'rgba(190,200,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,.4)');
+  g.fillStyle = gr; g.fill(); g.strokeStyle = 'rgba(235,240,255,.35)'; g.lineWidth = 3; g.stroke(); });
 
 /** 切り抜きの板（両面に同じ絵）。影も絵の形で落ちる */
 /** レフ板（2026-11-22 作者「カメラからキャラにスポットライトかレフ板を置いて明るく」）：キャラの絵を少しだけ自分で光らせる */
@@ -975,7 +978,7 @@ export function createThreeStage(canvasEl, assets) {
   const hexTex = texOf(hexCanvas()); const orbGroup = new THREE.Group(); scene.add(orbGroup);
   // 光の玉は場所ごとに変える（2026-11-22 作者「オーブは場所によって変えるようにしたい」）：マップの stage.orbs（数・明るさ・色・大きさ）が
   // stage-style.json の orbs を上書きする。玉は ORB_MAX 個まで先に作っておき、マップを読むたびに数と色を合わせる
-  const ORB_MAX = 80, ORB_MORE = 1.3, NEAR_ORBS = 8; // 2026-11-23 作者「オーブの量を増やして」「カメラ付近にも出るように」のあと「オーブ多すぎるかな」：マップの数の1.3倍、カメラの前に8個
+  const ORB_MAX = 80, ORB_MORE = 1.0, NEAR_ORBS = 5; // 2026-11-23 作者「オーブの量を増やして」「カメラ付近にも出るように」のあと「オーブ多すぎるかな」：マップの数の1.3倍、カメラの前に8個。2026-11-24 作者「オーブが多いかも」：マップの数のまま、カメラの前に5個
   const orbSprites = [];
   for (let i = 0; i < ORB_MAX; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: hexTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, rotation: i * 1.7, toneMapped: false, fog: false }) /* 明るい部屋でも消えないように、明るさをおさえる処理（トーンマッピング）ともやを受けない */); s.visible = false; orbGroup.add(s); orbSprites.push(s); }
   let orbCfg = { count: 0, alpha: 0.7, size: 1 };
@@ -1062,9 +1065,16 @@ export function createThreeStage(canvasEl, assets) {
     const tx = m.stage?.textures;
     if (tx && new URLSearchParams(location.search).get('innart') !== '0') for (const k of INN_KEYS) {
       if (!tx[k]) continue; const url = (tx.base || '') + tx[k]; if (url in artCache) continue;
-      jobs.push(loader.loadAsync(url).then(async (x) => { try { await x.image?.decode?.(); } catch { /* ほどけなくても張るときにほどく */ } x.colorSpace = THREE.SRGBColorSpace; if (!(url in artCache)) { artCache[url] = x; renderer.initTexture(x); } }, () => {}));
+      jobs.push(loader.loadAsync(url).then(async (x) => { try { await x.image?.decode?.(); } catch { /* ほどけなくても張るときにほどく */ } x.colorSpace = THREE.SRGBColorSpace; if (!(url in artCache)) { artCache[url] = x; upQ.push(x); pumpUploads(); } }, () => {}));
     }
     await Promise.all(jobs);
+  }
+  // GPU へ送るのは1コマに少しずつ（2026-11-24 作者の録画「銀鹿亭の中の部屋に入るとき」：扉に入った瞬間に約1秒止まっていた。先読みした部屋の絵を、届いたそばから一度に送っていた）
+  /** @type {any[]} */ const upQ = []; let pumping = false;
+  async function pumpUploads() {
+    if (pumping) return; pumping = true;
+    try { let tb = performance.now(); while (upQ.length) { renderer.initTexture(upQ.shift()); if (performance.now() - tb > 6) { await new Promise((res) => requestAnimationFrame(() => res(undefined))); tb = performance.now(); } } }
+    finally { pumping = false; }
   }
   /** 元絵の手ざわり（写しを作って繰り返し数を決める。写しはマップを替えるときに片づく）。無ければ null */
   /** 切り抜きの元絵の、絵のある範囲（px。美術・演出室の 追加元絵_生成一覧_v01.json の content_bounds_alpha128）と絵の大きさ */
@@ -1099,6 +1109,8 @@ export function createThreeStage(canvasEl, assets) {
   const doorGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc878, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true, opacity: 0 }));
   doorGlow.visible = false; doorGlow.renderOrder = 5; scene.add(doorGlow);
   /** @type {{HT:number, F:number}|null} ブックヌックの箱の大きさ（中のマップのとき） */ let nook = null;
+  /** 仲間の見え方（2026-11-24 作者「２，４」）：広い所ではかたまって歩き、止まると主人公のまわりに集まる。core の並び（一列の足あと）は変えず、絵の位置だけずらす */
+  const grp = { /** @type {Record<string,any>} 仲間ごとの「横へずれる量 lat・よける量 dx・集まる度合い g」 */ vis: {}, idleT: 0, lastT: 0, /** @type {string|null} */ mapId: null };
   let interior = false, cssW = 1, cssH = 1, lastEye = [0, 0, 0], lastIntro = null, orbsShown = 0, lastEffect = '';
 
   // めくれるページ（ページめくりの演出）。背を軸に、右ページから左ページへ。先のほうが遅れてしなる（試作と同じ形）
@@ -1491,11 +1503,29 @@ export function createThreeStage(canvasEl, assets) {
           if (F.mesh.visible) { const [cw, ch] = e.cell, fi = F.t.image; F.mesh.position.set(((an[0] + cw / 2) / F.fw - 0.5) * F.w, am.mesh.position.y + (0.5 - (an[1] + ch / 2) / F.fh) * F.h, 0.004); F.t.repeat.set(cw / fi.width, ch / fi.height); F.t.offset.set(col * cw / fi.width, 1 - (row + 1) * ch / fi.height); }
         }
         am.hinge.position.set(n.x, 0, n.z);
-        if (n.pose === 'sit' && (dir === 'left' || dir === 'right')) {
-          // 横向きに椅子に座る（2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」）：
-          // 椅子を置き（背は後ろ）、腰（足もとから背の3割強）を座面に。腰から下は、前へずらして座面から床までちぢめる（ひざから下が椅子の前に下りて見える）
-          const fwd = dir === 'right' ? 1 : -1, SEAT = 0.62, HIP = 0.33;
-          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); ch.position.set(n.x, 0, n.z - 0.26); ch.rotation.y = -fwd * Math.PI / 2; root.add(ch); // 絵の板より少し奥に置く（背板が体の前に出ないように）
+        if (n.pose === 'sit' && am.sheet.sit) {
+          // 座り姿の絵があれば、それを椅子の上に置く（2026-11-24 作者「先に座り姿を組み込む」）：立ち絵を切ったりちぢめたりせず、座面の高さ（台帳の seat＝足の裏から何ドット上か）を椅子の座面に合わせる
+          const S = am.sheet.sit, e = S.e, sf = sheetFrame(e, dir, 0), simg = S.t.image, [sfw, sfh] = e.frame, fwd = dir === 'right' ? 1 : dir === 'left' ? -1 : 0, SEAT = 0.62;
+          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); root.add(ch);
+          if (fwd) { ch.position.set(n.x, 0, n.z - 0.26); ch.rotation.y = -fwd * Math.PI / 2; } // 横向き：背板は進む向きの逆
+          else if (dir === 'down') { ch.position.set(n.x, 0, n.z - 0.3); ch.rotation.y = Math.PI; } // 正面：絵は座面の前のふちに（脚が椅子の前にたれる）
+          else ch.position.set(n.x, 0, n.z + 0.02); // 後ろ向き：背板が体の手前（背もたれごしに背中）
+          am.mesh.visible = false; if (am.face) am.face.mesh.visible = false;
+          const sh2 = sfh * DOT, sw2 = sh2 * sfw / sfh, seat = e.seat?.[e.directions.indexOf(dir)] ?? 12;
+          const sm = boardMesh(S.t, sw2, sh2); fillMaterial(sm.material, S.t); sm.castShadow = true;
+          S.t.repeat.set(sf.sw / simg.width, sf.sh / simg.height); S.t.offset.set(sf.sx / simg.width, 1 - (sf.sy + sf.sh) / simg.height);
+          sm.position.set(0, SEAT - seat * DOT + sh2 / 2 - (sfh - e.anchor[1]) * DOT, 0); am.hinge.add(sm);
+          npcHinges.push(am.hinge); continue;
+        }
+        if (n.pose === 'sit') {
+          // 椅子に座る（2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」、のち「椅子に座るのをもう少し見やすく」で正面・後ろ向きも椅子に）：
+          // 椅子を置き、腰（足もとから背の3割強）を座面に。腰から下は座面から床までちぢめる（横向きは前へずらして、ひざから下が椅子の前に下りて見える）
+          // 椅子の前は -z（背板は +z）。横向き＝背は進む向きの逆、正面＝背は体のうしろ、後ろ向き＝背板が体の手前（カメラ側）に来る
+          const fwd = dir === 'right' ? 1 : dir === 'left' ? -1 : 0, SEAT = 0.62, HIP = 0.33;
+          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); root.add(ch);
+          if (fwd) { ch.position.set(n.x, 0, n.z - 0.26); ch.rotation.y = -fwd * Math.PI / 2; } // 絵の板より少し奥に置く（背板が体の前に出ないように）
+          else if (dir === 'down') { ch.position.set(n.x, 0, n.z); ch.rotation.y = Math.PI; } // 正面：体は座面の真ん中。脚は座面の前のふちから下へたらす（足が床に届かず、下に椅子の脚が見える）
+          else { ch.position.set(n.x, 0, n.z + 0.02); } // 後ろ向き：背板が体の手前に来て、背もたれごしに背中が見える
           const bh = am.mesh.geometry.parameters.height, bw = am.mesh.geometry.parameters.width, footY = am.mesh.position.y - bh / 2; // 絵の下のはし（足の裏より少し下）
           am.hinge.position.y = SEAT - (bh * HIP + footY); // 腰を座面に
           const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -SEAT)];
@@ -1504,13 +1534,10 @@ export function createThreeStage(canvasEl, assets) {
           // 脚の絵は腰より少し上（LAP）まで取って、座面より上にも重ねる（2026-11-24 作者「座った時に、椅子の部分が腰に見えないように」：上半身と脚のあいだに座面のふちが帯のように見えた）
           const LAP = 0.08, EXT = bh * LAP; // EXT：座面より上に重ねる高さ（絵の LAP 分）
           const lt = sh.t.clone(); lt.needsUpdate = true; lt.repeat.set(f.sw / img.width, f.sh * (HIP + LAP) / img.height); lt.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); // 絵の下の3割と少し（脚と腰）
-          const legs = new THREE.Mesh(new THREE.PlaneGeometry(bw, SEAT + EXT), fillMaterial(new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), lt));
-          legs.position.set(fwd * 0.2, (SEAT + EXT) / 2 - am.hinge.position.y, 0.006); legs.castShadow = true; am.hinge.add(legs);
-        } else if (n.pose === 'sit') {
-          const bh = am.mesh.geometry.parameters.height; am.hinge.position.y = 0.6 - bh * 0.32; // 腰（足もとから背の3割ほど。デフォルメで頭が大きい）を座面の高さ 0.6 に
-          const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.62)]; // 座面より下は描かない（卓の下から足が見えないように）
-          for (const mt of [m, am.face?.mesh.material]) if (mt) { mt.clippingPlanes = clip; mt.needsUpdate = true; }
-          renderer.localClippingEnabled = true;
+          const front = dir === 'down', LH = front ? EXT + 0.36 : SEAT + EXT; // 正面は、ひざから下だけ（もも は手前に向くので見えない）が座面からたれる
+          const legs = new THREE.Mesh(new THREE.PlaneGeometry(bw, LH), fillMaterial(new THREE.MeshStandardMaterial({ map: lt, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), lt));
+          legs.position.set(fwd * 0.2, SEAT + EXT - LH / 2 - am.hinge.position.y, front ? 0.3 : 0.006); legs.castShadow = true; // 正面の脚は座面の前のふちより手前
+          if (dir !== 'up') am.hinge.add(legs); else { legs.geometry.dispose(); lt.dispose(); } // 後ろ向きの脚は、座面の向こう（前）へ出るので見えない
         }
         npcHinges.push(am.hinge); continue;
       }
@@ -1942,7 +1969,9 @@ export function createThreeStage(canvasEl, assets) {
         const fm = new THREE.Mesh(new THREE.PlaneGeometry(w * cw / fw, h * ch / fh), fillMaterial(new THREE.MeshStandardMaterial({ map: ft, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), ft));
         hinge.add(fm); face = { e: fe, t: ft, mesh: fm, w, h, fw, fh };
       }
-      return { hinge, mesh, face, sheet: { walk: { e: we, t: walkT }, idle: { e: ie, t: idleT } } };
+      // 座り姿（2026-11-24 美術・演出室の座り姿をドット絵化）：あれば sheet.sit
+      const se = pe.sit && byId(pe.sit), sit = se && assets.images[se.id] ? { e: se, t: mk(toneSheet(id, assets.images[se.id], se.frame[1])) } : null;
+      return { hinge, mesh, face, sheet: { walk: { e: we, t: walkT }, idle: { e: ie, t: idleT }, sit } };
     }
     const base = flutter[id]; if (!base) return null;
     const t = base.clone(); t.needsUpdate = true; t.repeat.set(1 / FLUTTER_FRAMES, 1);
@@ -2008,7 +2037,36 @@ export function createThreeStage(canvasEl, assets) {
     renderer.compile(blurScene, fadeCam); renderer.compile(blurOutScene, fadeCam); renderer.compile(veilScene, fadeCam); renderer.compile(holdScene, fadeCam);
     return { textures: seen.size, ms: Math.round(performance.now() - t0) };
   }
-  let lastWarm = { textures: 0, ms: 0 }, loading = false;
+  let lastWarm = { textures: 0, ms: 0 }, loading = false, /** @type {any} */ lastLoad = null;
+  /**
+   * きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：
+   * 足もとの近くに、六角のオーブが3つ、ゆっくり回りながらまたたく。下にうすい光のたまり。調べて拾うと、すっと消える
+   * @type {Map<string, {g:any, parts:any[], glow:any, fade:number, seed:number}>}
+   */
+  let sparkleObjs = new Map(), sparkleRoot = null;
+  function updateSparkles(/** @type {{id:string,x:number,y:number}[]} */ list, /** @type {number} */ now) {
+    if (sparkleRoot !== root) { sparkleObjs = new Map(); sparkleRoot = root; } // マップが変わると root ごと片づく
+    if (!root || !map) return;
+    const want = new Set(list.map((s) => s.id));
+    for (const s of list) {
+      if (sparkleObjs.has(s.id)) continue;
+      const g = new THREE.Group(), seed = (s.x * 7.31 + s.y * 3.17) % 6.28, parts = [];
+      for (let i = 0; i < 4; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: hexTex, color: 0xfff2c8, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); sp.scale.setScalar(0.22); g.add(sp); parts.push(sp); }
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffe0a0, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); glow.scale.set(1.1, 0.55, 1); g.add(glow);
+      g.position.set(s.x + 0.5, heightOf(map, s.x, s.y) * HU, s.y + 0.55); g.traverse((/** @type {any} */ o) => o.layers.enable(1)); root.add(g);
+      sparkleObjs.set(s.id, { g, parts, glow, fade: 0, seed });
+    }
+    for (const [id, o] of sparkleObjs) {
+      const on = want.has(id); o.fade = Math.max(0, Math.min(1, o.fade + (on ? 0.03 : -0.06)));
+      if (!on && o.fade <= 0) { root.remove(o.g); o.g.traverse((/** @type {any} */ c) => c.material?.dispose?.()); sparkleObjs.delete(id); continue; }
+      o.parts.forEach((sp, i) => {
+        const a = now * 0.7 + o.seed + i * 1.57, tw = 0.5 + 0.5 * Math.sin(now * 3.1 + o.seed * 2 + i * 1.7);
+        sp.position.set(Math.cos(a) * 0.3, 0.3 + i * 0.2 + 0.08 * Math.sin(now * 1.3 + i), Math.sin(a) * 0.2);
+        sp.material.opacity = o.fade * (0.45 + 0.55 * tw); sp.scale.setScalar(0.2 + 0.14 * tw);
+      });
+      o.glow.position.set(0, 0.12, 0); o.glow.material.opacity = o.fade * (0.45 + 0.12 * Math.sin(now * 2 + o.seed));
+    }
+  }
 
   return {
     name: 'paper',
@@ -2033,6 +2091,7 @@ export function createThreeStage(canvasEl, assets) {
       buildExitMarks();
       applyOrbs(map); mark(); await nextFrame();
       if (PF) console.info('[perf] load', map.id, ['art', 'town', 'symbols', 'ground', 'boards', 'marks'].map((k, i) => k + ' ' + Math.round(pt[i + 1] - pt[i]) + 'ms').join(' / '));
+      lastLoad = { id: map.id, parts: ['絵', '町', '敵', '床', '板', '印'].map((k, i) => k + Math.round(pt[i + 1] - pt[i])).join(' '), t0: pt[0] }; // ?perf=1 の画面の表示に（2026-11-24 作者「銀鹿亭の中の部屋に入るとき」重い：作者の画面で何にかかっているか見る）
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
       key.position.set(W / 2 - 14, 26, H / 2 + 16); key.target.position.set(W / 2, 0, H / 2);
@@ -2041,8 +2100,18 @@ export function createThreeStage(canvasEl, assets) {
       key.color.set(DAY && !interior ? 0xfff8ec : 0xfff0d8);
       hemi.intensity = DAY && !interior ? 1.7 : tavern ? 0.28 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : tavern ? 0xa88c70 : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
       lastWarm = await warmUp(); if (PF) console.info('[perf] warm', map.id, lastWarm.textures + '枚 ' + lastWarm.ms + 'ms');
+      if (lastLoad) lastLoad.text = `${lastLoad.id} 読む${Math.round(performance.now() - lastLoad.t0)}ms（${lastLoad.parts} 準備${lastWarm.ms}・${lastWarm.textures}枚）`;
     },
-    resize(w, h, dpr) { cssW = Math.max(1, w); cssH = Math.max(1, h); renderer.setPixelRatio(Math.min(2, dpr || 1)); renderer.setSize(cssW, cssH, false); camera.aspect = cssW / cssH; camera.updateProjectionMatrix(); },
+    resize(w, h, dpr) {
+      cssW = Math.max(1, w); cssH = Math.max(1, h);
+      // 描く大きさは 420万画素まで（2026-11-24 作者の画面は 3820×1816＝約700万画素で、扉の出入りのぼかしなどが重かった）。ドット絵なので見た目はほとんど変わらない
+      const pr = Math.min(2, dpr || 1, Math.sqrt(4.2e6 / (cssW * cssH)));
+      renderer.setPixelRatio(Math.max(0.5, pr)); renderer.setSize(cssW, cssH, false); camera.aspect = cssW / cssH; camera.updateProjectionMatrix();
+      // ぼかし用の絵の置き場は、大きさが変わったときに作っておく（前は扉に入った最初のコマで作って、その分止まっていた）
+      const sz = renderer.getDrawingBufferSize(new THREE.Vector2()), bw = Math.max(2, sz.x >> 1), bh = Math.max(2, sz.y >> 1);
+      for (const t of blurRT) if (t.width !== bw || t.height !== bh) { t.setSize(bw, bh); renderer.setRenderTarget(t); renderer.clear(); }
+      renderer.setRenderTarget(null);
+    },
     /**
      * @param {any} view
      * @param {{ intro?: { t:number, open:number, coverRad:number, zoom:number } | null, seconds?: number }} [fx]
@@ -2181,9 +2250,119 @@ export function createThreeStage(canvasEl, assets) {
         const m = b.mesh.material; if (m.opacity !== alpha) { const was = m.opacity >= 1; m.opacity = alpha; if (was !== (alpha >= 1)) { m.depthWrite = alpha >= 1; m.alphaTest = alpha >= 1 ? 0.35 : 0.05; m.needsUpdate = true; b.mesh.castShadow = alpha >= 1; } } // 作り直しは「不透明⇔薄い」が変わるときだけ
         if (b.door) for (const pv of b.door.pivots || [b.door]) for (const o of pv.pivot.children) { const dm = /** @type {any} */ (o).material; if (!dm) continue; if (dm.userData.holeOn && hole) dm.userData.holeOn.value = hole.value; if (dm.opacity !== alpha) { const was = dm.opacity >= 1; dm.opacity = alpha; if (was !== (alpha >= 1)) { dm.depthWrite = alpha >= 1; dm.alphaTest = alpha >= 1 ? 0.35 : 0.05; dm.needsUpdate = true; o.castShadow = alpha >= 1; } } } // 扉の板も家といっしょに透かす（2026-11-24 手前の家が透けても扉だけ浮いて残っていた）
       }
+      // 仲間の並び（2026-11-24 作者「5人一列ってまあ昔のゲームでもあるもんな、もっと何かあるかな」→「２，４」）：
+      // 2＝かたまって歩く：一列の足あと（core）をたどりながら、ひとりおきに左右へ半歩ずれ、前の人に少し寄る（横のマスが通れないときは一列のまま）。
+      // 4＝止まると集まる：しばらく止まっていると、主人公の左右とすぐ後ろに集まり、少しすると左右の2人は主人公のほうを向く。歩きだすと並びにもどる。
+      // 家に入るあいだは一列になって戸口を通る。マップが変わったときは、その場の並びに置く
+      const gdt = grp.lastT ? Math.min(0.1, now - grp.lastT) : 0; grp.lastT = now;
+      const DV = /** @type {Record<string,number[]>} */ ({ up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] });
+      const floorAt = (/** @type {number} */ x, /** @type {number} */ y) => { const r = map.collision?.[y]; const c = r?.[x]; return c !== undefined && map.legend?.[c] === 'floor' && !(view.npcs || []).some((/** @type {any} */ n) => n.x === x && n.y === y); };
+      const okAt = (/** @type {number} */ bx, /** @type {number} */ by, /** @type {number} */ tx, /** @type {number} */ ty) => { const cx = Math.round(tx), cy = Math.round(ty); return floorAt(cx, cy) && heightOf(map, cx, cy) === heightOf(map, Math.round(bx), Math.round(by)); };
+      const still = !efk && view.actors.every((/** @type {any} */ a) => a.motion !== 'walk');
+      grp.idleT = still ? grp.idleT + gdt : 0;
+      const snapAll = grp.mapId !== map.id; grp.mapId = map.id; // 演出のあいだは一列の位置へなめらかに寄る（飛ばない）。マップが変わったらその場に置く
+      const L0 = view.actors[0], fv = DV[L0?.dir] || [0, 1], rv = [-fv[1], fv[0]];
+      // 主人公の速さ（1秒に何マス）：仲間がついていく速さの上限に使う。止まっていても、少しは歩ける（集まる・もどる）
+      // 1コマごとの速さは、画面のコマと動きの刻みがずれて 0 と 2倍をくりかえすので、ならした速さを使う（2026-11-24：前は2倍の速さで追いついて「ひゅん」と見えた）
+      if (gdt > 0 && grp.lx !== undefined && !snapAll) grp.ls = (grp.ls ?? 0) + (Math.hypot(L0.x - grp.lx, L0.y - grp.ly) / gdt - (grp.ls ?? 0)) * (1 - Math.exp(-gdt * 8));
+      const leadSpeed = grp.ls ?? 6.5; grp.lx = L0.x; grp.ly = L0.y;
+      const GATHER_ON = false;
+      const GATHER = [[1.0, -0.2], [-1.0, -0.2], [1.9, -0.6], [-1.9, -0.6]]; // 主人公から見て [右へ, 前へ]。左右に広がる（すぐ後ろに立つと、奥を向いたとき主人公がカメラから隠れた）
+      /** @type {Record<string,{x:number,y:number,dir:string,walk:boolean}>} */ const place = {};
+      // 位置そのものを遅れて追わせない（2026-11-24 作者「仲間が残像が見える、横に動くと」：位置を後から追いかけていたので、主人公とちがう刻みで動いてドットがにじんだ）。
+      // 位置はいつも、core の補間した並び（主人公と同じ速さで動く）から決め、なめらかに変えるのは「横へずれる量・よける量・集まる度合い」の数だけ
+      const leaveIn = efk === 'nook-in:leave'; // 家に入るあいだは一列（戸口を通る。横にずれたまま奥へ歩くと、入口でない壁を通りぬけて見えた）
+      // 出入りの演出のあいだ（入る・出る・着く）は一列のまま。マップが変わったら、一列（core の並びのまま）から始めて、演出が終わってからなめらかに組へ広がる
+      // （2026-11-24 作者「建物に入ったりでたりした直後が仲間が瞬間移動する」：着いた瞬間に組の並びへ飛んでいた）
+      const ease = (/** @type {number} */ cur, /** @type {number} */ to, /** @type {number} */ rate) => cur + (to - cur) * (1 - Math.exp(-gdt * rate));
+      // マップが変わったら、仲間は「入る前（出る前）の主人公からの位置」をそのまま持ってきて（扉の向きで回す）、そこから歩いて並びなおす
+      // （2026-11-24 作者「まだ瞬間移動するよ出入りで」：家の中は狭く、着いたときの立ち位置が入る前の並びとちがう所になって、そこへ飛んでいた）
+      if (snapAll) {
+        const D4 = ['up', 'right', 'down', 'left'], i0 = D4.indexOf(grp.ldir ?? ''), i1 = D4.indexOf(L0?.dir), turns = i0 >= 0 && i1 >= 0 ? (i1 - i0 + 4) % 4 : 0;
+        for (const k of Object.keys(grp.vis)) { const st = grp.vis[k]; Object.assign(st, { lat: 0, dx: 0, g: 0, sp: 0.7, ox: 0, oy: 0, pv: null, snap: true });
+          if (st.rx !== undefined && L0 && k !== L0.id) { let rx = st.rx, ry = st.ry; for (let n = 0; n < turns; n++) [rx, ry] = [-ry, rx]; st.px = L0.x + rx; st.py = L0.y + ry; st.snap = false; } }
+      }
+      grp.ldir = L0?.dir;
+      const along0 = (/** @type {number} */ d) => { // 一列の並びの線の上で、主人公から d の所と、そこでの「主人公へ向かう向き」
+        let px0 = view.actors[0].x, py0 = view.actors[0].y, ux = fv[0], uy = fv[1];
+        for (let j = 1; j < view.actors.length; j++) { const b = view.actors[j], sx = b.x - px0, sy = b.y - py0, sl = Math.hypot(sx, sy); if (sl < 0.01) continue; ux = -sx / sl; uy = -sy / sl; if (d <= sl) return { x: px0 + sx / sl * d, y: py0 + sy / sl * d, ux, uy }; d -= sl; px0 = b.x; py0 = b.y; }
+        return { x: px0 - ux * d, y: py0 - uy * d, ux, uy };
+      };
+      // 主人公が引き返すと、一列の足あと（core）は主人公の前へ折れ返る（仲間が主人公とすれちがう）。そのときは主人公のまうしろを並びの線にする
+      // （前は、仲間が一度うしろへ下がってから、主人公を追いこして駆けもどっていた）
+      const along = (/** @type {number} */ d) => { const c = along0(d); if (!efk && L0 && (c.x - L0.x) * fv[0] + (c.y - L0.y) * fv[1] > 0.2 * d) return { x: L0.x - fv[0] * d, y: L0.y - fv[1] * d, ux: fv[0], uy: fv[1] }; return c; };
+      // 並びの「場所」（主人公のすぐ後ろ＝1番、…）と、そこに立つ人を分ける（2026-11-24 作者「反転も結構急になっている」）：
+      // 主人公が引き返して仲間のあいだを通りぬけると、いちばん遠かった人がいちばん近くなる。前は決まった順の場所へ、みんなが主人公を追いこして駆けもどっていた。
+      // いまは、近い人から近い場所につく（並び順は少しのあいだ入れかわる）。止まって集まるときに、もとの並び順にもどる
+      const ids = view.actors.map((/** @type {any} */ a) => a.id), base = ids.join(',');
+      if (grp.base !== base || snapAll) { grp.base = base; grp.who = ids.slice(); grp.slots = {}; }
+      if (GATHER_ON && grp.idleT > 1.2 && !efk) grp.who = ids.slice(); // 入れかわった並び順は、集まるとき（いまは使わない）か、マップが変わったときにもどる
+      /** @type {Record<number,{tx:number,ty:number,dir:string,moving:boolean}>} */ const slotT = {};
+      view.actors.forEach((/** @type {any} */ a, i) => {
+        if (i === 0) return;
+        const st = grp.slots[i] || (grp.slots[i] = { lat: 0, dx: 0, g: 0, sp: efk ? 0.7 : 0.85 });
+        let tx = a.x, ty = a.y, dir = a.dir, moving = false;
+        {
+          // 2人ずつ組になって、主人公から 0.95・1.9 マスうしろ（一列の線の上）に、左右へ半歩ずつ並ぶ。横が通れないとき・家に入るときは一列（少しつめる）
+          st.sp = ease(st.sp ?? 0.85, efk ? 0.7 : 0.85, 6); // 一列のときの間（出入りのあいだはつめる）
+          const pair = Math.ceil(i / 2), side = i % 2 ? -1 : 1, c = along(pair * 0.95), px = -c.uy, py = c.ux, s = along(i * st.sp);
+          // 左右は、進む向きが逆になっても入れかえない（2026-11-24 作者「いまだに、しゅんかんいどうするよ」：家の中で向きを変えた瞬間、組の2人の左右が1コマで2マス入れかわっていた）
+          let sd = side; if (st.pv && (px * sd * st.pv[0] + py * sd * st.pv[1]) < 0) sd = -sd; st.pv = [px * sd, py * sd];
+          st.lat = ease(st.lat, !efk && okAt(c.x, c.y, c.x + px * sd, c.y + py * sd) ? 1 : 0, efk ? 10 : 5);
+          // 一列の位置からのずれは、急に変わる所（曲がり角・ふり返り）でもなめらかに（まっすぐ歩くあいだはずれが変わらないので、主人公と同じ刻みで動く）
+          const ox = (c.x + px * sd * 0.45 - s.x) * st.lat, oy = (c.y + py * sd * 0.45 - s.y) * st.lat;
+          if (st.ox === undefined || snapAll) { st.ox = ox; st.oy = oy; } else { st.ox = ease(st.ox, ox, 9); st.oy = ease(st.oy, oy, 9); }
+          tx = s.x + st.ox; ty = s.y + st.oy;
+          // 主人公の手前（カメラとのあいだ）には立たず、左右へよける（家の中のように近いカメラで主人公がかくれた）
+          let want = 0;
+          if (!efk && L0 && ty > L0.y + 0.3 && ty < L0.y + 3 && Math.abs(tx - L0.x) < 0.75) { const sgn = Math.abs(tx - L0.x) < 0.01 ? side : Math.sign(tx - L0.x); if (okAt(a.x, a.y, L0.x + sgn * 0.8, ty)) want = L0.x + sgn * 0.8 - tx; else if (okAt(a.x, a.y, L0.x - sgn * 0.8, ty)) want = L0.x - sgn * 0.8 - tx; }
+          st.dx = ease(st.dx, want, 6); tx += st.dx;
+          // 止まると集まる：集まる所へ、度合い g（0→1）でなめらかに寄る
+          const g = GATHER[(i - 1) % GATHER.length], gx = L0.x + rv[0] * g[0] + fv[0] * g[1], gy = L0.y + rv[1] * g[0] + fv[1] * g[1];
+          // 止まっても集まらない（2026-11-24 作者「ゴレンジャーみたい…別にその場にいていいんじゃないの？」）。集まる仕組みは残して、いまは使わない
+          const canG = GATHER_ON && grp.idleT > 1.2 && !efk && okAt(L0.x, L0.y, gx, gy) && okAt(L0.x, L0.y, (L0.x + gx) / 2, (L0.y + gy) / 2);
+          const g0 = st.g; st.g = ease(st.g, canG ? 1 : 0, 3.5); if (Math.abs(st.g - g0) > 0.0015) moving = true;
+          if (st.g > 0.001) { const k = st.g * st.g * (3 - 2 * st.g); tx += (gx - tx) * k; ty += (gy - ty) * k; }
+          if (st.g > 0.98) dir = L0.dir; // 集まったら主人公と同じ向きのまま（2026-11-24 作者「最後まで同じ方向向いてていいよ」：前は少しすると左右の2人が主人公のほうを向いた）
+          if (Math.abs(st.dx - want) > 0.02) moving = true;
+        }
+        slotT[i] = { tx, ty, dir, moving };
+      });
+      // 近い人から近い場所へ：2人の場所を入れかえると、歩く道のりの合計がはっきり短くなるなら入れかえる（出入りの演出のあいだ・止まって集まるときはしない）
+      if (!efk && !snapAll && grp.idleT <= 1.2) {
+        const pos = (/** @type {string} */ id) => { const s = grp.vis[id]; return s && s.px !== undefined ? s : null; };
+        for (let pass = 0; pass < 3; pass++) for (let j = 1; j < ids.length; j++) for (let k = j + 1; k < ids.length; k++) {
+          const A = pos(grp.who[j]), B = pos(grp.who[k]), Tj = slotT[j], Tk = slotT[k]; if (!A || !B || !Tj || !Tk) continue;
+          const d = (/** @type {any} */ p, /** @type {any} */ t) => Math.hypot(p.px - t.tx, p.py - t.ty);
+          if (d(A, Tj) + d(B, Tk) - (d(A, Tk) + d(B, Tj)) > 0.6) [grp.who[j], grp.who[k]] = [grp.who[k], grp.who[j]];
+        }
+      }
+      view.actors.forEach((/** @type {any} */ a, i) => {
+        const st = grp.vis[a.id] || (grp.vis[a.id] = { px: a.x, py: a.y, gdir: a.dir });
+        const j = i === 0 ? 0 : Math.max(1, grp.who.indexOf(a.id)), T = slotT[j];
+        let tx = T ? T.tx : a.x, ty = T ? T.ty : a.y, dir = T ? T.dir : a.dir, moving = T ? T.moving : false;
+        const sg = grp.slots[j]?.g ?? 0;
+        // 1コマで動ける距離に上限（走る速さより少し速いまで）。並びの線が折れ返る所（主人公が仲間のほうへ引き返す）でも、飛ばずに歩いて寄る。マップが変わったときはその場に置く
+        // 主人公が引き返してきたら、その場で待つ（2026-11-24 作者「向きを反転したとき、急にひゅんてくる、まってればいいのでは」）：
+        // いまの位置が、行きたい所より主人公に 0.3 マス以上近ければ動かない。主人公が離れはじめたら、主人公と同じくらいの速さで歩いてついていく
+        if (i > 0 && !st.snap) {
+          const dc = Math.hypot(st.px - L0.x, st.py - L0.y), dT = Math.hypot(tx - L0.x, ty - L0.y);
+          const ahead = (st.px - L0.x) * fv[0] + (st.py - L0.y) * fv[1] > 0.1; // 主人公の前（進む向きの側）にいる＝引き返してきた主人公がまだ通りすぎていない
+          if (!efk && sg < 0.3 && (dc < dT - 0.3 || (ahead && a.motion === 'walk'))) { tx = st.px; ty = st.py; }
+          const dd = Math.hypot(tx - st.px, ty - st.py), lim = gdt * Math.max(3, leadSpeed * 1.15) + 0.005;
+          if (dd > lim) { tx = st.px + (tx - st.px) * lim / dd; ty = st.py + (ty - st.py) * lim / dd; moving = true; }
+        }
+        st.snap = false;
+        const mx = tx - st.px, my = ty - st.py; st.px = tx; st.py = ty; if (L0) { st.rx = tx - L0.x; st.ry = ty - L0.y; }
+        if (moving && a.motion !== 'walk' && Math.hypot(mx, my) > 0.0005) { dir = Math.abs(mx) > Math.abs(my) ? (mx > 0 ? 'right' : 'left') : (my > 0 ? 'down' : 'up'); st.gdir = dir; } // 集まる・もどるあいだは、歩く向きを向く
+        else if (moving && a.motion !== 'walk') dir = st.gdir;
+        place[a.id] = { x: tx, y: ty, dir, walk: a.motion === 'walk' || moving };
+      });
+      updateSparkles(view.sparkles || [], now);
       // キャラ（左右反転しない。いまは1方向の絵のまま）
       const seen = new Set();
-      for (const a of view.actors) {
+      for (const a0 of view.actors) {
+        const pl = place[a0.id], a = pl ? { ...a0, x: pl.x, y: pl.y, dir: pl.dir, motion: pl.walk ? 'walk' : 'idle', animMs: pl.walk && a0.motion !== 'walk' ? now * 1000 : a0.animMs } : a0;
         seen.add(a.id);
         if (!actors[a.id]) { const am = actorMesh(a.id); if (!am) continue; am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[a.id] = am; }
         const am = actors[a.id], k = efk.startsWith('nook') ? 1 : kOf(a.y + 0.5, true);
@@ -2192,9 +2371,19 @@ export function createThreeStage(canvasEl, assets) {
         // 入るとき：キャラは入口の奥へ歩いて、入口の板の向こうに消える（カメラがキャラの絵に寄りすぎない）
         const inward = efk === 'nook-in:leave' && NOOKIN === 'blur' ? WALK_IN * cl((ep - 0.15) / 0.65) /* 主人公たちも戸口の奥へ歩く（作者「主人公も奥へ進む」）。2マス奥＝中に着いたときの立ち位置と同じ */ : efk === 'nook-in:leave' ? (NOOKIN === 'walk' && !(ef?.at && ef.at.x === 0 && ef.at.y > 0) ? ep * 3.2 : ez(ep / 0.45) * 1.8) : 0, sideDoor = ef?.at && ef.at.x === 0 && ef.at.y > 0; // 左の壁の扉では左へ歩いて消える
         am.hinge.position.set(snapDot(a.x + 0.5) - (sideDoor ? inward : 0), 0.02 + heightLerp(map, a.x, a.y) * HU, snapDot(a.y + 0.62) - (sideDoor ? 0 : inward) + outward + emDir.z * emerge); am.hinge.position.x += emDir.x * emerge;
-        if (a !== view.actors[0] && NOOKIN === 'blur' && (efk === 'nook-in:leave' || efk === 'nook-in:arrive')) { // 仲間は主人公の後ろから半歩よける（カメラが真後ろから主人公を見られるように）
+        if (a0 !== view.actors[0] && NOOKIN === 'blur' && (efk === 'nook-in:leave' || efk === 'nook-in:arrive')) { // 仲間は主人公の後ろから半歩よける（カメラが真後ろから主人公を見られるように）
           const st = efk === 'nook-in:leave' ? ASIDE * ez(cl(ep / 0.3)) : ASIDE * (1 - ez(cl((ep - 0.25) / 0.45)));
           if (efk === 'nook-in:leave' && sideDoor) am.hinge.position.z -= st; else am.hinge.position.x -= st; // 奥へ進む向きの左へ（左の壁の扉では、奥＝左なので手前の反対へ）
+        }
+        { // 戸口に近づいたら、戸口の幅の中へ寄せる（2026-11-24 作者「建物の入り口じゃないとこ通ってるように見える」）
+          // 寄せる量は1コマで動ける分だけ（2026-11-24 作者の録画：集まって立っている所から扉へ入ると、戸口のすぐ横にいた仲間が1コマで真ん中へ飛んでいた）
+          let want = 0;
+          if (efk === 'nook-in:leave' && ef?.at && !sideDoor && a0 !== view.actors[0]) {
+            const dz = am.hinge.position.z - (ef.at.y + 0.62);
+            if (dz < 2) { const cx = ef.at.x + 0.5, lim = 0.2 + Math.max(0, dz) * 0.6, hx = am.hinge.position.x, w = cl((2 - dz) / 1.2); want = (Math.max(cx - lim, Math.min(cx + lim, hx)) - hx) * w; }
+          }
+          const cur = am.doorX ?? 0, step = gdt * 4 + 0.002, nx = efk === 'nook-in:leave' ? cur + Math.max(-step, Math.min(step, want - cur)) : 0;
+          am.doorX = nx; am.hinge.position.x += nx;
         }
         if (emerge < 0 && outDoor && !interior && holeRecess?.sill) am.hinge.position.y += holeRecess.sill * cl((outDoor.y + 0.3 - am.hinge.position.z) / 0.5); // 戸口の中（敷居の高さ）から通りへ下りる
         flatLay(am.hinge, k, a.y + 0.5, CHIBI_H, true, a.x);
@@ -2322,12 +2511,16 @@ export function createThreeStage(canvasEl, assets) {
         // 主人公はいつも見えるように（2026-11-23 作者「主人公も奥へ進む」「主人公はいつも見えていてほしい」）：カメラは、いちばん後ろの仲間の少し横・頭の上・後ろについて、主人公の頭を見る。
         // 歩くにつれて後ろとの間をつめ、最後は家の正面より少し奥（中の始まりと同じ見え方）
         // 2階の扉なら2階の高さで、左の壁の扉なら扉のほうを向いて（2026-11-23 作者「銀鹿亭の2階のはいるときドアに向かってほしい、1階の目線になってる」）
-        const walkNow = WALK_IN * cl((ep - 0.15) / 0.65), rearA = view.actors[view.actors.length - 1], sdIn = !!(ef.at && ef.at.x === 0 && ef.at.y > 0);
+        const walkNow = WALK_IN * cl((ep - 0.15) / 0.65), rearA = (() => { const r = view.actors[view.actors.length - 1], p = place[r.id]; return p ? { ...r, x: p.x, y: p.y } : r; })() /* 絵の位置（2人ずつの組）のいちばん後ろ */, sdIn = !!(ef.at && ef.at.x === 0 && ef.at.y > 0);
         const dv = sdIn ? new THREE.Vector3(-1, 0, 0) : new THREE.Vector3(0, 0, -1), pv = sdIn ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(1, 0, 0), gyL = heightLerp(map, lead.x, lead.y) * HU;
         const rear = new THREE.Vector3(rearA.x + 0.5, heightLerp(map, rearA.x, rearA.y) * HU, rearA.y + 0.62).addScaledVector(dv, walkNow), leadHead = new THREE.Vector3(lead.x + 0.5, gyL + 1.55, lead.y + 0.62).addScaledVector(dv, walkNow);
         if (ef.at && holeRecess?.sill) { const up = (/** @type {any} */ v) => { v.y += holeRecess.sill * cl((ef.at.y + 0.3 - v.z) / 0.5); }; up(rear); up(leadHead); } // 戸口をくぐったら敷居の高さ（カメラもいっしょに上がる）
         const near = cl((ep - 0.55) / 0.45), gap = 2.2 + (1.0 - 2.2) * near; // 画角を広げるのと同時に、ぐっと近づく（2026-11-23 作者「同時に距離も近づけて」）
-        const z1 = ez(cl(ep / 0.35)); eye.lerp(rear.clone().addScaledVector(dv, -gap) /* 真後ろ（2026-11-23 作者「真後ろ」「ヴォルトがよける」：仲間は横へよけるので、主人公が隠れない） */.add(new THREE.Vector3(0, 1.95, 0)), z1); /* 近づくほど横へ：主人公が後ろの仲間に隠れないように。高さは頭の少し上＝見下ろす角度は低いまま（2026-11-23 作者「見下ろし角度はもっと低いまま」） */ look.lerp(leadHead, z1);
+        // 見下ろす角度は、外のいつもの角度（マップの pitchDeg）のまま変えない（2026-11-24 作者「ブックヌックに入るとき、一瞬見下ろし角度が下がってまた戻る？」：
+        // カメラの高さを決めていたので、近づくほど・戸口の敷居で主人公の頭が上がるほど角度が下がり、見上げる向き（-4度）まで行っていた）
+        const eTo = rear.clone().addScaledVector(dv, -gap) /* 真後ろ（2026-11-23 作者「真後ろ」「ヴォルトがよける」：仲間は横へよけるので、主人公が隠れない） */;
+        eTo.y = leadHead.y + Math.tan(pitch) * Math.hypot(eTo.x - leadHead.x, eTo.z - leadHead.z);
+        const z1 = ez(cl(ep / 0.35)); eye.lerp(eTo, z1); /* 近づくほど横へ：主人公が後ろの仲間に隠れないように。高さは頭の少し上＝見下ろす角度は低いまま（2026-11-23 作者「見下ろし角度はもっと低いまま」） */ look.lerp(leadHead, z1);
         if (ef.at) {
           const ax = ef.at.x + 0.5, az = ef.at.y;
           camera.fov += (FOV_BURST - camera.fov) * cl((ep - 0.55) / 0.45); // 入る瞬間に画角を目いっぱい広げる（2026-11-23 作者「入る瞬間に画角を目いっぱい広げて」）。中はこの画角から、ふつうの画角へ戻る（carry.fov）
@@ -2529,6 +2722,6 @@ export function createThreeStage(canvasEl, assets) {
     time: () => (DAY ? 'day' : 'night'),
     pixelRoom: () => PIXROOM,
     dispose() { if (root) { scene.remove(root); disposeTree(root); } renderer.dispose(); map = null; },
-    debug: () => ({ name: 'paper', engine: 'three', drawCalls: renderer.info.render.calls, boards: boards.length, inner: [Math.round(cssW * renderer.getPixelRatio()), Math.round(cssH * renderer.getPixelRatio())], eye: [...lastEye], intro: lastIntro ? { ...lastIntro } : null, orbs: orbsShown, interior, actors: Object.keys(actors), effect: lastEffect, map: map?.id ?? null, warm: { ...lastWarm } }),
+    debug: () => ({ name: 'paper', engine: 'three', drawCalls: renderer.info.render.calls, boards: boards.length, inner: [Math.round(cssW * renderer.getPixelRatio()), Math.round(cssH * renderer.getPixelRatio())], eye: [...lastEye], pitch: +(Math.asin(-camera.getWorldDirection(new THREE.Vector3()).y) * 180 / Math.PI).toFixed(1), intro: lastIntro ? { ...lastIntro } : null, orbs: orbsShown, interior, hinges: Object.fromEntries(Object.entries(actors).map(([k, am]) => [k, [+am.hinge.position.x.toFixed(3), +am.hinge.position.z.toFixed(3)]])), actors: Object.keys(actors), effect: lastEffect, map: map?.id ?? null, warm: { ...lastWarm }, loadText: lastLoad?.text ?? '' }),
   };
 }

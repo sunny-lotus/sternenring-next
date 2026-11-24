@@ -569,6 +569,163 @@
           "dialogue": "life.pl-planter5"
         }
       ]
+    },
+    {
+      "id": "sparkle-pl-corner-ne",
+      "x": 54,
+      "y": 3,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.pl-corner-ne"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.pl-corner-ne": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.pl-corner-ne",
+          "set": {
+            "flags": {
+              "sparkle.pl-corner-ne": true
+            }
+          },
+          "give": {
+            "items": {
+              "霊水": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-pl-corner-nw",
+      "x": 1,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.pl-corner-nw"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.pl-corner-nw": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.pl-corner-nw",
+          "set": {
+            "flags": {
+              "sparkle.pl-corner-nw": true
+            }
+          },
+          "give": {
+            "mats": {
+              "光る苔": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-pl-west",
+      "x": 1,
+      "y": 24,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.pl-west"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.pl-west": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.pl-west",
+          "set": {
+            "flags": {
+              "sparkle.pl-west": true
+            }
+          },
+          "give": {
+            "mats": {
+              "野草": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-pl-corner-se",
+      "x": 54,
+      "y": 38,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.pl-corner-se"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.pl-corner-se": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.pl-corner-se",
+          "set": {
+            "flags": {
+              "sparkle.pl-corner-se": true
+            }
+          },
+          "give": {
+            "mats": {
+              "苦い根": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "marble-notice",
+      "x": 7,
+      "y": 5,
+      "trigger": "examine",
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "marble.done": true
+            }
+          },
+          "dialogue": "marble.notice.done"
+        },
+        {
+          "dialogue": "marble.notice",
+          "set": {
+            "flags": {
+              "marble.seen": true
+            }
+          }
+        }
+      ]
     }
   ],
   "stage": {

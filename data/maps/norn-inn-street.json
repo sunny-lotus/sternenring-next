@@ -204,6 +204,185 @@
           "dialogue": "life.st-tree"
         }
       ]
+    },
+    {
+      "id": "sparkle-st-alley-w",
+      "x": 1,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.st-alley-w"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.st-alley-w": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.st-alley-w",
+          "set": {
+            "flags": {
+              "sparkle.st-alley-w": true
+            }
+          },
+          "give": {
+            "mats": {
+              "光る苔": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-st-alley-e",
+      "x": 42,
+      "y": 2,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.st-alley-e"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.st-alley-e": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.st-alley-e",
+          "set": {
+            "flags": {
+              "sparkle.st-alley-e": true
+            }
+          },
+          "give": {
+            "items": {
+              "薬草": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-st-alley-c",
+      "x": 33,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.st-alley-c"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.st-alley-c": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.st-alley-c",
+          "set": {
+            "flags": {
+              "sparkle.st-alley-c": true
+            }
+          },
+          "give": {
+            "mats": {
+              "白い塩": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-st-marble",
+      "x": 14,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "marble.found"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "marble.found": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "when": {
+            "flags": {
+              "marble.seen": true
+            }
+          },
+          "dialogue": "marble.found.seen",
+          "set": {
+            "flags": {
+              "marble.found": true
+            }
+          }
+        },
+        {
+          "dialogue": "marble.found",
+          "set": {
+            "flags": {
+              "marble.found": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "marble-flower",
+      "x": 22,
+      "y": 11,
+      "trigger": "examine",
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "marble.done": true
+            }
+          },
+          "dialogue": "marble.flower.after"
+        },
+        {
+          "when": {
+            "flags": {
+              "marble.found": true
+            }
+          },
+          "dialogue": "marble.flower.return",
+          "set": {
+            "flags": {
+              "marble.done": true
+            }
+          },
+          "give": {
+            "gold": 20,
+            "items": {
+              "清め薬": 1
+            }
+          }
+        },
+        {
+          "dialogue": "marble.flower"
+        }
+      ]
     }
   ],
   "collision": [

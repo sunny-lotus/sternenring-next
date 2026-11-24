@@ -1164,6 +1164,321 @@
       "frames": 1,
       "frameMs": 400,
       "sha256": "98a1b8ec7a620ce56f4b3c8fcdec3df994a4540b0b9eb9e8b4b800e256038804"
+    },
+    {
+      "id": "chara.nacht.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/nacht/chibi-sit.png",
+      "frame": [
+        68,
+        98
+      ],
+      "anchor": [
+        34,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        11.6,
+        11.9,
+        11.9,
+        11.3
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/nacht-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/nacht_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "刀は左の腰（納刀）",
+      "sha256": "6aceeb595095606d9d1774e2d9552ebde76e3796705b9478f0ffbf269f6d68ae"
+    },
+    {
+      "id": "chara.volt.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/volt/chibi-sit.png",
+      "frame": [
+        64,
+        98
+      ],
+      "anchor": [
+        32,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        12.6,
+        12.3,
+        12.9,
+        12.3
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/volt-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/volt_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "杖は右手で床に立てる",
+      "sha256": "9ea584c0d88a430bcfc06790b7e9f805b4e6597b7f4b118678ebc0cb4e196947"
+    },
+    {
+      "id": "chara.serena.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/serena/chibi-sit.png",
+      "frame": [
+        78,
+        92
+      ],
+      "anchor": [
+        39,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        12.7,
+        12.7,
+        12.4,
+        12.7
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/serena-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/serena_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "剣は左の腰（納刀）",
+      "sha256": "c5947a34b95ede9f5c57a5818de64af8fd4c21e26ff6cbc000d5ecd355ece01f"
+    },
+    {
+      "id": "chara.flare.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/flare/chibi-sit.png",
+      "frame": [
+        72,
+        85
+      ],
+      "anchor": [
+        36,
+        83
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        14.8,
+        14.8,
+        14.8,
+        14.6
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/flare-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/flare_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "剣は左の腰（納刀）",
+      "sha256": "1bca725e73418515b438651ea9fb1732037876b71c2f6e5e536f4fd0cc6a243f"
+    },
+    {
+      "id": "chara.licht.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/licht/chibi-sit.png",
+      "frame": [
+        68,
+        98
+      ],
+      "anchor": [
+        34,
+        96
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        17.9,
+        17.7,
+        17.9,
+        17.9
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/licht-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/licht_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "鞘はマントの内で背負う",
+      "sha256": "f84f62feea48a4b528246575d79ecaa7dcd50133dd9782ea2c90523c83a1f866"
+    },
+    {
+      "id": "chara.mob01.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/mob01/chibi-sit.png",
+      "frame": [
+        68,
+        92
+      ],
+      "anchor": [
+        34,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        6.9,
+        6.9,
+        6.9,
+        6.9
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/mob01-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/モブ_v01/mob01_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "袋は右の腰",
+      "sha256": "faf4010f7fb7631a4b7ff3d65bca510a57f38b3357c778b83cd53b9d22757852"
+    },
+    {
+      "id": "chara.mob02.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/mob02/chibi-sit.png",
+      "frame": [
+        68,
+        92
+      ],
+      "anchor": [
+        34,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        14.8,
+        15.3,
+        15.3,
+        15
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/mob02-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/モブ_v01/mob02_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "かごは右手でひざの上",
+      "sha256": "6dbd5d316090e4366d3797869815e081f1f62d9c2f72b5db89e255f4d26fe01f"
+    },
+    {
+      "id": "chara.mob03.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/mob03/chibi-sit.png",
+      "frame": [
+        60,
+        79
+      ],
+      "anchor": [
+        30,
+        77
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        11.5,
+        11.5,
+        11.2,
+        10.9
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/mob03-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/モブ_v01/mob03_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "持ち物なし",
+      "sha256": "bdda4ef25138fa6014f6a3aad1f3f10d6c513864833ab4f5d367284c7ad415e8"
+    },
+    {
+      "id": "chara.mob04.chibi.sit",
+      "kind": "sheet",
+      "path": "assets/characters/mob04/chibi-sit.png",
+      "frame": [
+        62,
+        92
+      ],
+      "anchor": [
+        31,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "frames": 1,
+      "frameMs": 400,
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "seat": [
+        11.5,
+        11.5,
+        11.2,
+        11.2
+      ],
+      "seatNote": "座面の高さ＝足の裏から何ドット上か（directions の順）。元絵の座面の初期点（目視）から",
+      "source": "相談チャット（2026-11-24、pixel/mob04-sit、道具 sit4.ps1、歩きと同じ縮尺・色）",
+      "sourceArt": "pixel/元絵/モブ_v01/mob04_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
+      "equipmentSide": "持ち物なし",
+      "sha256": "144fea05e2a6bc96b1b00827fb45029e082c4709ce038f609cfca42be4d5fe6d"
     }
   ],
   "party": [
@@ -1174,7 +1489,8 @@
       "idle": "chara.nacht.chibi.idle",
       "walkLegacy": "chara.nacht.walk",
       "idleLegacy": "chara.nacht.idle",
-      "faces": "chara.nacht.chibi.faces"
+      "faces": "chara.nacht.chibi.faces",
+      "sit": "chara.nacht.chibi.sit"
     },
     {
       "id": "volt",
@@ -1183,7 +1499,8 @@
       "idle": "chara.volt.chibi.idle",
       "walkLegacy": "chara.volt.walk",
       "idleLegacy": "chara.volt.idle",
-      "faces": "chara.volt.chibi.faces"
+      "faces": "chara.volt.chibi.faces",
+      "sit": "chara.volt.chibi.sit"
     }
   ],
   "cast": [
@@ -1193,7 +1510,8 @@
       "walk": "chara.flare.chibi.walk",
       "idle": "chara.flare.chibi.idle",
       "faces": "chara.flare.chibi.faces",
-      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
+      "sit": "chara.flare.chibi.sit"
     },
     {
       "id": "serena",
@@ -1201,7 +1519,8 @@
       "walk": "chara.serena.chibi.walk",
       "idle": "chara.serena.chibi.idle",
       "faces": "chara.serena.chibi.faces",
-      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
+      "sit": "chara.serena.chibi.sit"
     },
     {
       "id": "licht",
@@ -1209,7 +1528,8 @@
       "walk": "chara.licht.chibi.walk",
       "idle": "chara.licht.chibi.idle",
       "faces": "chara.licht.chibi.faces",
-      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+      "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
+      "sit": "chara.licht.chibi.sit"
     },
     {
       "id": "mob01",
@@ -1217,7 +1537,8 @@
       "walk": "chara.mob01.chibi.walk",
       "idle": "chara.mob01.chibi.idle",
       "mob": true,
-      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」",
+      "sit": "chara.mob01.chibi.sit"
     },
     {
       "id": "mob02",
@@ -1225,7 +1546,8 @@
       "walk": "chara.mob02.chibi.walk",
       "idle": "chara.mob02.chibi.idle",
       "mob": true,
-      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」",
+      "sit": "chara.mob02.chibi.sit"
     },
     {
       "id": "mob03",
@@ -1233,7 +1555,8 @@
       "walk": "chara.mob03.chibi.walk",
       "idle": "chara.mob03.chibi.idle",
       "mob": true,
-      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」",
+      "sit": "chara.mob03.chibi.sit"
     },
     {
       "id": "mob04",
@@ -1241,7 +1564,8 @@
       "walk": "chara.mob04.chibi.walk",
       "idle": "chara.mob04.chibi.idle",
       "mob": true,
-      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」",
+      "sit": "chara.mob04.chibi.sit"
     }
   ]
 }

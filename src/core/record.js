@@ -70,19 +70,31 @@ export function storeFor(rec, onChange = () => {}) {
   };
 }
 
-/** @param {AdventureRecord} rec @returns {{ gold:number, exp:Record<string,number> }} */
-const inbox = (rec) => { const b = readJSON(rec, FIELD_KEYS.inbox, {}); return { gold: Math.max(0, b.gold || 0), exp: { ...(b.exp || {}) } }; };
+/** @param {AdventureRecord} rec @returns {{ gold:number, exp:Record<string,number>, items:Record<string,number>, mats:Record<string,number> }} */
+const inbox = (rec) => { const b = readJSON(rec, FIELD_KEYS.inbox, {}); return { gold: Math.max(0, b.gold || 0), exp: { ...(b.exp || {}) }, items: { ...(b.items || {}) }, mats: { ...(b.mats || {}) } }; };
+
+/** inbox を書く（空の道具・素材は書かない） @param {AdventureRecord} rec @param {any} b */
+function writeInbox(rec, b) { const o = { ...b }; for (const k of ['items', 'mats']) if (!Object.keys(o[k] || {}).length) delete o[k]; writeJSON(rec, FIELD_KEYS.inbox, o); }
+
+/**
+ * 道具・素材を手に入れる（戦闘・メニューが次に開いたときに持ち物へ足される。2026-11-24 きらきら光る所の隠しアイテム）
+ * 名前は戦闘の持ち物（SR.ITEMS・SR.MATERIALS）と同じ
+ * @param {AdventureRecord} rec @param {'items'|'mats'} kind @param {string} name @param {number} n
+ */
+export function giveThing(rec, kind, name, n) { const b = inbox(rec); b[kind][name] = (b[kind][name] || 0) + Math.max(0, Math.round(n)); writeInbox(rec, b); }
+/** まだ持ち物へ渡していない道具・素材 @param {AdventureRecord} rec */
+export function pendingThings(rec) { const b = inbox(rec); return { items: b.items, mats: b.mats }; }
 
 /** いまのお金（銅貨の数。戦闘の育ちにあるお金＋まだ受け取っていないお金） @param {AdventureRecord} rec */
 export function goldOf(rec) { return Math.max(0, readJSON(rec, GROWTH_KEY, {}).gold || 0) + inbox(rec).gold; }
 
 /** お金を手に入れる（戦闘・メニューが次に開いたときに育ちへ足される） @param {AdventureRecord} rec @param {number} n */
-export function giveGold(rec, n) { const b = inbox(rec); b.gold += Math.max(0, Math.round(n)); writeJSON(rec, FIELD_KEYS.inbox, b); }
+export function giveGold(rec, n) { const b = inbox(rec); b.gold += Math.max(0, Math.round(n)); writeInbox(rec, b); }
 
 /** 経験値を手に入れる（レベルの経験値。戦闘・メニューが次に開いたときに足される） @param {AdventureRecord} rec @param {string} who NEXT の名前 @param {number} n */
 export function giveExp(rec, who, n) {
   const code = BATTLE_CODE[/** @type {keyof typeof BATTLE_CODE} */ (who)]; if (!code) throw Error(`仲間ではない：${who}`);
-  const b = inbox(rec); b.exp[code] = (b.exp[code] || 0) + Math.max(0, Math.round(n)); writeJSON(rec, FIELD_KEYS.inbox, b);
+  const b = inbox(rec); b.exp[code] = (b.exp[code] || 0) + Math.max(0, Math.round(n)); writeInbox(rec, b);
 }
 
 /** フィールドで覚えた技（NEXT の名前ごと） @param {AdventureRecord} rec @returns {Record<string,string[]>} */
@@ -148,6 +160,7 @@ export function applyEffects(rec, eff) {
   const notes = [];
   for (const [k, v] of Object.entries(eff.flags || {})) rec.flags[k] = v;
   if (eff.gold) { giveGold(rec, eff.gold); notes.push(`銅貨を${eff.gold}枚手に入れた`); }
+  for (const kind of /** @type {const} */ (['items', 'mats'])) for (const [name, n] of Object.entries(eff[kind] || {})) if (n > 0) { giveThing(rec, kind, name, n); notes.push(`${name}を${n}つ手に入れた`); }
   for (const [who, n] of Object.entries(eff.exp || {})) { giveExp(rec, who, n); notes.push(`${NAME_JA[who] ?? who}は経験値を${n}手に入れた`); }
   for (const s of eff.skills || []) if (learnSkill(rec, s.who, s.skill)) notes.push(`${NAME_JA[s.who] ?? s.who}は「${s.skill}」を覚えた`);
   for (const who of eff.openLink || []) if (openLink(rec, who)) notes.push(`ナハトと${NAME_JA[who] ?? who}の連携技が開いた`);

@@ -255,6 +255,105 @@
           }
         }
       ]
+    },
+    {
+      "id": "sparkle-fo-ne",
+      "x": 62,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.fo-ne"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.fo-ne": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.fo-ne",
+          "set": {
+            "flags": {
+              "sparkle.fo-ne": true
+            }
+          },
+          "give": {
+            "mats": {
+              "光る苔": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-fo-sw",
+      "x": 1,
+      "y": 28,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.fo-sw"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.fo-sw": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.fo-sw",
+          "set": {
+            "flags": {
+              "sparkle.fo-sw": true
+            }
+          },
+          "give": {
+            "mats": {
+              "苦い根": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-fo-se",
+      "x": 61,
+      "y": 28,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.fo-se"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.fo-se": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.fo-se",
+          "set": {
+            "flags": {
+              "sparkle.fo-se": true
+            }
+          },
+          "give": {
+            "items": {
+              "気付け薬": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "stage": {

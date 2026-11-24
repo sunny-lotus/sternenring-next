@@ -753,7 +753,9 @@ SR.level = (function () {
   if (box) {
     if (box.gold) { var g = SR.growth.data(); g.gold = (g.gold || 0) + box.gold; try { SRS.setItem('sr-battle-growth-v2', JSON.stringify(g)); } catch (e) {} }
     Object.keys(box.exp || {}).forEach(function (code) { if (box.exp[code] > 0) SR.level.add(code, box.exp[code]); });
-    try { SRS.removeItem('sr-field-inbox-v1'); } catch (e) {}
+    // 道具・素材（2026-11-24）は、持ち物（SR.bag）ができてから受け取るので残す
+    var rest = {}; if (box.items) rest.items = box.items; if (box.mats) rest.mats = box.mats;
+    try { if (rest.items || rest.mats) SRS.setItem('sr-field-inbox-v1', JSON.stringify(rest)); else SRS.removeItem('sr-field-inbox-v1'); } catch (e) {}
   }
   var can = SR.canLearn;
   SR.canLearn = function (tree, who, id) {
@@ -956,6 +958,15 @@ SR.bag = (function () {   // 持ち物（アイテムと素材）。この端末
     buy: function (id) { var p = SR.ITEMS[id].price; if (SR.growth.gold() < p) return false; SR.growth.addGold(-p); d.items[id] = (d.items[id] || 0) + 1; save(); return true; },
     reset: function () { d = { items: { '薬草': 3 }, mats: {} }; save(); }
   };
+})();
+// フィールドで手に入れた道具・素材を持ち物へ（2026-11-24 きらきら光る所の隠しアイテム）
+(function () {
+  var box = null; try { box = JSON.parse(SRS.getItem('sr-field-inbox-v1')); } catch (e) {}
+  if (!box || (!box.items && !box.mats)) return;
+  Object.keys(box.items || {}).forEach(function (id) { if (box.items[id] > 0) SR.bag.add(id, box.items[id]); });
+  Object.keys(box.mats || {}).forEach(function (id) { if (box.mats[id] > 0) SR.bag.addMat(id, box.mats[id]); });
+  delete box.items; delete box.mats;
+  try { if (box.gold || (box.exp && Object.keys(box.exp).length)) SRS.setItem('sr-field-inbox-v1', JSON.stringify(box)); else SRS.removeItem('sr-field-inbox-v1'); } catch (e) {}
 })();
 (function () {   // 説明・経験値の文
   var ds = SR.describe; SR.describe = function (a) { if (a && a.item) return SR.ITEMS[a.id].fx + '（1つの戦いに' + SR.ITEM_CARRY + '個まで）'; return ds(a); };

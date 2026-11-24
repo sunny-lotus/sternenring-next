@@ -313,7 +313,7 @@
       },
       "sourceFile": "step_stone_01.wav",
       "durationSeconds": 0.22,
-      "gain": 0.07,
+      "gain": 0.11,
       "status": "adopted",
       "assignedTo": "field.footstep.stone",
       "recording": {
@@ -325,7 +325,7 @@
         "gainDb": 9.9,
         "note": "Claude が1回分を切り出し（頭6msで立ち上げ・終わりの4割で消す）、同じ種類の中でいちばん大きい山を -3dBFS にそろえた。耳での確認はまだ"
       },
-      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。石の上の足音（町の石畳＝stage.paved の上）。4つからランダムに（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）",
+      "use": "2026-11-23 作者「足音とドアの音など録音したから入れてほしい」。石の上の足音（町の石畳＝stage.paved の上）。4つからランダムに（同日 作者「足音うるさいかな」「足音まだでかいな」で小さくした）。2026-11-24 作者「石畳の方、もうちょっと大きくしていいかも」で 0.07→0.11",
       "sha256": "328492c7daf21374ac86f15271d86e5d0967a6904e478a0fb8ae68204d062e31"
     },
     {
@@ -339,7 +339,7 @@
       },
       "sourceFile": "step_stone_02.wav",
       "durationSeconds": 0.22,
-      "gain": 0.07,
+      "gain": 0.11,
       "status": "adopted",
       "assignedTo": "field.footstep.stone",
       "recording": {
@@ -365,7 +365,7 @@
       },
       "sourceFile": "step_stone_03.wav",
       "durationSeconds": 0.22,
-      "gain": 0.07,
+      "gain": 0.11,
       "status": "adopted",
       "assignedTo": "field.footstep.stone",
       "recording": {
@@ -391,7 +391,7 @@
       },
       "sourceFile": "step_stone_04.wav",
       "durationSeconds": 0.22,
-      "gain": 0.07,
+      "gain": 0.11,
       "status": "adopted",
       "assignedTo": "field.footstep.stone",
       "recording": {

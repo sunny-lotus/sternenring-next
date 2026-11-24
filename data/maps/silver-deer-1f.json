@@ -306,6 +306,105 @@
           }
         }
       ]
+    },
+    {
+      "id": "sparkle-sd-gallery",
+      "x": 1,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-gallery"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-gallery": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-gallery",
+          "set": {
+            "flags": {
+              "sparkle.sd-gallery": true
+            }
+          },
+          "give": {
+            "items": {
+              "霊水": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-sd-corner",
+      "x": 18,
+      "y": 11,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-corner"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-corner": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-corner",
+          "set": {
+            "flags": {
+              "sparkle.sd-corner": true
+            }
+          },
+          "give": {
+            "items": {
+              "薬草": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-sd-west",
+      "x": 1,
+      "y": 8,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-west"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-west": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-west",
+          "set": {
+            "flags": {
+              "sparkle.sd-west": true
+            }
+          },
+          "give": {
+            "mats": {
+              "澄んだ水": 1
+            }
+          }
+        }
+      ]
     }
   ],
   "stage": {

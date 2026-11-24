@@ -291,7 +291,7 @@ async function boot() {
       if (!perfEl.hidden) {
         const dbg = r.debug();
         perfEl.textContent = `${boot.draw ? `起動${(boot.draw / 1000).toFixed(1)}秒（データ${(boot.data / 1000).toFixed(1)} 舞台${((boot.stage - boot.data) / 1000).toFixed(1)} 町${((boot.map - boot.stage) / 1000).toFixed(1)} 描画${((boot.draw - boot.map) / 1000).toFixed(1)}）
-` : ''}${mode}  ${perf.fps}fps  最長${Math.round(perf.worstMs)}ms  描画${perf.drawMs.toFixed(1)}ms${dbg.drawCalls != null ? `  draw${dbg.drawCalls}  板${dbg.boards}` : ''}  内部${(dbg.inner || [dbg.W, dbg.H]).join('×')}`;
+` : ''}${mode}  ${perf.fps}fps  最長${Math.round(perf.worstMs)}ms  描画${perf.drawMs.toFixed(1)}ms${dbg.drawCalls != null ? `  draw${dbg.drawCalls}  板${dbg.boards}` : ''}  内部${(dbg.inner || [dbg.W, dbg.H]).join('×')}${dbg.loadText ? `\n${dbg.loadText}` : ''}`;
       }
       perf.frames = 0; perf.since = now; perf.worstMs = 0;
     }
@@ -360,7 +360,9 @@ async function boot() {
     const list = order.map((id) => people.find((/** @type {any} */ p) => p.id === id)).filter(Boolean);
     if (list.length) field.setParty(list);
   };
-  applyFormation(formationOf(record));
+  // 隊列をまだ並べかえていないときも、メニューの「隊列」と同じ5人の並びで歩く（2026-11-24 作者「隊列5人いるじゃん、その並びにならないの？」：
+  // 前は保存した並びが無いと台帳の2人だけだった。仲間に入る時期を作るときに、仲間になった人だけに変える）
+  applyFormation(formationOf(record) ?? ['nacht', 'volt', 'flare', 'serena', 'licht']);
   /** @type {HTMLElement | null} */
   let statusUi = null;
   // 本のページをめくるように開く・閉じる（2026-11-22 作者「本をめくるみたいな演出を入れてほしい、メニューでも」）
