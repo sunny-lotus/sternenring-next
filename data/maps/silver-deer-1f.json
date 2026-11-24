@@ -162,6 +162,150 @@
           "dialogue": "inn.counter"
         }
       ]
+    },
+    {
+      "id": "life-inn-guest1",
+      "x": 2,
+      "y": 11,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest1": true
+            }
+          },
+          "dialogue": "life.inn-guest1.again"
+        },
+        {
+          "dialogue": "life.inn-guest1.first",
+          "set": {
+            "flags": {
+              "life.inn-guest1": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-inn-guest2",
+      "x": 6,
+      "y": 7,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest2": true
+            }
+          },
+          "dialogue": "life.inn-guest2.again"
+        },
+        {
+          "dialogue": "life.inn-guest2.first",
+          "set": {
+            "flags": {
+              "life.inn-guest2": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-inn-guest3",
+      "x": 17,
+      "y": 7,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest3": true
+            }
+          },
+          "dialogue": "life.inn-guest3.again"
+        },
+        {
+          "dialogue": "life.inn-guest3.first",
+          "set": {
+            "flags": {
+              "life.inn-guest3": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-inn-guest4",
+      "x": 13,
+      "y": 11,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest4": true
+            }
+          },
+          "dialogue": "life.inn-guest4.again"
+        },
+        {
+          "dialogue": "life.inn-guest4.first",
+          "set": {
+            "flags": {
+              "life.inn-guest4": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-inn-guest5",
+      "x": 4,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest5": true
+            }
+          },
+          "dialogue": "life.inn-guest5.again"
+        },
+        {
+          "dialogue": "life.inn-guest5.first",
+          "set": {
+            "flags": {
+              "life.inn-guest5": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-inn-guest6",
+      "x": 7,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.inn-guest6": true
+            }
+          },
+          "dialogue": "life.inn-guest6.again"
+        },
+        {
+          "dialogue": "life.inn-guest6.first",
+          "set": {
+            "flags": {
+              "life.inn-guest6": true
+            }
+          }
+        }
+      ]
     }
   ],
   "stage": {
@@ -363,7 +507,8 @@
         "pose": "sit",
         "facing": "right",
         "tone": "#6a4a3a",
-        "sprite": "serena"
+        "sprite": "mob02",
+        "borrowed": "serena"
       },
       {
         "x": 17.45,
@@ -371,7 +516,8 @@
         "pose": "sit",
         "facing": "left",
         "tone": "#4a5a6a",
-        "sprite": "licht"
+        "sprite": "mob04",
+        "borrowed": "licht"
       },
       {
         "x": 6.45,
@@ -379,7 +525,8 @@
         "pose": "sit",
         "facing": "left",
         "tone": "#5a6a4a",
-        "sprite": "flare"
+        "sprite": "mob03",
+        "borrowed": "flare"
       },
       {
         "x": 13.55,
@@ -387,7 +534,8 @@
         "pose": "sit",
         "facing": "right",
         "tone": "#7a5a4a",
-        "sprite": "nacht"
+        "sprite": "mob01",
+        "borrowed": "nacht"
       },
       {
         "x": 4.2,
@@ -395,7 +543,8 @@
         "pose": "stand",
         "facing": "back",
         "tone": "#5a4a5a",
-        "sprite": "volt"
+        "sprite": "mob01",
+        "borrowed": "volt"
       },
       {
         "x": 7.3,
@@ -403,7 +552,8 @@
         "pose": "stand",
         "facing": "back",
         "tone": "#6a5a3a",
-        "sprite": "licht"
+        "sprite": "mob04",
+        "borrowed": "licht"
       }
     ],
     "npcsNote": "2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」：座る客を卓の横はしの横向きの椅子に（仮）"

@@ -184,16 +184,29 @@ async function boot() {
   // 言葉の窓（2026-11-22 作者「フィールドの出来事から記録を書きかえる」）：調べた出来事の言葉と、手に入れたもののお知らせ（金の字）。
   // 調べる（Enter・Space・Z・画面の「調べる」）か、窓を押すと閉じる。閉じた同じ押しで、また調べてしまわないようにする
   const msgBox = $('msg'); let msgShownAt = 0;
+  // 会話（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：dialogue.lines の値は1行の文か、行の並び（文字列か {who:話す人, text}）。
+  // 押すたびに次の行へ。最後の行で、手に入れたもののお知らせ（金の字）も出す
+  /** @type {{who?:string, text:string}[]} */ let msgLines = []; let msgAt = 0; /** @type {string[]} */ let msgNotes = [];
+  const esc = (/** @type {string} */ t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] || c);
+  const drawMsg = () => {
+    const l = msgLines[msgAt], last = msgAt >= msgLines.length - 1;
+    msgBox.innerHTML = (l?.who ? `<p class="who">${esc(l.who)}</p>` : '') + (l?.text ? `<p>${esc(l.text)}</p>` : '') + (last ? msgNotes.map((n) => `<p class="note">${n}</p>`).join('') : '');
+    msgShownAt = performance.now();
+  };
   const syncMsg = () => {
     const m = field.state.message;
     if (m && msgBox.hidden) {
-      const line = m.dialogue ? (dialogue.lines?.[m.dialogue] ?? m.dialogue) : '';
-      msgBox.innerHTML = (line ? `<p>${line}</p>` : '') + m.notes.map((n) => `<p class="note">${n}</p>`).join('');
-      msgBox.hidden = false; msgShownAt = performance.now();
+      const raw = m.dialogue ? (dialogue.lines?.[m.dialogue] ?? m.dialogue) : '';
+      msgLines = (Array.isArray(raw) ? raw : raw ? [raw] : []).map((x) => (typeof x === 'string' ? { text: x } : x)); if (!msgLines.length) msgLines = [{ text: '' }];
+      msgAt = 0; msgNotes = m.notes; drawMsg(); msgBox.hidden = false;
       if (m.notes.length) sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]);
     } else if (!m && !msgBox.hidden) msgBox.hidden = true;
   };
-  const closeMsg = () => { if (!field.state.message || performance.now() - msgShownAt < 200) return false; field.closeMessage(); input.takeAction(); msgBox.hidden = true; return true; };
+  const closeMsg = () => {
+    if (!field.state.message || performance.now() - msgShownAt < 200) return false;
+    if (msgAt < msgLines.length - 1) { msgAt++; drawMsg(); input.takeAction(); return true; } // 次の行へ
+    field.closeMessage(); input.takeAction(); msgBox.hidden = true; return true;
+  };
   window.addEventListener('keydown', (e) => { if (['Enter', 'Space', 'KeyZ'].includes(e.code) && !e.repeat) closeMsg(); });
   msgBox.addEventListener('pointerdown', (e) => { e.preventDefault(); closeMsg(); });
   $('act-btn').addEventListener('pointerdown', (e) => { e.preventDefault(); if (!closeMsg()) input.pressAction(); });

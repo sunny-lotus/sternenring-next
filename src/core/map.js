@@ -55,6 +55,19 @@ export function validateMap(map, ctx) {
     if (q.kindAt(ev.x, ev.y) === null) err(`event ${ev.id} がマップ外`);
     if (!Array.isArray(ev.pages) || !ev.pages.length || ev.pages.at(-1).when) err(`event ${ev.id} の最後のページが無条件でない`);
   }
+  // 町の人（2026-11-24）：通れるマスに立ち、出入口・ほかの町の人と重ならない。話す pages は出来事と同じく、最後のページが無条件
+  const npcIds = new Set(), npcCells = new Set();
+  for (const n of map.npcs || []) {
+    if (!n.id || npcIds.has(n.id)) err(`npc ${n.id} の id が無いか重複`);
+    npcIds.add(n.id);
+    if (!q.passable(n.x, n.y)) err(`npc ${n.id} が通れないマス(${n.x},${n.y})に立っている`);
+    if (q.exitAt(n.x, n.y)) err(`npc ${n.id} が出入口の上に立っている`);
+    if (npcCells.has(`${n.x},${n.y}`)) err(`npc ${n.id} がほかの町の人と同じマス`);
+    npcCells.add(`${n.x},${n.y}`);
+    if (typeof n.sprite !== 'string') err(`npc ${n.id} の sprite（絵のキャラの id）が無い`);
+    if (n.dir !== undefined && !DIRS.includes(n.dir)) err(`npc ${n.id} の向きが不正`);
+    if (n.pages !== undefined && (!Array.isArray(n.pages) || !n.pages.length || n.pages.at(-1).when)) err(`npc ${n.id} の最後のページが無条件でない`);
+  }
   const ledgerIds = new Set((ctx.ledger?.assets || []).map((/** @type {any} */ a) => a.id));
   const tsOk = (/** @type {string} */ id) => id.startsWith('placeholder:') || ledgerIds.has(id);
   const g = map.ground || {};

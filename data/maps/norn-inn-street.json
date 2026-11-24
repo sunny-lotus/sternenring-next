@@ -111,7 +111,101 @@
       "dir": "down"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-st-crates",
+      "x": 6,
+      "y": 5,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-crates": true
+            }
+          },
+          "dialogue": "life.st-crates.again"
+        },
+        {
+          "dialogue": "life.st-crates.first",
+          "set": {
+            "flags": {
+              "life.st-crates": true
+            }
+          },
+          "give": {
+            "gold": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-lamp1",
+      "x": 4,
+      "y": 10,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-lamp"
+        }
+      ]
+    },
+    {
+      "id": "life-st-lamp2",
+      "x": 17,
+      "y": 10,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-lamp2"
+        }
+      ]
+    },
+    {
+      "id": "life-st-cart",
+      "x": 40,
+      "y": 12,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-cart"
+        }
+      ]
+    },
+    {
+      "id": "life-st-flowerbed",
+      "x": 11,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-flowerbed"
+        }
+      ]
+    },
+    {
+      "id": "life-st-crates2",
+      "x": 32,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-crates2"
+        }
+      ]
+    },
+    {
+      "id": "life-st-tree",
+      "x": 1,
+      "y": 9,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-tree"
+        }
+      ]
+    }
+  ],
   "collision": [
     "############################################",
     "#.############.##################.#######..#",
@@ -716,5 +810,165 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-st-merchant",
+      "sprite": "mob01",
+      "tone": "#7a5a3a",
+      "x": 13,
+      "y": 13,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-merchant": true
+            }
+          },
+          "dialogue": "life.st-merchant.again"
+        },
+        {
+          "dialogue": "life.st-merchant.first",
+          "set": {
+            "flags": {
+              "life.st-merchant": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-woman",
+      "sprite": "mob02",
+      "tone": "#6a5a7a",
+      "x": 22,
+      "y": 13,
+      "dir": "up",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-woman": true
+            }
+          },
+          "dialogue": "life.st-woman.again"
+        },
+        {
+          "dialogue": "life.st-woman.first",
+          "set": {
+            "flags": {
+              "life.st-woman": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-child",
+      "sprite": "mob03",
+      "tone": "#5a7a4a",
+      "x": 20,
+      "y": 10,
+      "dir": "up",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-child": true
+            }
+          },
+          "dialogue": "life.st-child.again"
+        },
+        {
+          "dialogue": "life.st-child.first",
+          "set": {
+            "flags": {
+              "life.st-child": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-waiter",
+      "sprite": "mob04",
+      "tone": "#8a7a5a",
+      "x": 11,
+      "y": 5,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-waiter": true
+            }
+          },
+          "dialogue": "life.st-waiter.again"
+        },
+        {
+          "dialogue": "life.st-waiter.first",
+          "set": {
+            "flags": {
+              "life.st-waiter": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-elder",
+      "sprite": "mob01",
+      "tone": "#5a5a5a",
+      "x": 30,
+      "y": 14,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-elder": true
+            }
+          },
+          "dialogue": "life.st-elder.again"
+        },
+        {
+          "dialogue": "life.st-elder.first",
+          "set": {
+            "flags": {
+              "life.st-elder": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob05"
+    },
+    {
+      "id": "life-st-traveler",
+      "sprite": "mob01",
+      "tone": "#4a5a5a",
+      "x": 41,
+      "y": 7,
+      "dir": "left",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.st-traveler": true
+            }
+          },
+          "dialogue": "life.st-traveler.again"
+        },
+        {
+          "dialogue": "life.st-traveler.first",
+          "set": {
+            "flags": {
+              "life.st-traveler": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob07"
+    }
+  ]
 }

@@ -55,7 +55,41 @@
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-house04-bed",
+      "x": 2,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house04-bed"
+        }
+      ]
+    },
+    {
+      "id": "life-house04-barrel",
+      "x": 5,
+      "y": 1,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house04-barrel"
+        }
+      ]
+    },
+    {
+      "id": "life-house04-table",
+      "x": 4,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house04-table"
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,
@@ -156,5 +190,34 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-house04-resident",
+      "sprite": "mob04",
+      "tone": "#6a4a3a",
+      "x": 1,
+      "y": 4,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.house04-resident": true
+            }
+          },
+          "dialogue": "life.house04-resident.again"
+        },
+        {
+          "dialogue": "life.house04-resident.first",
+          "set": {
+            "flags": {
+              "life.house04-resident": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob06"
+    }
+  ]
 }

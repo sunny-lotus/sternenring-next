@@ -39,7 +39,12 @@ export function createField(data) {
     /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
+    /** @type {Record<string, string>} 話しかけた町の人の向き（話すと主人公のほうを向く。マップが変わると元に戻る） */ npcFace: {},
   };
+  // 町の人（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：マップの npcs。立っているマスは通れない。向かいあって調べると話す（pages は出来事と同じ形）
+  /** @param {number} x @param {number} y */
+  const npcAt = (x, y) => (data.maps[state.mapId].npcs || []).find((/** @type {any} */ n) => n.x === x && n.y === y) || null;
+  const OPP = /** @type {Record<string,string>} */ ({ up: 'down', down: 'up', left: 'right', right: 'left' });
 
   /** @param {string} mapId @param {{x:number,y:number,dir:string}} at */
   /** @param {string} mapId @param {any} at @param {{dx:number,dy:number}[]} [keep] 仲間の、主人公からの位置（そのまま並べたいとき） */
@@ -52,7 +57,7 @@ export function createField(data) {
       const pos = k && q.passable(kx, ky) && !(kx === at.x && ky === at.y) ? { x: kx, y: ky } : placeFollower(q, at); // 同じ並び（立てない所なら、いつもの置き方）
       return { id: p.id, x: pos.x, y: pos.y, dir: at.dir, from: null, t: 0, animMs: 0 };
     });
-    state.actors = [lead, ...followers];
+    state.actors = [lead, ...followers]; state.npcFace = {};
     state.trail = followers.map((f) => ({ x: f.x, y: f.y }));
   }
 
@@ -105,8 +110,10 @@ export function createField(data) {
   function examine() {
     const p = player(), [dx, dy] = DIR_VEC[p.dir] || [0, 0], rec = data.record;
     const list = (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => (e.trigger || 'examine') === 'examine');
-    const ev = list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
+    const npc = npcAt(p.x + dx, p.y + dy);
+    const ev = (npc && npc.pages ? { id: 'npc:' + npc.id, pages: npc.pages } : null) || list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
     if (!ev || !rec) return false;
+    if (npc && npc.pages && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir]; // 話すと、こちらを向く
     const page = pickPage(rec, ev.pages); if (!page) return false;
     const notes = applyEffects(rec, { ...(page.give || {}), flags: { ...(page.set?.flags || {}) } });
     state.message = { event: ev.id, dialogue: page.dialogue || null, notes };
@@ -128,6 +135,7 @@ export function createField(data) {
     // 見えている敵（マップの encounters）：まだ倒していない敵のマスへ進もうとすると戦闘になる（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」）
     const foe = encounterAt(nx, ny);
     if (foe) { state.battle = { id: foe.id, battle: foe.battle, mapId: state.mapId }; return false; }
+    if (npcAt(nx, ny)) return false; // 町の人のマスは通れない
     if (!queries[state.mapId].passable(nx, ny)) return false;
     // 高さが1段より大きくちがうマスへは歩けない（2階の通路へは階段からだけ上がれる。2026-11-22）
     if (Math.abs(queries[state.mapId].heightAt(nx, ny) - queries[state.mapId].heightAt(p.x, p.y)) > 1) return false;
@@ -234,6 +242,7 @@ export function createField(data) {
       effect: state.leaving
         ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
+      npcs: (data.maps[state.mapId].npcs || []).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / curStep) : 1;
         const fx = a.from ? a.from.x : a.x, fy = a.from ? a.from.y : a.y;

@@ -55,7 +55,41 @@
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-house10-bed",
+      "x": 2,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house10-bed"
+        }
+      ]
+    },
+    {
+      "id": "life-house10-barrel",
+      "x": 5,
+      "y": 1,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house10-barrel"
+        }
+      ]
+    },
+    {
+      "id": "life-house10-table",
+      "x": 4,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house10-table"
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,
@@ -156,5 +190,33 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-house10-resident",
+      "sprite": "mob03",
+      "tone": "#5a7a4a",
+      "x": 1,
+      "y": 4,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.house10-resident": true
+            }
+          },
+          "dialogue": "life.house10-resident.again"
+        },
+        {
+          "dialogue": "life.house10-resident.first",
+          "set": {
+            "flags": {
+              "life.house10-resident": true
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

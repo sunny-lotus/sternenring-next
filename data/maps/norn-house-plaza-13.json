@@ -55,7 +55,52 @@
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-house16-hearth",
+      "x": 6,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house16-hearth"
+        }
+      ]
+    },
+    {
+      "id": "life-house16-bed",
+      "x": 2,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house16-bed"
+        }
+      ]
+    },
+    {
+      "id": "life-house16-table",
+      "x": 3,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house16-table"
+        }
+      ]
+    },
+    {
+      "id": "life-house16-barrel",
+      "x": 7,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house16-barrel"
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,
@@ -165,5 +210,33 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-house16-resident",
+      "sprite": "mob01",
+      "tone": "#7a5a3a",
+      "x": 1,
+      "y": 4,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.house16-resident": true
+            }
+          },
+          "dialogue": "life.house16-resident.again"
+        },
+        {
+          "dialogue": "life.house16-resident.first",
+          "set": {
+            "flags": {
+              "life.house16-resident": true
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

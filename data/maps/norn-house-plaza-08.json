@@ -55,7 +55,52 @@
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-house11-bed",
+      "x": 6,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house11-bed"
+        }
+      ]
+    },
+    {
+      "id": "life-house11-barrel",
+      "x": 1,
+      "y": 1,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house11-barrel"
+        }
+      ]
+    },
+    {
+      "id": "life-house11-table",
+      "x": 3,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house11-table"
+        }
+      ]
+    },
+    {
+      "id": "life-house11-barrel",
+      "x": 1,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house11-barrel"
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,

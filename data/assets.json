@@ -940,6 +940,230 @@
       "status": "provisional",
       "source": "相談チャット（2026-11-22、pixel/licht-chibi、道具 walk12.ps1・facesplit.ps1 -StrictSkin）。元絵 licht_walk12_source_v02.png（見本 v05、右向き・右足前の1コマ描き直し済み）",
       "sha256": "eeec9e8b934502f0e9417749aecc8084d5d47e79de424aa515163b2ee63a3718"
+    },
+    {
+      "id": "chara.mob01.chibi.walk",
+      "path": "assets/characters/mob01/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        62,
+        92
+      ],
+      "anchor": [
+        31,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob01-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob01_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob01_walk12_source",
+      "equipmentSide": "腰の小さな革袋は本人の右腰",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "7a98fe967426babba1608764db2396cbd9b5220440d85e78fad61f4baa8e4353"
+    },
+    {
+      "id": "chara.mob01.chibi.idle",
+      "path": "assets/characters/mob01/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        62,
+        92
+      ],
+      "anchor": [
+        31,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob01-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob01_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob01_walk12_source",
+      "equipmentSide": "腰の小さな革袋は本人の右腰",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "25d421c3155e75cf41e811edb461f2a5bedc76e08ee12903bbbc86f4a335ac6b"
+    },
+    {
+      "id": "chara.mob02.chibi.walk",
+      "path": "assets/characters/mob02/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        62,
+        92
+      ],
+      "anchor": [
+        31,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob02-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob02_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob02_walk12_source",
+      "equipmentSide": "買い物かごは本人の右手",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "d45895c9bd06aea6fd49edab26a9ce4d4b9151a023767eb5c1ffc529141de867"
+    },
+    {
+      "id": "chara.mob02.chibi.idle",
+      "path": "assets/characters/mob02/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        62,
+        92
+      ],
+      "anchor": [
+        31,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob02-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob02_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob02_walk12_source",
+      "equipmentSide": "買い物かごは本人の右手",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "577e75e2650fda00609ce898ed27d1951ba4d08dd965be2b74dafe280aff5d3c"
+    },
+    {
+      "id": "chara.mob03.chibi.walk",
+      "path": "assets/characters/mob03/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        56,
+        79
+      ],
+      "anchor": [
+        28,
+        77
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob03-chibi、道具 walk12.ps1 -H 77 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob03_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob03_walk12_source",
+      "equipmentSide": "持ち物なし（大人の約0.85倍の背）",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "665c556b6df6b94135b7e0f26021f163ee4b986244247bf881742780dda3a897"
+    },
+    {
+      "id": "chara.mob03.chibi.idle",
+      "path": "assets/characters/mob03/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        56,
+        79
+      ],
+      "anchor": [
+        28,
+        77
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob03-chibi、道具 walk12.ps1 -H 77 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob03_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob03_walk12_source",
+      "equipmentSide": "持ち物なし（大人の約0.85倍の背）",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "0b09ebbf433fe1750cd50614896f47e294ca3369fb016cceb1b43938ba08528a"
+    },
+    {
+      "id": "chara.mob04.chibi.walk",
+      "path": "assets/characters/mob04/chibi-walk.png",
+      "kind": "sheet",
+      "frame": [
+        60,
+        92
+      ],
+      "anchor": [
+        30,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob04-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob04_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob04_walk12_source",
+      "equipmentSide": "持ち物なし",
+      "frames": 4,
+      "frameMs": 160,
+      "sha256": "3c8db9503748ececdfa8e3747ff57e25a35bf32e99b95d1bb6d925bcefe35bfb"
+    },
+    {
+      "id": "chara.mob04.chibi.idle",
+      "path": "assets/characters/mob04/chibi-idle.png",
+      "kind": "sheet",
+      "frame": [
+        60,
+        92
+      ],
+      "anchor": [
+        30,
+        90
+      ],
+      "directions": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ],
+      "noFlip": true,
+      "status": "provisional",
+      "style": "chibi",
+      "source": "相談チャット（2026-11-24、pixel/mob04-chibi、道具 walk12.ps1 -H 90 -Colors 48）。元絵 pixel/元絵/モブ_v01/mob04_walk12_source.png（美術・演出室。作者が見本をOK）",
+      "sourceArt": "mob04_walk12_source",
+      "equipmentSide": "持ち物なし",
+      "frames": 1,
+      "frameMs": 400,
+      "sha256": "98a1b8ec7a620ce56f4b3c8fcdec3df994a4540b0b9eb9e8b4b800e256038804"
     }
   ],
   "party": [
@@ -986,6 +1210,38 @@
       "idle": "chara.licht.chibi.idle",
       "faces": "chara.licht.chibi.faces",
       "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）"
+    },
+    {
+      "id": "mob01",
+      "name": "商人",
+      "walk": "chara.mob01.chibi.walk",
+      "idle": "chara.mob01.chibi.idle",
+      "mob": true,
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+    },
+    {
+      "id": "mob02",
+      "name": "婦人",
+      "walk": "chara.mob02.chibi.walk",
+      "idle": "chara.mob02.chibi.idle",
+      "mob": true,
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+    },
+    {
+      "id": "mob03",
+      "name": "子ども",
+      "walk": "chara.mob03.chibi.walk",
+      "idle": "chara.mob03.chibi.idle",
+      "mob": true,
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
+    },
+    {
+      "id": "mob04",
+      "name": "給仕",
+      "walk": "chara.mob04.chibi.walk",
+      "idle": "chara.mob04.chibi.idle",
+      "mob": true,
+      "note": "名前・役目・設定の無い町の人（モブ）。2026-11-24 作者「モブはおっけー」"
     }
   ]
 }

@@ -99,7 +99,7 @@
   @keyframes page-out { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(.4); } }
   /* 言葉の窓と「調べる」（2026-11-22） */
   #msg { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(720px, calc(100% - 32px)); z-index: 60; background: linear-gradient(180deg, rgba(34,24,14,.94), rgba(20,14,8,.96)); border: 1px solid #c9a050; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.5), inset 0 0 0 3px rgba(201,160,80,.18); padding: 14px 20px; color: #f3e6c4; font: 16px/1.7 "Shippori Mincho B1", serif; animation: msg-in .22s ease-out; }
-  #msg p { margin: 0; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; }
+  #msg p { margin: 0; } #msg p.who { color: #e8c47a; font-size: 13px; letter-spacing: 2px; margin-bottom: 2px; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; }
   #msg::after { content: "▼"; position: absolute; right: 12px; bottom: 6px; font-size: 11px; color: #c9a050; animation: msg-blink 1s infinite; }
   @keyframes msg-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
   @keyframes msg-blink { 50% { opacity: .2; } }

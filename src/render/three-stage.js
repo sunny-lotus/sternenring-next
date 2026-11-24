@@ -2215,6 +2215,31 @@ export function createThreeStage(canvasEl, assets) {
           }
         } else am.tex.offset.x = (Math.floor(now * FLUTTER_FPS + am.off) % FLUTTER_FRAMES) / FLUTTER_FRAMES;
       }
+      // 町の人（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：仲間と同じ形で描く。立ったまま、向きだけ変わる（話すとこちらを向く）
+      for (const n of view.npcs || []) {
+        const key = 'npc:' + n.id; seen.add(key);
+        if (!actors[key]) {
+          let am = actorMesh(n.sprite);
+          if (!am) { // 絵（ドット絵）がまだ無い町の人は、コードで描いた仮の人影（モブのドット絵待ち）
+            const hgt = CHIBI_H, mesh = boardMesh(texOf(mobCanvas(n.tone || '#6a5a4a', false)), hgt / 2, hgt), hinge = new THREE.Group(); hinge.add(mesh); root.add(hinge); am = { hinge, mesh };
+          }
+          am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[key] = am;
+        }
+        const am = actors[key], k = efk.startsWith('nook') ? 1 : kOf(n.y + 0.5, true);
+        am.hinge.visible = true; am.hinge.rotation.x = -Math.PI / 2 * (1 - k);
+        am.hinge.position.set(snapDot(n.x + 0.5), 0.02 + heightLerp(map, n.x, n.y) * HU, snapDot(n.y + 0.62));
+        flatLay(am.hinge, k, n.y + 0.5, CHIBI_H, true, n.x);
+        if (am.sheet) {
+          const s = am.sheet.idle, f = sheetFrame(s.e, n.dir, now * 1000), img = s.t.image, m = am.mesh.material;
+          if (m.map !== s.t) { m.map = s.t; m.emissiveMap = s.t; am.mesh.customDepthMaterial.map = s.t; m.needsUpdate = true; }
+          if (am.npcDir !== n.dir || am.npcCol !== f.sx) { am.npcDir = n.dir; am.npcCol = f.sx; s.t.repeat.set(f.sw / img.width, f.sh / img.height); s.t.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); }
+          if (am.face) {
+            const F = am.face, e = F.e, list = e.anchors.idle[n.dir], an = list && list[Math.round(f.sx / f.sw)], row = e.dirs.indexOf(n.dir), col = Math.max(0, e.expressions.indexOf('normal'));
+            F.mesh.visible = !!an && row >= 0;
+            if (F.mesh.visible) { const [cw, ch] = e.cell, fi = F.t.image; F.mesh.position.set(((an[0] + cw / 2) / F.fw - 0.5) * F.w, am.mesh.position.y + (0.5 - (an[1] + ch / 2) / F.fh) * F.h, 0.004); F.t.repeat.set(cw / fi.width, ch / fi.height); F.t.offset.set(col * cw / fi.width, 1 - (row + 1) * ch / fi.height); }
+          }
+        }
+      }
       for (const id of Object.keys(actors)) if (!seen.has(id)) actors[id].hinge.visible = false;
       // 入れる家の扉（2026-11-23 作者「ドアを切り取って開くようにできるかい？」）：入るときは寄りながら開き、出てきたときは開いたまま着いて、閉まる
       for (const b of boards) {

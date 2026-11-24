@@ -85,3 +85,5 @@ for (const id of made) audio.bgmByMap[id] = audio.bgmByMap['norn-plaza'];
 fs.writeFileSync(ap, JSON.stringify(audio, null, 2) + '\n');
 for (const f of fs.readdirSync(MAPS)) if (f.startsWith('norn-house-') && !made.includes(f.replace('.json', ''))) fs.unlinkSync(path.join(MAPS, f));
 console.log('作った部屋', made.length);
+// 家の中を作りなおすと、町のにぎわい（住人・家具を調べる出来事）が消えるので、続けて入れなおす（2026-11-24）
+require('./gen-town-life.cjs');

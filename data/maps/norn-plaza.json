@@ -498,6 +498,77 @@
           }
         }
       ]
+    },
+    {
+      "id": "life-pl-planter1",
+      "x": 4,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.pl-planter1"
+        }
+      ]
+    },
+    {
+      "id": "life-pl-planter2",
+      "x": 19,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-planter2": true
+            }
+          },
+          "dialogue": "life.pl-planter2.again"
+        },
+        {
+          "dialogue": "life.pl-planter2.first",
+          "set": {
+            "flags": {
+              "life.pl-planter2": true
+            }
+          },
+          "give": {
+            "gold": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-pl-planter3",
+      "x": 15,
+      "y": 24,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.pl-planter3"
+        }
+      ]
+    },
+    {
+      "id": "life-pl-planter4",
+      "x": 42,
+      "y": 36,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.pl-planter4"
+        }
+      ]
+    },
+    {
+      "id": "life-pl-planter5",
+      "x": 17,
+      "y": 36,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.pl-planter5"
+        }
+      ]
     }
   ],
   "stage": {
@@ -1006,5 +1077,245 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-pl-merchant",
+      "sprite": "mob01",
+      "tone": "#7a5a3a",
+      "x": 3,
+      "y": 10,
+      "dir": "up",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-merchant": true
+            }
+          },
+          "dialogue": "life.pl-merchant.again"
+        },
+        {
+          "dialogue": "life.pl-merchant.first",
+          "set": {
+            "flags": {
+              "life.pl-merchant": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-pl-child1",
+      "sprite": "mob03",
+      "tone": "#5a7a4a",
+      "x": 28,
+      "y": 12,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-child1": true
+            }
+          },
+          "dialogue": "life.pl-child1.again"
+        },
+        {
+          "dialogue": "life.pl-child1.first",
+          "set": {
+            "flags": {
+              "life.pl-child1": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-pl-child2",
+      "sprite": "mob03",
+      "tone": "#7a6a3a",
+      "x": 31,
+      "y": 12,
+      "dir": "left",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-child2": true
+            }
+          },
+          "dialogue": "life.pl-child2.again"
+        },
+        {
+          "dialogue": "life.pl-child2.first",
+          "set": {
+            "flags": {
+              "life.pl-child2": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-pl-woman",
+      "sprite": "mob02",
+      "tone": "#6a5a7a",
+      "x": 20,
+      "y": 19,
+      "dir": "up",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-woman": true
+            }
+          },
+          "dialogue": "life.pl-woman.again"
+        },
+        {
+          "dialogue": "life.pl-woman.first",
+          "set": {
+            "flags": {
+              "life.pl-woman": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-pl-elder",
+      "sprite": "mob01",
+      "tone": "#5a5a5a",
+      "x": 9,
+      "y": 25,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-elder": true
+            }
+          },
+          "dialogue": "life.pl-elder.again"
+        },
+        {
+          "dialogue": "life.pl-elder.first",
+          "set": {
+            "flags": {
+              "life.pl-elder": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob05"
+    },
+    {
+      "id": "life-pl-craftsman",
+      "sprite": "mob04",
+      "tone": "#6a4a3a",
+      "x": 35,
+      "y": 18,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-craftsman": true
+            }
+          },
+          "dialogue": "life.pl-craftsman.again"
+        },
+        {
+          "dialogue": "life.pl-craftsman.first",
+          "set": {
+            "flags": {
+              "life.pl-craftsman": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob06"
+    },
+    {
+      "id": "life-pl-girl",
+      "sprite": "mob02",
+      "tone": "#8a5a6a",
+      "x": 45,
+      "y": 31,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-girl": true
+            }
+          },
+          "dialogue": "life.pl-girl.again"
+        },
+        {
+          "dialogue": "life.pl-girl.first",
+          "set": {
+            "flags": {
+              "life.pl-girl": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob08"
+    },
+    {
+      "id": "life-pl-traveler",
+      "sprite": "mob01",
+      "tone": "#4a5a5a",
+      "x": 53,
+      "y": 8,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-traveler": true
+            }
+          },
+          "dialogue": "life.pl-traveler.again"
+        },
+        {
+          "dialogue": "life.pl-traveler.first",
+          "set": {
+            "flags": {
+              "life.pl-traveler": true
+            }
+          }
+        }
+      ],
+      "wantSprite": "mob07"
+    },
+    {
+      "id": "life-pl-waiter",
+      "sprite": "mob04",
+      "tone": "#8a7a5a",
+      "x": 24,
+      "y": 7,
+      "dir": "down",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.pl-waiter": true
+            }
+          },
+          "dialogue": "life.pl-waiter.again"
+        },
+        {
+          "dialogue": "life.pl-waiter.first",
+          "set": {
+            "flags": {
+              "life.pl-waiter": true
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

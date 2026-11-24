@@ -55,7 +55,52 @@
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "life-house22-hearth",
+      "x": 7,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house22-hearth"
+        }
+      ]
+    },
+    {
+      "id": "life-house22-bed",
+      "x": 2,
+      "y": 2,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house22-bed"
+        }
+      ]
+    },
+    {
+      "id": "life-house22-table",
+      "x": 4,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house22-table"
+        }
+      ]
+    },
+    {
+      "id": "life-house22-barrel",
+      "x": 8,
+      "y": 4,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.house22-barrel"
+        }
+      ]
+    }
+  ],
   "stage": {
     "camera": {
       "pitchDeg": 10,
@@ -165,5 +210,33 @@
         "items": []
       }
     ]
-  }
+  },
+  "npcs": [
+    {
+      "id": "life-house22-resident",
+      "sprite": "mob04",
+      "tone": "#8a7a5a",
+      "x": 1,
+      "y": 4,
+      "dir": "right",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "life.house22-resident": true
+            }
+          },
+          "dialogue": "life.house22-resident.again"
+        },
+        {
+          "dialogue": "life.house22-resident.first",
+          "set": {
+            "flags": {
+              "life.house22-resident": true
+            }
+          }
+        }
+      ]
+    }
+  ]
 }
