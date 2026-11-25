@@ -163,7 +163,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   const M = base('norn-kingsroad', '東門の外・王道', 28, 30, 'town', 303);
   M.paved.push({ x: 11, y: 0, w: 5, h: 30 }, { x: 0, y: 14, w: 12, h: 4 });
   // 北：カルディアの第三城壁と王道側の門
-  M.put('back', 'third-wall', 1, 1, 9, 3, 7, 0.05); M.put('back', 'third-wall', 18, 1, 9, 3, 7, 0.05);
+  M.put('back', 'third-wall', 1, 1, 26, 3, 7, 0.02); // 第三城壁は端から端まで1枚（門の絵の両わきにすき間ができないよう、門はこの手前に重ねる。2026-11-26 サニーと画面で確認）
   M.put('back', 'kardia-gate', 10, 1, 7, 3, 8, 0.08); M.wall(10, 1, 7, 3);
   M.note('kingsroad-gate', 13, 4, GATE_NOTE);
   // 西：ノルンの東の壁（東門の口だけあける）
@@ -182,7 +182,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
 {
   const M = base('norn-north-gate', 'ノルン・北門前', 38, 16, 'town', 404);
   M.paved.push({ x: 15, y: 0, w: 8, h: 16 }, { x: 1, y: 6, w: 36, h: 5 });
-  M.put('back', 'third-wall', 1, 1, 14, 3, 7, 0.05); M.put('back', 'third-wall', 23, 1, 14, 3, 7, 0.05);
+  M.put('back', 'third-wall', 1, 1, 36, 3, 7, 0.02); // 第三城壁は端から端まで1枚（門はこの手前に重ねる）
   M.put('back', 'kardia-gate', 15, 1, 8, 3, 8, 0.08); M.wall(15, 1, 8, 3);
   M.note('north-gate', 18, 4, GATE_NOTE); M.note('north-gate-2', 19, 4, GATE_NOTE);
   // 西：倉庫と荷置き場
