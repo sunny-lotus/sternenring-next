@@ -5,9 +5,9 @@
   "title": "試験区画・ダンジョン（仮）",
   "kind": "interior",
   "status": "provisional",
-  "provenance": "2026-11-22 作者の指示（相談チャット）で作った技術試験用のダンジョン（tools/gen-test-maps.cjs で生成）。見せ方はブックヌック（試作_ブックヌックが基準）。場所・中身・名前は世界設定に無い仮のもので、正式な舞台として扱わない。",
-  "width": 11,
-  "height": 64,
+  "provenance": "2026-11-22 作者の指示（相談チャット）で作った技術試験用のダンジョン（tools/gen-test-maps.cjs で生成）。見せ方はブックヌック（試作_ブックヌックが基準）。場所・中身・名前は世界設定に無い仮のもので、正式な舞台として扱わない。 2026-11-25 サニー「そこまで迷路にしなくていいよ」「大きなイベントを作ってみて」：tools/gen-dungeon-puzzle.cjs で部屋と通路の形に（25×35）。西と東のレバーで石の扉が開き、番人を倒すと奥の間。 2026-11-25 サニー「そこまで迷路にしなくていいよ」「大きなイベントを作ってみて」：tools/gen-dungeon-puzzle.cjs で部屋と通路の形に（25×35）。西と東のレバーで石の扉が開き、番人を倒すと奥の間。 2026-11-25 サニー「そこまで迷路にしなくていいよ」「大きなイベントを作ってみて」：tools/gen-dungeon-puzzle.cjs で部屋と通路の形に（25×35）。西と東のレバーで石の扉が開き、番人を倒すと奥の間。 2026-11-25 サニー「そこまで迷路にしなくていいよ」「大きなイベントを作ってみて」：tools/gen-dungeon-puzzle.cjs で部屋と通路の形に（25×35）。西と東のレバーで石の扉が開き、番人を倒すと奥の間。",
+  "width": 25,
+  "height": 35,
   "tileSize": 32,
   "legend": {
     ".": "floor",
@@ -15,70 +15,41 @@
     "D": "door"
   },
   "collision": [
-    "###########",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.##...##.#",
-    "#.##...##.#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#.........#",
-    "#####D#####"
+    "#########################",
+    "##########.....##########",
+    "##########.....##########",
+    "########.........########",
+    "########.........########",
+    "########.........########",
+    "############.############",
+    "#####...............#####",
+    "#####...............#####",
+    "#####...............#####",
+    "#####...............#####",
+    "#####...............#####",
+    "###########...###########",
+    "#######...........#######",
+    "#.#...#...........#...#.#",
+    "#.....#...........#.....#",
+    "#.......................#",
+    "#.......................#",
+    "#.......................#",
+    "#.....#...........#.....#",
+    "#.....#...........#.....#",
+    "#######...........#######",
+    "###########...###########",
+    "###########...###########",
+    "###########...###########",
+    "###########...###########",
+    "###########...###########",
+    "###########...###########",
+    "##########.....##########",
+    "##########.....##########",
+    "########.........########",
+    "########.........########",
+    "########.........########",
+    "###########...###########",
+    "############D############"
   ],
   "ground": {
     "tileset": "tiles.pipoya-town",
@@ -89,8 +60,8 @@
   "exits": [
     {
       "id": "front-gate",
-      "x": 5,
-      "y": 63,
+      "x": 12,
+      "y": 34,
       "dir": "down",
       "effect": "nook-out",
       "to": {
@@ -106,12 +77,265 @@
   ],
   "spawns": {
     "default": {
-      "x": 5,
-      "y": 61,
+      "x": 12,
+      "y": 32,
       "dir": "up"
     }
   },
-  "events": [],
+  "events": [
+    {
+      "id": "du-lever-w",
+      "x": 2,
+      "y": 14,
+      "trigger": "examine",
+      "status": "provisional",
+      "sparkle": {
+        "flag": "du.lever.w"
+      },
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "du.lever.w": true
+            }
+          },
+          "dialogue": "du.lever.done"
+        },
+        {
+          "when": {
+            "flags": {
+              "du.lever.e": true
+            }
+          },
+          "dialogue": "du.lever.last",
+          "set": {
+            "flags": {
+              "du.lever.w": true
+            }
+          }
+        },
+        {
+          "dialogue": "du.lever.first",
+          "set": {
+            "flags": {
+              "du.lever.w": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "du-lever-e",
+      "x": 22,
+      "y": 14,
+      "trigger": "examine",
+      "status": "provisional",
+      "sparkle": {
+        "flag": "du.lever.e"
+      },
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "du.lever.e": true
+            }
+          },
+          "dialogue": "du.lever.done"
+        },
+        {
+          "when": {
+            "flags": {
+              "du.lever.w": true
+            }
+          },
+          "dialogue": "du.lever.last",
+          "set": {
+            "flags": {
+              "du.lever.e": true
+            }
+          }
+        },
+        {
+          "dialogue": "du.lever.first",
+          "set": {
+            "flags": {
+              "du.lever.e": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "du-gate-look",
+      "x": 12,
+      "y": 12,
+      "trigger": "examine",
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "du.lever.w": true,
+              "du.lever.e": true
+            }
+          },
+          "dialogue": "du.gate.opened"
+        },
+        {
+          "when": {
+            "flags": {
+              "du.lever.w": true
+            }
+          },
+          "dialogue": "du.gate.half"
+        },
+        {
+          "when": {
+            "flags": {
+              "du.lever.e": true
+            }
+          },
+          "dialogue": "du.gate.half"
+        },
+        {
+          "dialogue": "du.gate.closed"
+        }
+      ]
+    },
+    {
+      "id": "dungeon-altar",
+      "x": 12,
+      "y": 2,
+      "trigger": "examine",
+      "status": "provisional",
+      "sparkle": {
+        "flag": "dungeon.altar"
+      },
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "dungeon.altar": true
+            }
+          },
+          "dialogue": "dungeon.altar.again"
+        },
+        {
+          "dialogue": "dungeon.altar.first",
+          "set": {
+            "flags": {
+              "dungeon.altar": true
+            }
+          },
+          "give": {
+            "gold": 50,
+            "items": {
+              "霊水": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-du-1",
+      "x": 1,
+      "y": 20,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.du-1"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.du-1": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.du-1",
+          "set": {
+            "flags": {
+              "sparkle.du-1": true
+            }
+          },
+          "give": {
+            "mats": {
+              "光る苔": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-du-2",
+      "x": 23,
+      "y": 20,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.du-2"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.du-2": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.du-2",
+          "set": {
+            "flags": {
+              "sparkle.du-2": true
+            }
+          },
+          "give": {
+            "items": {
+              "霊水": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-du-3",
+      "x": 9,
+      "y": 32,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.du-3"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.du-3": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.du-3",
+          "set": {
+            "flags": {
+              "sparkle.du-3": true
+            }
+          },
+          "give": {
+            "items": {
+              "気付け薬": 1
+            }
+          }
+        }
+      ]
+    }
+  ],
   "stage": {
     "look": "dungeon",
     "camera": {
@@ -139,7 +363,7 @@
             "asset": "placeholder:dungeon-back-wall",
             "x": 0,
             "y": 0,
-            "w": 11,
+            "w": 25,
             "h": 1,
             "standH": 4
           }
@@ -154,55 +378,23 @@
         "items": [
           {
             "asset": "placeholder:stone-pillar",
-            "x": 2,
-            "y": 4,
+            "x": 8,
+            "y": 1,
             "w": 2,
             "h": 2,
             "standH": 4.5
           },
           {
             "asset": "placeholder:stone-pillar",
-            "x": 7,
-            "y": 4,
+            "x": 15,
+            "y": 1,
             "w": 2,
             "h": 2,
             "standH": 4.5
           },
           {
             "asset": "placeholder:stone-pillar",
-            "x": 2,
-            "y": 12,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
-          },
-          {
-            "asset": "placeholder:stone-pillar",
-            "x": 7,
-            "y": 12,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
-          },
-          {
-            "asset": "placeholder:stone-pillar",
-            "x": 2,
-            "y": 20,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
-          },
-          {
-            "asset": "placeholder:stone-pillar",
-            "x": 7,
-            "y": 20,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
-          },
-          {
-            "asset": "placeholder:stone-pillar",
-            "x": 2,
+            "x": 8,
             "y": 28,
             "w": 2,
             "h": 2,
@@ -210,59 +402,622 @@
           },
           {
             "asset": "placeholder:stone-pillar",
-            "x": 7,
+            "x": 15,
             "y": 28,
             "w": 2,
             "h": 2,
             "standH": 4.5
           },
           {
-            "asset": "placeholder:stone-pillar",
+            "asset": "placeholder:lever",
             "x": 2,
-            "y": 36,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1.5
           },
           {
-            "asset": "placeholder:stone-pillar",
+            "asset": "placeholder:lever",
+            "x": 22,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1.5
+          },
+          {
+            "asset": "placeholder:stone-gate",
+            "x": 11,
+            "y": 12,
+            "w": 3,
+            "h": 1,
+            "standH": 3.2,
+            "gate": "du-gate"
+          },
+          {
+            "asset": "placeholder:monster",
+            "x": 11,
+            "y": 7,
+            "w": 3,
+            "h": 1,
+            "standH": 3.4,
+            "zOffset": 0.05,
+            "encounter": "du-guardian"
+          },
+          {
+            "asset": "placeholder:stone-wall",
             "x": 7,
-            "y": 36,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
           },
           {
-            "asset": "placeholder:stone-pillar",
-            "x": 2,
-            "y": 44,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
           },
           {
-            "asset": "placeholder:stone-pillar",
+            "asset": "placeholder:stone-wall",
             "x": 7,
-            "y": 44,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
           },
           {
-            "asset": "placeholder:stone-pillar",
-            "x": 2,
-            "y": 52,
-            "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
           },
           {
-            "asset": "placeholder:stone-pillar",
+            "asset": "placeholder:stone-wall",
             "x": 7,
-            "y": 52,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 6,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 9,
+            "y": 6,
+            "w": 3,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 13,
+            "y": 6,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 6,
+            "w": 3,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 7,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 20,
+            "y": 7,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 8,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 20,
+            "y": 8,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 9,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 20,
+            "y": 9,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 20,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 11,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 20,
+            "y": 11,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 4,
+            "y": 12,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 9,
+            "y": 12,
             "w": 2,
-            "h": 2,
-            "standH": 4.5
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 12,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 19,
+            "y": 12,
+            "w": 2,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 1,
+            "y": 13,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 13,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 23,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 19,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 19,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 20,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 20,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 1,
+            "y": 21,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 21,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 18,
+            "y": 21,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 23,
+            "y": 21,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 6,
+            "y": 22,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 22,
+            "w": 5,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 10,
+            "y": 23,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 23,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 10,
+            "y": 24,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 24,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 10,
+            "y": 25,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 25,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 10,
+            "y": 26,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 26,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 9,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 29,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 29,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 30,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 30,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 31,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 31,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 32,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 17,
+            "y": 32,
+            "w": 1,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 7,
+            "y": 33,
+            "w": 4,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
+          },
+          {
+            "asset": "placeholder:stone-wall",
+            "x": 14,
+            "y": 33,
+            "w": 4,
+            "h": 1,
+            "standH": 1.9,
+            "fadeNearPlayer": true
           }
         ]
       },
@@ -296,5 +1051,33 @@
         ]
       }
     }
-  }
+  },
+  "gates": [
+    {
+      "id": "du-gate",
+      "x": 11,
+      "y": 12,
+      "w": 3,
+      "h": 1,
+      "open": {
+        "flags": {
+          "du.lever.w": true,
+          "du.lever.e": true
+        }
+      },
+      "note": "2026-11-25 仕掛けの扉（仮）：西と東のレバーを2つとも倒すと開く"
+    }
+  ],
+  "encounters": [
+    {
+      "id": "du-guardian",
+      "x": 12,
+      "y": 7,
+      "battle": "shellSwift",
+      "symbol": [
+        "battle/img/enemies/js-golem.png"
+      ],
+      "note": "奥の間の番人（仮）：バトル試作の「甲殻と疾風」。勝つと消え、奥の間への口が通れる"
+    }
+  ]
 }

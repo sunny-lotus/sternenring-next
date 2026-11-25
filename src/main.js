@@ -4,6 +4,7 @@
 import { loadGameData, getJson } from './data.js';
 import { InputState } from './core/input.js';
 import { createField } from './core/field.js';
+import { resolveTalk, isScene } from './core/talk.js';
 import { startLoop } from './core/loop.js';
 import { createFlat2d } from './render/flat2d.js';
 import { createPaperStage } from './render/paper-stage.js';
@@ -186,26 +187,67 @@ async function boot() {
   const msgBox = $('msg'); let msgShownAt = 0;
   // 会話（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：dialogue.lines の値は1行の文か、行の並び（文字列か {who:話す人, text}）。
   // 押すたびに次の行へ。最後の行で、手に入れたもののお知らせ（金の字）も出す
-  /** @type {{who?:string, text:string}[]} */ let msgLines = []; let msgAt = 0; /** @type {string[]} */ let msgNotes = [];
+  /** @type {{who?:string, text:string, member?:string}[]} */ let msgLines = []; let msgAt = 0; /** @type {string[]} */ let msgNotes = []; /** @type {Record<string, number>} */ const talkLast = {};
   const esc = (/** @type {string} */ t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] || c);
+  // 立ち絵の会話（2026-11-24 作者「立ち絵がでてサウンドノベル的な会話形式のイベントがあってもいいな」・2026-11-25 美術・演出室の立ち絵_v01）：
+  // 行に actor があれば、画面の左右に立ち絵を出す（隊列の順に左から）。話す人は明るく、聞く人は暗く。顔は行の face（絵が無ければ normal＝体の絵のまま）
+  const novel = $('novel'), seats = /** @type {HTMLElement[]} */ ([...novel.querySelectorAll('.seat')]);
+  const portraitOf = (/** @type {string} */ id) => d.ledger.assets.find((/** @type {any} */ a) => a.id === 'portrait.' + id && a.kind === 'portrait');
+  /** @type {Record<string, HTMLElement>} */ let seatOf = {};
+  const setFace = (/** @type {HTMLElement} */ seat, /** @type {any} */ p, /** @type {string|undefined} */ face) => {
+    // 2つ目のポーズ（poseB）：気持ちが大きく動く顔（serious・surprise）は、poseB の体と顔に切りかえる（2026-11-25 美術・演出室 poseB）
+    const B = face && p.poseB?.faces?.[face] ? p.poseB : null, body = /** @type {HTMLImageElement} */ (seat.querySelector('img.body')), want = B ? B.body : p.body;
+    if (body.getAttribute('src') !== want) body.src = want;
+    const img = /** @type {HTMLImageElement} */ (seat.querySelector('img.face')), f = face && (B || p).faces?.[face];
+    if (!f) { img.hidden = true; return; }
+    const [x, y, w, h] = f.rect, [W, H] = (B || p).size;
+    Object.assign(img.style, { left: (x / W * 100) + '%', top: (y / H * 100) + '%', width: (w / W * 100) + '%', height: (h / H * 100) + '%' });
+    if (img.getAttribute('src') !== f.file) img.src = f.file;
+    img.hidden = false;
+  };
+  const openNovel = () => {
+    const order = field.state.actors.map((/** @type {any} */ a) => a.id);
+    const ids = [...new Set(msgLines.filter((l) => l.actor).map((l) => /** @type {string} */ (l.actor)))].filter((id) => portraitOf(id))
+      .sort((a, b) => order.indexOf(a) - order.indexOf(b)).slice(0, seats.length);
+    seatOf = {};
+    seats.forEach((seat, i) => {
+      const id = ids[i], p = id && portraitOf(id); seat.classList.toggle('empty', !p); seat.classList.add('dim');
+      if (!p) return;
+      seatOf[id] = seat; const body = /** @type {HTMLImageElement} */ (seat.querySelector('img.body')); if (body.getAttribute('src') !== p.body) body.src = p.body;
+      setFace(seat, p, 'normal');
+    });
+    novel.hidden = false; msgBox.classList.add('novel');
+  };
+  const closeNovel = () => { novel.hidden = true; msgBox.classList.remove('novel'); };
+  const drawNovel = (/** @type {{actor?:string, face?:string}|undefined} */ l) => {
+    for (const [id, seat] of Object.entries(seatOf)) {
+      const speak = l?.actor === id; seat.classList.toggle('dim', !speak);
+      if (speak) setFace(seat, portraitOf(id), l?.face);
+    }
+  };
+  let sceneOn = false;
+  // 立ち絵は起動のあと少し待ってから先に読んでおく（会話を開いた瞬間に白く抜けないように）
+  setTimeout(() => { for (const a of d.ledger.assets) if (a.kind === 'portrait') for (const q of [a, a.poseB].filter(Boolean)) { new Image().src = q.body; for (const f of Object.values(q.faces || {})) new Image().src = /** @type {any} */ (f).file; } }, 4000);
   const drawMsg = () => {
     const l = msgLines[msgAt], last = msgAt >= msgLines.length - 1;
-    msgBox.innerHTML = (l?.who ? `<p class="who">${esc(l.who)}</p>` : '') + (l?.text ? `<p>${esc(l.text)}</p>` : '') + (last ? msgNotes.map((n) => `<p class="note">${n}</p>`).join('') : '');
+    if (sceneOn) drawNovel(l);
+    msgBox.innerHTML = (l?.who ? `<p class="who${l.member ? ' party' : ''}">${esc(l.who)}</p>` : '') + (l?.text ? `<p>${esc(l.text)}</p>` : '') + (last ? msgNotes.map((n) => `<p class="note">${n}</p>`).join('') : '');
     msgShownAt = performance.now();
   };
   const syncMsg = () => {
     const m = field.state.message;
     if (m && msgBox.hidden) {
       const raw = m.dialogue ? (dialogue.lines?.[m.dialogue] ?? m.dialogue) : '';
-      msgLines = (Array.isArray(raw) ? raw : raw ? [raw] : []).map((x) => (typeof x === 'string' ? { text: x } : x)); if (!msgLines.length) msgLines = [{ text: '' }];
-      msgAt = 0; msgNotes = m.notes; drawMsg(); msgBox.hidden = false;
+      // 話しかけるたびに会話が変わる（pick）・仲間の合いの手は隊列にいる仲間だけ（2026-11-24 作者「会話をもっと弾ませてほしい」）
+      msgLines = resolveTalk(raw, { party: field.state.actors.map((/** @type {any} */ a) => a.id), key: m.dialogue || '', last: talkLast }); if (!msgLines.length) msgLines = [{ text: '' }];
+      msgAt = 0; msgNotes = m.notes; sceneOn = isScene(msgLines); if (sceneOn) openNovel(); else closeNovel(); drawMsg(); msgBox.hidden = false;
       if (m.notes.length) sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]);
-    } else if (!m && !msgBox.hidden) msgBox.hidden = true;
+    } else if (!m && !msgBox.hidden) { msgBox.hidden = true; closeNovel(); }
   };
   const closeMsg = () => {
     if (!field.state.message || performance.now() - msgShownAt < 200) return false;
     if (msgAt < msgLines.length - 1) { msgAt++; drawMsg(); input.takeAction(); return true; } // 次の行へ
-    field.closeMessage(); input.takeAction(); msgBox.hidden = true; return true;
+    field.closeMessage(); input.takeAction(); msgBox.hidden = true; closeNovel(); return true;
   };
   window.addEventListener('keydown', (e) => { if (['Enter', 'Space', 'KeyZ'].includes(e.code) && !e.repeat) closeMsg(); });
   msgBox.addEventListener('pointerdown', (e) => { e.preventDefault(); closeMsg(); });

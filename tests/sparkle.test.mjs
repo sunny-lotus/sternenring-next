@@ -25,7 +25,7 @@ test('光る所の出来事：旗・拾ったあとのページ・戦闘にあ�
       if (!e.sparkle) continue; count++;
       assert.ok(e.sparkle.flag, `${e.id} に旗`);
       assert.equal(e.pages[0].when?.flags?.[e.sparkle.flag], true, `${e.id} の最初のページは拾ったあと`);
-      assert.ok(e.pages.slice(1).every((p) => p.set?.flags?.[e.sparkle.flag] === true), `${e.id} は拾うと旗が立つ`);
+      assert.ok(e.pages.slice(1).every((p) => p.set?.flags?.[e.sparkle.flag] === true || (e.sparkle.when && !p.set)), `${e.id} は拾うと旗が立つ`); // sparkle.when のある所（まだ光っていない間）は、旗を立てないページがあってよい（2026-11-25 包み布）
       for (const p of e.pages) for (const k of ['items', 'mats']) for (const n of Object.keys(p.give?.[k] || {})) assert.ok(known(n), `${e.id} の ${n} が戦闘の持ち物にない`);
     }
   }

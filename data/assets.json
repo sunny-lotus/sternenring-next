@@ -1479,6 +1479,520 @@
       "sourceArt": "pixel/元絵/モブ_v01/mob04_sit4_source.png（美術・演出室、座り姿_制作資料_v01）",
       "equipmentSide": "持ち物なし",
       "sha256": "144fea05e2a6bc96b1b00827fb45029e082c4709ce038f609cfca42be4d5fe6d"
+    },
+    {
+      "id": "portrait.nacht",
+      "kind": "portrait",
+      "path": null,
+      "body": "assets/portraits/nacht/body.png",
+      "size": [
+        768,
+        1152
+      ],
+      "faces": {
+        "smile": {
+          "file": "assets/portraits/nacht/face_smile.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "2b91cf2c3b0ea45334081ca9eb08d8f1da2e15e005c766e988221722865c43d5"
+        },
+        "surprise": {
+          "file": "assets/portraits/nacht/face_surprise.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "c45bfd2d04f8613b97f6cc830f9722aa1f05614d5fbaa2726f82225c1147b7e4"
+        },
+        "angry": {
+          "file": "assets/portraits/nacht/face_angry.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "6fc4f812a2f2c5c38b660bab6e71268d7c6a4eed60f6cae8b3aa42adf4965d62"
+        },
+        "troubled": {
+          "file": "assets/portraits/nacht/face_troubled.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "7f32a3f6ed494a410d66e325203401ae68c8600e1fbcd9fae81a824eda479e80"
+        },
+        "sad": {
+          "file": "assets/portraits/nacht/face_sad.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "cad13edfffe5162dbff6a4dfd400476d1e01be3e032c99b97f6610d6c07aa803"
+        },
+        "shy": {
+          "file": "assets/portraits/nacht/face_shy.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "fe4e54db762a7513a363a214e72d811bbe54dfde290eb86fbd17f3fac9643395"
+        },
+        "serious": {
+          "file": "assets/portraits/nacht/face_serious.png",
+          "rect": [
+            324,
+            106,
+            84,
+            74
+          ],
+          "sha256": "ce0c49db0041bf7883bac26f6205aa31299da382b5b24d758c372992ef7cb0ec"
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "note": "会話の立ち絵。normal は体の絵そのまま。ほかの表情は faces の絵を rect（体の絵の上の x, y, 幅, 高さ）に重ねる",
+      "source": "道具 portrait-faces.ps1（2026-11-25、0.75倍、差のある所を切り出し）",
+      "sourceArt": "pixel/元絵/立ち絵_v01/nacht_poseA_*.png（美術・演出室 ART-DIALOGUE-20261125、作者採用前）",
+      "origin": "バトル試作/_作業/新立ち絵/nacht_stand_pencil_v01_transparent.png",
+      "equipmentSide": "刀は左の腰",
+      "sha256": "114bbfcebae31afe32c287f4791f9e6339dd754d1f9aa1fcff9109032c1bf166",
+      "poseB": {
+        "body": "assets/portraits/nacht/b_body.png",
+        "size": [
+          768,
+          1152
+        ],
+        "faces": {
+          "serious": {
+            "file": "assets/portraits/nacht/b_face_serious.png",
+            "rect": [
+              323,
+              104,
+              88,
+              77
+            ],
+            "sha256": "057f62723079b78b04bed5ae899f61b1f37ae15335f43f3d243ed03c244eadf7"
+          },
+          "surprise": {
+            "file": "assets/portraits/nacht/b_face_surprise.png",
+            "rect": [
+              323,
+              104,
+              88,
+              77
+            ],
+            "sha256": "eac02e056f44c78955c69f18bfb25baae1e0a17597584e89d9ebe6d2418798d6"
+          }
+        },
+        "sha256": "3e7eadb488b99be96482e019eff6fd1e576d8b30a0cdc97e8caf24d88c35da8c",
+        "sourceArt": "pixel/元絵/立ち絵_v01/nacht_poseB_*.png（美術・演出室 ART-DIALOGUE-20261125 制作記録 v02。白い背景を透明にした）",
+        "note": "2つ目のポーズ（気持ちが大きく動いたとき）。会話で face が serious・surprise のとき、この体と顔を使う。normal は体のまま"
+      }
+    },
+    {
+      "id": "portrait.volt",
+      "kind": "portrait",
+      "path": null,
+      "body": "assets/portraits/volt/body.png",
+      "size": [
+        768,
+        1152
+      ],
+      "faces": {
+        "smile": {
+          "file": "assets/portraits/volt/face_smile.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "bfec112e09c4ada031bef6b68d0d74f6ee746074a91d684ba2baa8d74b76595b"
+        },
+        "surprise": {
+          "file": "assets/portraits/volt/face_surprise.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "b136d9a887d16a1019c7011b60dcb8f8ef03b416b4e300bf7b03a598cb89d900"
+        },
+        "angry": {
+          "file": "assets/portraits/volt/face_angry.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "b1e2cd646fca421d008a80a2413d70bb419f99f992ca13b9c575de74241c9472"
+        },
+        "troubled": {
+          "file": "assets/portraits/volt/face_troubled.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "ef0a636ad6e59a163cb7637a56797cc0cc2acf6b8447ac20a9642ce9dff998dc"
+        },
+        "sad": {
+          "file": "assets/portraits/volt/face_sad.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "76e309054c905a7abcbbaa6176701a5ee4477e2ae31c96860802bd4a8795388e"
+        },
+        "shy": {
+          "file": "assets/portraits/volt/face_shy.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "9e3deb43d01ec3e06ddaccc74a449efa79fbe07fda1dbe0b703cea8ca7d672bc"
+        },
+        "serious": {
+          "file": "assets/portraits/volt/face_serious.png",
+          "rect": [
+            325,
+            99,
+            92,
+            74
+          ],
+          "sha256": "9360eb3a4c3571365b9dfde3129603e1912b10975e23ba665711a485d7582b96"
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "note": "会話の立ち絵。normal は体の絵そのまま。ほかの表情は faces の絵を rect（体の絵の上の x, y, 幅, 高さ）に重ねる",
+      "source": "道具 portrait-faces.ps1（2026-11-25、0.75倍、差のある所を切り出し）",
+      "sourceArt": "pixel/元絵/立ち絵_v01/volt_poseA_*.png（美術・演出室 ART-DIALOGUE-20261125、作者採用前）",
+      "origin": "バトル試作/_作業/新立ち絵/volt_stand_pencil_v01_transparent.png",
+      "equipmentSide": "右手に杖・右の義足（服で隠れる）",
+      "sha256": "fe8cf29504ea85dc08c060a8ba9ed3dde38abc42b7c7f0819b5c96529bb74b3b",
+      "poseB": {
+        "body": "assets/portraits/volt/b_body.png",
+        "size": [
+          768,
+          1152
+        ],
+        "faces": {
+          "serious": {
+            "file": "assets/portraits/volt/b_face_serious.png",
+            "rect": [
+              289,
+              101,
+              84,
+              82
+            ],
+            "sha256": "6733e99dfdb60dbbddef8250b9683538d6afba90ab843d0c94105b5866419a43"
+          },
+          "surprise": {
+            "file": "assets/portraits/volt/b_face_surprise.png",
+            "rect": [
+              289,
+              101,
+              84,
+              82
+            ],
+            "sha256": "50339b52076a3bc9343aed41e8f020029a5a01638c4cca57ecf8a5999668fc56"
+          }
+        },
+        "sha256": "6eb8f5755019d267e3f40b0ac3e8a144cb7a990be4dfe640c5b49f2abc6fd403",
+        "sourceArt": "pixel/元絵/立ち絵_v01/volt_poseB_*.png（美術・演出室 ART-DIALOGUE-20261125 制作記録 v02。白い背景を透明にした）",
+        "note": "2つ目のポーズ（気持ちが大きく動いたとき）。会話で face が serious・surprise のとき、この体と顔を使う。normal は体のまま"
+      }
+    },
+    {
+      "id": "portrait.flare",
+      "kind": "portrait",
+      "path": null,
+      "body": "assets/portraits/flare/body.png",
+      "size": [
+        768,
+        1152
+      ],
+      "faces": {
+        "smile": {
+          "file": "assets/portraits/flare/face_smile.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "ed96f1a57bef2fa338a1e1c36f7f3bc72c9f42dbb02a7bd3befa4ae9a606943c"
+        },
+        "surprise": {
+          "file": "assets/portraits/flare/face_surprise.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "d1dd1699f22fcc942f2e3e05c677452f1bc92962b0c1310feb3bf46463934b0b"
+        },
+        "angry": {
+          "file": "assets/portraits/flare/face_angry.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "ae1a6d33e98de8aeedfc968372244b05617c2de45a7078dbbb84960f1842dc88"
+        },
+        "troubled": {
+          "file": "assets/portraits/flare/face_troubled.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "c3fe6c1526e48cd79ced3c7763a282ccf7971e9ade311400cc5618dd9d99c2b0"
+        },
+        "sad": {
+          "file": "assets/portraits/flare/face_sad.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "f1161a01e5185c7ff387fced61d8dde83cac5ec7165d960bf76d54b328ecb03d"
+        },
+        "shy": {
+          "file": "assets/portraits/flare/face_shy.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "df426207f453bc7cbdcd52eea913c9f54ed703995ea74ef58e239e9e859e85a6"
+        },
+        "serious": {
+          "file": "assets/portraits/flare/face_serious.png",
+          "rect": [
+            353,
+            122,
+            95,
+            85
+          ],
+          "sha256": "639fe83ee5a86358866cbc9d0bd00df80ee79dbae74f82fef2b9fb2d39f4e5f7"
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "note": "会話の立ち絵。normal は体の絵そのまま。ほかの表情は faces の絵を rect（体の絵の上の x, y, 幅, 高さ）に重ねる",
+      "source": "道具 portrait-faces.ps1（2026-11-25、0.75倍、差のある所を切り出し）",
+      "sourceArt": "pixel/元絵/立ち絵_v01/flare_poseA_*.png（美術・演出室 ART-DIALOGUE-20261125 第2段）",
+      "origin": "バトル試作/_作業/新立ち絵/flare_stand_pencil_v02_transparent.png",
+      "equipmentSide": "左の腰に剣",
+      "sha256": "0e3aa4986ce647143a2fc75bdd77c924e109c39f5cf86432684d64190c455d95"
+    },
+    {
+      "id": "portrait.serena",
+      "kind": "portrait",
+      "path": null,
+      "body": "assets/portraits/serena/body.png",
+      "size": [
+        768,
+        1152
+      ],
+      "faces": {
+        "smile": {
+          "file": "assets/portraits/serena/face_smile.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "664dcae63145880c3d62fb38476eb84db568a0f05ec39278e74c218155ddec77"
+        },
+        "surprise": {
+          "file": "assets/portraits/serena/face_surprise.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "22839c72ef7f2b9eaa9c191871df0f245045c39984e78cc5e6b263e8d784144f"
+        },
+        "angry": {
+          "file": "assets/portraits/serena/face_angry.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "78d3cc4550e8cc20f771016278b354bbe7bd249866aaee104bd8f1bcc6637185"
+        },
+        "troubled": {
+          "file": "assets/portraits/serena/face_troubled.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "37a4888b8e5dd8605b31e76bf9b9f064b4414935a79c10bc3ec89a8ef3355486"
+        },
+        "sad": {
+          "file": "assets/portraits/serena/face_sad.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "09fa4a7fea90c5dc30a6f7c368375d7226c51385fa93a125caebfa8acfb6a0cb"
+        },
+        "shy": {
+          "file": "assets/portraits/serena/face_shy.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "d87048521afc1c6863de3987074e6fb7cdb7fd0b926c80d2445a6c0b0c9ede4c"
+        },
+        "serious": {
+          "file": "assets/portraits/serena/face_serious.png",
+          "rect": [
+            331,
+            81,
+            86,
+            80
+          ],
+          "sha256": "7002d94c2dbc6d9ba2ba2864f4fc94a405abb408edf17e9c9cc68d16c8ccc62b"
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "note": "会話の立ち絵。normal は体の絵そのまま。ほかの表情は faces の絵を rect（体の絵の上の x, y, 幅, 高さ）に重ねる",
+      "source": "道具 portrait-faces.ps1（2026-11-25、0.75倍、差のある所を切り出し）",
+      "sourceArt": "pixel/元絵/立ち絵_v01/serena_poseA_*.png（美術・演出室 ART-DIALOGUE-20261125 第2段）",
+      "origin": "バトル試作/_作業/新立ち絵/serena_stand_pencil_v01_transparent.png",
+      "equipmentSide": "左の腰に剣",
+      "sha256": "8e45cad1ef182b0546df7d279e70437c4296e8bc0d047f2e79adf50de6afed72"
+    },
+    {
+      "id": "portrait.licht",
+      "kind": "portrait",
+      "path": null,
+      "body": "assets/portraits/licht/body.png",
+      "size": [
+        768,
+        1152
+      ],
+      "faces": {
+        "smile": {
+          "file": "assets/portraits/licht/face_smile.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "a039c21a17d5ab044d77bfc4699c0f4e010d8483d0610dd1d02ec55ce1d1691b"
+        },
+        "surprise": {
+          "file": "assets/portraits/licht/face_surprise.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "632824ddcb8cf849c2a44db39ee59ba8d616f838eb6eef71fcc2ca4c4d0e3c9a"
+        },
+        "angry": {
+          "file": "assets/portraits/licht/face_angry.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "04b62efbc1e0cb45b153a534e2c54dfc4750597fe0bb8a20aed14081a626589f"
+        },
+        "troubled": {
+          "file": "assets/portraits/licht/face_troubled.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "3c13fc67891e7e92e5d199a3f6cdab2e1e23557989bd4b044da11a5e1e18de66"
+        },
+        "sad": {
+          "file": "assets/portraits/licht/face_sad.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "8761fe4dcf1e1661bd0b1582608ff013c4ac8ded4dc73376f33d2ea57c0ebab9"
+        },
+        "shy": {
+          "file": "assets/portraits/licht/face_shy.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "76c431eb0bf43ef8ef4e5a2893bff49eeb241a5550610fb278ed4a3593905a2c"
+        },
+        "serious": {
+          "file": "assets/portraits/licht/face_serious.png",
+          "rect": [
+            335,
+            80,
+            82,
+            81
+          ],
+          "sha256": "eadd11f43f509541707dc8033ad22ea7268a73ebe40d588203da018d14c9adb9"
+        }
+      },
+      "noFlip": true,
+      "status": "provisional",
+      "note": "会話の立ち絵。normal は体の絵そのまま。ほかの表情は faces の絵を rect（体の絵の上の x, y, 幅, 高さ）に重ねる",
+      "source": "道具 portrait-faces.ps1（2026-11-25、0.75倍、差のある所を切り出し）",
+      "sourceArt": "pixel/元絵/立ち絵_v01/licht_poseA_*.png（美術・演出室 ART-DIALOGUE-20261125 第2段）",
+      "origin": "バトル試作/_作業/新立ち絵/licht_stand_pencil_v01_transparent.png",
+      "equipmentSide": "マントの内に背負った鞘",
+      "sha256": "8ff7b4aedfeb564a953b43e9697b625e0645110bac34bc44a6226cbe6ad3c952"
     }
   ],
   "party": [
@@ -1490,7 +2004,8 @@
       "walkLegacy": "chara.nacht.walk",
       "idleLegacy": "chara.nacht.idle",
       "faces": "chara.nacht.chibi.faces",
-      "sit": "chara.nacht.chibi.sit"
+      "sit": "chara.nacht.chibi.sit",
+      "portrait": "portrait.nacht"
     },
     {
       "id": "volt",
@@ -1500,7 +2015,8 @@
       "walkLegacy": "chara.volt.walk",
       "idleLegacy": "chara.volt.idle",
       "faces": "chara.volt.chibi.faces",
-      "sit": "chara.volt.chibi.sit"
+      "sit": "chara.volt.chibi.sit",
+      "portrait": "portrait.volt"
     }
   ],
   "cast": [
@@ -1511,7 +2027,8 @@
       "idle": "chara.flare.chibi.idle",
       "faces": "chara.flare.chibi.faces",
       "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
-      "sit": "chara.flare.chibi.sit"
+      "sit": "chara.flare.chibi.sit",
+      "portrait": "portrait.flare"
     },
     {
       "id": "serena",
@@ -1520,7 +2037,8 @@
       "idle": "chara.serena.chibi.idle",
       "faces": "chara.serena.chibi.faces",
       "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
-      "sit": "chara.serena.chibi.sit"
+      "sit": "chara.serena.chibi.sit",
+      "portrait": "portrait.serena"
     },
     {
       "id": "licht",
@@ -1529,7 +2047,8 @@
       "idle": "chara.licht.chibi.idle",
       "faces": "chara.licht.chibi.faces",
       "note": "仲間に入る時期・場面は物語どおり（ここでは確認用に絵だけ持つ）",
-      "sit": "chara.licht.chibi.sit"
+      "sit": "chara.licht.chibi.sit",
+      "portrait": "portrait.licht"
     },
     {
       "id": "mob01",

@@ -99,7 +99,18 @@
   @keyframes page-out { from { transform: rotateY(0); filter: brightness(1); } to { transform: rotateY(-100deg); filter: brightness(.4); } }
   /* 言葉の窓と「調べる」（2026-11-22） */
   #msg { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(720px, calc(100% - 32px)); z-index: 60; background: linear-gradient(180deg, rgba(34,24,14,.94), rgba(20,14,8,.96)); border: 1px solid #c9a050; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.5), inset 0 0 0 3px rgba(201,160,80,.18); padding: 14px 20px; color: #f3e6c4; font: 16px/1.7 "Shippori Mincho B1", serif; animation: msg-in .22s ease-out; }
-  #msg p { margin: 0; } #msg p.who { color: #e8c47a; font-size: 13px; letter-spacing: 2px; margin-bottom: 2px; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; }
+  #msg p { margin: 0; } #msg p.who { color: #e8c47a; font-size: 13px; letter-spacing: 2px; margin-bottom: 2px; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; } #msg p.who.party { color: #9fd4ff; } /* 仲間の言葉は名前を青く（町の人と見分ける） */
+  /* 立ち絵の会話（2026-11-24 作者「立ち絵がでてサウンドノベル的な会話形式のイベントがあってもいいな」）：左右に立ち絵、話す人は明るく少し前に、聞く人は少し暗く */
+  #novel { position: fixed; inset: 0; z-index: 55; pointer-events: none; background: linear-gradient(180deg, rgba(10,6,2,0) 35%, rgba(10,6,2,.55)); animation: novel-in .25s ease-out; }
+  #novel .seat { position: absolute; bottom: 0; height: min(94vh, 85vw); aspect-ratio: 768 / 1152; transition: filter .22s, transform .22s, opacity .22s; transform-origin: 50% 100%; }
+  #novel .seat[data-side="left"] { right: 50%; margin-right: clamp(-80px, 14vw - 90px, 130px); }
+  #novel .seat[data-side="right"] { left: 50%; margin-left: clamp(-80px, 14vw - 90px, 130px); }
+  #novel .seat.dim { filter: brightness(.5) saturate(.75); transform: translateY(1.5%) scale(.96); }
+  #novel .seat.empty { opacity: 0; }
+  #novel .seat img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }
+  #novel .seat img.body { inset: 0; width: 100%; height: 100%; }
+  @keyframes novel-in { from { opacity: 0; } to { opacity: 1; } }
+  #msg.novel { width: min(860px, calc(100% - 24px)); min-height: 96px; }
   #msg::after { content: "▼"; position: absolute; right: 12px; bottom: 6px; font-size: 11px; color: #c9a050; animation: msg-blink 1s infinite; }
   @keyframes msg-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translateX(-50%); } }
   @keyframes msg-blink { 50% { opacity: .2; } }
@@ -162,6 +173,7 @@ window.SR_PRE = (() => {
 <div id="topright"><button type="button" id="sound-toggle">音：中</button><button type="button" id="bgm-toggle">曲：中</button><button type="button" id="room-toggle" hidden>内装：絵</button><button type="button" id="fs-toggle" hidden>全画面</button><button type="button" id="dev-toggle" aria-keyshortcuts="F2" title="開発者メニュー（F2）">開発</button><button type="button" id="status-toggle" aria-keyshortcuts="M">メニュー</button><button type="button" id="cam-toggle">カメラ</button><button type="button" id="render-toggle">表示：紙の舞台</button></div>
 <div id="perf" hidden></div>
 <div id="dev-pos" hidden></div>
+<div id="novel" hidden aria-hidden="true"><div class="seat empty" data-side="left"><img class="body" alt=""><img class="face" alt="" hidden></div><div class="seat empty" data-side="right"><img class="body" alt=""><img class="face" alt="" hidden></div></div>
 <div id="msg" hidden role="status" aria-live="polite"></div>
 <button type="button" id="act-btn" aria-label="調べる" aria-keyshortcuts="Enter Space Z">調べる</button>
 <div id="pad" aria-label="十字ボタン">

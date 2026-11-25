@@ -113,99 +113,6 @@
   },
   "events": [
     {
-      "id": "life-st-crates",
-      "x": 6,
-      "y": 5,
-      "trigger": "examine",
-      "pages": [
-        {
-          "when": {
-            "flags": {
-              "life.st-crates": true
-            }
-          },
-          "dialogue": "life.st-crates.again"
-        },
-        {
-          "dialogue": "life.st-crates.first",
-          "set": {
-            "flags": {
-              "life.st-crates": true
-            }
-          },
-          "give": {
-            "gold": 3
-          }
-        }
-      ]
-    },
-    {
-      "id": "life-st-lamp1",
-      "x": 4,
-      "y": 10,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-lamp"
-        }
-      ]
-    },
-    {
-      "id": "life-st-lamp2",
-      "x": 17,
-      "y": 10,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-lamp2"
-        }
-      ]
-    },
-    {
-      "id": "life-st-cart",
-      "x": 40,
-      "y": 12,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-cart"
-        }
-      ]
-    },
-    {
-      "id": "life-st-flowerbed",
-      "x": 11,
-      "y": 15,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-flowerbed"
-        }
-      ]
-    },
-    {
-      "id": "life-st-crates2",
-      "x": 32,
-      "y": 15,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-crates2"
-        }
-      ]
-    },
-    {
-      "id": "life-st-tree",
-      "x": 1,
-      "y": 9,
-      "trigger": "examine",
-      "pages": [
-        {
-          "dialogue": "life.st-tree"
-        }
-      ]
-    },
-    {
       "id": "sparkle-st-alley-w",
       "x": 1,
       "y": 1,
@@ -383,6 +290,191 @@
           "dialogue": "marble.flower"
         }
       ]
+    },
+    {
+      "id": "life-st-crates",
+      "x": 6,
+      "y": 5,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "scene.day03": false
+            }
+          },
+          "dialogue": "scene.day03",
+          "set": {
+            "flags": {
+              "scene.day03": true
+            }
+          },
+          "party": [
+            "nacht",
+            "volt"
+          ]
+        },
+        {
+          "when": {
+            "flags": {
+              "life.st-crates": true
+            }
+          },
+          "dialogue": "life.st-crates.again"
+        },
+        {
+          "dialogue": "life.st-crates.first",
+          "set": {
+            "flags": {
+              "life.st-crates": true
+            }
+          },
+          "give": {
+            "gold": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "life-st-lamp1",
+      "x": 4,
+      "y": 10,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-lamp"
+        }
+      ]
+    },
+    {
+      "id": "life-st-lamp2",
+      "x": 17,
+      "y": 10,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-lamp2"
+        }
+      ]
+    },
+    {
+      "id": "life-st-cart",
+      "x": 40,
+      "y": 12,
+      "trigger": "examine",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.alarm": true,
+              "story.norn.saved": false
+            }
+          },
+          "dialogue": "story.norn.5",
+          "set": {
+            "flags": {
+              "story.norn.saved": true
+            }
+          }
+        },
+        {
+          "dialogue": "life.st-cart"
+        }
+      ]
+    },
+    {
+      "id": "life-st-flowerbed",
+      "x": 11,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-flowerbed"
+        }
+      ]
+    },
+    {
+      "id": "life-st-crates2",
+      "x": 32,
+      "y": 15,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-crates2"
+        }
+      ]
+    },
+    {
+      "id": "life-st-tree",
+      "x": 1,
+      "y": 9,
+      "trigger": "examine",
+      "pages": [
+        {
+          "dialogue": "life.st-tree"
+        }
+      ]
+    },
+    {
+      "id": "story-cloth",
+      "x": 23,
+      "y": 1,
+      "trigger": "examine",
+      "status": "provisional",
+      "sparkle": {
+        "flag": "story.norn.cloth",
+        "when": {
+          "flags": {
+            "story.norn.witness": true
+          }
+        }
+      },
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.cloth": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.witness": true
+            }
+          },
+          "dialogue": "story.norn.6c-cloth",
+          "set": {
+            "flags": {
+              "story.norn.cloth": true
+            }
+          }
+        },
+        {
+          "dialogue": "story.norn.alley"
+        }
+      ]
+    },
+    {
+      "id": "story-end",
+      "x": 2,
+      "y": 1,
+      "trigger": "examine",
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.chase": true
+            }
+          },
+          "dialogue": "story.norn.end"
+        },
+        {
+          "dialogue": "story.norn.alley"
+        }
+      ]
     }
   ],
   "collision": [
@@ -391,7 +483,7 @@
     "#..###########.########.#########.########.#",
     "#..###########.########.#########.#######..#",
     "#..#####D#####.##D#####.##D######.###D###..#",
-    "#.....#....................................#",
+    "#.....#.............##.......##............#",
     "#..........................................D",
     "#..........................................D",
     "#..........................................D",
@@ -579,7 +671,19 @@
         "sign-bread": "signs-1.webp",
         "sign-shoe": "signs-2.webp",
         "sign-cup": "signs-3.webp",
-        "sign-deer": "signs-4.webp"
+        "sign-deer": "signs-4.webp",
+        "crates": "crates.webp",
+        "barrels": "barrels.webp",
+        "well": "well.webp",
+        "bench": "bench.webp",
+        "notice-board": "notice_board.webp",
+        "signpost": "signpost.webp",
+        "trough": "trough.webp",
+        "sacks": "sacks.webp",
+        "firewood": "firewood.webp",
+        "fence": "fence.webp",
+        "laundry": "laundry.webp",
+        "door-pots": "door_pots.webp"
       }
     },
     "paved": [
@@ -772,7 +876,7 @@
             "zOffset": 0
           },
           {
-            "asset": "placeholder:crates",
+            "asset": "placeholder:barrels",
             "x": 23,
             "y": 1,
             "w": 1,
@@ -889,7 +993,7 @@
             "zOffset": 0.05
           },
           {
-            "asset": "placeholder:crates",
+            "asset": "placeholder:sacks",
             "x": 17,
             "y": 11,
             "w": 2,
@@ -961,7 +1065,7 @@
             "zOffset": 0.03
           },
           {
-            "asset": "placeholder:crates",
+            "asset": "placeholder:firewood",
             "x": 16,
             "y": 15,
             "w": 2,
@@ -977,6 +1081,28 @@
             "h": 1,
             "standH": 1.2,
             "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:door-pots",
+            "x": 20,
+            "y": 5,
+            "w": 2,
+            "h": 1,
+            "standH": 1.1,
+            "zOffset": 0.03,
+            "prop": true,
+            "solid": true
+          },
+          {
+            "asset": "placeholder:bench",
+            "x": 29,
+            "y": 5,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.03,
+            "prop": true,
+            "solid": true
           }
         ]
       },
@@ -1025,6 +1151,20 @@
       "y": 13,
       "dir": "up",
       "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.asked": true,
+              "story.norn.witness": false
+            }
+          },
+          "dialogue": "story.norn.6b",
+          "set": {
+            "flags": {
+              "story.norn.witness": true
+            }
+          }
+        },
         {
           "when": {
             "flags": {
@@ -1148,6 +1288,108 @@
         }
       ],
       "wantSprite": "mob07"
+    },
+    {
+      "id": "story-otto",
+      "sprite": "mob01",
+      "tone": "#7a4a2a",
+      "x": 9,
+      "y": 11,
+      "dir": "left",
+      "status": "provisional",
+      "wantSprite": "otto",
+      "note": "オットー（串焼き屋）。絵はまだ無いので町の人①の絵を借りる。屋台（6,11）は仮にオットーの店",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.chase": true
+            }
+          },
+          "dialogue": "story.norn.wait"
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.cloth": true
+            }
+          },
+          "dialogue": "story.norn.6c-7",
+          "set": {
+            "flags": {
+              "story.norn.chase": true
+            }
+          }
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.saved": true,
+              "story.norn.witness": false
+            }
+          },
+          "dialogue": "story.norn.6a",
+          "set": {
+            "flags": {
+              "story.norn.asked": true
+            }
+          }
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.saved": true
+            }
+          },
+          "dialogue": "story.norn.wait"
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.alarm": true
+            }
+          },
+          "dialogue": "story.norn.wait"
+        },
+        {
+          "when": {
+            "flags": {
+              "story.norn.meal": true
+            }
+          },
+          "dialogue": "story.norn.4",
+          "set": {
+            "flags": {
+              "story.norn.alarm": true
+            }
+          }
+        },
+        {
+          "dialogue": "story.norn.1-3",
+          "set": {
+            "flags": {
+              "story.norn.meal": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "story-helper",
+      "sprite": "mob04",
+      "tone": "#5a6a4a",
+      "x": 5,
+      "y": 12,
+      "dir": "right",
+      "status": "provisional",
+      "hideWhen": {
+        "flags": {
+          "story.norn.alarm": true
+        }
+      },
+      "turn": false,
+      "note": "店の手伝い（名前・年齢・性別・オットーとの関係は付けない仮の人物）。祭りの音が変わったあとは見えなくなる"
     }
-  ]
+  ],
+  "storyNote": "2026-11-25 ノルン導入から追跡開始の試作（tools/gen-norn-story.cjs）。オットー（story-otto）・店の手伝い（story-helper）・包み布（story-cloth）・試作の終わり（story-end）"
 }

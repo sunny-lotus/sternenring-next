@@ -131,6 +131,26 @@
         "band": "front",
         "items": []
       }
+    ],
+    "npcs": [
+      {
+        "x": 5.3,
+        "z": 2.7,
+        "pose": "sit",
+        "facing": "front",
+        "sprite": "licht",
+        "seatTest": true,
+        "note": "2026-11-25：主人公の座り姿を見るための仮の見本（物語の場面ではない。status provisional）"
+      },
+      {
+        "x": 5.3,
+        "z": 5.2,
+        "pose": "sit",
+        "facing": "back",
+        "sprite": "nacht",
+        "seatTest": true,
+        "note": "2026-11-25：主人公の座り姿を見るための仮の見本（物語の場面ではない。status provisional）"
+      }
     ]
   }
 }

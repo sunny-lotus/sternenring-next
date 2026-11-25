@@ -6,6 +6,21 @@ import { placeFollower } from '../src/core/party.js';
 import { mapQuery } from '../src/core/map.js';
 import { InputState } from '../src/core/input.js';
 
+/** 迷路の森・迷宮（2026-11-25）：いまのマップで (tx,ty) まで、通れるマスをたどって歩く（見えている敵・町の人・高さの差が2以上のマスは避ける）。着いたマスを返す */
+function walkTo(field, input, d, tx, ty) {
+  const m = d.maps[field.state.mapId], C = m.collision, L = m.legend, h = (x, y) => Number(m.heights?.[y]?.[x] ?? 0);
+  const foes = new Set((m.encounters || []).filter((e) => !(field.view().defeated || []).includes(`${m.id}:${e.id}`)).map((e) => e.x + ',' + e.y));
+  const npcs = new Set((m.npcs || []).map((n) => n.x + ',' + n.y));
+  const ok = (x, y) => y >= 0 && y < C.length && x >= 0 && x < C[y].length && L[C[y][x]] === 'floor' && !foes.has(x + ',' + y) && !npcs.has(x + ',' + y);
+  const s0 = pos(field), prev = { [s0.x + ',' + s0.y]: null }, q = [[s0.x, s0.y]];
+  while (q.length) { const [x, y] = q.shift(); if (x === tx && y === ty) break;
+    for (const [dx, dy, k] of [[1, 0, 'right'], [-1, 0, 'left'], [0, 1, 'down'], [0, -1, 'up']]) { const nx = x + dx, ny = y + dy, key = nx + ',' + ny; if (key in prev || !ok(nx, ny) || Math.abs(h(nx, ny) - h(x, y)) > 1) continue; prev[key] = [x + ',' + y, k]; q.push([nx, ny]); } }
+  const key0 = tx + ',' + ty; if (!(key0 in prev)) throw new Error(`${m.id}：(${tx},${ty}) へ行けない`);
+  const path = []; for (let c = key0; prev[c]; c = prev[c][0]) path.unshift(prev[c][1]);
+  for (const k of path) tap(field, input, k);
+  return pos(field);
+}
+
 // 2026-11-22 景観案で、始まりと宿の入口を見開き「銀鹿亭前の通り」(norn-inn-street) へ移した。歩きの基本の確かめは広い広場で行う
 const PLAZA = { map: 'norn-plaza', spawn: 'default' };
 const STREET_TO_DOOR = [['up', 2]]; // (8,6)→(8,5)→宿の入口(8,4)
@@ -196,23 +211,76 @@ test('演出：広場の東の道 → 森（page）。離れるあいだは入�
   assert.deepEqual(pos(field), { x: 1, y: 7, dir: 'right' }); // 演出中の連打で動いていない
 });
 
-test('演出：森 → ダンジョン（nook-in）→ 森（nook-out）→ 広場（page）。広い森（64×30）と長いダンジョン（奥行き64）', () => {
-  const { field, input } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)
-  tap(field, input, 'right', 50); // 東西の道を (58,7) まで
-  assert.deepEqual(pos(field), { x: 58, y: 7, dir: 'right' });
-  tap(field, input, 'up', 4); // (58,4) → 入口(58,3)
+test('演出：迷路の森 → 迷宮（nook-in）→ 森（nook-out）→ 広場（page）。森（64×30）は入口から奥まで歩いて行ける。ダンジョン（25×35）は石の扉の前まで歩ける（2026-11-25）', () => {
+  const { field, input, d } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)
+  field.dev.setNoRandom(true); // 迷路は街道の外を歩くので、ランダムの戦闘を止めて道だけ確かめる
+  assert.deepEqual(walkTo(field, input, d, 58, 4), { x: 58, y: 4, dir: pos(field).dir }); // 迷路を抜けて門の前へ
+  tap(field, input, 'up'); // 入口(58,3)
   assert.equal(field.state.mapId, 'test-dungeon');
-  assert.deepEqual(pos(field), { x: 5, y: 62, dir: 'up' });
-  tap(field, input, 'up', 61); // 奥の突き当たり(5,1)まで歩ける
-  assert.deepEqual(pos(field), { x: 5, y: 1, dir: 'up' });
-  tap(field, input, 'down', 62); // 出口(5,63)
+  const dg = d.maps['test-dungeon'], gate = dg.exits[0];
+  assert.deepEqual(pos(field), { x: gate.x, y: gate.y - 2, dir: 'up' });
+  const g0 = dg.gates[0];
+  walkTo(field, input, d, g0.x + 1, g0.y + 1); tap(field, input, 'up'); // 中央の広間の、石の扉の前まで歩ける
+  assert.deepEqual([pos(field).x, pos(field).y], [g0.x + 1, g0.y + 1]); // 閉じた石の扉は通れない（記録が無いので旗は立たない）
+  walkTo(field, input, d, gate.x, gate.y - 1); tap(field, input, 'down'); // 出口
   assert.equal(field.state.mapId, 'test-forest');
   assert.deepEqual(pos(field), { x: 58, y: 4, dir: 'down' });
-  tap(field, input, 'down', 3); tap(field, input, 'left', 57); // (1,7)
+  walkTo(field, input, d, 1, 7);
   tap(field, input, 'left', 1); // 西の道(0,7)
   assert.equal(field.state.mapId, 'norn-plaza');
   assert.deepEqual(pos(field), { x: 54, y: 11, dir: 'left' });
   assert.deepEqual(field.state.transferLog.map((l) => l.to), ['test-dungeon', 'test-forest', 'norn-plaza']);
+});
+
+test('ダンジョンの謎解き（2026-11-25 サニー「大きなイベントを作ってみて」）：石の扉は西と東のレバーを2つ倒すと開き、番人に勝つと奥の宝の台まで行ける', async () => {
+  const { createRecord } = await import('../src/core/record.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const d = loadAll(), record = createRecord();
+  const field = createField({ maps: d.maps, collision: d.collision, world: { ...d.world, start: { map: 'test-dungeon', spawn: 'default' } }, party: d.ledger.party, record });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  field.dev.setNoRandom(true);
+  const dg = d.maps['test-dungeon'], g0 = dg.gates[0], altar = dg.events.find((e) => e.id === 'dungeon-altar');
+  walkTo(field, input, d, g0.x + 1, g0.y + 1); tap(field, input, 'up');
+  assert.deepEqual([pos(field).x, pos(field).y], [g0.x + 1, g0.y + 1]); // 閉じた扉は通れない
+  input.pressAction(); run(field, input, 20); assert.equal(field.state.message?.dialogue, 'du.gate.closed'); field.closeMessage(); // 扉を調べると手がかり
+  const texts = [];
+  for (const id of ['du-lever-w', 'du-lever-e']) {
+    const lv = dg.events.find((e) => e.id === id); walkTo(field, input, d, lv.x, lv.y + 1); tap(field, input, 'up');
+    assert.ok(field.view().sparkles.some((sp) => sp.id === id)); // 倒すまでは光っている
+    input.pressAction(); run(field, input, 20); texts.push(field.state.message?.dialogue); field.closeMessage();
+    assert.ok(!field.view().sparkles.some((sp) => sp.id === id));
+  }
+  assert.deepEqual(texts, ['du.lever.first', 'du.lever.last']);
+  assert.ok(field.view().openGates.includes(g0.id)); // 2つ倒すと開く
+  const foe = dg.encounters[0]; walkTo(field, input, d, foe.x, foe.y + 1); tap(field, input, 'up');
+  assert.equal(field.state.battle?.id, foe.id); field.endBattle('win'); run(field, input, 20); // 番人
+  walkTo(field, input, d, altar.x, altar.y + 1); tap(field, input, 'up');
+  input.pressAction(); run(field, input, 20); assert.equal(field.state.message?.dialogue, 'dungeon.altar.first');
+});
+
+test('ノルン導入の試作（2026-11-25 シナリオ室）：オットー→祭りの異変→荷車の救助→オットー→目撃→包み布→オットーで追跡へ。店の手伝いは異変のあといなくなる', async () => {
+  const { createRecord } = await import('../src/core/record.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const d = loadAll(), record = createRecord();
+  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party: d.ledger.party, record });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  const m = d.maps['norn-inn-street'], otto = m.npcs.find((n) => n.id === 'story-otto');
+  const talk = (x, y, face) => { walkTo(field, input, d, x, y); tap(field, input, face); input.pressAction(); run(field, input, 20); const k = field.state.message?.dialogue; field.closeMessage(); return k; };
+  const atOtto = () => talk(otto.x + 1, otto.y, 'left');
+  assert.ok(field.view().npcs.some((n) => n.id === 'story-helper'));
+  assert.equal(atOtto(), 'story.norn.1-3');
+  assert.equal(atOtto(), 'story.norn.4');
+  assert.ok(!field.view().npcs.some((n) => n.id === 'story-helper')); // 異変のあと、店の手伝いはいない
+  const cart = m.events.find((e) => e.id === 'life-st-cart'); assert.equal(talk(cart.x, cart.y + 1, 'up'), 'story.norn.5');
+  assert.equal(atOtto(), 'story.norn.6a');
+  const woman = m.npcs.find((n) => n.id === 'life-st-woman'); assert.equal(talk(woman.x, woman.y + 1, 'up'), 'story.norn.6b');
+  const clothEv = m.events.find((e) => e.id === 'story-cloth'); assert.ok(field.view().sparkles.some((sp) => sp.id === clothEv.id)); // 目撃を聞くと、包み布の所が光る
+  const cloth = m.events.find((e) => e.id === 'story-cloth'); assert.equal(talk(cloth.x, cloth.y + 1, 'up'), 'story.norn.6c-cloth');
+  assert.equal(atOtto(), 'story.norn.6c-7');
+  const end = m.events.find((e) => e.id === 'story-end'); assert.equal(talk(end.x, end.y + 1, 'up'), 'story.norn.end');
+  assert.equal(record.flags['story.norn.chase'], true);
 });
 
 test('銀鹿亭：右の階段で吹き抜けの2階の通路へ上がり、奥の扉から客室へ入って戻る（2026-11-22）', () => {
@@ -265,8 +333,9 @@ test('銀鹿亭：左の壁ぞいの回廊の扉から客室C・Dへ入って戻
 
 // ---- 見えている敵（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」） ----
 test('見えている敵：ぶつかると戦闘になり、戦闘中は歩けない。負けると敵は残り、勝つと消えて通れる', () => {
-  const { field, input } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)
-  tap(field, input, 'right', 6); tap(field, input, 'down', 2); // (14,9)。敵は (14,10)
+  const { field, input, d } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)
+  field.dev.setNoRandom(true);
+  walkTo(field, input, d, 14, 8); tap(field, input, 'down'); // (14,9) で下を向く。敵は (14,10)
   assert.deepEqual(pos(field), { x: 14, y: 9, dir: 'down' });
   tap(field, input, 'down');
   assert.deepEqual(field.view().battle, { id: 'forest-beasts', battle: 'normal', mapId: 'test-forest' });
@@ -292,7 +361,7 @@ test('見えている敵：ぶつかると戦闘になり、戦闘中は歩け�
 test('ランダムの戦闘：街道の上では起きず、街道の外では歩くと起きる。勝っても何も残らない', () => {
   const { field, input } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)＝街道の上
   for (let k = 0; k < 20; k++) { tap(field, input, k % 2 ? 'left' : 'right'); assert.equal(field.view().battle, null, '街道の上ではランダムの戦闘は起きない'); }
-  tap(field, input, 'down', 2); // (8,9)＝街道の外
+  tap(field, input, 'down', 3); // (8,10)＝街道の外（2026-11-25 迷路の森：入口の広場が街道）
   let n = 0; while (!field.view().battle && n < 400) { tap(field, input, n % 2 ? 'left' : 'right'); n++; }
   const b = field.view().battle;
   assert.ok(b && b.random, `街道の外を歩くとランダムの戦闘になる（${n}歩）`);
@@ -330,19 +399,20 @@ test('調べる：向いている先の出来事を動かし、記録に書く�
   const d = loadAll(), record = createRecord(); let changed = 0;
   const field = createField({ maps: d.maps, collision: d.collision, world: { ...d.world, start: { map: 'test-forest', spawn: 'default' } }, party: d.ledger.party, record, onRecordChange: () => changed++ });
   const input = new InputState({ buffer: d.world.inputBuffer });
-  tap(field, input, 'right', 12); tap(field, input, 'down', 2); // (20,9)。下の (20,10) が薬草の茂み
-  assert.deepEqual(pos(field), { x: 20, y: 9, dir: 'down' });
+  field.dev.setNoRandom(true);
+  walkTo(field, input, d, 20, 10); // 薬草の茂み (20,10) の上に立って調べる（足もとの出来事も調べられる。迷路の森では上のマスが茂みの壁）
+  const here = pos(field); assert.deepEqual([here.x, here.y], [20, 10]);
   input.pressAction(); run(field, input, 20);
   assert.equal(field.view().message.dialogue, 'forest.herbs.first');
   assert.deepEqual(field.view().message.notes, ['銅貨を30枚手に入れた']);
   assert.equal(goldOf(record), 30); assert.equal(changed, 1);
-  tap(field, input, 'left'); assert.deepEqual(pos(field), { x: 20, y: 9, dir: 'down' }, '言葉が出ているあいだは歩けない');
+  tap(field, input, 'left'); assert.deepEqual(pos(field), here, '言葉が出ているあいだは歩けない');
   field.closeMessage();
   input.pressAction(); run(field, input, 20);
   assert.equal(field.view().message.dialogue, 'forest.herbs.again');
   assert.equal(goldOf(record), 30, '2回目はもらえない');
   field.closeMessage();
-  tap(field, input, 'right', 8); tap(field, input, 'down'); // (28,9) で下を向く → 古い石碑
+  walkTo(field, input, d, 28, 10); // 古い石碑の上で調べる
   input.pressAction(); run(field, input, 20);
   assert.deepEqual(fieldSkills(record).volt, ['閃光弾']);
 });
@@ -423,4 +493,28 @@ test('確かめ用のワープ：行けるマスへは移る、行けないマ�
   assert.equal(field.warp('test-forest', 0, 0), false);
   assert.equal(field.warp('no-such-map', 1, 1), false);
   assert.equal(field.state.mapId, 'test-forest');
+});
+
+test('立ち絵の会話：銀鹿亭の受付は一度だけ立ち絵の会話、二度目からはいつもの言葉。ナハトとヴォルトがそろわないと出ない', async () => {
+  const { createRecord } = await import('../src/core/record.js');
+  const { createField } = await import('../src/core/field.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const d = loadAll();
+  const at = (party) => {
+    const record = createRecord();
+    const field = createField({ maps: d.maps, collision: d.collision, world: { ...d.world, start: { map: 'silver-deer-1f', spawn: 'default' } }, party, record });
+    const input = new InputState({ buffer: d.world.inputBuffer });
+    walkTo(field, input, d, 5, 4); tap(field, input, 'up'); // 受付 (5,3) に向かう
+    assert.equal(pos(field).dir, 'up');
+    return { field, input, record };
+  };
+  const { field, input, record } = at(d.ledger.party);
+  input.pressAction(); run(field, input, 20);
+  assert.equal(field.view().message.dialogue, 'scene.day01');
+  assert.equal(record.flags['scene.day01'], true);
+  field.closeMessage(); input.pressAction(); run(field, input, 20);
+  assert.equal(field.view().message.dialogue, 'inn.counter', '二度目はいつもの言葉');
+  const solo = at(d.ledger.party.filter((p) => p.id === 'nacht'));
+  solo.input.pressAction(); run(solo.field, solo.input, 20);
+  assert.equal(solo.field.view().message.dialogue, 'inn.counter', 'ヴォルトがいないと立ち絵の会話は出ない');
 });

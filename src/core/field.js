@@ -43,7 +43,9 @@ export function createField(data) {
   };
   // 町の人（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：マップの npcs。立っているマスは通れない。向かいあって調べると話す（pages は出来事と同じ形）
   /** @param {number} x @param {number} y */
-  const npcAt = (x, y) => (data.maps[state.mapId].npcs || []).find((/** @type {any} */ n) => n.x === x && n.y === y) || null;
+  // hideWhen：その旗がそろうと、その町の人はいなくなる（2026-11-25 ノルン導入の試作：事件のあと店の手伝いがいない）
+  const npcShown = (/** @type {any} */ n) => !n.hideWhen || !Object.entries(n.hideWhen.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v);
+  const npcAt = (x, y) => (data.maps[state.mapId].npcs || []).find((/** @type {any} */ n) => n.x === x && n.y === y && npcShown(n)) || null;
   const OPP = /** @type {Record<string,string>} */ ({ up: 'down', down: 'up', left: 'right', right: 'left' });
 
   /** @param {string} mapId @param {{x:number,y:number,dir:string}} at */
@@ -69,6 +71,14 @@ export function createField(data) {
   const startSpawn = data.maps[state.mapId].spawns[data.world.start.spawn ?? 'default'];
   placeParty(state.mapId, startSpawn);
 
+  /**
+   * 仕掛けの扉（マップの gates。2026-11-25 サニー「大きなイベントを作ってみて」「謎解き系にしていきたい」）：
+   * open.flags の旗がみんなそろうまで、扉のマスは通れない（地図の collision は床のまま。扉の板は描画が消す）
+   * @param {string} mapId
+   */
+  const gatesOf = (mapId) => (data.maps[mapId].gates || []).map((/** @type {any} */ g) => ({ ...g, isOpen: Object.entries(g.open?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v), prog: Object.entries(g.open?.flags || {}).filter(([k, v]) => !!data.record?.flags?.[k] === v).length / Math.max(1, Object.keys(g.open?.flags || {}).length) }));
+  /** @param {number} x @param {number} y */
+  const closedGateAt = (x, y) => gatesOf(state.mapId).some((g) => !g.isOpen && x >= g.x && x < g.x + (g.w || 1) && y >= g.y && y < g.y + (g.h || 1));
   /** まだ倒していない、見えている敵（そのマスにいれば） @param {number} x @param {number} y */
   function encounterAt(x, y) {
     const list = data.maps[state.mapId].encounters || [];
@@ -119,7 +129,8 @@ export function createField(data) {
     const ev = (npc && npc.pages ? { id: 'npc:' + npc.id, pages: npc.pages } : null) || list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
     if (!ev || !rec) return false;
     if (npc && npc.pages && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir]; // 話すと、こちらを向く
-    const page = pickPage(rec, ev.pages); if (!page) return false;
+    // party のあるページ（立ち絵の会話など）は、その仲間がみんな隊列にいるときだけ
+    const page = pickPage(rec, ev.pages.filter((/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((/** @type {any} */ a) => a.id === id)))); if (!page) return false;
     const notes = applyEffects(rec, { ...(page.give || {}), flags: { ...(page.set?.flags || {}) } });
     state.message = { event: ev.id, dialogue: page.dialogue || null, notes };
     data.onRecordChange?.();
@@ -141,6 +152,7 @@ export function createField(data) {
     const foe = encounterAt(nx, ny);
     if (foe) { state.battle = { id: foe.id, battle: foe.battle, mapId: state.mapId }; return false; }
     if (npcAt(nx, ny)) return false; // 町の人のマスは通れない
+    if (closedGateAt(nx, ny)) return false; // 閉じている仕掛けの扉
     if (!queries[state.mapId].passable(nx, ny)) return false;
     // 高さが1段より大きくちがうマスへは歩けない（2階の通路へは階段からだけ上がれる。2026-11-22）
     if (Math.abs(queries[state.mapId].heightAt(nx, ny) - queries[state.mapId].heightAt(p.x, p.y)) > 1) return false;
@@ -242,14 +254,16 @@ export function createField(data) {
       battle: state.battle ? { ...state.battle } : null,
       message: state.message ? { ...state.message, notes: [...state.message.notes] } : null,
       defeated: [...state.defeated],
+      openGates: gatesOf(state.mapId).filter((g) => g.isOpen).map((g) => g.id), // 開いた仕掛けの扉
+      gateProgress: Object.fromEntries(gatesOf(state.mapId).map((g) => [g.id, g.prog])), // 仕掛けの扉の旗がそろった割合（扉の紋の光り方。2026-11-25 シナリオ室「紋が、半分だけ光っている」）
       transition: state.arriveKind || !transitionMs ? 0 : state.transitionLeft / transitionMs,
       // 出入口の演出：kind（page / nook-in / nook-out）、phase（leave＝転送の前・arrive＝転送のあと）、p（0→1）、at（踏んだ出入口のマス）
       effect: state.leaving
         ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       // きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：出来事に sparkle があり、その旗がまだ立っていない所
-      sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag])).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })),
-      npcs: (data.maps[state.mapId].npcs || []).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
+      sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
+      npcs: (data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / curStep) : 1;
         const fx = a.from ? a.from.x : a.x, fy = a.from ? a.from.y : a.y;

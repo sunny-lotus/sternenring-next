@@ -12,11 +12,20 @@ const write = (id, m) => fs.writeFileSync(path.join(MAPS, id + '.json'), JSON.st
 const SRC = [['norn-inn-street', 'street'], ['norn-plaza', 'plaza']];
 const room = read('silver-deer-room-a'); // 見本（手ざわり・カメラ・オーブ）
 const made = [];
+// 民家の手ざわりと家具（2026-11-25 サニー「家の家具など、銀鹿亭とは変えたい雰囲気を」）：美術・演出室の pixel/元絵/内装_民家_v01（委任による担当採用・provisional）を
+// assets/interiors/home に（床・壁・天井は 1024 の WebP、家具は透明でない所を切り出して長い辺 768）。暖炉・窓・樽などは銀鹿亭の絵のまま
+const ROOM_TEX = room.stage.textures, HOME_CUTS = {"cupboard":[[0,0,433,767],434,768],"bed_home":[[0,0,767,302],768,303],"table_home":[[0,0,767,336],768,337],"hearth_pot":[[0,0,287,724],288,725],"herbs_hanging":[[0,0,612,281],613,282],"wash_tub":[[0,0,664,294],665,295],"chest":[[0,0,714,196],715,197],"rug_home":[[0,0,767,392],768,393]};
+const HOME_TEX = { note: '民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵', base: 'assets/interiors/',
+  ...Object.fromEntries(Object.entries(ROOM_TEX).filter(([k, v]) => k !== 'base' && k !== 'note' && typeof v === 'string').map(([k, v]) => [k, 'silver-deer/' + v])),
+  floor: 'home/floor_home.webp', wall: 'home/wall_home.webp', ceiling: 'home/ceiling_home.webp', rug: 'home/rug_home.webp',
+  bedHome: 'home/bed_home.webp', tableHome: 'home/table_home.webp', cupboard: 'home/cupboard.webp', herbs: 'home/herbs_hanging.webp', pot: 'home/hearth_pot.webp', chest: 'home/chest.webp', washTub: 'home/wash_tub.webp',
+  cuts: { rug: HOME_CUTS.rug_home, bedHome: HOME_CUTS.bed_home, tableHome: HOME_CUTS.table_home, cupboard: HOME_CUTS.cupboard, herbs: HOME_CUTS.herbs_hanging, pot: HOME_CUTS.hearth_pot, chest: HOME_CUTS.chest, washTub: HOME_CUTS.wash_tub } };
 
 for (const [outId, short] of SRC) {
   const out = read(outId), doors = out.stage.townArt?.doors || {};
-  out.exits = out.exits.filter((e) => !String(e.id).startsWith('house-'));
   const rows = out.collision.map((r) => [...r]);
+  for (const e of out.exits.filter((e) => String(e.id).startsWith('house-'))) if (rows[e.y]?.[e.x] === 'D') rows[e.y][e.x] = '#'; // 前に作った扉のマスは、いったん壁に戻す（作り直すと扉の場所が変わることがある）
+  out.exits = out.exits.filter((e) => !String(e.id).startsWith('house-'));
   let n = 0;
   for (const layer of out.stage.layers) for (const it of layer.items) {
     if (!/^placeholder:house-/.test(it.asset)) continue;
@@ -50,6 +59,14 @@ for (const [outId, short] of SRC) {
     const tx = Math.max(3, Math.floor(W / 2) - 1);
     mid.push({ asset: 'tiles.pipoya-town', region: 'table', x: tx, y: 3, w: 2, h: 2 }); block(tx, 3, 2, 2);
     if (W >= 8) { mid.push({ asset: 'placeholder:barrels', x: W - 2, y: 4, w: 1, h: 1, standH: 1.3 }); block(W - 2, 4, 1, 1); }
+    // 民家の家具（2026-11-25 内装_民家_v01）：奥の壁ぎわの空いたマスに食器棚（ぶつかる）、寝台の上の壁に干した香草（ぶつからない）
+    { const free = [...Array(W - 2).keys()].map((k) => k + 1).filter((x) => col2[1][x] === '.' && col2[2][x] === '.').sort((p, q) => Math.abs(p - dx) - Math.abs(q - dx));
+      const cx = free.find((x) => x !== dx); if (cx !== undefined) { mid.push({ asset: 'placeholder:home-cupboard', x: cx, y: 1, w: 1, h: 1, standH: 2.4 }); block(cx, 1, 1, 1); } }
+    back.push({ asset: 'placeholder:home-herbs', x: 1, y: 1, w: 2, h: 1, standH: 0.7 });
+    // 長持ちと洗い桶（2026-11-25 ART-HOME の続き「どの家にも同じ組合せを一律に置かない」）：3軒のうち1軒は寝台の足もと側の壁ぎわに長持ち、1軒は反対の壁ぎわに洗い桶、1軒は置かない。
+    // 4段目（y=4）の壁ぎわだけ。すぐ上（y=3）と、下の通り道（y=5）はふさがない
+    { const k = n % 3, at = k === 0 ? 1 : W - 2, kind = k === 0 ? 'home-chest' : 'home-washtub';
+      if (k < 2 && col2[4][at] === '.' && col2[3][at] === '.' && Math.abs(at - dx) > 1) { mid.push({ asset: 'placeholder:' + kind, x: at, y: 4, w: 1, h: 1, standH: k === 0 ? 0.6 : 0.8 }); block(at, 4, 1, 1); } }
     if (n % 2 === 0) { // 1軒おきに左右を入れかえる（どの家も同じ並びに見えないように）。板の絵は反転しない（置く場所だけ入れかえる）
       for (const it2 of [...back, ...mid]) it2.x = W - it2.x - it2.w;
       for (const r of col2) r.reverse();
@@ -65,7 +82,7 @@ for (const [outId, short] of SRC) {
       spawns: { default: { x: dx, y: H - 2, dir: 'up' } },
       events: [],
       stage: {
-        camera: room.stage.camera, textures: room.stage.textures, backWindows: false, orbs: room.stage.orbs,
+        look: 'home', camera: room.stage.camera, textures: HOME_TEX, backWindows: false, orbs: room.stage.orbs,
         layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }],
       },
     };

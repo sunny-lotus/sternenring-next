@@ -159,7 +159,123 @@
       "trigger": "examine",
       "pages": [
         {
+          "when": {
+            "flags": {
+              "scene.day01": false
+            }
+          },
+          "dialogue": "scene.day01",
+          "set": {
+            "flags": {
+              "scene.day01": true
+            }
+          },
+          "party": [
+            "nacht",
+            "volt"
+          ]
+        },
+        {
           "dialogue": "inn.counter"
+        }
+      ]
+    },
+    {
+      "id": "sparkle-sd-gallery",
+      "x": 1,
+      "y": 1,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-gallery"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-gallery": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-gallery",
+          "set": {
+            "flags": {
+              "sparkle.sd-gallery": true
+            }
+          },
+          "give": {
+            "items": {
+              "霊水": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-sd-corner",
+      "x": 18,
+      "y": 11,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-corner"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-corner": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-corner",
+          "set": {
+            "flags": {
+              "sparkle.sd-corner": true
+            }
+          },
+          "give": {
+            "items": {
+              "薬草": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sparkle-sd-west",
+      "x": 1,
+      "y": 8,
+      "trigger": "examine",
+      "sparkle": {
+        "flag": "sparkle.sd-west"
+      },
+      "status": "provisional",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "sparkle.sd-west": true
+            }
+          },
+          "dialogue": "sparkle.empty"
+        },
+        {
+          "dialogue": "sparkle.sd-west",
+          "set": {
+            "flags": {
+              "sparkle.sd-west": true
+            }
+          },
+          "give": {
+            "mats": {
+              "澄んだ水": 1
+            }
+          }
         }
       ]
     },
@@ -302,105 +418,6 @@
           "set": {
             "flags": {
               "life.inn-guest6": true
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "sparkle-sd-gallery",
-      "x": 1,
-      "y": 1,
-      "trigger": "examine",
-      "sparkle": {
-        "flag": "sparkle.sd-gallery"
-      },
-      "status": "provisional",
-      "pages": [
-        {
-          "when": {
-            "flags": {
-              "sparkle.sd-gallery": true
-            }
-          },
-          "dialogue": "sparkle.empty"
-        },
-        {
-          "dialogue": "sparkle.sd-gallery",
-          "set": {
-            "flags": {
-              "sparkle.sd-gallery": true
-            }
-          },
-          "give": {
-            "items": {
-              "霊水": 1
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "sparkle-sd-corner",
-      "x": 18,
-      "y": 11,
-      "trigger": "examine",
-      "sparkle": {
-        "flag": "sparkle.sd-corner"
-      },
-      "status": "provisional",
-      "pages": [
-        {
-          "when": {
-            "flags": {
-              "sparkle.sd-corner": true
-            }
-          },
-          "dialogue": "sparkle.empty"
-        },
-        {
-          "dialogue": "sparkle.sd-corner",
-          "set": {
-            "flags": {
-              "sparkle.sd-corner": true
-            }
-          },
-          "give": {
-            "items": {
-              "薬草": 1
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "sparkle-sd-west",
-      "x": 1,
-      "y": 8,
-      "trigger": "examine",
-      "sparkle": {
-        "flag": "sparkle.sd-west"
-      },
-      "status": "provisional",
-      "pages": [
-        {
-          "when": {
-            "flags": {
-              "sparkle.sd-west": true
-            }
-          },
-          "dialogue": "sparkle.empty"
-        },
-        {
-          "dialogue": "sparkle.sd-west",
-          "set": {
-            "flags": {
-              "sparkle.sd-west": true
-            }
-          },
-          "give": {
-            "mats": {
-              "澄んだ水": 1
             }
           }
         }
@@ -653,6 +670,42 @@
         "tone": "#6a5a3a",
         "sprite": "mob04",
         "borrowed": "licht"
+      },
+      {
+        "x": 4.5,
+        "z": 5.75,
+        "pose": "sit",
+        "facing": "front",
+        "sprite": "mob02",
+        "seatTest": true,
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+      },
+      {
+        "x": 15.5,
+        "z": 8.3,
+        "pose": "sit",
+        "facing": "back",
+        "sprite": "mob01",
+        "seatTest": true,
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+      },
+      {
+        "x": 15.5,
+        "z": 9.75,
+        "pose": "sit",
+        "facing": "front",
+        "sprite": "mob03",
+        "seatTest": true,
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+      },
+      {
+        "x": 4.5,
+        "z": 12.3,
+        "pose": "sit",
+        "facing": "back",
+        "sprite": "mob04",
+        "seatTest": true,
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
       }
     ],
     "npcsNote": "2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」：座る客を卓の横はしの横向きの椅子に（仮）"

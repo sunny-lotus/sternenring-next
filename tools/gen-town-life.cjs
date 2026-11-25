@@ -150,7 +150,16 @@ const houses = {};
       const cand = [[1, H - 3], [Wd - 2, H - 3], [1, 3], [Wd - 2, 3]].find(([x, y]) => free(x, y) && !taken.has(`${x},${y}`) && Math.abs(x - door.x) > 1);
       if (cand) npcs.push({ id: `life-house${String(i + 1).padStart(2, '0')}-resident`, sprite: r.sprite, tone: r.tone, x: cand[0], y: cand[1], dir: cand[0] < Wd / 2 ? 'right' : 'left', pages: talk(`house${String(i + 1).padStart(2, '0')}-resident`, r.first, r.again) });
     }
-    houses[id] = { events, npcs };
+    // 食卓に座っている人（2026-11-25 サニー「民家でも座らせて」）：住人のいない家の半分ほど（3軒に1軒）に、食卓の横の椅子に座る人を置く。
+    // 銀鹿亭の座る客と同じ stage.npcs（座り姿のドット絵・椅子つき。話しかけない・ぶつからない）。食卓の右か左の空いている側に、食卓のほうを向いて座る
+    const seats = [];
+    if (i % 3 === 1) {
+      const tb = items.find((it) => it.region === 'table');
+      // 民家の食卓の絵（table_home）は、食卓の左右に椅子が描いてある：座る人はその椅子の所（食卓のまんなかから 1.13 マス）に、自分の椅子なしで座る（noChair）
+      const side = tb && [[tb.x + tb.w, 'left', tb.x + tb.w / 2 + 1.13], [tb.x - 1, 'right', tb.x + tb.w / 2 - 1.13]].find(([cx]) => free(cx, tb.y) && free(cx, tb.y + 1) && !npcs.some((p) => Math.abs(p.x - cx) <= 1 && p.y >= tb.y - 1 && p.y <= tb.y + 2));
+      if (side) seats.push({ x: side[2], z: tb.y + tb.h / 2, pose: 'sit', noChair: true, facing: side[1], sprite: ['mob01', 'mob02', 'mob03', 'mob04'][((i - 1) / 3) % 4], life: true, note: '2026-11-25 サニー「民家でも座らせて」：食卓に座る住人（仮・status provisional）' });
+    }
+    houses[id] = { events, npcs, seats };
   });
 }
 
@@ -166,6 +175,7 @@ const apply = (id, add) => {
   m.events = (m.events || []).filter((e) => !String(e.id).startsWith('life-')).concat(add.events || []);
   const keepNpcs = (m.npcs || []).filter((n) => !String(n.id).startsWith('life-')), npcs = keepNpcs.concat(add.npcs || []);
   if (npcs.length) m.npcs = npcs; else delete m.npcs;
+  if (add.seats) { m.stage.npcs = (m.stage.npcs || []).filter((p) => !p.life).concat(add.seats); if (!m.stage.npcs.length) delete m.stage.npcs; }
   write(id, m);
   return (add.events || []).length + (add.npcs || []).length;
 };

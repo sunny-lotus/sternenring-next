@@ -59,5 +59,13 @@ export async function loadGameData(opt = {}) {
   /** @type {Record<string, HTMLImageElement>} */
   const images = {};
   await Promise.all(ledger.assets.filter((/** @type {any} */ a) => a.path && /\.png$/.test(a.path)).map(async (/** @type {any} */ a) => { images[a.id] = await loadImage(a.path); }));
+  // ?chara=art：キャラを元の絵（水彩の歩きの元絵を、ドット絵と同じ並びにしたもの。tools/make-art-walk.py）で歩かせる試し（2026-11-25 サニー「元の絵だったらどうなるか試したい」）。
+  // 絵は大きさが artScale 倍なので、コマの大きさと足の位置も同じ倍にする（画面での背の高さは変わらない）
+  if (typeof location !== 'undefined' && new URLSearchParams(location.search).get('chara') === 'art') {
+    await Promise.all(ledger.assets.filter((/** @type {any} */ a) => a.style === 'chibi' && /\/chibi-(walk|idle)\.png$/.test(a.path || '')).map(async (/** @type {any} */ a) => {
+      const im = await loadImage(a.path.replace('/chibi-', '/art-')).catch(() => null); if (!im) return;
+      const k = im.height / (a.frame[1] * 4); images[a.id] = im; a.artScale = k; a.frame = a.frame.map((/** @type {number} */ v) => v * k); a.anchor = a.anchor.map((/** @type {number} */ v) => v * k);
+    }));
+  }
   return { errors, world, collision, ledger, maps, regions, images, style };
 }

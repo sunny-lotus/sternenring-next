@@ -49,6 +49,7 @@ test('描画は状態を書きかえない（render は core の field を impor
 test('旧版のフォルダーを参照しない', () => {
   for (const f of src) assert.ok(!/STERNENRING_RPG_CORE/.test(f.text), f.p);
   for (const a of d.ledger.assets) assert.ok(a.path === null || a.path.startsWith('assets/'), a.id);
+  for (const a of d.ledger.assets.filter((x) => x.kind === 'portrait')) for (const p of [a.body, ...Object.values(a.faces).map((f) => f.file)]) assert.ok(/^assets\/portraits\/[a-z]+\/[a-z_]+\.png$/.test(p), p); // 会話の立ち絵
 });
 
 test('整数倍の拡大（ドットをにじませない）', () => {

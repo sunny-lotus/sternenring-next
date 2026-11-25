@@ -17,7 +17,7 @@
   },
   "collision": [
     "#########",
-    "###..####",
+    "####.####",
     "###..####",
     "#..##...#",
     "#..##..##",
@@ -102,6 +102,7 @@
     }
   ],
   "stage": {
+    "look": "home",
     "camera": {
       "pitchDeg": 10,
       "fovDeg": 90,
@@ -109,29 +110,118 @@
       "follow": "center-if-fits"
     },
     "textures": {
-      "note": "内装の手ざわり（美術・演出室の元絵 pixel/元絵/内装_銀鹿亭_v01、ドット絵にせずそのまま。2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵に戻る",
-      "base": "assets/interiors/silver-deer/",
-      "floor": "floor.webp",
-      "wall": "wall.webp",
-      "ceiling": "ceiling.webp",
-      "brick": "brick.webp",
-      "window": "window.webp",
-      "tabletop": "tabletop.webp",
-      "counter": "counter.webp",
-      "blanket": "blanket.webp",
-      "door": "door.webp",
-      "wood": "wood_side.webp",
-      "wainscot": "wainscot.webp",
-      "linen": "linen.webp",
-      "rug": "rug.webp",
-      "barrels": "barrels.webp",
-      "bottles": "bottles.webp",
-      "mugs": "mugs.webp",
-      "candle": "candle.webp",
-      "lampHanging": "lamp_hanging.webp",
-      "lampWall": "lamp_wall.webp",
-      "flame": "hearth_flame.webp",
-      "logs": "hearth_logs.webp"
+      "note": "民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵",
+      "base": "assets/interiors/",
+      "floor": "home/floor_home.webp",
+      "wall": "home/wall_home.webp",
+      "ceiling": "home/ceiling_home.webp",
+      "brick": "silver-deer/brick.webp",
+      "window": "silver-deer/window.webp",
+      "tabletop": "silver-deer/tabletop.webp",
+      "counter": "silver-deer/counter.webp",
+      "blanket": "silver-deer/blanket.webp",
+      "door": "silver-deer/door.webp",
+      "wood": "silver-deer/wood_side.webp",
+      "wainscot": "silver-deer/wainscot.webp",
+      "linen": "silver-deer/linen.webp",
+      "rug": "home/rug_home.webp",
+      "barrels": "silver-deer/barrels.webp",
+      "bottles": "silver-deer/bottles.webp",
+      "mugs": "silver-deer/mugs.webp",
+      "candle": "silver-deer/candle.webp",
+      "lampHanging": "silver-deer/lamp_hanging.webp",
+      "lampWall": "silver-deer/lamp_wall.webp",
+      "flame": "silver-deer/hearth_flame.webp",
+      "logs": "silver-deer/hearth_logs.webp",
+      "bedHome": "home/bed_home.webp",
+      "tableHome": "home/table_home.webp",
+      "cupboard": "home/cupboard.webp",
+      "herbs": "home/herbs_hanging.webp",
+      "pot": "home/hearth_pot.webp",
+      "chest": "home/chest.webp",
+      "washTub": "home/wash_tub.webp",
+      "cuts": {
+        "rug": [
+          [
+            0,
+            0,
+            767,
+            392
+          ],
+          768,
+          393
+        ],
+        "bedHome": [
+          [
+            0,
+            0,
+            767,
+            302
+          ],
+          768,
+          303
+        ],
+        "tableHome": [
+          [
+            0,
+            0,
+            767,
+            336
+          ],
+          768,
+          337
+        ],
+        "cupboard": [
+          [
+            0,
+            0,
+            433,
+            767
+          ],
+          434,
+          768
+        ],
+        "herbs": [
+          [
+            0,
+            0,
+            612,
+            281
+          ],
+          613,
+          282
+        ],
+        "pot": [
+          [
+            0,
+            0,
+            287,
+            724
+          ],
+          288,
+          725
+        ],
+        "chest": [
+          [
+            0,
+            0,
+            714,
+            196
+          ],
+          715,
+          197
+        ],
+        "washTub": [
+          [
+            0,
+            0,
+            664,
+            294
+          ],
+          665,
+          295
+        ]
+      }
     },
     "backWindows": false,
     "orbs": {
@@ -169,6 +259,14 @@
             "w": 3,
             "h": 2,
             "zOffset": 0.1
+          },
+          {
+            "asset": "placeholder:home-herbs",
+            "x": 1,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 0.7
           }
         ]
       },
@@ -198,6 +296,14 @@
             "w": 1,
             "h": 1,
             "standH": 1.3
+          },
+          {
+            "asset": "placeholder:home-cupboard",
+            "x": 3,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 2.4
           }
         ]
       },

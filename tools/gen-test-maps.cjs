@@ -1,6 +1,7 @@
 // 試験区画（森・ダンジョン）のマップを作る道具。2026-11-22 作者「歩ける広さをもっとめっちゃ大きく」。
 // どちらも技術試験用の仮の区画（status: provisional）。場所・地理・中身は世界設定に無いもので、正式な舞台として扱わない。
 // 使い方：<node> tools/gen-test-maps.cjs  → data/maps/test-forest.json と test-dungeon.json を書き直す
+// 注意（2026-11-25）：いまの森とダンジョンは tools/gen-maze-maps.cjs で迷路にしてある。このスクリプトを流し直すと、迷路も手で足した出入口・出来事も消える
 const fs = require('fs'), path = require('path');
 const out = (id, obj) => fs.writeFileSync(path.join(__dirname, '..', 'data', 'maps', `${id}.json`), JSON.stringify(obj, null, 2) + '\n');
 function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296; }

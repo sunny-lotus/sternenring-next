@@ -549,7 +549,7 @@ function townBoardCanvas(name, b, it) {
   // キャラの背は約2.5マス（2026-11-23 作者「植木などのサイズを確認してほしい」：街路樹が2.6マス＝キャラとほぼ同じ、小さな木は0.9マスだった）
   const showH = it.showH ?? SHOW_H[name];
   if (showH) { const h = showH, w = h / ar; return { w, h, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) }; }
-  const hang = /^(sign-|awning-|herbs)/.test(name);
+  const hang = /^(sign-|awning-|herbs|laundry)/.test(name); // laundry：路地に渡した洗濯ひも（2026-11-25）
   const artH = hang ? b.h : Math.min(b.h, b.w * ar); // 絵が見えている高さ（マス）。板が高くても、絵は下に低く描かれることがある（花壇など）
   return { h: b.h, artH, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
     let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
@@ -607,7 +607,13 @@ function townPattern(g, key, T, size) {
  */
 const BOOK_ASPECT = 1.6;
 function bookSize(map) { const W = map.width, H = map.height; return { BW: Math.max(W, H * BOOK_ASPECT), BH: Math.max(H, W / BOOK_ASPECT) }; }
-function pageCanvas(map) { // 羊皮紙のページ（見開きの大きさ）。真ん中に地図（うすいインクで石畳と入口のしるし。ページに描かれた町の地図のように）
+// 描いた絵の取りおき（2026-11-25：宿から通りへ出るたびに、同じページ・同じ家の絵を描きなおして0.3秒ほど止まっていた）。中身はマップと届いた絵だけで決まるので使い回せる
+const PAGE_CACHE = new Map(), BOARD_CACHE = new Map(), blurMemo = new WeakMap();
+function pageCanvas(map) {
+  const key = `${map.id}|${!!BOOK_IMG.paper_page}|${!!TOWN_IMG}`;
+  let c = PAGE_CACHE.get(key); if (!c) { c = pageCanvasNew(map); PAGE_CACHE.set(key, c); } return c;
+}
+function pageCanvasNew(map) { // 羊皮紙のページ（見開きの大きさ）。真ん中に地図（うすいインクで石畳と入口のしるし。ページに描かれた町の地図のように）
   const T = 32, { BW, BH } = bookSize(map), PW = Math.round(BW * T), PH = Math.round(BH * T);
   const mc = mapCanvas(map, T), ox = Math.round((PW - mc.width) / 2), oy = Math.round((PH - mc.height) / 2);
   return canvas(PW, PH, (g) => {
@@ -833,7 +839,7 @@ const glassCanvas = () => memo('lampGlass', () => canvas(512, 256, (g, w, h) => 
   for (let i = 0; i < 260; i++) { const x = R() * w, a = 0.03 + R() * 0.07; g.fillStyle = R() < 0.5 ? `rgba(255,230,180,${a})` : `rgba(120,50,15,${a})`; g.fillRect(x, 0, 0.6 + R() * 1.6, h); } // たての細いすじ
   for (let i = 0; i < 90; i++) { const x = R() * w, y = R() * h, r = 0.6 + R() * 1.8; g.fillStyle = 'rgba(255,240,210,0.55)'; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); g.strokeStyle = 'rgba(110,45,12,0.35)'; g.lineWidth = 0.5; g.stroke(); } // 小さな気泡
 }));
-const woodCanvas = () => canvas(256, 256, (g, w, h) => { const R = rnd(11); g.fillStyle = '#3a2414'; g.fillRect(0, 0, w, h); for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(${20 + R() * 30},${10 + R() * 14},4,.35)`; g.lineWidth = 1 + R() * 2; const y = R() * h; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + R() * 8 - 4, w * 0.7, y + R() * 8 - 4, w, y); g.stroke(); } noise(g, w, h, R, 12); });
+const woodCanvas = () => memo('wood', () => canvas(256, 256, (g, w, h) => { const R = rnd(11); g.fillStyle = '#3a2414'; g.fillRect(0, 0, w, h); for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(${20 + R() * 30},${10 + R() * 14},4,.35)`; g.lineWidth = 1 + R() * 2; const y = R() * h; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + R() * 8 - 4, w * 0.7, y + R() * 8 - 4, w, y); g.stroke(); } noise(g, w, h, R, 12); }));
 const windowCanvas = (cols, rows, frame) => canvas(128, 192, (g, w, h) => { // 光る窓：あたたかい灯りと窓わく
   const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#fff3b0'); gr.addColorStop(0.6, '#ffc861'); gr.addColorStop(1, '#ff9a3a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = frame; const t = 7; g.fillRect(0, 0, w, t); g.fillRect(0, h - t, w, t); g.fillRect(0, 0, t, h); g.fillRect(w - t, 0, t, h);
@@ -1003,7 +1009,7 @@ export function createThreeStage(canvasEl, assets) {
   // マップの手ざわり（stage.textures）：美術・演出室の元絵をそのまま張る（2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵
   const artCache = {}; let ART2 = null;
   // 内装の手ざわりと切り抜き（v01：床〜扉、v02：木・腰板・麻布・敷物と、切り抜きの灯り・瓶・ジョッキ・樽。2026-11-23 作者「銀鹿亭のテクスチャできたよ」）
-  const INN_KEYS = ['pillar', 'windowArch', 'flowerBox', 'pottery', 'bread', 'guestBook', 'keyRack', 'logBasket', 'floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
+  const INN_KEYS = ['bedHome', 'tableHome', 'cupboard', 'herbs', 'pot', 'chest', 'washTub', 'pillar', 'windowArch', 'flowerBox', 'pottery', 'bread', 'guestBook', 'keyRack', 'logBasket', 'floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
   // 元絵1枚が覆うマス数（横, 縦）。ドット絵にするときの細かさを決める
   const ART_TILES = { floor: [4, 4], wall: [4, 4], ceiling: [4, 4], brick: [1.5, 1.9], window: [1.3, 1.8], tabletop: [3, 1.8], counter: [7, 1.1], blanket: [2, 1.2], door: [1, 2.1] };
   // 町の絵（2026-11-22 作者「テクスチャができました、ノルンの」）：マップの stage.townArt の絵を読んでおく（地面の模様と板の絵に使う）
@@ -1265,7 +1271,9 @@ export function createThreeStage(canvasEl, assets) {
     // 書斎の奥（2026-11-23 作者「簡単な書斎、こんなに本だけが並んでるの変だから」）：壁（下は腰板・上はしっくい）・右に本棚を1つ・左に窓。
     // どれもピントの外なので、絵を少しぼかして張る（作者「後ろの本棚もピンとぼけ」「ぼかしはもう少し少なめに」）。くり返す絵は、まわりに並べてからぼかして真ん中を切り出す（つなぎ目が暗くならない）
     const blurOf = (/** @type {any} */ src, /** @type {boolean} */ tile) => { void tile; // ぼかしは、絵を小さく縮めてから引きのばす形に（キャンバスのぼかしは、開くまで数秒かかった）
-      return canvas(Math.max(2, Math.round(src.width / 9)), Math.max(2, Math.round(src.height / 9)), (g, w, h) => g.drawImage(src, 0, 0, w, h)); /* 2026-11-23 作者「もう少しぼかしを」：1/5→1/9 */
+      let c = blurMemo.get(src); if (c) return c; // 同じ絵は取りおき（2026-11-25）
+      c = canvas(Math.max(2, Math.round(src.width / 9)), Math.max(2, Math.round(src.height / 9)), (g, w, h) => g.drawImage(src, 0, 0, w, h)); /* 2026-11-23 作者「もう少しぼかしを」：1/5→1/9 */
+      blurMemo.set(src, c); return c;
     };
     const tex = (/** @type {any} */ c, rx = 1, ry = 1) => { const t = texOf(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); t.anisotropy = 8; return t; };
     // 本物らしい背景の絵（美術・演出室に依頼中：assets/book/study_backdrop.webp）があれば、立体の壁・本棚・額の代わりに、机の奥へぼかして置く（2026-11-23 作者「やっぱり向こう側はリアルな背景をぼかして入れよう」）
@@ -1369,7 +1377,7 @@ export function createThreeStage(canvasEl, assets) {
   }
 
   function buildInterior() { // ブックヌック：本棚にはまった、手前が開いた箱の内側（試作_ブックヌックと同じ作り）
-    const W = map.width, H = map.height, dungeon = map.stage?.look === 'dungeon';
+    const W = map.width, H = map.height, dungeon = map.stage?.look === 'dungeon', home = map.stage?.look === 'home'; // home：町の民家（2026-11-25 サニー「家の家具など、銀鹿亭とは変えたい雰囲気を」）。宿の吊りランプ・壁の灯り・腰板を使わず、窓の昼の光で明るく
     // 天井の高さ：ダンジョンは背の高い箱。建物の中は低い天井で、こぢんまりした部屋に（2026-11-22 作者「天井低くしたら？」）。マップの stage.ceiling で上書きできる
     const HT = map.stage?.ceiling ?? (dungeon ? Math.max(8, Math.min(12, W * 1.25)) : 5.5), F = 0.7, S = HT / 4.6; // 箱の高さ（横より高い）・額縁の太さ・試作からの縮尺
     nook = { HT, F };
@@ -1381,9 +1389,9 @@ export function createThreeStage(canvasEl, assets) {
     // 箱の内側：床・左右の壁・奥の壁・天井
     { const fm = mat(artT('floor', W / 4, H / 4) ?? rep(dungeon ? cobbleCanvas() : planksCanvas(), W / 4, H / 4, 4)); if (!dungeon) fm.color.set(WOOD_TINT); plane(W, H, fm, [W / 2, 0, H / 2], [-Math.PI / 2, 0, 0]); }
     const wallC = dungeon ? brickCanvas(21, [128, 132, 118]) : plasterCanvas();
-    plane(H, HT, mat(artT('wall', H / 4, HT / 4) ?? rep(wallC, H / 6, HT / 6, 6)), [0, HT / 2, H / 2], [0, Math.PI / 2, 0]);
-    plane(H, HT, mat(artT('wall', H / 4, HT / 4) ?? rep(dungeon ? brickCanvas(33, [120, 124, 116]) : wallC, H / 6, HT / 6, 6)), [W, HT / 2, H / 2], [0, -Math.PI / 2, 0]);
-    plane(W, HT, mat(artT('wall', W / 4, HT / 4) ?? rep(dungeon ? brickCanvas(45, [110, 112, 120]) : wallC, W / 6, HT / 6, 6)), [W / 2, HT / 2, 0], [0, 0, 0]);
+    plane(H, HT, mat(artT('wall', home ? H / HT : H / 4, home ? 1 : HT / 4) ?? rep(wallC, H / 6, HT / 6, 6)), [0, HT / 2, H / 2], [0, Math.PI / 2, 0]);
+    plane(H, HT, mat(artT('wall', home ? H / HT : H / 4, home ? 1 : HT / 4) ?? rep(dungeon ? brickCanvas(33, [120, 124, 116]) : wallC, H / 6, HT / 6, 6)), [W, HT / 2, H / 2], [0, -Math.PI / 2, 0]);
+    plane(W, HT, mat(artT('wall', home ? W / HT : W / 4, home ? 1 : HT / 4) ?? rep(dungeon ? brickCanvas(45, [110, 112, 120]) : wallC, W / 6, HT / 6, 6)), [W / 2, HT / 2, 0], [0, 0, 0]);
     { const cm = mat(artT('ceiling', W / 4, H / 4) ?? rep(beamsCanvas(), W / 4, H / 4, 4)); if (!dungeon) cm.color.set(WOOD_TINT); plane(W, H, cm, [W / 2, HT, H / 2], [Math.PI / 2, 0, 0]); }
     // 壁の飾りと灯り：手前から奥へ、左右の壁に交互。建物の中は灯りのともる窓、ダンジョンは壁の灯り（たいまつ）と暗いくぼみ
     const winM = new THREE.MeshBasicMaterial({ map: artT('window') ?? (PIXROOM ? pixTex(windowCanvas(3, 4, dungeon ? '#16221a' : '#4a2416'), 1.1 * S, 1.5 * S) : texOf(windowCanvas(3, 4, dungeon ? '#16221a' : '#4a2416'))) });
@@ -1424,6 +1432,7 @@ export function createThreeStage(canvasEl, assets) {
         solid(ww + 0.7, 0.16, 0.6, wy - wh / 2 - 0.25, 0, frM); // 窓の下の台
         }
       }
+      if (home) { const D = new THREE.PointLight(0xe8eeff, 16, 7, 1.4); D.position.set(out(0.8), HT * 0.5, z); root.add(D); continue; } // 民家：壁の灯りの代わりに、窓から入る昼の光
       const lx = side < 0 ? 0.7 : W - 0.7, ly = dungeon ? HT * 0.4 : Math.min(HT - 0.6, HT * 0.5 + 0.75 * S + 0.6); // 建物の中は窓の上
       let fx = lx, fy = ly; // 火の位置
       const wl = cutPlane('lampWall', 0.95, { flip: side > 0 }); // 壁の灯りの切り抜き（美術・演出室 v02 lamp_wall）：腕木は壁の側、油皿は部屋の側。右の壁は左右を返す
@@ -1448,7 +1457,7 @@ export function createThreeStage(canvasEl, assets) {
       const lampGlass = new THREE.MeshBasicMaterial({ color: 0xffd27a });
       const stepX = dungeon ? W : 6, stepZ = dungeon ? 9 : 5;
       const nx = Math.max(1, Math.round(W / stepX)), nz = Math.max(1, Math.round((H - 1) / stepZ));
-      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      for (let i = 0; i < (home ? 0 : nx); i++) for (let j = 0; j < nz; j++) { // 民家には吊りランプを下げない
         const x = W * (i + 0.5) / nx, chain = dungeon ? 1.6 : Math.min(1.4, HT * 0.25), y = HT - chain - 0.35;
         let z = (H - 1) * (j + 0.5) / nz + 0.5;
         const nearUp = (/** @type {number} */ zz) => { for (let ty = 0; ty < H; ty++) for (let tx = 0; tx < W; tx++) if (heightOf(map, tx, ty) > 0 && Math.hypot(Math.max(tx - x, 0, x - tx - 1), Math.max(ty - zz, 0, zz - ty - 1)) < 1.2) return true; return false; };
@@ -1470,7 +1479,7 @@ export function createThreeStage(canvasEl, assets) {
     }
     const backI = dungeon ? 24 : 14; // 建物の中は奥の壁を照らしすぎない（梁の下や隅に影を残す。2026-11-23 作者の内装の方針）
     const back = new THREE.PointLight(0xffc06a, backI, 10 * S / 2, 1.6); back.position.set(W / 2, HT * 0.45, 1.2); root.add(back); lights.push({ L: back, base: backI, ph: 1, z: 1.2 });
-    if (!dungeon) { // 壁の下の板張り（腰板）と、上の見切りの横木（2026-11-23 作者「銀鹿亭なんだかまだチープ」：白い壁だけでは平らに見えた）
+    if (!dungeon && !home) { // 壁の下の板張り（腰板）と、上の見切りの横木（2026-11-23 作者「銀鹿亭なんだかまだチープ」：白い壁だけでは平らに見えた）
       const panel = (t, rx) => { t.repeat.set(rx, 1); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.8, color: 0xb08868 }); };
       const ph = 1.3;
       const wsc = artT('wainscot', 1, 1); // 腰板の元絵（v02 wainscot）：上のはしに見切りの横木まで描いてあるので、横木の箱は足さない。左右だけくり返す
@@ -1487,7 +1496,7 @@ export function createThreeStage(canvasEl, assets) {
     // 手前の本棚（額縁のまわりの奥の板・左右の本・上下の棚板）は外した（2026-11-23 作者「ブックヌックスタイルやつの手前の本棚消していいよ」：カメラを近づけたので、画面の左右に大きく出ていた）
     // 本棚の前を照らす部屋のやわらかい灯り（入る・出るとき、遠くから本棚が見える）と、箱の中のうすい月明かり
     const room = new THREE.SpotLight(0xffd9a8, 60 * S * S, 40 * S, 0.55, 0.7, 1.6); room.position.set(W / 2 - 2 * S, 9 * S, H + 10 * S); room.target.position.set(W / 2, HT / 2, H); root.add(room, room.target);
-    root.add(dungeon ? new THREE.AmbientLight(0x4a5478, 0.5) : new THREE.AmbientLight(0x5a4030, 0.3)); // 建物の中は暖かく暗めに
+    root.add(dungeon ? new THREE.AmbientLight(0x4a5478, 0.5) : home ? new THREE.AmbientLight(0xfff2e2, 0.7) : new THREE.AmbientLight(0x5a4030, 0.3)); // 建物の中は暖かく暗めに
     { const shelfL = new THREE.PointLight(0xffc890, 30 * S, 14 * S, 1.4); shelfL.position.set(W / 2, HT * 0.55, H + 3 * S); root.add(shelfL); } // 額縁と本棚を前から照らす（2026-11-22 作者「客室もブックヌックぽく」：本棚が暗くて見えなかった）
     if (map.heights) buildLevels(W, H);
     // 仮の客（地図の stage.npcs）：sit＝卓の奥の椅子に座る（下半身は卓の天板にかくれるよう、座面の高さまで沈める）、stand＝立つ。
@@ -1506,7 +1515,7 @@ export function createThreeStage(canvasEl, assets) {
         if (n.pose === 'sit' && am.sheet.sit) {
           // 座り姿の絵があれば、それを椅子の上に置く（2026-11-24 作者「先に座り姿を組み込む」）：立ち絵を切ったりちぢめたりせず、座面の高さ（台帳の seat＝足の裏から何ドット上か）を椅子の座面に合わせる
           const S = am.sheet.sit, e = S.e, sf = sheetFrame(e, dir, 0), simg = S.t.image, [sfw, sfh] = e.frame, fwd = dir === 'right' ? 1 : dir === 'left' ? -1 : 0, SEAT = 0.62;
-          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); root.add(ch);
+          const ch = solidMesh('chair', null, null, { w: 0.6, h: 1.4 }, { h: 0.6, x: 0, y: 0 }); if (!n.noChair) root.add(ch); // noChair：民家の食卓の絵の椅子に座る（2026-11-25 椅子が二重に見えた）
           if (fwd) { ch.position.set(n.x, 0, n.z - 0.26); ch.rotation.y = -fwd * Math.PI / 2; } // 横向き：背板は進む向きの逆
           else if (dir === 'down') { ch.position.set(n.x, 0, n.z - 0.3); ch.rotation.y = Math.PI; } // 正面：絵は座面の前のふちに（脚が椅子の前にたれる）
           else ch.position.set(n.x, 0, n.z + 0.02); // 後ろ向き：背板が体の手前（背もたれごしに背中）
@@ -1561,6 +1570,38 @@ export function createThreeStage(canvasEl, assets) {
     const M = (map, extra = {}) => new THREE.MeshStandardMaterial({ map, roughness: 0.92, ...extra });
     const g = new THREE.Group();
     const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(roundBox(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+    // 民家（look: home）の家具は、美術・演出室の内装_民家_v01 の切り抜きを立てる（2026-11-25）。絵が無ければ下のいつもの形
+    if (map.stage?.look === 'home') {
+      const HK = { bed: ['bedHome', 1.15], 'home-cupboard': ['cupboard', 2.4], 'home-herbs': ['herbs', 0.75], 'home-chest': ['chest', 0.6], 'home-washtub': ['washTub', 0.8] }[name] ?? (it.region === 'table' ? ['tableHome', 1.3] : null);
+      const cp = HK && cutPlane(HK[0], HK[1]);
+      if (cp) {
+        if (name === 'home-herbs') cp.position.set(0, 2.55, -d + 0.08); // 奥の壁に、目の高さより上に吊るす
+        else cp.position.set(0, HK[1] / 2, -d / 2);
+        cp.receiveShadow = true; g.add(cp); return g;
+      }
+    }
+    if (name === 'stone-wall') { // 迷宮の石の壁（2026-11-25 作者「ダンジョンも迷宮っぽく入り組んだ形に」）：ダンジョンの壁の絵（無ければ石積み）を四方と上に。上の面は少し暗く
+      const wa = (/** @type {number} */ rx, /** @type {number} */ ry) => artT('wall', Math.max(0.3, rx), Math.max(0.3, ry)) ?? tile(brickCanvas(64, [110, 112, 118]), rx, ry);
+      const sx = M(wa(w / 2, h / 2)), sz = M(wa(d / 2, h / 2)), top = M(wa(w / 2, d / 2), { color: 0x8a8a8a });
+      box([sz, sz, top, top, sx, sx], w, h, d, h / 2);
+      return g;
+    }
+    if (name === 'stone-gate') { // 仕掛けの石の扉（2026-11-25 サニー「大きなイベントを作ってみて」。仮・コードの絵）：石の板に鉄の帯と、まんなかの丸い紋。開くと消える（view.openGates）
+      const sa = (/** @type {number} */ rx, /** @type {number} */ ry) => artT('wall', Math.max(0.3, rx), Math.max(0.3, ry)) ?? tile(brickCanvas(81, [96, 98, 108]), rx, ry);
+      const face = M(sa(w / 2, h / 2), { color: 0x9a96a4 }), iron = new THREE.MeshStandardMaterial({ color: 0x2c2c34, roughness: 0.5, metalness: 0.6 });
+      box(face, w, h, d * 0.6, h / 2);
+      for (const y of [0.35, h * 0.5, h - 0.35]) box(iron, w * 1.02, 0.14, d * 0.62, y);
+      const seal = new THREE.Mesh(new THREE.TorusGeometry(Math.min(w, h) * 0.17, 0.05, 8, 24), new THREE.MeshStandardMaterial({ color: 0x6a5a3a, metalness: 0.7, roughness: 0.4, emissive: 0x2a1c08 }));
+      seal.position.set(0, h * 0.62, -d / 2 + d * 0.31 + 0.02); g.add(seal); g.userData.seal = seal; // 紋：レバーを倒すごとに光る（view.gateProgress）
+      return g;
+    }
+    if (name === 'lever') { // 壁ぎわの石の台と、古い木のレバー（仮・コードの絵）
+      const st = M(tile(brickCanvas(83, [110, 112, 118]), 0.6, 0.6)), wood = M(tile(woodCanvas(), 0.3, 1), { color: WOOD_TINT });
+      box(st, w * 0.6, 0.7, d * 0.5, 0.35);
+      const handle = new THREE.Mesh(roundBox(0.1, 0.9, 0.1), wood); handle.position.set(0, 0.95, -d / 2); handle.rotation.z = -0.5; handle.castShadow = true; g.add(handle);
+      const knob = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshStandardMaterial({ color: 0x3a3a44, metalness: 0.6, roughness: 0.4 })); knob.position.set(0.22, 1.36, -d / 2); g.add(knob);
+      return g;
+    }
     if (name === 'stone-pillar') {
       const pa = artT('pillar'); // 森の元絵 v01 dungeon_pillar（上下の飾りの石まで描いた柱）。四方に絵を張る
       if (pa) { // 絵の、柱の胴・上の飾り石・下の台を切り出して、それぞれ立体に張る（2026-11-23 作者「柱が変」：絵をそのまま箱の四方に張ったので、絵のまわりの透明な所が黒く、横から黒い板に見えた）
@@ -1707,6 +1748,7 @@ export function createThreeStage(canvasEl, assets) {
       const mouth = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.55, hh * 0.46), new THREE.MeshBasicMaterial({ map: texOf(fireboxCanvas()), transparent: true, alphaTest: 0.3 })); mouth.position.set(0, hh * 0.23, 0.01); g.add(mouth); // 炉の中（2026-11-23 作者「暖炉黒い部分はどうしようか違和感がある」：まっ黒の四角をやめ、上がアーチの、すすけたレンガの奥が火で照らされる絵に）
       const fire = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.95 })); fire.scale.set(1.4, 1.1, 1); fire.position.set(0, 0.35, 0.15); g.add(fire);
       { const lb = cutPlane('logBasket', 0.85); if (lb) { lb.position.set(-w / 2 - 0.45, 0.425, -0.3); g.add(lb); } } // v03 薪籠（暖炉の左脇）
+      if (map.stage?.look === 'home') { const pt = cutPlane('pot', 1.1); if (pt) { pt.position.set(0, 0.85, 0.06); g.add(pt); } } // 民家の暖炉には、鎖で吊った鍋（内装_民家_v01 hearth_pot）
       // 揺れる炎（6コマを順に）と、舞い上がる火の粉
       // 炎（2026-11-23 美術・演出室 v02 hearth_flame：水彩の8コマ。1コマ 256×320、根もと (128,312)）と薪と熾火（hearth_logs、足もと (256,184)）。無ければコードの6コマ
       const flameArt = ART2?.flame, logsArt = ART2?.logs, nF = flameArt ? 8 : FIRE_FRAMES;
@@ -1825,10 +1867,13 @@ export function createThreeStage(canvasEl, assets) {
       const rc = it.region ? regionCanvas(it) : null;
       const T = map.tileSize || 32, b = placeBoard(it, layer.band, T, rc ? [rc.width, rc.height] : null);
       const name = it.asset.replace('placeholder:', '');
-      const artC = rc ? null : (ART[name] || ((w, h) => genericArt(w, h, boards.length + 5)))(b.w, b.h, it.x * 131 + it.y * 37 + 1); // 3つめ＝板ごとの seed（位置から決まるので、開き直しても同じ家）
-      let art = rc ? texOf(rc, true) : PIXROOM && interior ? pixTex(artC, b.w, b.h) : texOf(artC);
-      const townC = rc ? null : townBoardCanvas(name, b, it);
-      const doorCut = townC && it.doorExit ? cutDoor(townC, TOWN_IMG?.[townC.file], TOWN_CFG?.doors?.[townC.file]?.cut) : it.doorExit && it.cut && artC && !townC ? cutDoor({ c: artC }, true, it.cut) : null; // 入れる家の扉は切り抜く（絵を張る前に）。町の絵でない板（ダンジョンの門など）は、地図の it.cut で（2026-11-23 作者「ダンジョンに入るときも同様にしたい」）
+      // 町の絵の板は、扉を切り抜いたあとの絵・扉・窓の明かりまで取りおいて使い回す（BOARD_CACHE）
+      const bk = `${map.id}|${it.x},${it.y},${it.w},${it.h}|${it.asset}|${it.art || ''}`, hit = rc ? null : BOARD_CACHE.get(bk);
+      const townC = hit ? hit.townC : rc ? null : townBoardCanvas(name, b, it);
+      const artC = rc || townC ? null : (ART[name] || ((w, h) => genericArt(w, h, boards.length + 5)))(b.w, b.h, it.x * 131 + it.y * 37 + 1); // 3つめ＝板ごとの seed（位置から決まるので、開き直しても同じ家）。町の絵があれば描かない
+      let art = rc ? texOf(rc, true) : townC ? null : PIXROOM && interior ? pixTex(artC, b.w, b.h) : texOf(artC);
+      const doorCut = hit ? hit.doorCut : townC && it.doorExit ? cutDoor(townC, TOWN_IMG?.[townC.file], TOWN_CFG?.doors?.[townC.file]?.cut) : it.doorExit && it.cut && artC && !townC ? cutDoor({ c: artC }, true, it.cut) : null; // 入れる家の扉は切り抜く（絵を張る前に）。町の絵でない板（ダンジョンの門など）は、地図の it.cut で（2026-11-23 作者「ダンジョンに入るときも同様にしたい」）
+      const cache = townC ? (hit || (BOARD_CACHE.set(bk, { townC, doorCut, glow: undefined }), BOARD_CACHE.get(bk))) : null;
       if (doorCut && !townC) art.needsUpdate = true;
       if (townC) { if (townC.w && townC.w !== b.w) { b.x += (b.w - townC.w) / 2; b.w = townC.w; } b.h = townC.h; art =PIXROOM ? pixTex(townC.c, b.w, b.h) : texOf(townC.c); }
       if (it.encounter && SYM[it.encounter]) art = texOf(symbolCanvas(SYM[it.encounter], b.w, b.h), true); // 見えている敵は、戦う敵の姿 // 内装（絵柄）を「ドット」にすると町の絵もドットに
@@ -1839,14 +1884,14 @@ export function createThreeStage(canvasEl, assets) {
       }
       // ブックヌック（中）の物は立体：板ではなく厚みのある箱にし、側面と上にも手ざわりを張る（2026-11-22 作者：「ブックヌックは、シャドーボックスと違って立体もある。横も描けるテクスチャで」）
       // 奥の壁の絵（backdrop）だけは、壁に貼った平らな絵のまま
-      if (interior && layer.band !== 'backdrop') {
+      if (interior && layer.band !== 'backdrop' && !it.encounter) { // 見えている敵は、建物・ダンジョンの中でも立った板（敵の絵。倒すと消える。2026-11-25 ダンジョンの番人）
         const solid = solidMesh(name, art, rc, b, it);
         const hinge = new THREE.Group(); hinge.position.set(b.x + b.w / 2, 0, it.y + it.h); hinge.add(solid); root.add(hinge);
         boards.push({ hinge, mesh: solid, z: b.z, h: b.h, fade: it.fadeNearPlayer ? it : null, name: it.region ? `${it.asset}#${it.region}` : it.asset, solid: true, it });
         continue;
       }
       const mesh = boardMesh(art, b.w, b.h);
-      if (townC?.file && !DAY && !interior) { const gl = windowGlow(townC.c, townC.file, Math.abs(it.x * 31 + it.y * 17) | 0); if (gl) { mesh.material.emissiveMap = PIXROOM ? pixTex(gl, b.w, b.h) : texOf(gl); mesh.material.emissive = new THREE.Color(0xffffff); mesh.material.emissiveIntensity = 1.5; } } // 夜は家の窓に明かり
+      if (townC?.file && !DAY && !interior) { const gl = cache && cache.glow !== undefined ? cache.glow : windowGlow(townC.c, townC.file, Math.abs(it.x * 31 + it.y * 17) | 0); if (cache) cache.glow = gl; if (gl) { mesh.material.emissiveMap = PIXROOM ? pixTex(gl, b.w, b.h) : texOf(gl); mesh.material.emissive = new THREE.Color(0xffffff); mesh.material.emissiveIntensity = 1.5; } } // 夜は家の窓に明かり
       if (layer.band === 'backdrop') { mesh.castShadow = false; mesh.material.fog = false; if (it.sink) mesh.position.y -= it.sink; } // sink：背景の下を本のページより下に沈める（絵の下のはしで切れた家の壁を見せない。2026-11-22 作者「屋根はあるけど家のドアや窓の部分がなくて変」）
       else if (!interior) holeMaterial(mesh.material);
       const cx = b.x + b.w / 2, hinge = new THREE.Group();
@@ -1956,15 +2001,16 @@ export function createThreeStage(canvasEl, assets) {
     const pe = [...(assets.ledger.party || []), ...(assets.ledger.cast || [])].find((p) => p.id === id), byId = (x) => assets.ledger.assets.find((a) => a.id === x);
     const we = pe && byId(pe.walk), ie = pe && byId(pe.idle);
     if (we?.style === 'chibi' && assets.images[we.id] && assets.images[ie?.id]) {
-      const mk = (img) => { const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t; };
-      const walkT = mk(toneSheet(id, assets.images[we.id], we.frame[1])), idleT = mk(toneSheet(id, assets.images[ie.id], (ie.frame || we.frame)[1]));
-      const [fw, fh] = we.frame, h = fh * DOT, w = h * fw / fh; // ドットの大きさはみんな同じ（DOT）。絵の高さで背の高さが決まる（フレアは小柄）
+      const art = we.artScale || 0; // ?chara=art：元の絵（なめらかに拡大縮小する）
+      const mk = (img, smooth = false) => { const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; if (smooth) { t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.anisotropy = 4; } else { t.magFilter = t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; } t.needsUpdate = true; return t; };
+      const walkT = mk(toneSheet(id, assets.images[we.id], we.frame[1]), !!art), idleT = mk(toneSheet(id, assets.images[ie.id], (ie.frame || we.frame)[1]), !!art);
+      const [fw, fh] = we.frame, h = fh * DOT / (art || 1), w = h * fw / fh; // ドットの大きさはみんな同じ（DOT）。絵の高さで背の高さが決まる（フレアは小柄）
       const mesh = boardMesh(walkT, w, h); fillMaterial(mesh.material, walkT); mesh.position.y = h / 2 - (fh - we.anchor[1]) / fh * h; // 足の裏（anchor）を地面に
       const hinge = new THREE.Group(); hinge.add(mesh); root.add(hinge);
       // 顔の層（2026-11-22 作者の案「顔の部分だけ別のレイヤに。表情も変えられる」）：体の上に、顔のマスを重ねて描く。背中では出さない
       const fe = pe.faces && byId(pe.faces);
       let face = null;
-      if (fe && assets.images[fe.id]) {
+      if (fe && assets.images[fe.id] && !art) { // 元の絵には顔が描いてあるので、顔の層は重ねない
         const ft = mk(toneSheet(id, assets.images[fe.id], 1)), [cw, ch] = fe.cell; // 顔のレイヤーの前髪も髪と同じ色に（fh=1：ぜんぶ髪あつかい。肌はもともと変えない）（2026-11-23 作者「顔のレイヤーも黒にしないと」）
         const fm = new THREE.Mesh(new THREE.PlaneGeometry(w * cw / fw, h * ch / fh), fillMaterial(new THREE.MeshStandardMaterial({ map: ft, transparent: true, alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide }), ft));
         hinge.add(fm); face = { e: fe, t: ft, mesh: fm, w, h, fw, fh };
@@ -2044,27 +2090,40 @@ export function createThreeStage(canvasEl, assets) {
    * @type {Map<string, {g:any, parts:any[], glow:any, fade:number, seed:number}>}
    */
   let sparkleObjs = new Map(), sparkleRoot = null;
-  function updateSparkles(/** @type {{id:string,x:number,y:number}[]} */ list, /** @type {number} */ now) {
+  // きらっと光る星（2026-11-24 作者「オーブじゃなくて、きらきらひかるものにしてみようか目立たないから」）：細い十字の光と、まんなかの白い点
+  const starTex = texOf(canvas(128, 128, (g, w, h) => {
+    const c = w / 2; g.globalCompositeOperation = 'lighter';
+    const core = g.createRadialGradient(c, c, 0, c, c, 22); core.addColorStop(0, 'rgba(255,255,255,1)'); core.addColorStop(0.35, 'rgba(255,240,190,.8)'); core.addColorStop(1, 'rgba(255,220,140,0)'); g.fillStyle = core; g.fillRect(0, 0, w, h);
+    for (const [len, wid, rot] of [[62, 5, 0], [62, 5, Math.PI / 2], [30, 3, Math.PI / 4], [30, 3, -Math.PI / 4]]) {
+      g.save(); g.translate(c, c); g.rotate(rot); const gr = g.createLinearGradient(-len, 0, len, 0); gr.addColorStop(0, 'rgba(255,230,160,0)'); gr.addColorStop(0.5, 'rgba(255,255,240,1)'); gr.addColorStop(1, 'rgba(255,230,160,0)');
+      g.fillStyle = gr; g.beginPath(); g.moveTo(-len, 0); g.quadraticCurveTo(0, -wid, len, 0); g.quadraticCurveTo(0, wid, -len, 0); g.fill(); g.restore();
+    }
+  }));
+  function updateSparkles(/** @type {{id:string,x:number,y:number}[]} */ list, /** @type {number} */ now, show = true) {
     if (sparkleRoot !== root) { sparkleObjs = new Map(); sparkleRoot = root; } // マップが変わると root ごと片づく
     if (!root || !map) return;
     const want = new Set(list.map((s) => s.id));
     for (const s of list) {
       if (sparkleObjs.has(s.id)) continue;
       const g = new THREE.Group(), seed = (s.x * 7.31 + s.y * 3.17) % 6.28, parts = [];
-      for (let i = 0; i < 4; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: hexTex, color: 0xfff2c8, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); sp.scale.setScalar(0.22); g.add(sp); parts.push(sp); }
+      for (let i = 0; i < 5; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, color: 0xffffff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); sp.scale.setScalar(0.22); g.add(sp); parts.push(sp); }
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffe0a0, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 })); glow.scale.set(1.1, 0.55, 1); g.add(glow);
-      g.position.set(s.x + 0.5, heightOf(map, s.x, s.y) * HU, s.y + 0.55); g.traverse((/** @type {any} */ o) => o.layers.enable(1)); root.add(g);
+      g.position.set(s.x + 0.5, heightOf(map, s.x, s.y) * HU, s.y + 0.55); root.add(g); // キャラの組（layer 1）には入れない（2026-11-25 サニー：タイトルの机の上や、家に入るときのぼかしの上に、きらきらだけがくっきり出ていた）
       sparkleObjs.set(s.id, { g, parts, glow, fade: 0, seed });
     }
     for (const [id, o] of sparkleObjs) {
-      const on = want.has(id); o.fade = Math.max(0, Math.min(1, o.fade + (on ? 0.03 : -0.06)));
+      o.g.visible = show; const on = want.has(id); o.fade = Math.max(0, Math.min(1, o.fade + (on ? 0.03 : -0.06)));
       if (!on && o.fade <= 0) { root.remove(o.g); o.g.traverse((/** @type {any} */ c) => c.material?.dispose?.()); sparkleObjs.delete(id); continue; }
+      // 星はひとつずつ、ちがう時に「きらっ」と光って消える（光るたびに少し場所が変わる）
       o.parts.forEach((sp, i) => {
-        const a = now * 0.7 + o.seed + i * 1.57, tw = 0.5 + 0.5 * Math.sin(now * 3.1 + o.seed * 2 + i * 1.7);
-        sp.position.set(Math.cos(a) * 0.3, 0.3 + i * 0.2 + 0.08 * Math.sin(now * 1.3 + i), Math.sin(a) * 0.2);
-        sp.material.opacity = o.fade * (0.45 + 0.55 * tw); sp.scale.setScalar(0.2 + 0.14 * tw);
+        // 2026-11-25 サニー「きらきらの点滅早すぎるもう少しゆっくりぽわぽわ」：1回 1.1秒→2.8秒。急に光らず、ふわっと明るくなって、ふわっと消える
+        const T = 2.8, ph = (now / T + o.seed * 0.37 + i * 0.21) % 1, cyc = Math.floor(now / T + o.seed * 0.37 + i * 0.21), r = Math.sin(cyc * 12.9898 + i * 78.233 + o.seed) * 43758.5453, rr = r - Math.floor(r);
+        const flash = ph < 0.8 ? Math.pow(Math.sin(ph / 0.8 * Math.PI), 2) : 0;
+        sp.position.set((rr - 0.5) * 0.8, 0.15 + ((rr * 7.3) % 1) * 0.8, ((rr * 3.1) % 1 - 0.5) * 0.3 + 0.2);
+        sp.material.opacity = o.fade * Math.min(1, flash * 1.1); sp.scale.setScalar(0.35 + 0.5 * flash * (0.65 + 0.35 * ((rr * 5.7) % 1)));
+        sp.material.rotation = ph * 0.25;
       });
-      o.glow.position.set(0, 0.12, 0); o.glow.material.opacity = o.fade * (0.45 + 0.12 * Math.sin(now * 2 + o.seed));
+      o.glow.position.set(0, 0.12, 0); o.glow.material.opacity = o.fade * (0.45 + 0.12 * Math.sin(now * 0.9 + o.seed));
     }
   }
 
@@ -2095,10 +2154,10 @@ export function createThreeStage(canvasEl, assets) {
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
       key.position.set(W / 2 - 14, 26, H / 2 + 16); key.target.position.set(W / 2, 0, H / 2);
-      const tavern = interior && map.stage?.look !== 'dungeon'; // 建物の中は、部屋全体を照らす光を弱めて、灯りのまわりだけ暖かく（暗がりを作る。2026-11-23 作者「銀鹿亭なんだかまだチープ」）
+      const tavern = interior && map.stage?.look !== 'dungeon' && map.stage?.look !== 'home', homeLook = interior && map.stage?.look === 'home'; // 建物の中は、部屋全体を照らす光を弱めて、灯りのまわりだけ暖かく（暗がりを作る。2026-11-23 作者「銀鹿亭なんだかまだチープ」）
       key.intensity = tavern ? 0.2 : interior ? 0.5 : DAY ? 2.6 : 1.6;
       key.color.set(DAY && !interior ? 0xfff8ec : 0xfff0d8);
-      hemi.intensity = DAY && !interior ? 1.7 : tavern ? 0.28 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : tavern ? 0xa88c70 : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
+      hemi.intensity = DAY && !interior ? 1.7 : tavern ? 0.28 : 0.9; hemi.color.set(DAY && !interior ? 0xcfe2ff : tavern ? 0xa88c70 : homeLook ? 0xeae4d8 : 0x8090c8); hemi.groundColor.set(DAY && !interior ? 0x6a5a40 : 0x2a1a10);
       lastWarm = await warmUp(); if (PF) console.info('[perf] warm', map.id, lastWarm.textures + '枚 ' + lastWarm.ms + 'ms');
       if (lastLoad) lastLoad.text = `${lastLoad.id} 読む${Math.round(performance.now() - lastLoad.t0)}ms（${lastLoad.parts} 準備${lastWarm.ms}・${lastWarm.textures}枚）`;
     },
@@ -2227,6 +2286,8 @@ export function createThreeStage(canvasEl, assets) {
         }
         if (keepBack || deep === 'layers') { b.hinge.visible = true; b.hinge.scale.y = 1; } else flatLay(b.hinge, k, b.z, b.h || 1, false, b.x0 ?? b.x ?? 0);
         if (b.enc && (view.defeated || []).includes(b.enc)) { b.hinge.visible = false; continue; } // 倒した見えている敵は消す
+        if (b.it?.gate && (view.openGates || []).includes(b.it.gate)) { b.hinge.visible = false; continue; } // 開いた仕掛けの扉は消す
+        if (b.it?.gate && b.mesh.userData.seal) { const pr = view.gateProgress?.[b.it.gate] ?? 0, sm = b.mesh.userData.seal.material; sm.emissive.setHex(pr > 0 ? 0xffc860 : 0x2a1c08); sm.emissiveIntensity = pr > 0 ? 0.6 + 1.4 * pr * (0.85 + 0.15 * Math.sin(now * 2)) : 1; }
         let alpha = 1;
         // 外では、主人公より手前にあって主人公と重なる板（家・露店など）を透かす（2026-11-22 ノルンを広げたら、手前の家が主人公を隠した）
         // 主人公より手前の板は、主人公のまわりの丸（のぞき穴）だけ透かす。板のほかの所はそのまま
@@ -2235,7 +2296,7 @@ export function createThreeStage(canvasEl, assets) {
         const low = (b.artH ?? b.h ?? 99) < CHIBI_H; // キャラより低い物（荷箱・植木など）は透かさない（2026-11-23 作者「キャラよりひくいオブジェクトは別に透過しなくていい」）
         if (hole) hole.value = !low && !b.fade && b.z > lead.y + 0.7 ? 1 : 0;
         if (interior && b.solid && b.it && heightLerp(map, lead.x, lead.y) > 0 && lead.y + 0.5 < b.it.y + b.it.h && lead.x + 0.5 > b.it.x - 1 && lead.x + 0.5 < b.it.x + b.it.w + 1) alpha = 0.3; // 2階にいるとき、手前の物（暖炉の煙突）がキャラを隠すなら透かす（2026-11-23 2階の通路で煙突に隠れた）
-        if (b.fade) { const it = b.fade; if (lead.x >= it.x - 1 && lead.x <= it.x + it.w && lead.y >= it.y - 2 && lead.y <= it.y + it.h) alpha = 0.4; }
+        if (b.fade) { const it = b.fade; if (lead.x >= it.x - 1 && lead.x <= it.x + it.w && lead.y >= it.y - 2 && lead.y <= it.y + it.h) alpha = 0.4; if (interior && it.y + it.h > lead.y + 0.8 && it.y < lastEye[2] + 0.5) alpha = 0.25; } // 建物・ダンジョンの中は、カメラと主人公のあいだにある壁を、横の位置にかかわらず透かす（2026-11-25 サニー「ダンジョンが…見づらい」）
         // カメラに近すぎる板は透かす（2026-11-22 作者「カメラに近すぎる家とかは透明にしてほしい」）。カメラ（前の絵の位置）から板のいちばん近い所までの
         // 横の距離が NEAR_FAR マスより近いと薄くなりはじめ、NEAR_NEAR マスでいちばん薄く（NEAR_MIN）
         if (!low && !interior && b.x1 !== undefined && b.band !== 'backdrop') {
@@ -2358,7 +2419,7 @@ export function createThreeStage(canvasEl, assets) {
         else if (moving && a.motion !== 'walk') dir = st.gdir;
         place[a.id] = { x: tx, y: ty, dir, walk: a.motion === 'walk' || moving };
       });
-      updateSparkles(view.sparkles || [], now);
+      updateSparkles(view.sparkles || [], now, !intro); // 本がひらく前（タイトルの机）は出さない（2026-11-25 サニー：机の上にきらきらが見えていた）
       // キャラ（左右反転しない。いまは1方向の絵のまま）
       const seen = new Set();
       for (const a0 of view.actors) {
@@ -2415,7 +2476,7 @@ export function createThreeStage(canvasEl, assets) {
           am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[key] = am;
         }
         const am = actors[key], k = efk.startsWith('nook') ? 1 : kOf(n.y + 0.5, true);
-        am.hinge.visible = true; am.hinge.rotation.x = -Math.PI / 2 * (1 - k);
+        am.hinge.visible = efk !== 'nook-in:leave' && efk !== 'nook-out:leave'; am.hinge.rotation.x = -Math.PI / 2 * (1 - k); // 建物に出入りするとき（まわりがぼける間）は、町の人を消す（2026-11-25 サニー「家に入るとき町のキャラたちが見える」：仲間と同じくっきり描く組にいた）
         am.hinge.position.set(snapDot(n.x + 0.5), 0.02 + heightLerp(map, n.x, n.y) * HU, snapDot(n.y + 0.62));
         flatLay(am.hinge, k, n.y + 0.5, CHIBI_H, true, n.x);
         if (am.sheet) {
