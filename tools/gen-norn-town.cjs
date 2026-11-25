@@ -131,6 +131,11 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   M.exit('west', 0, 12, 3, 'left', 'page', { map: 'norn-west-street', exit: 'east', arrive: { x: 42, y: 7, dir: 'left' } });
   M.exit('inn-street', 0, 23, 3, 'left', 'page', { map: 'norn-inn-street', exit: 'east-street', arrive: { x: 42, y: 6, dir: 'left' } }); // 左下：銀鹿亭の通り（広場の西南）
   M.exit('south', 19, 29, 3, 'down', 'emerge', { map: 'norn-south-street', exit: 'north', arrive: { x: 11, y: 1, dir: 'down' } });
+  // 出口の目印（2026-11-26 夜の改善・学びノート題1「行きたい所を1画面に」）：広い広場は1画面に入らないので、どの出口にも両側に街灯を立て、遠くからでも口が分かるようにする
+  for (const e of M.exits) {
+    const side = e.dir === 'left' || e.dir === 'right' ? [[e.x + (e.dir === 'left' ? 1 : -1), e.y - 1], [e.x + (e.dir === 'left' ? 1 : -1), e.y + (e.span || 1)]] : [[e.x - 1, e.y + (e.dir === 'up' ? 1 : -1)], [e.x + (e.span || 1), e.y + (e.dir === 'up' ? 1 : -1)]];
+    for (const [x, y] of side) if (M.free(x, y, 1, 1)) M.put('mid', 'lamp', x, y, 1, 1, 3.8, 0.05);
+  }
   M.walkers.push({ id: 'sq-a', sprite: 'mob01', path: [[8, 13], [16, 13]], speed: 0.9 }, { id: 'sq-b', sprite: 'mob02', path: [[24, 17], [34, 17]], speed: 1 }, { id: 'sq-c', sprite: 'mob03', path: [[14, 11], [14, 21]], speed: 0.8, wait: 1800 }, { id: 'sq-d', sprite: 'mob04', path: [[27, 12], [27, 18]], speed: 1.1 });
   finish(M, { x: 20, y: 18, dir: 'up' });
 }
