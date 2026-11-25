@@ -79,7 +79,7 @@ test('隣のマップへの出入口の前に、町の人も歩く人もいな�
 
 test('ノルンの新しい骨格と森・村・魔女の家（2026-11-25 STORY-NORN-MAP）：どの地図も、出入口から出入口へ歩いて行け、着く所は通れる。東門→商店通り→広場→北門、広場→銀鹿亭の通り・西門、森→村、分かれ道→魔女の家がつながる', async () => {
   const { mapQuery } = await import('../src/core/map.js');
-  const NEW = ['norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village'];
+  const NEW = ['norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village', 'norn-ne', 'norn-nw', 'norn-se'];
   const IN = { left: [1, 0], right: [-1, 0], up: [0, 1], down: [0, -1] };
   for (const id of NEW) {
     const m = d.maps[id], q = mapQuery(m, d.collision);
@@ -90,6 +90,6 @@ test('ノルンの新しい骨格と森・村・魔女の家（2026-11-25 STORY-
     for (const e of m.exits) { const a = e.to.arrive; assert.ok(mapQuery(d.maps[e.to.map], d.collision).passable(a.x, a.y), `${id}.${e.id} の着く所が通れない`); }
   }
   const link = (a, b) => d.maps[a].exits.some((e) => e.to.map === b);
-  for (const [a, b] of [['norn-kingsroad', 'norn-east-street'], ['norn-east-street', 'norn-square'], ['norn-square', 'norn-north-gate'], ['norn-square', 'norn-inn-street'], ['norn-square', 'norn-west-street'], ['norn-west-street', 'erde-forest-east'], ['erde-forest-east', 'erde-forest-fork'], ['erde-forest-fork', 'erde-village'], ['erde-forest-fork', 'erde-deep'], ['norn-inn-street', 'norn-square']]) assert.ok(link(a, b) && link(b, a), `${a} ⇄ ${b}`);
+  for (const [a, b] of [['norn-kingsroad', 'norn-east-street'], ['norn-east-street', 'norn-square'], ['norn-square', 'norn-north-gate'], ['norn-square', 'norn-inn-street'], ['norn-square', 'norn-west-street'], ['norn-west-street', 'erde-forest-east'], ['erde-forest-east', 'erde-forest-fork'], ['erde-forest-fork', 'erde-village'], ['erde-forest-fork', 'erde-deep'], ['norn-inn-street', 'norn-square'], ['norn-north-gate', 'norn-ne'], ['norn-north-gate', 'norn-nw'], ['norn-ne', 'norn-east-street'], ['norn-nw', 'norn-west-street'], ['norn-east-street', 'norn-se'], ['norn-se', 'norn-south-street'], ['norn-west-street', 'norn-inn-street']]) assert.ok(link(a, b) && link(b, a), `${a} ⇄ ${b}`); // 四地区もふくめ、町じゅうが道でつながる（2026-11-26）
   assert.ok(!link('erde-deep', 'erde-village')); // 魔女の家は村への通り道にしない
 });

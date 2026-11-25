@@ -583,6 +583,9 @@
     "erde-forest-east": "bgm.field.hikari-no-arpeggio",
     "erde-forest-fork": "bgm.field.hikari-no-arpeggio",
     "erde-deep": "bgm.field.hikari-no-arpeggio",
-    "erde-village": "bgm.town.celtic.v30"
+    "erde-village": "bgm.town.celtic.v30",
+    "norn-ne": "bgm.town.celtic.v30",
+    "norn-nw": "bgm.town.celtic.v30",
+    "norn-se": "bgm.town.celtic.v30"
   }
 }

@@ -60,6 +60,18 @@
       ]
     },
     {
+      "id": "kingsroad-signpost",
+      "x": 17,
+      "y": 16,
+      "trigger": "examine",
+      "status": "provisional",
+      "pages": [
+        {
+          "dialogue": "map.norn.signpost"
+        }
+      ]
+    },
+    {
       "id": "kingsroad-south",
       "x": 13,
       "y": 27,
