@@ -58,13 +58,16 @@ function base(id, title, W, H, kind, seed) {
     }
   };
   /** 森の木：あいたマスに、密度 p で木・やぶ・岩（keep の所は空けておく） */
+  /** 森の木：板は1マップ150枚までなので、道に近い所ほど多く置く（道ぞいが森らしく見える）。遠い所はまばら。南ほど、やぶ・岩が多い（南ほど自然が多い） */
   M.forest = (p, keep, south = 0, max = 140) => {
-    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
-      if (g[y][x] !== '.' || keep(x, y)) continue;
-      const r = M.R(), sb = south * (y / H); // 南ほど、やぶ・岩が多い（南ほど自然が多い）
-      if (M.items.back.length + M.items.mid.length >= max) return;
+    const near = (x, y) => Math.min(...M.roads.map((r) => Math.hypot(Math.max(r.x - x, 0, x - (r.x + r.w - 1)), Math.max(r.y - y, 0, y - (r.y + r.h - 1)))), 99);
+    const cells = []; for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) if (g[y][x] === '.' && !keep(x, y)) cells.push({ x, y, k: near(x, y) * (0.6 + M.R()) });
+    cells.sort((a, b) => a.k - b.k);
+    for (const { x, y } of cells) {
+      if (M.items.back.length + M.items.mid.length >= max || g[y][x] !== '.') continue;
+      const r = M.R(), sb = south * (y / H);
       if (r < p) { const s = 4.4 + M.R() * 1.4; M.put('back', 'pine', x, y, 1, 1, Math.round(s * 10) / 10, 0, true, { showH: Math.round(s * 10) / 10 }); }
-      else if (r < p + 0.04 + sb * 0.08) { const bush = M.R() < 0.65; M.put('mid', bush ? 'bush' : 'rock', x, y, 1, 1, bush ? 1 : 0.8, 0.02, true, { showH: bush ? 1 : 0.8 }); }
+      else if (r < p + 0.12 + sb * 0.12) { const bush = M.R() < 0.65; M.put('mid', bush ? 'bush' : 'rock', x, y, 1, 1, bush ? 1 : 0.8, 0.02, true, { showH: bush ? 1 : 0.8 }); }
     }
   };
   return M;
@@ -225,7 +228,7 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
 {
   const M = base('erde-forest-east', 'エルデ森林・ノルン寄り', 50, 20, 'forest', 707);
   forestRoad(M, [[0, 9], [14, 9], [18, 7], [30, 7], [34, 10], [49, 10]]);
-  M.forest(0.13, (x, y) => onRoad(M, x, y) || (y < 4 && M.R() < 0.6), 1);
+  M.forest(0.45, (x, y) => onRoad(M, x, y) || (y < 4 && M.R() < 0.6), 1);
   M.exit('east', 49, 9, 3, 'right', 'page', { map: 'norn-west-street', exit: 'west-gate', arrive: { x: 1, y: 7, dir: 'right' } });
   M.exit('west', 0, 8, 3, 'left', 'page', { map: 'erde-forest-fork', exit: 'east', arrive: { x: 48, y: 8, dir: 'left' } });
   finish(M, { x: 40, y: 10, dir: 'left' });
@@ -235,8 +238,8 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   const M = base('erde-forest-fork', 'エルデ森林・分かれ道', 50, 26, 'forest', 808);
   forestRoad(M, [[0, 8], [20, 8], [26, 10], [49, 10]]);
   forestRoad(M, [[12, 8], [12, 15], [16, 19], [16, 25]], 3); // 南の森の奥への小道（村寄り）
-  M.forest(0.11, (x, y) => onRoad(M, x, y), 1.4);
-  M.put('mid', 'signpost', 15, 6, 1, 1, 2.2, 0.05); // 分かれ道の道しるべ（文字は書いていない）
+  M.forest(0.45, (x, y) => onRoad(M, x, y), 1.4);
+  M.put('mid', 'rock', 15, 6, 1, 1, 1.1, 0.05, true, { showH: 1.1 }); // 分かれ道の目印の岩（道しるべの絵は森の絵に無いので、いまは岩。道しるべは美術・演出室に依頼）
   M.exit('east', 49, 9, 3, 'right', 'page', { map: 'erde-forest-east', exit: 'west', arrive: { x: 1, y: 9, dir: 'right' } });
   M.exit('west', 0, 7, 3, 'left', 'page', { map: 'erde-village', exit: 'east', arrive: { x: 40, y: 9, dir: 'left' } });
   M.exit('south', 15, 25, 3, 'down', 'emerge', { map: 'erde-deep', exit: 'north', arrive: { x: 16, y: 1, dir: 'down' } });
@@ -249,8 +252,8 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   for (let y = 19; y < 28; y++) for (let x = 9; x < 27; x++) if (Math.hypot(x - 17.5, (y - 23) * 1.3) < 8.5) M.roads.push({ x, y, w: 1, h: 1 }); // 家の前の空き地
   M.put('back', 'witch-house', 14, 16, 7, 3, 6.5, 0.08); // 魔女の家（仮の外観）
   M.note('witch-house-door', 17, 19, 'map.erde.witch-house');
-  M.put('mid', 'herbs', 22, 18, 2, 1, 2.4, 0.03); M.put('mid', 'firewood', 11, 18, 2, 1, 0.8, 0.03);
-  M.forest(0.16, (x, y) => onRoad(M, x, y) || (x >= 13 && x <= 21 && y >= 15 && y <= 19), 2);
+  // 干した薬草・薪の絵は森の絵に無い（町の絵）ので、いまは置かない。魔女の家まわりの小物は美術・演出室に依頼
+  M.forest(0.5, (x, y) => onRoad(M, x, y) || (x >= 13 && x <= 21 && y >= 15 && y <= 19), 2);
   M.exit('north', 15, 0, 3, 'up', 'dive', { map: 'erde-forest-fork', exit: 'south', arrive: { x: 16, y: 24, dir: 'up' } });
   finish(M, { x: 17, y: 23, dir: 'up' }, { stageOrbsNote: '森の奥：苔と木もれ日（仮）' });
 }
