@@ -11,6 +11,12 @@ var SRS = (function () {
   try { return window.localStorage; } catch (e) { var m = {}; return { getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; } }; }
 })();
 
+// フィールドから開いたときの様子（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」）：?place=forest|dungeon|town・?time=day|night・?members=NV（仲間に入っている人）。
+// ふつうに開いたとき（バトル試作）は空で、今までどおり5人・石の広間・夜
+SR.fieldCtx = (function () {
+  var q = new URLSearchParams(location.search), m = (q.get('members') || '').toUpperCase().replace(/[^NVFSL]/g, '');
+  return { place: q.get('place') || '', time: q.get('time') || '', members: m ? m.split('') : null };
+})();
 SR.C = { maxMp: 100, maxK: 100, recovery: 26, ap: 24, maxRounds: 24,
   ctBase: 1000, brkDelay: 0.5, releaseWeight: 0.6,
   weak2K: [1, 1.5, 2.5], openK: 1.3 };   // 弱点が二つのボス：片方1.5倍・両方2.5倍。大技・全体攻撃の直後のすき：1.3倍   // アクティブカウント：番の間隔＝ctBase÷素早さ。ブレイクで順番が半分下がる。ブレイク明けの敵は次の番が早い
@@ -843,6 +849,8 @@ SR.PIX = {};
 (function () {
   var at = { cols: 8, rows: 1, row: 0, frames: 8, fps: 7, fill: .953, foot: .006 };
   var h = { N: 1.8, V: 1.8, F: 1.55, S: 1.8, L: 1.85 };   // フレアは小柄（サニー 2026-11-22）
+  // ?chara=art（フィールドでキャラを元の絵にしたとき）は、戦場も水彩の立ち絵にする（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」）
+  if (/[?&]chara=art(&|$)/.test(location.search)) return;
   Object.keys(SR.img).forEach(function (id) { SR.PIX[id] = { src: 'img/pix/' + SR.img[id] + '_flutter.png?v=2', atlas: at, h: h[id] }; });
 })();
 // カットインの大きな絵：5人とも構えの絵

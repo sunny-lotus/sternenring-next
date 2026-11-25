@@ -1520,10 +1520,11 @@ export function createThreeStage(canvasEl, assets) {
           else if (dir === 'down') { ch.position.set(n.x, 0, n.z - 0.3); ch.rotation.y = Math.PI; } // 正面：絵は座面の前のふちに（脚が椅子の前にたれる）
           else ch.position.set(n.x, 0, n.z + 0.02); // 後ろ向き：背板が体の手前（背もたれごしに背中）
           am.mesh.visible = false; if (am.face) am.face.mesh.visible = false;
-          const sh2 = sfh * DOT, sw2 = sh2 * sfw / sfh, seat = e.seat?.[e.directions.indexOf(dir)] ?? 12;
+          const SD = DOT / (e.artScale || 1); // 元の絵（?chara=art）は大きさが artScale 倍なので、1ドットの大きさで割り戻す
+          const sh2 = sfh * SD, sw2 = sh2 * sfw / sfh, seat = e.seat?.[e.directions.indexOf(dir)] ?? 12;
           const sm = boardMesh(S.t, sw2, sh2); fillMaterial(sm.material, S.t); sm.castShadow = true;
           S.t.repeat.set(sf.sw / simg.width, sf.sh / simg.height); S.t.offset.set(sf.sx / simg.width, 1 - (sf.sy + sf.sh) / simg.height);
-          sm.position.set(0, SEAT - seat * DOT + sh2 / 2 - (sfh - e.anchor[1]) * DOT, 0); am.hinge.add(sm);
+          sm.position.set(0, SEAT - seat * SD + sh2 / 2 - (sfh - e.anchor[1]) * SD, 0); am.hinge.add(sm);
           npcHinges.push(am.hinge); continue;
         }
         if (n.pose === 'sit') {
@@ -2016,7 +2017,7 @@ export function createThreeStage(canvasEl, assets) {
         hinge.add(fm); face = { e: fe, t: ft, mesh: fm, w, h, fw, fh };
       }
       // 座り姿（2026-11-24 美術・演出室の座り姿をドット絵化）：あれば sheet.sit
-      const se = pe.sit && byId(pe.sit), sit = se && assets.images[se.id] ? { e: se, t: mk(toneSheet(id, assets.images[se.id], se.frame[1])) } : null;
+      const se = pe.sit && byId(pe.sit), sit = se && assets.images[se.id] ? { e: se, t: mk(toneSheet(id, assets.images[se.id], se.frame[1]), !!se.artScale) } : null; // ?chara=art の座り姿はなめらかに
       return { hinge, mesh, face, sheet: { walk: { e: we, t: walkT }, idle: { e: ie, t: idleT }, sit } };
     }
     const base = flutter[id]; if (!base) return null;
@@ -2476,9 +2477,10 @@ export function createThreeStage(canvasEl, assets) {
           am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[key] = am;
         }
         const am = actors[key], k = efk.startsWith('nook') ? 1 : kOf(n.y + 0.5, true);
-        am.hinge.visible = efk !== 'nook-in:leave' && efk !== 'nook-out:leave'; am.hinge.rotation.x = -Math.PI / 2 * (1 - k); // 建物に出入りするとき（まわりがぼける間）は、町の人を消す（2026-11-25 サニー「家に入るとき町のキャラたちが見える」：仲間と同じくっきり描く組にいた）
+        am.hinge.visible = true; am.hinge.rotation.x = -Math.PI / 2 * (1 - k);
         am.hinge.position.set(snapDot(n.x + 0.5), 0.02 + heightLerp(map, n.x, n.y) * HU, snapDot(n.y + 0.62));
         flatLay(am.hinge, k, n.y + 0.5, CHIBI_H, true, n.x);
+        if (efk.startsWith('nook')) am.hinge.visible = false; // 建物に出入りするあいだ（ぼける・中に着く）は、町の人を消す。flatLay のあとで（前は flatLay が見えるに戻していた。2026-11-25 サニー「はいるとき町の人たちが見えちゃう」）
         if (am.sheet) {
           const s = am.sheet.idle, f = sheetFrame(s.e, n.dir, now * 1000), img = s.t.image, m = am.mesh.material;
           if (m.map !== s.t) { m.map = s.t; m.emissiveMap = s.t; am.mesh.customDepthMaterial.map = s.t; m.needsUpdate = true; }

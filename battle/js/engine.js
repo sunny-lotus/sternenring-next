@@ -12,6 +12,8 @@ SR.Battle = function (opts) {
   function random() { rng = (Math.imul(rng, 1664525) + 1013904223) >>> 0; return rng / 4294967296; }
 
   var roster = ['N', 'V', 'F', 'S', 'L'];
+  // フィールドから開いたときは、仲間に入っている人だけが戦う（2026-11-25。ナハトはいつもいる）
+  var mem = SR.fieldCtx && SR.fieldCtx.members; if (mem && mem.length) roster = roster.filter(function (id) { return id === 'N' || mem.indexOf(id) >= 0; });
   var formation = opts.formation || roster;
   var heroes = roster.map(function (id) {
     return { id: id, name: SR.names[id], hero: true, hp: 560, maxHp: 560, k: 100, maxK: 100, mp: C.maxMp, maxMp: C.maxMp, until: 0, brk: false, speed: SR.heroSpeed[id], at: 0, turns: 0, form: 'default',

@@ -359,9 +359,12 @@ test('見えている敵：ぶつかると戦闘になり、戦闘中は歩け�
 });
 
 test('ランダムの戦闘：街道の上では起きず、街道の外では歩くと起きる。勝っても何も残らない', () => {
-  const { field, input } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)＝街道の上
+  const { field, input, d } = makeField({ map: 'test-forest', spawn: 'default' }); // (8,7)＝街道の上
   for (let k = 0; k < 20; k++) { tap(field, input, k % 2 ? 'left' : 'right'); assert.equal(field.view().battle, null, '街道の上ではランダムの戦闘は起きない'); }
-  tap(field, input, 'down', 3); // (8,10)＝街道の外（2026-11-25 迷路の森：入口の広場が街道）
+  // 街道の外へ（2026-11-25 迷路の森：入口の広場と小道の上が街道）。右どなりも街道の外のマスを探して、そこで左右に歩く
+  const m = d.maps['test-forest'], on = (x, y) => m.roads.some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+  let spot = null; for (let y = 1; y < m.height - 1 && !spot; y++) for (let x = 1; x < m.width - 2 && !spot; x++) if (m.collision[y][x] === '.' && m.collision[y][x + 1] === '.' && !on(x, y) && !on(x + 1, y) && !(m.encounters || []).some((e) => Math.abs(e.x - x) < 3 && e.y === y)) spot = [x, y];
+  field.dev.setNoRandom(true); walkTo(field, input, d, spot[0], spot[1]); field.dev.setNoRandom(false);
   let n = 0; while (!field.view().battle && n < 400) { tap(field, input, n % 2 ? 'left' : 'right'); n++; }
   const b = field.view().battle;
   assert.ok(b && b.random, `街道の外を歩くとランダムの戦闘になる（${n}歩）`);

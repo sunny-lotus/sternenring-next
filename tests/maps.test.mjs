@@ -58,3 +58,12 @@ broken('見えている敵の id が重なる', (m) => { m['test-forest'].encoun
 broken('街道がマップ外', (m) => { m['test-forest'].roads.push({ x: 60, y: 0, w: 9, h: 1 }); }, /roads .* がマップ外/);
 broken('ランダムの戦闘に敵の組が無い', (m) => { m['test-forest'].randomEncounters.battles = []; }, /randomEncounters は/);
 broken('出入口の span が大きすぎる', (m) => { m['norn-plaza'].exits[0].span = 12; }, /span は1〜9/);
+
+test('森の小道（正しい道）の上は街道：ランダムの戦闘にならない（2026-11-25 サニー「街道ではランダムにならないは引き継がれているのかな」）', () => {
+  const m = d.maps['test-forest'], on = (x, y) => (m.roads || []).some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+  for (const p of m.stage.paths) for (let i = 1; i < p.pts.length; i++) {
+    const [ax, ay] = p.pts[i - 1], [bx, by] = p.pts[i], n = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+    for (let k = 0; k <= n; k++) { const x = Math.floor(ax + (bx - ax) * k / n), y = Math.floor(ay + (by - ay) * k / n); if (m.collision[y]?.[x] === '.') assert.ok(on(x, y), `(${x},${y}) が街道でない`); }
+  }
+  assert.ok(m.randomEncounters, '森にはランダムの戦闘がある（街道の外だけ）');
+});

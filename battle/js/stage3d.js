@@ -85,7 +85,34 @@ function build() {
   ceil.rotation.x = Math.PI / 2; ceil.position.y = 7; scene.add(ceil);
   const rim = new THREE.Mesh(new THREE.TorusGeometry(6.5, .12, 8, 64), new THREE.MeshStandardMaterial({ color: 0xc8a060, emissive: 0x403020, roughness: .6 }));
   rim.rotation.x = Math.PI / 2; rim.position.y = 6.95; scene.add(rim);
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false })));
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(80, 32, 16), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false })); scene.add(sky);
+  // フィールドの場所と昼夜に合わせる（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」）。模様はコードで描く仮。バトル試作として開いたとき（place なし）は今までどおり
+  const ctx = SR.fieldCtx || {}, place = ctx.place, day = ctx.time === 'day';
+  if (day) sky.material.map = tex(2048, 1024, (g, w, h) => { // 昼の空：青と、うすい雲
+    const grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, '#5f8fd0'); grd.addColorStop(.6, '#a9c8ec'); grd.addColorStop(1, '#e6eef6'); g.fillStyle = grd; g.fillRect(0, 0, w, h);
+    const r = rnd(9); for (let i = 0; i < 40; i++) { const x = r() * w, y = r() * h * .5, rw = 80 + r() * 220; const cg = g.createRadialGradient(x, y, 4, x, y, rw); cg.addColorStop(0, 'rgba(255,255,255,.55)'); cg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = cg; g.fillRect(x - rw, y - rw, rw * 2, rw * 2); }
+  });
+  if (place === 'forest' || place === 'town') { ceil.visible = false; rim.visible = false; } // 外：天井なし、空がひらけている
+  if (place === 'dungeon') { sky.visible = false; ceil.geometry.dispose(); ceil.geometry = new THREE.CircleGeometry(16, 64); } // ダンジョン：天井をふさぐ（空は見えない）
+  if (place === 'forest') {
+    floor.material.map = tex(512, 512, (g, w, h) => { const r = rnd(21); g.fillStyle = '#3c5a32'; g.fillRect(0, 0, w, h); for (let i = 0; i < 2600; i++) { const v = r(); g.fillStyle = v < .5 ? 'rgba(90,130,70,.5)' : v < .8 ? 'rgba(40,70,35,.5)' : 'rgba(110,95,60,.45)'; g.fillRect(r() * w, r() * h, 2 + r() * 4, 2 + r() * 7); } }, [8, 8]);
+    const trees = tex(1024, 512, (g, w, h) => { // まわりの木々（幹と、重なった葉のかたまり）
+      const r = rnd(31); g.fillStyle = '#1c2a1e'; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 26; i++) { const x = r() * w, tw = 10 + r() * 14; g.fillStyle = '#2e2218'; g.fillRect(x, h * .45, tw, h * .55); }
+      for (let i = 0; i < 70; i++) { const x = r() * w, y = h * (.05 + r() * .5), rr = 40 + r() * 70, v = 30 + r() * 40; g.fillStyle = `rgb(${v * .6},${v + 20},${v * .55})`; g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); }
+    }, [3, 1]);
+    wall.material.map = trees; wall.material.emissiveMap = trees;
+  }
+  if (place === 'town') {
+    floor.material.map = tex(512, 512, (g, w, h) => { const r = rnd(41); g.fillStyle = '#6e6152'; g.fillRect(0, 0, w, h); const s = 48; for (let y = 0; y < h; y += s / 2) for (let x = (y / (s / 2)) % 2 ? -s / 2 : 0; x < w; x += s) { const v = 120 + r() * 50; g.fillStyle = `rgb(${v},${v * .9},${v * .78})`; g.beginPath(); g.ellipse(x + s / 2, y + s / 4, s / 2 - 3, s / 4 - 2, 0, 0, Math.PI * 2); g.fill(); } }, [10, 10]);
+    const houses = tex(1024, 512, (g, w, h) => { // まわりの家並み（漆喰と梁・窓・屋根）
+      const r = rnd(51); g.fillStyle = '#3a3040'; g.fillRect(0, 0, w, h);
+      for (let x = 0; x < w;) { const hw = 90 + r() * 80, top = h * (.15 + r() * .2); g.fillStyle = '#d8cdb4'; g.fillRect(x + 2, top, hw - 4, h - top); g.fillStyle = '#5a3a26'; g.fillRect(x + 2, top, hw - 4, 8); g.fillRect(x + 2, top + (h - top) * .5, hw - 4, 6); g.fillRect(x + hw / 2 - 3, top, 6, h - top);
+        g.fillStyle = '#8a3a2c'; g.beginPath(); g.moveTo(x - 6, top + 4); g.lineTo(x + hw / 2, top - 40 - r() * 30); g.lineTo(x + hw + 6, top + 4); g.closePath(); g.fill();
+        g.fillStyle = day ? '#5a6a7a' : '#f0b060'; for (const fy of [.25, .62]) for (const fx of [.22, .66]) g.fillRect(x + hw * fx, top + (h - top) * fy, hw * .14, (h - top) * .13); x += hw; }
+    }, [3, 1]);
+    wall.material.map = houses; wall.material.emissiveMap = houses;
+  }
 
   scene.add(new THREE.HemisphereLight(0x9aa6ff, 0x202030, 1.0));
   const warm = new THREE.PointLight(0xffc98a, 22, 18, 1.6); warm.position.set(3.5, 3, 2.5); scene.add(warm);
@@ -93,6 +120,8 @@ function build() {
   const tl = new THREE.PointLight(0xffa860, 25, 14, 1.4); tl.position.set(-7, 3.5, -12); scene.add(tl);
   const tr = new THREE.PointLight(0xffa860, 25, 14, 1.4); tr.position.set(8, 3.5, -11); scene.add(tr);
   const moon = new THREE.DirectionalLight(0xaabbff, .6); moon.position.set(-3, 8, 6); scene.add(moon);
+  if (day && place !== 'dungeon') { scene.fog.color.setHex(0xb8c8dc); scene.fog.density = 0.012; moon.color.setHex(0xfff4e0); moon.intensity = 2.2; scene.children.filter((o) => o.isHemisphereLight).forEach((o) => { o.color.setHex(0xdfe8ff); o.groundColor.setHex(0x6a6050); o.intensity = 1.6; }); } // 昼：明るく
+  else if (place === 'forest') scene.fog.color.setHex(0x0c1a12); // 夜の森：緑がかった暗がり
   const motes = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(Array.from({ length: lite ? 240 : 600 }, () => (Math.random() - .5) * 20), 3)),
     new THREE.PointsMaterial({ color: 0xffe2a0, size: .05, transparent: true, opacity: .7 }));
   motes.position.y = 3; scene.add(motes); SR._motes = motes;

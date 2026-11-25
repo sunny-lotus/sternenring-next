@@ -104,7 +104,8 @@ function wallRects(g, inside, maxLen) {
     pts.push([tx + 0.5, ty + 0.5]); return pts; };
   m.stage.paths = [{ pts: route(1, 7, 58, 4), w: 2.2 }, { pts: route(20, 10, 31, 28), w: 2 }];
   m.stage.pathsNote = '2026-11-25 迷路の森（tools/gen-maze-maps.cjs）：小道の絵は、入口から門・南の出口への正しい道をたどる';
-  m.roads = [{ x: 0, y: 5, w: 10, h: 5 }, { x: 53, y: 4, w: 8, h: 4 }];
+  // 街道＝入口の広場・門の前と、小道の絵（正しい道）の上。この上ではランダムの戦闘にならない（2026-11-22 作者「街道の上はシンボルエンカウントのみ」。2026-11-25 サニー「街道ではランダムにならないは引き継がれているのかな」：迷路にしたとき、小道の上が街道から外れていた）
+  m.roads = ((paths) => [{ x: 0, y: 5, w: 10, h: 5 }, { x: 53, y: 4, w: 8, h: 4 }, ...paths.flatMap((p) => p.pts.slice(1).map((q, i) => { const o = p.pts[i], x0 = Math.floor(Math.min(o[0], q[0]) - 1), y0 = Math.floor(Math.min(o[1], q[1]) - 1); return { x: Math.max(0, x0), y: Math.max(0, y0), w: Math.ceil(Math.abs(q[0] - o[0])) + 3, h: Math.ceil(Math.abs(q[1] - o[1])) + 3 }; }))])(m.stage.paths);
   m.collision = g.map((r) => r.join(''));
   m.provenance += ' 2026-11-25 作者「森をもっとめいろっぽく」：tools/gen-maze-maps.cjs で迷路に（通路3マス・しげみの壁、ところどころ回り道。光る所は行き止まり）。';
   write('test-forest', m);

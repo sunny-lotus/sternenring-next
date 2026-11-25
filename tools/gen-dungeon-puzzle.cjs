@@ -52,7 +52,7 @@ m.width = W; m.height = H; m.collision = g.map((r) => r.join(''));
 m.exits = [{ ...m.exits[0], x: CX, y: H - 1 }];
 m.spawns = { default: { x: CX, y: H - 3, dir: 'up' } };
 m.gates = [{ id: 'du-gate', x: 11, y: 12, w: 3, h: 1, open: { flags: { 'du.lever.w': true, 'du.lever.e': true } }, note: '2026-11-25 仕掛けの扉（仮）：西と東のレバーを2つとも倒すと開く' }];
-m.encounters = [{ id: 'du-guardian', x: CX, y: 7, battle: 'shellSwift', symbol: ['battle/img/enemies/js-golem.png'], note: '奥の間の番人（仮）：バトル試作の「甲殻と疾風」。勝つと消え、奥の間への口が通れる' }];
+m.encounters = [{ id: 'du-guardian', x: CX, y: 7, battle: 'normal', symbol: ['battle/img/enemies/sr-norma.png'], note: '奥の間の番人（仮）：バトル試作の「通常戦（敵三体）」。序盤の場所なので、目安Lv8の「甲殻と疾風」から目安Lv1に下げた（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」）。勝つと消え、奥の間への口が通れる' }];
 const L = (band) => m.stage.layers.find((l) => l.band === band);
 L('mid').items = [...items, gate, { asset: 'placeholder:monster', x: CX - 1, y: 7, w: 3, h: 1, standH: 3.4, zOffset: 0.05, encounter: 'du-guardian' }, ...walls]; // 番人の絵（見えている敵の板）
 L('backdrop').items = [{ asset: 'placeholder:dungeon-back-wall', x: 0, y: 0, w: W, h: 1, standH: 4 }];

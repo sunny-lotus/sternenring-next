@@ -24,8 +24,10 @@ async function boot() {
   // 音の台帳は、ゲームのデータと並べて読む。読めなくても無音で進む（音はゲームの進行に要らない）
   const audioLedger = getJson('data/audio.json').catch(() => ({ sounds: [] }));
   const dialogueP = getJson('data/dialogue.json').catch(() => ({ lines: {} })); // 調べたときの言葉も、はじめに並べて読む
-  let day = false; try { day = JSON.parse(loadRecord().store['sr-settings-v1'] || '{}')?.time === 'day'; } catch { day = false; } // 昼の設定なら昼の背景を先に読む
-  const d = await loadGameData({ day });
+  let day = false, charaArt = false; try { const s0 = JSON.parse(loadRecord().store['sr-settings-v1'] || '{}') || {}; day = s0.time === 'day'; charaArt = s0.chara === 'art'; } catch { day = false; } // 昼の設定なら昼の背景を先に読む
+  // キャラの絵柄（2026-11-25 サニー「つけなくても開発の設定でできるように」）：開発者の窓の「キャラの絵柄」が元の絵なら、?chara=art と同じ
+  if (params.get('chara') === 'art') charaArt = true; else if (params.get('chara') === 'pixel') charaArt = false;
+  const d = await loadGameData({ day, charaArt });
   const boot = { data: performance.now(), stage: 0, map: 0, draw: 0 }; // 起動にかかった時間（?perf=1 で右上に出す。2026-11-23 作者「はじめの読み込みが遅い　クロームでやると」）
   if (d.errors.length) { $('status').textContent = `データに問題があるため起動しません：\n${d.errors.join('\n')}`; $('status').classList.add('error'); return; }
   const input = new InputState({ buffer: d.world.inputBuffer });
@@ -142,7 +144,11 @@ async function boot() {
     field.setStepScale(Number(s.walk) || 1); // 歩く速さ（開発者の窓だけ。2026-11-23 作者「移動速度の調整も開発のみできるように」） // 奥へ・手前へ移る演出（開発者の窓で見くらべる。2026-11-23）
     const tm = s.time === 'day' ? 'day' : 'night'; if (r?.setTime && r.time() !== tm) { r.setTime(tm); shown = ''; } // 時間（昼・夜）。変えたらマップを読み直す
     syncRoomUi();
+    // キャラの絵柄を変えたら、いまの場所のまま読み直す（絵は起動のときに読むため）
+    if (!params.get('chara') && (s.chara === 'art') !== charaArt) { saver.now(); const v = field.view(), a = v.actors[0], q = new URLSearchParams(location.search); q.set('warp', `${v.mapId}:${a.tileX},${a.tileY},${a.dir}`); location.search = q.toString(); return; }
+    if (partyMode !== s.party) { partyMode = s.party; onPartyMode?.(); } // 仲間（物語どおり・5人）を変えたとき（onPartyMode は隊列の仕組みができてから入る）
   };
+  let partyMode = readSettings().party, /** @type {null|(() => void)} */ onPartyMode = null;
   applySettings();
   document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stopAll(); bgm.setHidden(document.hidden); });
   const skipIntro = (/** @type {string} */ why) => { if (!intro.blocking) return; if (intro.skip(why, performance.now())) { input.clearQueue(); sound.stop('sfx.book.open'); } syncIntroUi(); };
@@ -368,12 +374,18 @@ async function boot() {
     setTimeout(() => document.body.classList.remove('encountering'), 1300);
     setTimeout(() => fx.remove(), 1700);
   };
+  // 戦闘へ、フィールドの今の様子を渡す（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」）：場所（森・ダンジョン・町）・昼か夜か・仲間に入っている人
+  const battleContext = () => {
+    const m = d.maps[field.state.mapId] || {}, place = m.battlePlace || (m.stage?.look === 'dungeon' ? 'dungeon' : /forest/.test(m.id || '') ? 'forest' : m.kind === 'interior' ? 'dungeon' : 'town');
+    const L = { nacht: 'N', volt: 'V', flare: 'F', serena: 'S', licht: 'L' };
+    return `place=${place}&time=${readSettings().time === 'day' ? 'day' : 'night'}&members=${joinedIds().map((id) => L[id]).join('')}${charaArt ? '&chara=art' : ''}`;
+  };
   const openBattle = (/** @type {{battle:string}} */ b) => {
     if (statusUi) { const sb = statusUi; statusUi = null; sb.remove(); } // 開発者の窓・メニューから戦闘を始めたら、窓は閉じる（開いたままだと、戦闘のあと歩けなかった。2026-11-23 作者「逃げたら歩けなくなった」）
     // エンカウントの演出（2026-11-22 作者「エンカウント時の演出も追加」）：白く光ったあと、金のふちの斬撃が3本走って暗転。そのあいだに戦闘を読み込む
     encounterFx();
     const box = document.createElement('div'); box.id = 'battle-overlay';
-    box.innerHTML = `<iframe title="戦闘" src="battle/index.html?field=1&enc=${encodeURIComponent(b.battle)}" allow="autoplay; fullscreen"></iframe><button type="button" id="battle-back">逃げる（試し）</button>`;
+    box.innerHTML = `<iframe title="戦闘" src="battle/index.html?field=1&enc=${encodeURIComponent(b.battle)}&${battleContext()}" allow="autoplay; fullscreen"></iframe><button type="button" id="battle-back">逃げる（試し）</button>`;
     box.dataset.wait = '1'; setTimeout(() => { delete box.dataset.wait; }, 1350); // エンカウントの演出が終わるまで、戦闘の画面は見せない（読み込みは先に進める）
     document.body.appendChild(box); battleUi = { box, outcome: null };
     bgm.setHidden(true);
@@ -397,14 +409,18 @@ async function boot() {
     else if (m.action === 'pos') { showPos = !!m.on; posEl.hidden = !showPos; }
     else if (m.action === 'reset') { for (const k of Object.keys(record.store)) delete record.store[k]; for (const k of Object.keys(record.flags)) delete record.flags[k]; record.store['sr-dev-fresh'] = '1'; saver.now(); location.reload(); }
   };
+  // 仲間に入っている人（2026-11-25 サニー「戦闘とフィールドの設定がちぐはぐ」：物語の序盤はナハトとヴォルトの2人。フレア・セレナ・リヒトは旗 join.<id> が立つと仲間に入る）。
+  // ?party=all で5人（確かめ用）。フィールドの隊列と戦闘に出る人の両方に使う
+  const joinedIds = () => params.get('party') === 'all' || readSettings().party === 'all' ? ['nacht', 'volt', 'flare', 'serena', 'licht'] : ['nacht', 'volt', ...['flare', 'serena', 'licht'].filter((id) => record.flags['join.' + id])];
   const applyFormation = (/** @type {unknown} */ order) => {
-    if (onlyId || params.get('party') || !Array.isArray(order)) return;
-    const list = order.map((id) => people.find((/** @type {any} */ p) => p.id === id)).filter(Boolean);
+    if (onlyId || (params.get('party') && params.get('party') !== 'all') || !Array.isArray(order)) return;
+    const joined = joinedIds(), list = [...order.filter((id) => joined.includes(/** @type {string} */ (id))), ...joined.filter((id) => !order.includes(id))].map((id) => people.find((/** @type {any} */ p) => p.id === id)).filter(Boolean);
     if (list.length) field.setParty(list);
   };
   // 隊列をまだ並べかえていないときも、メニューの「隊列」と同じ5人の並びで歩く（2026-11-24 作者「隊列5人いるじゃん、その並びにならないの？」：
   // 前は保存した並びが無いと台帳の2人だけだった。仲間に入る時期を作るときに、仲間になった人だけに変える）
   applyFormation(formationOf(record) ?? ['nacht', 'volt', 'flare', 'serena', 'licht']);
+  onPartyMode = () => applyFormation(formationOf(record) ?? ['nacht', 'volt', 'flare', 'serena', 'licht']);
   /** @type {HTMLElement | null} */
   let statusUi = null;
   // 本のページをめくるように開く・閉じる（2026-11-22 作者「本をめくるみたいな演出を入れてほしい、メニューでも」）
