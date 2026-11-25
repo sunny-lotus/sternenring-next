@@ -668,7 +668,7 @@
             "zOffset": 0.05
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 11,
             "y": 9,
             "w": 9,
@@ -680,7 +680,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 21,
             "y": 9,
             "w": 9,

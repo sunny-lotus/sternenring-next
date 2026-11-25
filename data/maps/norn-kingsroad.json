@@ -455,8 +455,9 @@
             "y": 12,
             "w": 4,
             "h": 1,
-            "standH": 7.5,
-            "zOffset": 0.1
+            "standH": 12,
+            "zOffset": 0.1,
+            "showH": 12
           }
         ]
       },
@@ -469,8 +470,9 @@
             "y": 18,
             "w": 4,
             "h": 1,
-            "standH": 7.5,
-            "zOffset": 0.06
+            "standH": 12,
+            "zOffset": 0.06,
+            "showH": 12
           },
           {
             "asset": "placeholder:tree",

@@ -1459,10 +1459,10 @@
             "solid": true
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 1,
             "y": 9,
-            "w": 8.167,
+            "w": 10,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1471,10 +1471,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 10.167,
+            "asset": "placeholder:bunting",
+            "x": 12,
             "y": 9,
-            "w": 8.167,
+            "w": 10,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1483,10 +1483,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 19.333,
+            "asset": "placeholder:bunting",
+            "x": 23,
             "y": 9,
-            "w": 8.167,
+            "w": 10,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1495,10 +1495,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 28.5,
+            "asset": "placeholder:bunting",
+            "x": 34,
             "y": 9,
-            "w": 8.167,
+            "w": 10,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1507,10 +1507,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 37.667,
+            "asset": "placeholder:bunting",
+            "x": 45,
             "y": 9,
-            "w": 8.167,
+            "w": 10,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1519,19 +1519,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 46.833,
-            "y": 9,
-            "w": 8.167,
-            "h": 1,
-            "standH": 6.6,
-            "zOffset": 0.02,
-            "prop": true,
-            "solid": false,
-            "festival": true
-          },
-          {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 1,
             "y": 13,
             "w": 6.667,
@@ -1543,7 +1531,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 8.667,
             "y": 13,
             "w": 6.667,
@@ -1555,7 +1543,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 16.333,
             "y": 13,
             "w": 6.667,

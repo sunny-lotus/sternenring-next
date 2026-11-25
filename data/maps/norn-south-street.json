@@ -500,8 +500,9 @@
             "y": 24,
             "w": 2,
             "h": 1,
-            "standH": 4.5,
-            "zOffset": 0.03
+            "standH": 12,
+            "zOffset": 0.03,
+            "showH": 12
           },
           {
             "asset": "placeholder:gate-tower",
@@ -509,8 +510,9 @@
             "y": 24,
             "w": 2,
             "h": 1,
-            "standH": 4.5,
-            "zOffset": 0.03
+            "standH": 12,
+            "zOffset": 0.03,
+            "showH": 12
           }
         ]
       }

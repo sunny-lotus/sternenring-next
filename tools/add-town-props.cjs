@@ -36,12 +36,12 @@ const FESTIVAL = {
   'norn-inn-street': [
     ['bunting', 3, 4, 11, 1, 5.6, 'back', false], ['bunting', 15, 4, 8, 1, 5.6, 'back', false], ['bunting', 24, 4, 9, 1, 5.6, 'back', false], ['bunting', 34, 4, 8, 1, 5.6, 'back', false], // 家の正面に沿った小旗
     ['festival-banner', 14, 4, 1, 1, 4.6, 'back', false], ['festival-banner', 33, 4, 1, 1, 4.6, 'back', false], // 路地の口の垂れ幕
-    ['lantern-string', 1, 7, 42, 1, 6.4, 'mid', false], // 通りの上に渡した提灯
+    ['bunting', 1, 7, 42, 1, 6.4, 'mid', false], // 通りの上に渡した旗（2026-11-26 サニー「祭りは提灯ではなく、旗にしたい」。旗の列の絵が届くまで小旗）
   ],
   'norn-plaza': [
     ['bunting', 2, 5, 20, 1, 5.4, 'back', false], ['bunting', 24, 5, 8, 1, 5.4, 'back', false],
     ['festival-banner', 22, 5, 1, 1, 4.4, 'back', false],
-    ['lantern-string', 1, 9, 54, 1, 6.6, 'mid', false], ['lantern-string', 1, 13, 22, 1, 6.2, 'mid', false],
+    ['bunting', 1, 9, 54, 1, 6.6, 'mid', false], ['bunting', 1, 13, 22, 1, 6.2, 'mid', false],
   ],
 };
 // 祭りの飾りの絵（2026-11-25 ART-FESTIVAL-20261125：美術・演出室の元絵 町_ノルン_祭り_v01 を tools/copy-festival-art.py で写した）。祭りのマップでは、屋台も飾り付きの版にする（屋台の絵に小旗と提灯が描いてあるので、屋台の上には飾りを足さない）

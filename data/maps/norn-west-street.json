@@ -395,8 +395,9 @@
             "y": 4,
             "w": 3,
             "h": 1,
-            "standH": 7.5,
-            "zOffset": 0.12
+            "standH": 12,
+            "zOffset": 0.12,
+            "showH": 12
           }
         ]
       },
@@ -463,8 +464,9 @@
             "y": 12,
             "w": 3,
             "h": 2,
-            "standH": 7.5,
-            "zOffset": 0.06
+            "standH": 12,
+            "zOffset": 0.06,
+            "showH": 12
           },
           {
             "asset": "placeholder:town-wall",

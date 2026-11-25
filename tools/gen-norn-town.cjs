@@ -126,7 +126,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   M.put('mid', 'tree', 15, 10, 1, 1, 6, 0.05); M.put('mid', 'tree', 26, 22, 1, 1, 6, 0.05);
   // 祭りの飾り（吊るす。ぶつからない）
   for (const [x, w] of [[1, 8], [27, 8]]) M.items.back.push({ asset: 'placeholder:bunting', x, y: 4, w, h: 1, standH: 5.6, zOffset: 0.3, prop: true, solid: false, festival: true });
-  for (const x of [11, 21]) M.items.mid.push({ asset: 'placeholder:lantern-string', x, y: 9, w: 9, h: 1, standH: 6.4, zOffset: 0.02, prop: true, solid: false, festival: true });
+  for (const x of [11, 21]) M.items.mid.push({ asset: 'placeholder:bunting', x, y: 9, w: 9, h: 1, standH: 6.4, zOffset: 0.02, prop: true, solid: false, festival: true });
   M.exit('north', 19, 0, 3, 'up', 'dive', { map: 'norn-north-gate', exit: 'south', arrive: { x: 18, y: 13, dir: 'up' } });
   M.exit('east', 41, 12, 3, 'right', 'page', { map: 'norn-east-street', exit: 'west', arrive: { x: 1, y: 7, dir: 'right' } });
   M.exit('west', 0, 12, 3, 'left', 'page', { map: 'norn-west-street', exit: 'east', arrive: { x: 42, y: 7, dir: 'left' } });
@@ -145,14 +145,17 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   const M = base('norn-east-street', 'ノルン・商店通りと東門', 48, 16, 'town', 202);
   M.paved.push({ x: 0, y: 5, w: 48, h: 7 });
   M.houses(1, 38, 1, 'back', { gap: 0.05 });
-  for (const [x, a] of [[4, 'awning-red'], [12, 'awning-green'], [20, 'awning-wheat'], [28, 'awning-red']]) M.items.back.push({ asset: `placeholder:${a}`, x, y: 4, w: 3, h: 1, standH: 3.9, zOffset: 0.25 });
-  for (const [x, a] of [[8, 'sign-bread'], [16, 'sign-cup'], [24, 'sign-shoe']]) M.items.back.push({ asset: `placeholder:${a}`, x, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 });
-  for (const [x, w] of [[4, 3], [11, 3], [19, 3], [27, 3]]) M.put('mid', 'stall', x, 12, w, 2, 3.2, 0.05);
+  // 店が並ぶ通り（2026-11-26 サニー「東はもっとお店にしたい」）：どの家の1階にも庇、看板を多く、通りの南側は屋台と花屋・荷を並べ、店先の品（樽・袋・木箱）も
+  const AW = ['awning-red', 'awning-green', 'awning-wheat'], SG = ['sign-bread', 'sign-cup', 'sign-shoe'];
+  M.items.back.filter((it) => /house-/.test(it.asset)).forEach((h, i) => { M.items.back.push({ asset: `placeholder:${AW[i % 3]}`, x: h.x + Math.max(0, Math.floor(h.w / 2) - 1), y: 4, w: 3, h: 1, standH: 3.9, zOffset: 0.25 }, { asset: `placeholder:${SG[i % 3]}`, x: h.x + h.w - 1, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 }); });
+  for (const [x, w] of [[3, 3], [9, 3], [15, 3], [21, 3], [27, 3]]) M.put('mid', 'stall', x, 12, w, 2, 3.2, 0.05);
+  M.put('mid', 'flower-stall', 30, 12, 3, 2, 3.2, 0.05);
+  for (const [a, x] of [['barrels', 6], ['sacks', 12], ['crates', 18], ['barrels', 24]]) M.put('mid', a, x, 14, 2, 1, 1.3, 0.03);
   M.put('mid', 'cart', 33, 12, 3, 2, 2.4, 0.05); M.put('mid', 'crates', 37, 12, 2, 1, 1.4, 0.05); M.put('mid', 'sacks', 31, 4, 2, 1, 1.2, 0.05);
   for (const x of [8, 22, 36]) M.put('mid', 'lamp', x, 11, 1, 1, 3.8, 0.05);
   // 東門：町の東の壁（家並みの東）と門の塔。東の出入口は門の口
   M.wall(40, 1, 7, 4); M.put('back', 'town-wall', 40, 1, 7, 4, 4.6, 0.05, true);
-  M.put('back', 'gate-tower', 42, 4, 3, 1, 7.5, 0.12); M.put('mid', 'gate-tower', 42, 12, 3, 2, 7.5, 0.06);
+  M.put('back', 'gate-tower', 42, 4, 3, 1, 12, 0.12, true, { showH: 12 }); M.put('mid', 'gate-tower', 42, 12, 3, 2, 12, 0.06, true, { showH: 12 });
   M.wall(40, 13, 7, 2); M.put('mid', 'town-wall', 39, 13, 3, 2, 3.4, 0.03, true); M.put('mid', 'town-wall', 45, 13, 2, 2, 3.4, 0.03, true);
   M.exit('west', 0, 6, 3, 'left', 'page', { map: 'norn-square', exit: 'east', arrive: { x: 40, y: 13, dir: 'left' } });
   M.exit('east-gate', 47, 6, 3, 'right', 'page', { map: 'norn-kingsroad', exit: 'east-gate', arrive: { x: 6, y: 15, dir: 'right' } });
@@ -169,7 +172,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   M.note('kingsroad-gate', 13, 4, GATE_NOTE);
   // 西：ノルンの東の壁（東門の口だけあける）
   for (let y = 5; y < 28; y += 2) if (y < 13 || y > 18) M.put('back', 'town-wall', 1, y, 4, 2, 4.6, 0.04);
-  M.put('back', 'gate-tower', 1, 12, 4, 1, 7.5, 0.1); M.put('mid', 'gate-tower', 1, 18, 4, 1, 7.5, 0.06);
+  M.put('back', 'gate-tower', 1, 12, 4, 1, 12, 0.1, true, { showH: 12 }); M.put('mid', 'gate-tower', 1, 18, 4, 1, 12, 0.06, true, { showH: 12 });
   // 東：野と木
   for (const [x, y] of [[20, 6], [23, 9], [19, 13], [24, 16], [21, 20], [25, 24], [18, 26]]) M.put('mid', 'tree', x, y, 1, 1, 6, 0.05);
   M.put('mid', 'signpost', 17, 16, 1, 1, 2.2, 0.05);
@@ -206,7 +209,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   for (const x of [14, 28]) M.put('mid', 'lamp', x, 11, 1, 1, 3.8, 0.05);
   // 西門：町の西の壁と門の塔。西の出入口は門の口（森へ）
   M.put('back', 'town-wall', 1, 1, 7, 4, 4.6, 0.05, true);
-  M.put('back', 'gate-tower', 2, 4, 3, 1, 7.5, 0.12); M.put('mid', 'gate-tower', 2, 12, 3, 2, 7.5, 0.06);
+  M.put('back', 'gate-tower', 2, 4, 3, 1, 12, 0.12, true, { showH: 12 }); M.put('mid', 'gate-tower', 2, 12, 3, 2, 12, 0.06, true, { showH: 12 });
   M.put('mid', 'town-wall', 1, 13, 1, 2, 3.4, 0.03, true); M.put('mid', 'town-wall', 5, 13, 3, 2, 3.4, 0.03, true);
   M.exit('east', 43, 6, 3, 'right', 'page', { map: 'norn-square', exit: 'west', arrive: { x: 1, y: 13, dir: 'right' } });
   M.exit('west-gate', 0, 6, 3, 'left', 'page', { map: 'erde-forest-east', exit: 'east', arrive: { x: 46, y: 9, dir: 'left' } });
@@ -222,7 +225,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   M.put('mid', 'planter', 8, 22, 2, 1, 1.2, 0.02); M.put('mid', 'door-pots', 16, 22, 2, 1, 1.1, 0.02);
   // 南門（手前のはし）。門の先は未定なので出られない
   M.put('front', 'town-wall', 1, 25, 8, 1, 2.6, 0.02); M.put('front', 'town-wall', 17, 25, 8, 1, 2.6, 0.02);
-  M.put('front', 'gate-tower', 8, 24, 2, 1, 4.5, 0.03); M.put('front', 'gate-tower', 15, 24, 2, 1, 4.5, 0.03);
+  M.put('front', 'gate-tower', 8, 24, 2, 1, 12, 0.03, true, { showH: 12 }); M.put('front', 'gate-tower', 15, 24, 2, 1, 12, 0.03, true, { showH: 12 }); // 門の塔は扉がキャラくらいになる大きさ（2026-11-26 サニー「門の扉小さい」「南門も直す」）
   M.wall(10, 26, 5, 1); M.note('south-gate', 12, 25, SOUTH_NOTE); M.note('south-gate-2', 11, 25, SOUTH_NOTE); M.note('south-gate-3', 13, 25, SOUTH_NOTE);
   M.exit('north', 11, 0, 3, 'up', 'dive', { map: 'norn-square', exit: 'south', arrive: { x: 20, y: 28, dir: 'up' } });
   M.walkers.push({ id: 'ss-a', sprite: 'mob02', path: [[11, 6], [11, 20]], speed: 0.7, wait: 2000 });
@@ -233,26 +236,34 @@ const forestRoad = (M, pts, w = 3) => { // 道（街道あつかい・小道の�
   M.paths.push({ pts: pts.map(([x, y]) => [x + 0.5, y + 0.5]), w: w - 0.6 });
   for (let k = 0; k < pts.length - 1; k++) { const [a, b] = [pts[k], pts[k + 1]]; const x = Math.min(a[0], b[0]), y = Math.min(a[1], b[1]), rw = Math.abs(a[0] - b[0]) + w, rh = Math.abs(a[1] - b[1]) + w; const rx = Math.max(0, x - (w >> 1)), ry = Math.max(0, y - (w >> 1)); M.roads.push({ x: rx, y: ry, w: Math.min(M.W, x - (w >> 1) + rw) - rx, h: Math.min(M.H, y - (w >> 1) + rh) - ry }); }
 };
+// 道を外れた所の落とし物（2026-11-26 サニー「アイテムが落ちている場所のようなところも欲しい。道でないところを探す楽しさと、道を外れるとランダムエンカウントの駆け引き」）。
+// 中身と言葉は、試しの森と同じ（光る苔・苦い根・気付け薬。tools/gen-maze-maps.cjs の sparkle.fo-*）。旗は場所ごと。まわりの木は空けて、小さな空き地にする
+const TREASURE = { 'fo-ne': { mats: { 光る苔: 2 } }, 'fo-sw': { mats: { 苦い根: 1 } }, 'fo-se': { items: { 気付け薬: 1 } } };
+function treasures(M, list) { M.treasureAt = M.treasureAt || []; for (const [x, y, kind] of list) { const id = `sparkle-${M.id}-${x}-${y}`, flag = `sparkle.${M.id}.${x}-${y}`; M.events.push({ id, x, y, trigger: 'examine', sparkle: { flag }, status: 'provisional', pages: [{ when: { flags: { [flag]: true } }, dialogue: 'sparkle.empty' }, { dialogue: `sparkle.${kind}`, set: { flags: { [flag]: true } }, give: TREASURE[kind] }] }); M.treasureAt.push([x, y]); } }
+const nearTreasure = (M, x, y) => (M.treasureAt || []).some(([tx, ty]) => Math.abs(tx - x) <= 1 && Math.abs(ty - y) <= 1);
+const FOREST_RE = { rate: 0.03, minSteps: 30, battles: ['normal', 'swarm'], note: 'エルデ森林：道（roads）の外だけ。30歩をこえたら1歩ごとに3%（試しの森と同じ。2026-11-26 サニー「道を外れるとモンスターをランダムエンカウントするということの駆け引き」）' };
 const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r.x + r.w + pad && y >= r.y - pad && y < r.y + r.h + pad);
 {
   const M = base('erde-forest-east', 'エルデ森林・ノルン寄り', 50, 20, 'forest', 707);
-  forestRoad(M, [[0, 9], [14, 9], [18, 7], [30, 7], [34, 10], [49, 10]]);
-  M.forest(0.45, (x, y) => onRoad(M, x, y) || (y < 4 && M.R() < 0.6), 1);
+  forestRoad(M, [[0, 9], [6, 9], [9, 13], [16, 13], [19, 8], [26, 6], [31, 6], [34, 11], [40, 13], [44, 10], [49, 10]]); // くねくね（2026-11-26 サニー「森が一本道すぎる」）
+  treasures(M, [[4, 3, 'fo-ne'], [27, 15, 'fo-sw'], [45, 3, 'fo-se']]);
+  M.forest(0.45, (x, y) => onRoad(M, x, y) || nearTreasure(M, x, y) || (y < 4 && M.R() < 0.6), 1);
   M.exit('east', 49, 9, 3, 'right', 'page', { map: 'norn-west-street', exit: 'west-gate', arrive: { x: 1, y: 7, dir: 'right' } });
   M.exit('west', 0, 8, 3, 'left', 'page', { map: 'erde-forest-fork', exit: 'east', arrive: { x: 48, y: 8, dir: 'left' } });
-  finish(M, { x: 40, y: 10, dir: 'left' });
+  finish(M, { x: 40, y: 10, dir: 'left' }, { randomEncounters: FOREST_RE });
 }
 // ---------- エルデ森林・分かれ道（ふつうの道は西の村へ。村寄りの所から南の森の奥へ分かれる） ----------
 {
   const M = base('erde-forest-fork', 'エルデ森林・分かれ道', 50, 26, 'forest', 808);
-  forestRoad(M, [[0, 8], [20, 8], [26, 10], [49, 10]]);
-  forestRoad(M, [[12, 8], [12, 15], [16, 19], [16, 25]], 3); // 南の森の奥への小道（村寄り）
-  M.forest(0.45, (x, y) => onRoad(M, x, y), 1.4);
+  forestRoad(M, [[0, 8], [5, 8], [8, 5], [14, 5], [17, 9], [24, 11], [30, 7], [36, 7], [40, 12], [46, 12], [49, 10]]); // くねくね
+  forestRoad(M, [[17, 9], [15, 14], [19, 18], [16, 22], [16, 25]], 3); // 南の森の奥への小道（村寄り）
+  treasures(M, [[28, 3, 'fo-se'], [33, 18, 'fo-ne'], [6, 16, 'fo-sw']]);
+  M.forest(0.45, (x, y) => onRoad(M, x, y) || nearTreasure(M, x, y), 1.4);
   M.put('mid', 'signpost', 15, 6, 1, 1, 2.4, 0.05, true, { showH: 2.4 }); // 分かれ道の道しるべ（文字は無い。美術・演出室 2026-11-26）
   M.exit('east', 49, 9, 3, 'right', 'page', { map: 'erde-forest-east', exit: 'west', arrive: { x: 1, y: 9, dir: 'right' } });
   M.exit('west', 0, 7, 3, 'left', 'page', { map: 'erde-village', exit: 'east', arrive: { x: 40, y: 9, dir: 'left' } });
   M.exit('south', 15, 25, 3, 'down', 'emerge', { map: 'erde-deep', exit: 'north', arrive: { x: 16, y: 1, dir: 'down' } });
-  finish(M, { x: 30, y: 10, dir: 'left' });
+  finish(M, { x: 30, y: 10, dir: 'left' }, { randomEncounters: FOREST_RE });
 }
 // ---------- 森の奥・魔女の家（家の外観は仮。中には入れない） ----------
 {
@@ -262,9 +273,10 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   M.put('back', 'witch-house', 14, 16, 7, 3, 6.5, 0.08); // 魔女の家（仮の外観）
   M.note('witch-house-door', 17, 19, 'map.erde.witch-house');
   M.put('mid', 'herbs', 22, 18, 3, 1, 1.6, 0.03, true, { showH: 1.6 }); M.put('mid', 'firewood', 10, 18, 2, 1, 0.8, 0.03, true, { showH: 0.8 }); // 干した薬草・薪（美術・演出室 2026-11-26）
-  M.forest(0.5, (x, y) => onRoad(M, x, y) || (x >= 13 && x <= 21 && y >= 15 && y <= 19), 2);
+  treasures(M, [[27, 8, 'fo-sw'], [5, 25, 'fo-ne']]);
+  M.forest(0.5, (x, y) => onRoad(M, x, y) || nearTreasure(M, x, y) || (x >= 13 && x <= 21 && y >= 15 && y <= 19), 2);
   M.exit('north', 15, 0, 3, 'up', 'dive', { map: 'erde-forest-fork', exit: 'south', arrive: { x: 16, y: 24, dir: 'up' } });
-  finish(M, { x: 17, y: 23, dir: 'up' }, { stageOrbsNote: '森の奥：苔と木もれ日（仮）' });
+  finish(M, { x: 17, y: 23, dir: 'up' }, { stageOrbsNote: '森の奥：苔と木もれ日（仮）', randomEncounters: FOREST_RE });
 }
 // ---------- 小さな村（村の名前・距離・既存の村との関係は未定。人は置かない） ----------
 {

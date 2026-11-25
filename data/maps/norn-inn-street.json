@@ -1223,10 +1223,10 @@
             "solid": true
           },
           {
-            "asset": "placeholder:lantern-string",
+            "asset": "placeholder:bunting",
             "x": 1,
             "y": 7,
-            "w": 7.6,
+            "w": 9.75,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1235,10 +1235,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 9.6,
+            "asset": "placeholder:bunting",
+            "x": 11.75,
             "y": 7,
-            "w": 7.6,
+            "w": 9.75,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1247,10 +1247,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 18.2,
+            "asset": "placeholder:bunting",
+            "x": 22.5,
             "y": 7,
-            "w": 7.6,
+            "w": 9.75,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1259,22 +1259,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:lantern-string",
-            "x": 26.8,
+            "asset": "placeholder:bunting",
+            "x": 33.25,
             "y": 7,
-            "w": 7.6,
-            "h": 1,
-            "standH": 6.4,
-            "zOffset": 0.02,
-            "prop": true,
-            "solid": false,
-            "festival": true
-          },
-          {
-            "asset": "placeholder:lantern-string",
-            "x": 35.4,
-            "y": 7,
-            "w": 7.6,
+            "w": 9.75,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
