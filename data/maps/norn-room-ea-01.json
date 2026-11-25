@@ -1,0 +1,282 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "norn-room-ea-01",
+  "title": "ノルン・商店通りと東門・商店通りの店（仮・無人）",
+  "kind": "interior",
+  "footsteps": "wood",
+  "status": "provisional",
+  "provenance": "2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（norn-east-street の house_c_stepgable.webp の家、型：shop。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。",
+  "width": 8,
+  "height": 7,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "collision": [
+    "########",
+    "###...##",
+    "#......#",
+    "#..##.##",
+    "##.##..#",
+    "#......#",
+    "####D###"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "floor",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "door",
+      "x": 4,
+      "y": 6,
+      "dir": "down",
+      "effect": "nook-out",
+      "to": {
+        "map": "norn-east-street",
+        "exit": "room-01",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "down"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 4,
+      "y": 5,
+      "dir": "up"
+    }
+  },
+  "events": [],
+  "stage": {
+    "look": "home",
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 90,
+      "distance": 3,
+      "follow": "center-if-fits"
+    },
+    "textures": {
+      "note": "民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵",
+      "base": "assets/interiors/",
+      "floor": "home/floor_home.webp",
+      "wall": "home/wall_home.webp",
+      "ceiling": "home/ceiling_home.webp",
+      "brick": "silver-deer/brick.webp",
+      "window": "silver-deer/window.webp",
+      "tabletop": "silver-deer/tabletop.webp",
+      "counter": "silver-deer/counter.webp",
+      "blanket": "silver-deer/blanket.webp",
+      "door": "silver-deer/door.webp",
+      "wood": "silver-deer/wood_side.webp",
+      "wainscot": "silver-deer/wainscot.webp",
+      "linen": "silver-deer/linen.webp",
+      "rug": "home/rug_home.webp",
+      "barrels": "silver-deer/barrels.webp",
+      "bottles": "silver-deer/bottles.webp",
+      "mugs": "silver-deer/mugs.webp",
+      "candle": "silver-deer/candle.webp",
+      "lampHanging": "silver-deer/lamp_hanging.webp",
+      "lampWall": "silver-deer/lamp_wall.webp",
+      "flame": "silver-deer/hearth_flame.webp",
+      "logs": "silver-deer/hearth_logs.webp",
+      "bedHome": "home/bed_home.webp",
+      "tableHome": "home/table_home.webp",
+      "cupboard": "home/cupboard.webp",
+      "herbs": "home/herbs_hanging.webp",
+      "pot": "home/hearth_pot.webp",
+      "chest": "home/chest.webp",
+      "washTub": "home/wash_tub.webp",
+      "cuts": {
+        "rug": [
+          [
+            0,
+            0,
+            767,
+            392
+          ],
+          768,
+          393
+        ],
+        "bedHome": [
+          [
+            0,
+            0,
+            767,
+            302
+          ],
+          768,
+          303
+        ],
+        "tableHome": [
+          [
+            0,
+            0,
+            767,
+            336
+          ],
+          768,
+          337
+        ],
+        "cupboard": [
+          [
+            0,
+            0,
+            433,
+            767
+          ],
+          434,
+          768
+        ],
+        "herbs": [
+          [
+            0,
+            0,
+            612,
+            281
+          ],
+          613,
+          282
+        ],
+        "pot": [
+          [
+            0,
+            0,
+            287,
+            724
+          ],
+          288,
+          725
+        ],
+        "chest": [
+          [
+            0,
+            0,
+            714,
+            196
+          ],
+          715,
+          197
+        ],
+        "washTub": [
+          [
+            0,
+            0,
+            664,
+            294
+          ],
+          665,
+          295
+        ]
+      }
+    },
+    "backWindows": false,
+    "orbs": {
+      "count": 8,
+      "alpha": 0.85,
+      "color": [
+        1,
+        0.92,
+        0.72
+      ],
+      "size": 0.95,
+      "note": "宿の中：暖炉の火の粉のような、暖かい粒（仮）。2026-11-23 作者「オーブの量を増やして」：暖かい壁に溶けて見えなかったので、濃く大きく少し白く"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": []
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "placeholder:rug",
+            "x": 2,
+            "y": 3,
+            "w": 4,
+            "h": 2,
+            "standH": 0.05
+          },
+          {
+            "asset": "placeholder:home-herbs",
+            "x": 4,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 0.7
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "tiles.pipoya-town",
+            "x": 3,
+            "y": 3,
+            "w": 2,
+            "h": 2,
+            "region": "table"
+          },
+          {
+            "asset": "placeholder:home-cupboard",
+            "x": 1,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 2.4
+          },
+          {
+            "asset": "placeholder:home-cupboard",
+            "x": 2,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 2.4
+          },
+          {
+            "asset": "placeholder:home-cupboard",
+            "x": 6,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 2.4
+          },
+          {
+            "asset": "placeholder:barrels",
+            "x": 6,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 1.3
+          },
+          {
+            "asset": "placeholder:home-chest",
+            "x": 1,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 0.6
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  }
+}

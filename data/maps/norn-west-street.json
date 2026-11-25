@@ -87,6 +87,54 @@
           "dir": "left"
         }
       }
+    },
+    {
+      "id": "room-01",
+      "x": 13,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-we-01",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-02",
+      "x": 30,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-we-02",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-03",
+      "x": 36,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-we-03",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -102,7 +150,7 @@
     "########.#########.........#################",
     "########.#########.........#################",
     "########.#########.........#################",
-    "########.#########.........#################",
+    "########.####D####.........###D#####D#######",
     "#..........................................#",
     "D..........................................D",
     "D..........................................D",
@@ -364,7 +412,8 @@
             "h": 4,
             "standH": 8.1,
             "zOffset": 0.01,
-            "art": "house_d_workshop.webp"
+            "art": "house_d_workshop.webp",
+            "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-front",
@@ -374,7 +423,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0.04,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-front",
@@ -384,7 +434,8 @@
             "h": 4,
             "standH": 9.1,
             "zOffset": 0.06,
-            "art": "house_home_2f.webp"
+            "art": "house_home_2f.webp",
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:herbs",

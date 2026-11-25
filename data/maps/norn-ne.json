@@ -54,6 +54,70 @@
           "dir": "down"
         }
       }
+    },
+    {
+      "id": "room-01",
+      "x": 4,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-ne-01",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-02",
+      "x": 14,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-ne-02",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-03",
+      "x": 23,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-ne-03",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-04",
+      "x": 31,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-ne-04",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -69,7 +133,7 @@
     "#####################################......#",
     "#####################################......#",
     "#####################################......#",
-    "#####################################......#",
+    "####D#########D########D#######D#####......#",
     "#.......................................####",
     "D..........................................#",
     "D..........................................#",
@@ -337,7 +401,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.01,
-            "art": "house_b_sideroof.webp"
+            "art": "house_b_sideroof.webp",
+            "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-front",
@@ -347,7 +412,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.02,
-            "art": "house_b_sideroof.webp"
+            "art": "house_b_sideroof.webp",
+            "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-front",
@@ -357,7 +423,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.03,
-            "art": "house_f_corner.webp"
+            "art": "house_f_corner.webp",
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:house-front",
@@ -367,7 +434,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.03,
-            "art": "house_f_corner.webp"
+            "art": "house_f_corner.webp",
+            "doorExit": "room-04"
           }
         ]
       },

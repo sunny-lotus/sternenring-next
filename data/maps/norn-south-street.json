@@ -54,6 +54,102 @@
           "dir": "right"
         }
       }
+    },
+    {
+      "id": "room-01",
+      "x": 5,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-01",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-02",
+      "x": 18,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-02",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-03",
+      "x": 3,
+      "y": 12,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-03",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-04",
+      "x": 18,
+      "y": 12,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-04",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-05",
+      "x": 4,
+      "y": 20,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-05",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-06",
+      "x": 19,
+      "y": 20,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-so-06",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -106,7 +202,7 @@
     "##########......######...#",
     "##########......######...#",
     "##########......######...#",
-    "##########......######...#",
+    "#####D####......##D###...#",
     "#........................#",
     "#........................D",
     "#........................D",
@@ -114,7 +210,7 @@
     "#########.......########.#",
     "#########.......########.#",
     "#########.......########.#",
-    "#########.......########.#",
+    "###D#####.......##D#####.#",
     "#........................#",
     "#........................#",
     "#........................#",
@@ -122,7 +218,7 @@
     "########........#######..#",
     "########........#######..#",
     "########........#######..#",
-    "########........#######..#",
+    "####D###........###D###..#",
     "#........................#",
     "#.......##......##.......#",
     "#........................#",
@@ -392,7 +488,8 @@
             "h": 4,
             "standH": 8.1,
             "zOffset": 0.02,
-            "art": "house_d_workshop.webp"
+            "art": "house_d_workshop.webp",
+            "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-front",
@@ -402,7 +499,8 @@
             "h": 4,
             "standH": 10.4,
             "zOffset": 0.03,
-            "art": "house_a_narrow.webp"
+            "art": "house_a_narrow.webp",
+            "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-front",
@@ -412,7 +510,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.04,
-            "art": "house_f_corner.webp"
+            "art": "house_f_corner.webp",
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:house-front",
@@ -422,7 +521,8 @@
             "h": 4,
             "standH": 8.8,
             "zOffset": 0.06,
-            "art": "house_f_corner.webp"
+            "art": "house_f_corner.webp",
+            "doorExit": "room-04"
           },
           {
             "asset": "placeholder:house-front",
@@ -432,7 +532,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0.1,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "room-05"
           },
           {
             "asset": "placeholder:house-front",
@@ -442,7 +543,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "room-06"
           }
         ]
       },
@@ -563,7 +665,7 @@
     {
       "id": "night-town-south-01",
       "sprite": "mob01",
-      "x": 7,
+      "x": 8,
       "y": 7,
       "dir": "down",
       "status": "provisional",
@@ -603,7 +705,7 @@
     {
       "id": "night-town-south-02",
       "sprite": "mob02",
-      "x": 19,
+      "x": 21,
       "y": 15,
       "dir": "down",
       "status": "provisional",

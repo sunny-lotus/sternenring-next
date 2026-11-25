@@ -54,6 +54,86 @@
           "dir": "down"
         }
       }
+    },
+    {
+      "id": "room-01",
+      "x": 4,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-nw-01",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-02",
+      "x": 12,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-nw-02",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-03",
+      "x": 19,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-nw-03",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-04",
+      "x": 28,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-nw-04",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-05",
+      "x": 38,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-nw-05",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -69,7 +149,7 @@
     "##########################################.#",
     "##########################################.#",
     "##########################################.#",
-    "##########################################.#",
+    "####D#######D######D########D#########D###.#",
     "#..........................................#",
     "#..........................................D",
     "#..........................................D",
@@ -337,7 +417,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0.03,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-front",
@@ -347,7 +428,8 @@
             "h": 4,
             "standH": 8.1,
             "zOffset": 0.05,
-            "art": "house_d_workshop.webp"
+            "art": "house_d_workshop.webp",
+            "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-front",
@@ -357,7 +439,8 @@
             "h": 4,
             "standH": 9.1,
             "zOffset": 0.09,
-            "art": "house_home_2f.webp"
+            "art": "house_home_2f.webp",
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:house-front",
@@ -367,7 +450,8 @@
             "h": 4,
             "standH": 9.1,
             "zOffset": 0.02,
-            "art": "house_home_2f.webp"
+            "art": "house_home_2f.webp",
+            "doorExit": "room-04"
           },
           {
             "asset": "placeholder:house-front",
@@ -377,7 +461,8 @@
             "h": 4,
             "standH": 9.8,
             "zOffset": 0.1,
-            "art": "house_c_stepgable.webp"
+            "art": "house_c_stepgable.webp",
+            "doorExit": "room-05"
           },
           {
             "asset": "placeholder:herbs",

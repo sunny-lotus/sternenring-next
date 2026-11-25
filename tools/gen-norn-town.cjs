@@ -416,6 +416,85 @@ function district(id, title, seed, opt) {
   const m = read('norn-plaza'), e = m.exits.find((x) => x.id === 'west-street');
   if (e) { m.exits = m.exits.filter((x) => x !== e); m.collision = m.collision.map((row, y) => (y >= e.y && y < e.y + (e.span || 1) ? '#' + row.slice(1) : row)); m.oldNote = '2026-11-25 STORY-NORN-MAP：新しい中央広場（norn-square）ができたので、前の広場は見比べ用（開発の窓・ワープで行く）。西の出入口はふさいだ'; write(m); }
 }
+// ---------- どの家にも入れるように（2026-11-26 サニー「家の中も入れるようにどこも」。STORY-INTERIOR-CONTENTS-20261126：シナリオ室「店と住まいの内装対応_v01.md」）。
+// 新しい地図の家の板ごとに、扉のマスと出入口を足し、中の部屋（norn-room-<地図>-NN）を作る。作りは gen-house-interiors と同じ（ブックヌック・民家の内装の絵）。
+// 部屋の型：商店通り＝店（売り台の代わりに卓・棚・樽。8種の店の絵が届いたら差しかえ）、北東＝倉庫・荷運びの家、北西＝小工房・薬草の仕分け場、ほか＝民家。村＝村の住まい。
+// 住む人・店主は置かない（資料：店主不明は家具あり無人。屋外の町の人を中へ複製しない）。売買・店名・家族は作らない ----------
+{
+  const homeRoom = read('norn-house-plaza-02');
+  const ROOM_OF = { 'norn-east-street': 'shop', 'norn-ne': 'store', 'norn-nw': 'work', 'erde-village': 'village' };
+  const SHORT = { 'norn-square': 'sq', 'norn-east-street': 'ea', 'norn-west-street': 'we', 'norn-south-street': 'so', 'norn-north-gate': 'no', 'norn-ne': 'ne', 'norn-nw': 'nw', 'norn-se': 'se', 'erde-village': 'vi' };
+  const made = [];
+  for (const [outId, short] of Object.entries(SHORT)) {
+    const out = read(outId), doors = out.stage.townArt?.doors || {}, rows = out.collision.map((r) => [...r]);
+    out.exits = out.exits.filter((e) => !String(e.id).startsWith('room-'));
+    let n = 0;
+    for (const layer of out.stage.layers) for (const it of layer.items) {
+      if (!/^placeholder:house-/.test(it.asset) || !it.art) continue;
+      delete it.doorExit;
+      const row = it.y + it.h - 1, want = it.x + (doors[it.art]?.x ?? 0.5) * it.w;
+      let col = -1;
+      for (const c of [...Array(it.w).keys()].map((k) => it.x + k).sort((a, b) => Math.abs(a + 0.5 - want) - Math.abs(b + 0.5 - want))) {
+        if (rows[row]?.[c] !== '#' || rows[row + 1]?.[c] !== '.') continue;
+        if (out.exits.some((e) => Math.abs(e.x - c) <= 0 && e.y === row)) continue;
+        col = c; break;
+      }
+      if (col < 0) continue;
+      n++; rows[row][col] = 'D';
+      const nn = String(n).padStart(2, '0'), id = `norn-room-${short}-${nn}`, exitId = `room-${nn}`;
+      const kind = ROOM_OF[outId] === 'store' ? (n % 2 ? 'store' : 'home') : ROOM_OF[outId] === 'work' ? (n % 2 ? 'work' : 'herb') : ROOM_OF[outId] || 'home';
+      const W = Math.max(8, Math.min(11, it.w + 1)), H = 7, dx = Math.floor(W / 2);
+      out.exits.push({ id: exitId, x: col, y: row, dir: 'up', effect: 'nook-in', to: { map: id, exit: 'door', arrive: { x: dx, y: H - 2, dir: 'up' } } });
+      it.doorExit = exitId;
+      const C = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (y === 0 || x === 0 || x === W - 1 || y === H - 1 ? '#' : '.')));
+      C[H - 1][dx] = 'D';
+      const block = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) C[j][i] = '#'; };
+      const back = [], mid = [];
+      const put = (asset, x, y, w, h, standH, extra = {}) => { if (C[y]?.[x] !== '.') return; mid.push({ asset, x, y, w, h, ...(standH ? { standH } : {}), ...extra }); block(x, y, w, h); };
+      back.push({ asset: 'placeholder:rug', x: 2, y: 3, w: W - 4, h: 2, standH: 0.05 });
+      if (kind === 'shop') { // 店：手前に売り台（卓）、奥の壁に棚、品の樽
+        put('tiles.pipoya-town', dx - 1, 3, 2, 2, 0, { region: 'table' }); put('placeholder:home-cupboard', 1, 1, 1, 1, 2.4); put('placeholder:home-cupboard', 2, 1, 1, 1, 2.4); put('placeholder:home-cupboard', W - 2, 1, 1, 1, 2.4);
+        put('placeholder:barrels', W - 2, 3, 1, 1, 1.3); put('placeholder:home-chest', 1, 4, 1, 1, 0.6); back.push({ asset: 'placeholder:home-herbs', x: 4, y: 1, w: 2, h: 1, standH: 0.7 });
+      } else if (kind === 'store') { // 北東・倉庫：荷を壁ぎわに積み、通路をあける
+        for (const [x, y] of [[1, 1], [2, 1], [W - 3, 1], [W - 2, 1], [1, 3], [W - 2, 3]]) put('placeholder:barrels', x, y, 1, 1, 1.3);
+        put('placeholder:home-chest', 1, 4, 1, 1, 0.6); put('placeholder:home-chest', W - 2, 4, 1, 1, 0.6); put('tiles.pipoya-town', dx - 1, 2, 2, 2, 0, { region: 'table' });
+      } else if (kind === 'work' || kind === 'herb') { // 北西・小工房／薬草の仕分け場：作業台（卓）・棚・吊るした薬草
+        put('tiles.pipoya-town', dx - 1, 2, 2, 2, 0, { region: 'table' }); put('placeholder:home-cupboard', 1, 1, 1, 1, 2.4); put('placeholder:barrels', W - 2, 1, 1, 1, 1.3);
+        for (const x of [2, W - 4]) back.push({ asset: 'placeholder:home-herbs', x, y: 1, w: 2, h: 1, standH: 0.7 });
+        if (kind === 'herb') { put('placeholder:home-washtub', W - 2, 4, 1, 1, 0.8); put('placeholder:home-chest', 1, 4, 1, 1, 0.6); } else put('placeholder:home-chest', W - 2, 4, 1, 1, 0.6);
+      } else { // 民家・村の住まい：寝台・食卓・食器棚・かまど（幅9以上）か樽・香草・長持ち
+        put('placeholder:bed', 1, 1, 2, 2, 1);
+        if (W >= 9) { back.push({ asset: 'tiles.pipoya-town', region: 'hearth', x: W - 4, y: 1, w: 3, h: 2, zOffset: 0.1 }); block(W - 4, 1, 3, 2); } else put('placeholder:barrels', W - 2, 1, 1, 1, 1.3);
+        put('tiles.pipoya-town', Math.max(3, dx - 1), 3, 2, 2, 0, { region: 'table' }); put('placeholder:home-cupboard', dx === 3 ? 4 : 3, 1, 1, 1, 2.4);
+        back.push({ asset: 'placeholder:home-herbs', x: 1, y: 1, w: 2, h: 1, standH: 0.7 });
+        if (n % 3 === 0) put('placeholder:home-chest', 1, 4, 1, 1, 0.6); else if (n % 3 === 1) put('placeholder:home-washtub', W - 2, 4, 1, 1, 0.8);
+      }
+      for (let y = 1; y < H - 1; y++) C[y][dx] = C[y][dx] === '#' && y >= H - 2 ? '.' : C[y][dx]; // 扉の前は通れる
+      C[H - 2][dx] = '.';
+      const TITLE = { shop: '商店通りの店（仮・無人）', store: '北東の倉庫（仮）', work: '北西の小工房（仮）', herb: '北西の薬草の仕分け場（仮）', village: '村の住まい（仮）', home: '家の中（仮）' };
+      write({
+        format: 'sternenring-next-map', version: 1, id, title: `${out.title.replace(/（.*$/, '')}・${TITLE[kind]}`, kind: 'interior', footsteps: 'wood', status: 'provisional',
+        provenance: `2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（${outId} の ${it.art} の家、型：${kind}。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。`,
+        width: W, height: H, tileSize: 32, legend: { '.': 'floor', '#': 'wall', D: 'door' }, collision: C.map((r) => r.join('')),
+        ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
+        exits: [{ id: 'door', x: dx, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: outId, exit: exitId, arrive: { x: col, y: row + 1, dir: 'down' } } }],
+        spawns: { default: { x: dx, y: H - 2, dir: 'up' } }, events: [],
+        stage: { look: 'home', camera: homeRoom.stage.camera, textures: homeRoom.stage.textures, backWindows: false, orbs: homeRoom.stage.orbs,
+          layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
+      });
+      made.push(id);
+    }
+    out.collision = rows.map((r) => r.join(''));
+    write(out);
+  }
+  for (const f of fs.readdirSync(dir)) if (f.startsWith('norn-room-') && !made.includes(f.replace('.json', ''))) fs.unlinkSync(path.join(dir, f));
+  const wp = path.join(__dirname, '..', 'data', 'world.json'), w = JSON.parse(fs.readFileSync(wp, 'utf8'));
+  w.maps = w.maps.filter((id) => !id.startsWith('norn-room-')).concat(made); fs.writeFileSync(wp, JSON.stringify(w, null, 2) + '\n');
+  const ap = path.join(__dirname, '..', 'data', 'audio.json'), au = JSON.parse(fs.readFileSync(ap, 'utf8'));
+  for (const k of Object.keys(au.bgmByMap)) if (k.startsWith('norn-room-')) delete au.bgmByMap[k];
+  for (const id of made) au.bgmByMap[id] = au.bgmByMap['norn-plaza']; fs.writeFileSync(ap, JSON.stringify(au, null, 2) + '\n');
+  console.log('入れる家の部屋', made.length);
+}
 // ---------- 新しい町の人（2026-11-26 STORY-NIGHT-TOWN-LIFE-20261126：世界観・シナリオ室「新しい町の人の言葉_v01.md」7マップ16枠48本、provisional） ----------
 // 言葉は .md の表からそのまま読む。話者はみな「町の人」。ふだん1 → ふだん2 → ふだん1…の順（pick は最初が気まぐれなので、life.nighttown.<人> の旗でページを切りかえる。物語の旗ではない）。
 // story.norn.ended のあとは ended 後の1本を優先。置く所は、話題の物（井戸・屋台・時計台・荷・洗濯ひも・花）の近くの、通れて広い所（出入口から5マス以上・出来事のマス・着く所・せまい通路をさける）
