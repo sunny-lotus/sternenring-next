@@ -52,7 +52,7 @@ function base(id, title, W, H, kind, seed) {
     while (x < x1) {
       const fits = (f) => { const w = Math.round(HOUSE.boardSize(f).w); return x + w <= x1 + 1 && M.free(x, y, w, h); };
       const want = (opts.files || HOUSE_FILES)[Math.floor(M.R() * (opts.files || HOUSE_FILES).length)];
-      const art = fits(want) ? want : HOUSE_FILES.filter(fits).sort((a, b) => HOUSE.boardSize(b).w - HOUSE.boardSize(a).w)[0];
+      const art = fits(want) ? want : (opts.files || HOUSE_FILES).filter(fits).sort((a, b) => HOUSE.boardSize(b).w - HOUSE.boardSize(a).w)[0];
       if (!art) { x++; continue; }
       const sz = HOUSE.boardSize(art), w = Math.round(sz.w);
       M.put(band, band === 'back' ? 'house-front' : 'house-small', x, y, w, h, Math.round(sz.h * 10) / 10, Math.round(M.R() * 10) / 100);
@@ -94,7 +94,7 @@ function finish(M, spawn, extra = {}) {
       ...(town ? { paved: M.paved } : { paths: M.paths }),
       orbs: town ? ORB_TOWN : { count: 26, alpha: 0.75, color: [0.8, 1, 0.7], size: 1, note: '森：木もれ日のような光の粒（仮）' },
       layers: [
-        { band: 'backdrop', items: [{ ...(town ? TOWN_BACK : FOREST_BACK), x: 0, y: 0, w: M.W }] },
+        { band: 'backdrop', items: [{ ...(town && !M.forestBack ? TOWN_BACK : FOREST_BACK), x: 0, y: 0, w: M.W }] },
         { band: 'back', items: M.items.back }, { band: 'mid', items: M.items.mid }, { band: 'actors', items: [] }, { band: 'front', items: M.items.front },
       ],
     },
@@ -269,8 +269,10 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
 // ---------- 小さな村（村の名前・距離・既存の村との関係は未定。人は置かない） ----------
 {
   const M = base('erde-village', '森を抜けた小さな村', 42, 20, 'town', 1010);
-  M.paved.push({ x: 4, y: 7, w: 38, h: 5 });
-  M.houses(4, 14, 2, 'back', { gap: 0.6 }); M.houses(22, 34, 2, 'back', { gap: 0.6 });
+  // 村の道は石畳にしない（草の地面のまま）。土の道の絵は美術・演出室に依頼
+  // 村らしく（2026-11-26 サニーと画面で確認：町の高い家と町の背景で、村に見えなかった）：背景は森、家は低い絵だけ。村の家の絵は美術・演出室に依頼
+  M.forestBack = true; const LOW = ['house_b_sideroof.webp', 'house_d_workshop.webp', 'house_home_2f.webp'];
+  M.houses(4, 14, 2, 'back', { gap: 0.6, files: LOW }); M.houses(22, 34, 2, 'back', { gap: 0.6, files: LOW });
   M.put('mid', 'well', 17, 4, 3, 2, 3.6, 0.05); M.put('mid', 'trough', 35, 6, 3, 1, 1, 0.03);
   for (const [x, y] of [[4, 13], [12, 13], [20, 13], [28, 13]]) M.put('mid', 'fence', x, y, 5, 1, 1.5, 0.03);
   for (const [x, y] of [[6, 15], [14, 15], [22, 15], [30, 15]]) M.put('mid', 'flowerbed', x, y, 3, 1, 0.9, 0.02);

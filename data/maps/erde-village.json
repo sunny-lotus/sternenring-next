@@ -50,10 +50,10 @@
   "collision": [
     "##########################################",
     "#........................................#",
-    "#...##########........#############......#",
-    "#.#.##########........#############...#..#",
-    "#...##########...###..#############......#",
-    "#...##########...###..#############......#",
+    "#...#########.........##########.........#",
+    "#.#.#########.........##########......#..#",
+    "#...#########....###..##########.........#",
+    "#...#########....###..##########.........#",
     "#..................................###...#",
     "#........................................#",
     "#........................................D",
@@ -267,14 +267,7 @@
         "clock-tower": "clock_tower.webp"
       }
     },
-    "paved": [
-      {
-        "x": 4,
-        "y": 7,
-        "w": 38,
-        "h": 5
-      }
-    ],
+    "paved": [],
     "orbs": {
       "count": 10,
       "alpha": 0.5,
@@ -293,16 +286,14 @@
           {
             "asset": "placeholder:night-sky-ring",
             "sink": 1,
-            "image": "assets/backdrops/norn_night_v02.jpg",
-            "imageNightNote": "夜の背景（美術・演出室 2026-11-22 pixel/元絵/背景_ノルン/norn_night_backdrop_v02、試作）",
-            "imageDay": "assets/backdrops/norn_day_v02.jpg",
-            "imageDayNote": "昼の背景（美術・演出室 2026-11-22 norn_day_backdrop_v02。手前の家を一階・扉まで描き直したもの。作者「背景を書かせなおす、家の窓やドアがあるように」）",
-            "imageNote": "今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）。カルディアの城壁とレグナス城の背景の元絵を依頼中",
+            "image": "assets/backdrops/erde_night_v01.jpg",
+            "imageDay": "assets/backdrops/erde_day_v01.jpg",
+            "imageNote": "エルデ森林の奥の背景（美術・演出室 2026-11-26 ART-NIGHT-NORN、provisional）",
             "x": 0,
             "y": 0,
-            "w": 42,
             "h": 1,
-            "standH": 22
+            "standH": 26,
+            "w": 42
           }
         ]
       },
@@ -313,31 +304,21 @@
             "asset": "placeholder:house-front",
             "x": 4,
             "y": 2,
-            "w": 10,
+            "w": 9,
             "h": 4,
-            "standH": 8.9,
+            "standH": 8.1,
             "zOffset": 0.09,
-            "art": "house_e_archway.webp"
+            "art": "house_d_workshop.webp"
           },
           {
             "asset": "placeholder:house-front",
             "x": 22,
             "y": 2,
-            "w": 6,
+            "w": 10,
             "h": 4,
-            "standH": 10.4,
+            "standH": 8.8,
             "zOffset": 0.05,
-            "art": "house_a_narrow.webp"
-          },
-          {
-            "asset": "placeholder:house-front",
-            "x": 28,
-            "y": 2,
-            "w": 7,
-            "h": 4,
-            "standH": 9.8,
-            "zOffset": 0.1,
-            "art": "house_c_stepgable.webp"
+            "art": "house_b_sideroof.webp"
           }
         ]
       },
