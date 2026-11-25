@@ -951,8 +951,8 @@
     "#......#..............#.#.#......#",
     "#......##.....#######.##.#.#.....#",
     "#......##.....#######...#####....#",
-    "#......##.....#######.....####...#",
-    "#....#.##...................##...#",
+    "#......##.##..#######.###.####...#",
+    "#......##...................##...#",
     "#...#.###...................#....#",
     "#......##..................###...#",
     "#....####..................###...#",
@@ -961,7 +961,7 @@
     "#...##.##..................##....#",
     "#...#..##..................###...#",
     "#......##..................###...#",
-    "#....#.###.................#.#...#",
+    "#......###.................#.#...#",
     "##################################"
   ],
   "stage": {
@@ -990,7 +990,11 @@
           "tree_fir.webp"
         ],
         "rock": "rock.webp",
-        "bush": "bush.webp"
+        "bush": "bush.webp",
+        "witch-house": "witch_house.webp",
+        "signpost": "signpost_forest.webp",
+        "herbs": "herbs_forest.webp",
+        "firewood": "firewood_forest.webp"
       }
     },
     "paths": [
@@ -1041,12 +1045,14 @@
         "items": [
           {
             "asset": "placeholder:night-sky-ring",
-            "image": "assets/backdrops/title_bg_temp.jpg",
-            "imageNote": "今だけの仮（試しの森と同じ背景）。エルデ森林の背景の元絵は美術・演出室へ依頼",
+            "sink": 1,
+            "image": "assets/backdrops/erde_night_v01.jpg",
+            "imageDay": "assets/backdrops/erde_day_v01.jpg",
+            "imageNote": "エルデ森林の奥の背景（美術・演出室 2026-11-26 ART-NIGHT-NORN、provisional）",
             "x": 0,
             "y": 0,
             "h": 1,
-            "standH": 30,
+            "standH": 26,
             "w": 34
           }
         ]
@@ -2062,32 +2068,32 @@
             "standH": 4.7,
             "zOffset": 0,
             "showH": 4.7
-          },
-          {
-            "asset": "placeholder:pine",
-            "x": 5,
-            "y": 28,
-            "w": 1,
-            "h": 1,
-            "standH": 5.3,
-            "zOffset": 0,
-            "showH": 5.3
-          },
-          {
-            "asset": "placeholder:pine",
-            "x": 5,
-            "y": 19,
-            "w": 1,
-            "h": 1,
-            "standH": 5.5,
-            "zOffset": 0,
-            "showH": 5.5
           }
         ]
       },
       {
         "band": "mid",
         "items": [
+          {
+            "asset": "placeholder:herbs",
+            "x": 22,
+            "y": 18,
+            "w": 3,
+            "h": 1,
+            "standH": 1.6,
+            "zOffset": 0.03,
+            "showH": 1.6
+          },
+          {
+            "asset": "placeholder:firewood",
+            "x": 10,
+            "y": 18,
+            "w": 2,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.03,
+            "showH": 0.8
+          },
           {
             "asset": "placeholder:bush",
             "x": 19,

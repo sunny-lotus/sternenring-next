@@ -173,7 +173,11 @@
           "tree_fir.webp"
         ],
         "rock": "rock.webp",
-        "bush": "bush.webp"
+        "bush": "bush.webp",
+        "witch-house": "witch_house.webp",
+        "signpost": "signpost_forest.webp",
+        "herbs": "herbs_forest.webp",
+        "firewood": "firewood_forest.webp"
       }
     },
     "paths": [
@@ -237,12 +241,14 @@
         "items": [
           {
             "asset": "placeholder:night-sky-ring",
-            "image": "assets/backdrops/title_bg_temp.jpg",
-            "imageNote": "今だけの仮（試しの森と同じ背景）。エルデ森林の背景の元絵は美術・演出室へ依頼",
+            "sink": 1,
+            "image": "assets/backdrops/erde_night_v01.jpg",
+            "imageDay": "assets/backdrops/erde_day_v01.jpg",
+            "imageNote": "エルデ森林の奥の背景（美術・演出室 2026-11-26 ART-NIGHT-NORN、provisional）",
             "x": 0,
             "y": 0,
             "h": 1,
-            "standH": 30,
+            "standH": 26,
             "w": 50
           }
         ]
@@ -1656,14 +1662,14 @@
             "showH": 0.8
           },
           {
-            "asset": "placeholder:rock",
+            "asset": "placeholder:signpost",
             "x": 15,
             "y": 6,
             "w": 1,
             "h": 1,
-            "standH": 1.1,
+            "standH": 2.4,
             "zOffset": 0.05,
-            "showH": 1.1
+            "showH": 2.4
           }
         ]
       },

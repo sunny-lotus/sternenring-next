@@ -26,8 +26,11 @@ const SRC = 'production/claude/scenario/Claude引渡し_ノルンとエルデ森
 const inn = read('norn-inn-street');
 const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt));
 const FOREST_ART = JSON.parse(JSON.stringify(read('test-forest').stage.townArt)); delete FOREST_ART.doors; FOREST_ART.boards = { pine: FOREST_ART.boards.pine, rock: FOREST_ART.boards.rock, bush: FOREST_ART.boards.bush };
+// 骨格の絵（2026-11-26 美術・演出室 ART-NIGHT-NORN-20261126、pixel/元絵/ノルン_骨格_v01 を tools/copy-norn-structure-art.py で写した。provisional）。壁は横にくり返して張る
+Object.assign(TOWN_ART.boards, { 'town-wall': 'town_wall.webp', 'third-wall': 'third_wall.webp', 'gate-tower': 'gate_tower.webp', 'kardia-gate': 'kardia_gate.webp', 'clock-tower': 'clock_tower.webp' });
+Object.assign(FOREST_ART.boards, { 'witch-house': 'witch_house.webp', signpost: 'signpost_forest.webp', herbs: 'herbs_forest.webp', firewood: 'firewood_forest.webp' });
 const TOWN_BACK = inn.stage.layers.find((l) => l.band === 'backdrop').items[0];
-const FOREST_BACK = { asset: 'placeholder:night-sky-ring', image: 'assets/backdrops/title_bg_temp.jpg', imageNote: '今だけの仮（試しの森と同じ背景）。エルデ森林の背景の元絵は美術・演出室へ依頼', x: 0, y: 0, h: 1, standH: 30 };
+const FOREST_BACK = { asset: 'placeholder:night-sky-ring', sink: 1, image: 'assets/backdrops/erde_night_v01.jpg', imageDay: 'assets/backdrops/erde_day_v01.jpg', imageNote: 'エルデ森林の奥の背景（美術・演出室 2026-11-26 ART-NIGHT-NORN、provisional）', x: 0, y: 0, h: 1, standH: 26 };
 const CAM = { pitchDeg: 10, fovDeg: 75, distance: 6.5, follow: 'player', deadzone: [2, 1.5] };
 const ORB_TOWN = { count: 10, alpha: 0.5, color: [1, 0.86, 0.62], size: 0.7, note: '町：暖かいほこりの粒（仮）' };
 
@@ -239,7 +242,7 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   forestRoad(M, [[0, 8], [20, 8], [26, 10], [49, 10]]);
   forestRoad(M, [[12, 8], [12, 15], [16, 19], [16, 25]], 3); // 南の森の奥への小道（村寄り）
   M.forest(0.45, (x, y) => onRoad(M, x, y), 1.4);
-  M.put('mid', 'rock', 15, 6, 1, 1, 1.1, 0.05, true, { showH: 1.1 }); // 分かれ道の目印の岩（道しるべの絵は森の絵に無いので、いまは岩。道しるべは美術・演出室に依頼）
+  M.put('mid', 'signpost', 15, 6, 1, 1, 2.4, 0.05, true, { showH: 2.4 }); // 分かれ道の道しるべ（文字は無い。美術・演出室 2026-11-26）
   M.exit('east', 49, 9, 3, 'right', 'page', { map: 'erde-forest-east', exit: 'west', arrive: { x: 1, y: 9, dir: 'right' } });
   M.exit('west', 0, 7, 3, 'left', 'page', { map: 'erde-village', exit: 'east', arrive: { x: 40, y: 9, dir: 'left' } });
   M.exit('south', 15, 25, 3, 'down', 'emerge', { map: 'erde-deep', exit: 'north', arrive: { x: 16, y: 1, dir: 'down' } });
@@ -252,7 +255,7 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   for (let y = 19; y < 28; y++) for (let x = 9; x < 27; x++) if (Math.hypot(x - 17.5, (y - 23) * 1.3) < 8.5) M.roads.push({ x, y, w: 1, h: 1 }); // 家の前の空き地
   M.put('back', 'witch-house', 14, 16, 7, 3, 6.5, 0.08); // 魔女の家（仮の外観）
   M.note('witch-house-door', 17, 19, 'map.erde.witch-house');
-  // 干した薬草・薪の絵は森の絵に無い（町の絵）ので、いまは置かない。魔女の家まわりの小物は美術・演出室に依頼
+  M.put('mid', 'herbs', 22, 18, 3, 1, 1.6, 0.03, true, { showH: 1.6 }); M.put('mid', 'firewood', 10, 18, 2, 1, 0.8, 0.03, true, { showH: 0.8 }); // 干した薬草・薪（美術・演出室 2026-11-26）
   M.forest(0.5, (x, y) => onRoad(M, x, y) || (x >= 13 && x <= 21 && y >= 15 && y <= 19), 2);
   M.exit('north', 15, 0, 3, 'up', 'dive', { map: 'erde-forest-fork', exit: 'south', arrive: { x: 16, y: 24, dir: 'up' } });
   finish(M, { x: 17, y: 23, dir: 'up' }, { stageOrbsNote: '森の奥：苔と木もれ日（仮）' });

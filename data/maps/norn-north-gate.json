@@ -280,7 +280,12 @@
         "bunting": "bunting.webp",
         "lantern-string": "lantern_string.webp",
         "festival-banner": "festival_banner.webp",
-        "flower-garland": "flower_garland.webp"
+        "flower-garland": "flower_garland.webp",
+        "town-wall": "town_wall.webp",
+        "third-wall": "third_wall.webp",
+        "gate-tower": "gate_tower.webp",
+        "kardia-gate": "kardia_gate.webp",
+        "clock-tower": "clock_tower.webp"
       }
     },
     "paved": [

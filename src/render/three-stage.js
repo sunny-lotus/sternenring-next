@@ -616,7 +616,10 @@ function townBoardCanvas(name, b, it) {
   // キャラの背は約2.5マス（2026-11-23 作者「植木などのサイズを確認してほしい」：街路樹が2.6マス＝キャラとほぼ同じ、小さな木は0.9マスだった）
   const showH = it.showH ?? SHOW_H[name];
   if (showH) { const h = showH, w = h / ar, pb = bottomPad(im); return { w, h, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight * (1 - pb), 0, H * pb, W, H * (1 - pb))) }; } // 絵の下の透明な余白を詰めて、足もとを地面につける（2026-11-25 サニー「ちょっと浮いている」）
-  const hang = /^(sign-|awning-|herbs|laundry|bunting|lantern-string|festival-banner|flower-garland)/.test(name); // laundry：路地に渡した洗濯ひも（2026-11-25）。祭りの飾り（小旗・提灯・垂れ幕・花輪）も板の上のはしから吊るす
+  if (/^(town-wall|third-wall)$/.test(name)) { // 壁（2026-11-26 美術・演出室の骨格の絵）：横につながる絵を、板の高さに合わせて横にくり返して張る（引き伸ばさない）
+    return { h: b.h, artH: b.h, c: canvas(b.w * PX, b.h * PX, (g, W, H) => { const tw = H / ar; for (let x = 0; x < W; x += tw) g.drawImage(im, Math.round(x), 0, Math.ceil(tw), H); }) };
+  }
+  const hang = /^(sign-|awning-|herbs$|laundry|bunting|lantern-string|festival-banner|flower-garland)/.test(name); // laundry：路地に渡した洗濯ひも（2026-11-25）。祭りの飾り（小旗・提灯・垂れ幕・花輪）も板の上のはしから吊るす
   const artH = hang ? b.h : Math.min(b.h, b.w * ar); // 絵が見えている高さ（マス）。板が高くても、絵は下に低く描かれることがある（花壇など）
   return { h: b.h, artH, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
     let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
