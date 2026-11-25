@@ -7444,6 +7444,14 @@
       "status": "provisional",
       "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
     },
+    "map.norn.gate-gastel": {
+      "lines": [
+        "（ガステルへの大門。）",
+        "〔開発中：この先はまだ作っていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
     "life.nighttown.square-01.normal-1": {
       "lines": [
         {

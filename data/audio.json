@@ -586,6 +586,8 @@
     "erde-village": "bgm.town.celtic.v30",
     "norn-ne": "bgm.town.celtic.v30",
     "norn-nw": "bgm.town.celtic.v30",
-    "norn-se": "bgm.town.celtic.v30"
+    "norn-se": "bgm.town.celtic.v30",
+    "norn-kingsroad-wall-b": "bgm.town.celtic.v30",
+    "norn-kingsroad-wall-c": "bgm.town.celtic.v30"
   }
 }

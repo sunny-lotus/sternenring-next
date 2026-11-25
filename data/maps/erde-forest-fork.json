@@ -337,7 +337,14 @@
         "witch-house": "witch_house.webp",
         "signpost": "signpost_forest.webp",
         "herbs": "herbs_forest.webp",
-        "firewood": "firewood_forest.webp"
+        "firewood": "firewood_forest.webp",
+        "flowerbed": "../town/norn/flowerbed.webp",
+        "planter": "../town/norn/planter.webp",
+        "fence": "../town/norn/fence.webp",
+        "bench": "../town/norn/bench.webp",
+        "door-pots": "../town/norn/door_pots.webp",
+        "tree-small": "../town/norn/tree_small.webp",
+        "well": "../town/norn/well.webp"
       }
     },
     "paths": [

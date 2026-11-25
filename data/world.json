@@ -47,7 +47,9 @@
     "erde-village",
     "norn-ne",
     "norn-nw",
-    "norn-se"
+    "norn-se",
+    "norn-kingsroad-wall-b",
+    "norn-kingsroad-wall-c"
   ],
   "start": {
     "map": "norn-inn-street",
