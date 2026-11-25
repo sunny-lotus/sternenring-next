@@ -592,3 +592,11 @@ test('新しい町の人（2026-11-26 STORY-NIGHT-TOWN-LIFE）：ふだん1→�
   record.flags['story.norn.ended'] = true;
   assert.equal(talk(), 'life.nighttown.square-01.ended');
 });
+
+test('頭の上の吹き出し（2026-11-26 ART-NIGHT-EMOTE）：act の emote で出て、仲間の頭の上の位置を返し、時間がたつか会話が終わると消える', () => {
+  const { field, input } = makeField();
+  field.sceneAct([{ emote: 'surprise', who: 'nacht', ms: 1000 }, { emote: 'note', who: 'nobody' }]);
+  const e = field.view().emotes; assert.equal(e.length, 1); assert.equal(e[0].type, 'surprise'); assert.deepEqual([e[0].x, e[0].y], [pos(field).x, pos(field).y]); // いない人の吹き出しは出さない
+  run(field, input, 1100); assert.equal(field.view().emotes.length, 0);
+  field.sceneAct([{ emote: 'idea', who: 'nacht' }]); field.closeMessage(); assert.equal(field.view().emotes.length, 0);
+});

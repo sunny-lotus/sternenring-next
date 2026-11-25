@@ -75,6 +75,11 @@ const LOCK_LINES = (() => {
   if (Object.keys(out).length !== 19) throw new Error('町の人の言葉が19項目でない：' + Object.keys(out).length);
   return out;
 })();
+// 頭の上の吹き出し（2026-11-26 夜の改善・学びノート題3、美術・演出室 ART-NIGHT-EMOTE）：全部の行には付けず、気持ちが動く少しの所だけ。文は変えない
+const emote = (lines, startsWith, list) => { const i = lines.findIndex((x) => (typeof x === 'string' ? x : x.text).startsWith(startsWith)); if (i < 0) throw new Error('吹き出しの文が無い：' + startsWith); const x = lines[i]; lines[i] = typeof x === 'string' ? { text: x, act: list } : { ...x, act: [...(x.act || []), ...list] }; };
+emote(s2, '客が重なる', [{ emote: 'note', who: 'c2', ms: 2400 }]); // 客が楽しそうに並ぶ
+emote(s4, '通りの向こうで、何かが倒れる音', [{ emote: 'surprise', who: 'nacht', ms: 1800 }, { emote: 'surprise', who: 'volt', ms: 1800 }]); // 祭りの音が変わる瞬間
+emote(s6c, '脇の通りに、店で使っていた包み布', [{ emote: 'idea', who: 'nacht', ms: 2000 }]); // 手がかりに気づく
 const SC = (scene, ttl, lines) => ({ scene, title: ttl, lines, status: 'provisional', source: 'production/claude/scenario/ノルン導入から追跡開始_試作シナリオ_v01.md' });
 const D = read('data/dialogue.json');
 for (const k of Object.keys(D.lines)) if (k.startsWith('story.norn.')) delete D.lines[k];

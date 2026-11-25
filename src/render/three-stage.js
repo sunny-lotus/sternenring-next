@@ -2180,6 +2180,24 @@ export function createThreeStage(canvasEl, assets) {
     g.beginPath(); g.moveTo(w / 2, h * .74); g.lineTo(w / 2 + 6, h * .86); g.lineTo(w / 2 - 6, h * .86); g.closePath(); g.fillStyle = '#b07818'; g.fill(); // 下を指す小さな三角
   }));
   let markObjs = new Map(), markRoot = null;
+  // 頭の上の吹き出し（2026-11-26 美術・演出室 ART-NIGHT-EMOTE、assets/ui/balloon_*.webp。256角、尻尾の先 (115,227) を頭の上に合わせる）。
+  // 大きさは約0.9マス（画面で48px前後の目安）。出るときに少しはずみ、終わりに薄くなって消える。会話が終わる・マップが変わると field が消す
+  const EMOTE_TEX = {}; const emoteTex = (/** @type {string} */ t) => EMOTE_TEX[t] || (EMOTE_TEX[t] = (() => { const x = loader.load(`assets/ui/balloon_${t}.webp`); x.colorSpace = THREE.SRGBColorSpace; return x; })());
+  let emoteObjs = new Map(), emoteRoot = null; const EMO = 0.9;
+  function updateEmotes(/** @type {{id:string,type:string,p:number,x:number,y:number,h?:number}[]} */ list, show = true) {
+    if (emoteRoot !== root) { emoteObjs = new Map(); emoteRoot = root; }
+    if (!root || !map) return;
+    const want = new Set(list.map((e) => e.id + ':' + e.type));
+    for (const [k, o] of emoteObjs) if (!want.has(k)) { root.remove(o); o.material.dispose(); emoteObjs.delete(k); }
+    for (const e of list) {
+      const k = e.id + ':' + e.type; let sp = emoteObjs.get(k);
+      if (!sp) { sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: emoteTex(e.type), transparent: true, depthWrite: false, depthTest: false })); sp.renderOrder = 20; root.add(sp); emoteObjs.set(k, sp); }
+      const pop = e.p < 0.08 ? 0.6 + 0.4 * Math.sin(e.p / 0.08 * Math.PI / 2) * 1.12 : 1, fade = e.p > 0.85 ? (1 - e.p) / 0.15 : 1, sc = EMO * pop;
+      const head = heightOf(map, Math.round(e.x), Math.round(e.y)) * HU + (e.h ?? CHIBI_H) + 0.05;
+      sp.scale.set(sc, sc, 1); sp.position.set(e.x + 0.5 + (128 - 115) / 256 * sc, head + (227 - 128) / 256 * sc, e.y + 0.6); // 尻尾の先が頭の上に来るように
+      sp.material.opacity = fade; sp.visible = show;
+    }
+  }
   function updateMarks(/** @type {{id:string,x:number,y:number,npc:boolean}[]} */ list, /** @type {number} */ now, show = true) {
     if (markRoot !== root) { markObjs = new Map(); markRoot = root; }
     if (!root || !map) return;
@@ -2517,6 +2535,7 @@ export function createThreeStage(canvasEl, assets) {
         place[a.id] = { x: tx, y: ty, dir, walk: a.motion === 'walk' || moving };
       });
       updateSparkles(view.sparkles || [], now, !intro);
+      updateEmotes(view.emotes || [], !intro);
       updateMarks(view.marks || [], now, !intro && !(view.effect?.kind || '').startsWith('nook')); // イベントのしるし（本がひらく前と、建物に出入りするあいだは出さない） // 本がひらく前（タイトルの机）は出さない（2026-11-25 サニー：机の上にきらきらが見えていた）
       // キャラ（左右反転しない。いまは1方向の絵のまま）
       const seen = new Set();

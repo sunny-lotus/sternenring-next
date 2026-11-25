@@ -39,6 +39,7 @@ export function createField(data) {
     /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
     /** @type {Record<string, any>} 会話の演出で出した人や敵（会話が終わると消える） */ cast: {},
+    /** @type {Record<string, {type:string, t:number, dur:number}>} 頭の上の吹き出し（2026-11-26 美術・演出室 ART-NIGHT-EMOTE。会話の act の emote で出し、時間がたつか会話が終わると消える） */ emotes: {},
     /** 歩き回る町の人の時計（ミリ秒） */ clock: 0,
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
     /** @type {Record<string, string>} 話しかけた町の人の向き（話すと主人公のほうを向く。マップが変わると元に戻る） */ npcFace: {},
@@ -80,7 +81,7 @@ export function createField(data) {
       taken.push(pos);
       return { id: p.id, x: pos.x, y: pos.y, dir: at.dir, from: null, t: 0, animMs: 0 };
     });
-    state.actors = [lead, ...followers]; state.npcFace = {};
+    state.actors = [lead, ...followers]; state.npcFace = {}; state.emotes = {}; // マップが変わると吹き出しも消す
     state.trail = followers.map((f) => ({ x: f.x, y: f.y }));
   }
 
@@ -164,7 +165,7 @@ export function createField(data) {
     return true;
   }
   /** 言葉を閉じる（画面の係が呼ぶ） */
-  function closeMessage() { state.message = null; state.cast = {}; } // 会話が終わったら、演出で出した人や敵も消す
+  function closeMessage() { state.message = null; state.cast = {}; state.emotes = {}; } // 会話が終わったら、演出で出した人や敵も消す
   /**
    * 会話の演出（2026-11-25 サニー「イベントが会話だけで見た目が何も変わらない、モブキャラとか敵とかを出して動かして」）：
    * 会話の行の act を、その行を出すときに画面の係が渡す。{spawn: id, sprite|img, h, x, y, dir}／{move: id, to: [x, y], ms}／{face: id, dir}／{hide: id}。
@@ -173,6 +174,7 @@ export function createField(data) {
    */
   function sceneAct(acts) {
     for (const a of acts || []) {
+      if (a.emote) { state.emotes[a.who] = { type: a.emote, t: 0, dur: a.ms || 1800 }; continue; } // {emote: surprise|question|silence|idea|note, who: 仲間の id・演出の人の id・町の人の id, ms}
       if (a.spawn) state.cast[a.spawn] = { id: a.spawn, sprite: a.sprite, img: a.img, h: a.h, tone: a.tone, fx: a.x, fy: a.y, tx: a.x, ty: a.y, t: 1, dur: 0, dir: a.dir || 'down' };
       const c = state.cast[a.move || a.face || a.hide]; if (!c) continue;
       if (a.hide) { delete state.cast[a.hide]; continue; }
@@ -260,7 +262,8 @@ export function createField(data) {
    * @param {import('./input.js').InputState} input
    */
   function update(dt, input) {
-    for (const c of Object.values(state.cast)) if (c.t < 1) c.t = Math.min(1, c.t + dt / c.dur); // 演出の人や敵は、会話の間も動く
+    for (const c of Object.values(state.cast)) if (c.t < 1) c.t = Math.min(1, c.t + dt / c.dur);
+    for (const [k, e] of Object.entries(state.emotes)) { e.t += dt; if (e.t >= e.dur) delete state.emotes[k]; } // 吹き出しは時間で消える // 演出の人や敵は、会話の間も動く
     state.clock += dt; // 歩き回る町の人（walkers）の時計
     if (state.battle) { input.clearQueue(); return; } // 戦闘中はフィールドを止める
     if (state.message) { input.clearQueue(); input.takeAction?.(); return; } // 言葉が出ているあいだも止める（閉じるのは画面の係：closeMessage）
@@ -336,6 +339,12 @@ export function createField(data) {
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       // きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：出来事に sparkle があり、その旗がまだ立っていない所
       sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && (!storyLockNow() || isStory(storyLockNow()?.L, e.id, null)) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
+      // 吹き出し：だれの頭の上か（仲間・演出の人・町の人）を、いまの位置で返す。p は出てからの割合（0→1）
+      emotes: Object.entries(state.emotes).map(([who, e]) => {
+        const a = state.actors.find((x) => x.id === who), c = state.cast[who], n = (data.maps[state.mapId].npcs || []).find((x) => x.id === who);
+        const at = a ? { x: a.from ? a.from.x + (a.x - a.from.x) * Math.min(1, a.t / curStep) : a.x, y: a.from ? a.from.y + (a.y - a.from.y) * Math.min(1, a.t / curStep) : a.y } : c ? { x: c.fx + (c.tx - c.fx) * c.t, y: c.fy + (c.ty - c.fy) * c.t, h: c.h } : n ? { x: n.x, y: n.y } : null;
+        return at ? { id: who, type: e.type, p: e.t / e.dur, ...at } : null;
+      }).filter(Boolean),
       marks: eventMarks(), // イベントが始まる所のしるし（2026-11-25 サニー「イベントが始まるところにはしるしを」）
       npcs: [...(data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
         ...walkersNow(),

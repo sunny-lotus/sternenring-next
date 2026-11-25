@@ -6386,6 +6386,38 @@
         ]
       ]
     },
+    "map.norn.gate-permit": {
+      "lines": [
+        "（カルディアへの門。通るには、通行の許可が要る。）",
+        "〔開発中：この先はまだ作っていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.norn.gate-south": {
+      "lines": [
+        "（ノルンの南門。）",
+        "〔開発中：南門の先は、まだ決まっていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.road-unbuilt": {
+      "lines": [
+        "（王道は、南へ続いている。）",
+        "〔開発中：この先はまだ作っていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.erde.witch-house": {
+      "lines": [
+        "（森の奥の家。戸は閉まっている。）",
+        "〔開発中：家の外観と中は、まだ仮です〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
     "story.norn.1-3": {
       "scene": "NORN-1-3",
       "title": "串焼きの前で／少しだけ働く／働いた分の食事",
@@ -6540,6 +6572,11 @@
                 10
               ],
               "ms": 3200
+            },
+            {
+              "emote": "note",
+              "who": "c2",
+              "ms": 2400
             }
           ]
         },
@@ -6781,6 +6818,16 @@
                 8
               ],
               "ms": 3100
+            },
+            {
+              "emote": "surprise",
+              "who": "nacht",
+              "ms": 1800
+            },
+            {
+              "emote": "surprise",
+              "who": "volt",
+              "ms": 1800
             }
           ]
         },
@@ -7032,7 +7079,16 @@
       "scene": "NORN-6c",
       "title": "戻ってこない人（包み布）",
       "lines": [
-        "脇の通りに、店で使っていた包み布が落ちている。"
+        {
+          "text": "脇の通りに、店で使っていた包み布が落ちている。",
+          "act": [
+            {
+              "emote": "idea",
+              "who": "nacht",
+              "ms": 2000
+            }
+          ]
+        }
       ],
       "status": "provisional",
       "source": "production/claude/scenario/ノルン導入から追跡開始_試作シナリオ_v01.md"
@@ -7293,38 +7349,6 @@
       ],
       "status": "provisional",
       "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
-    },
-    "map.norn.gate-permit": {
-      "lines": [
-        "（カルディアへの門。通るには、通行の許可が要る。）",
-        "〔開発中：この先はまだ作っていません〕"
-      ],
-      "status": "provisional",
-      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
-    },
-    "map.norn.gate-south": {
-      "lines": [
-        "（ノルンの南門。）",
-        "〔開発中：南門の先は、まだ決まっていません〕"
-      ],
-      "status": "provisional",
-      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
-    },
-    "map.road-unbuilt": {
-      "lines": [
-        "（王道は、南へ続いている。）",
-        "〔開発中：この先はまだ作っていません〕"
-      ],
-      "status": "provisional",
-      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
-    },
-    "map.erde.witch-house": {
-      "lines": [
-        "（森の奥の家。戸は閉まっている。）",
-        "〔開発中：家の外観と中は、まだ仮です〕"
-      ],
-      "status": "provisional",
-      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
     },
     "life.nighttown.square-01.normal-1": {
       "lines": [
