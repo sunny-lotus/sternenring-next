@@ -270,9 +270,12 @@ test('ノルン導入の試作（2026-11-25 シナリオ室）：オットー→
   const talk = (x, y, face) => { walkTo(field, input, d, x, y); tap(field, input, face); input.pressAction(); run(field, input, 20); const k = field.state.message?.dialogue; field.closeMessage(); return k; };
   const atOtto = () => talk(otto.x + 1, otto.y, 'left');
   assert.ok(field.view().npcs.some((n) => n.id === 'story-helper'));
+  const marked = () => field.view().marks.map((mk) => mk.id);
+  assert.ok(marked().includes('story-otto') && marked().includes('life-st-crates')); // しるし：オットーと、まだ見ていない立ち絵の会話（2026-11-25 サニー「イベントが始まるところにはしるしを」）
   assert.equal(atOtto(), 'story.norn.1-3');
   assert.equal(atOtto(), 'story.norn.4');
   assert.ok(!field.view().npcs.some((n) => n.id === 'story-helper')); // 異変のあと、店の手伝いはいない
+  assert.ok(marked().includes('life-st-cart') && !marked().includes('story-otto')); // しるしは荷車へ移る
   const cart = m.events.find((e) => e.id === 'life-st-cart'); assert.equal(talk(cart.x, cart.y + 1, 'up'), 'story.norn.5');
   assert.equal(atOtto(), 'story.norn.6a');
   const woman = m.npcs.find((n) => n.id === 'life-st-woman'); assert.equal(talk(woman.x, woman.y + 1, 'up'), 'story.norn.6b');
@@ -281,6 +284,7 @@ test('ノルン導入の試作（2026-11-25 シナリオ室）：オットー→
   assert.equal(atOtto(), 'story.norn.6c-7');
   const end = m.events.find((e) => e.id === 'story-end'); assert.equal(talk(end.x, end.y + 1, 'up'), 'story.norn.end');
   assert.equal(record.flags['story.norn.chase'], true);
+  assert.ok(!marked().some((id) => /^story-|life-st-(cart|woman)/.test(id))); // 見終わると、物語のしるしは残らない
 });
 
 test('銀鹿亭：右の階段で吹き抜けの2階の通路へ上がり、奥の扉から客室へ入って戻る（2026-11-22）', () => {
@@ -520,4 +524,14 @@ test('立ち絵の会話：銀鹿亭の受付は一度だけ立ち絵の会話�
   const solo = at(d.ledger.party.filter((p) => p.id === 'nacht'));
   solo.input.pressAction(); run(solo.field, solo.input, 20);
   assert.equal(solo.field.view().message.dialogue, 'inn.counter', 'ヴォルトがいないと立ち絵の会話は出ない');
+});
+
+test('会話の演出（2026-11-25 サニー「モブキャラとか敵とかを出して動かして」）：出した人は時間で動き、会話を閉じると消える。ぶつからない', () => {
+  const { field, input } = makeField({ map: 'norn-inn-street', spawn: 'default' });
+  field.sceneAct([{ spawn: 'beast', img: 'battle/img/enemies/sr-beast.png', h: 2.6, x: 20, y: 8 }, { move: 'beast', to: [10, 8], ms: 1000 }]);
+  const at = () => field.view().npcs.find((n) => n.id === 'cast:beast');
+  assert.ok(at() && at().moving && at().dir === 'left');
+  run(field, input, 500); assert.ok(Math.abs(at().x - 15) < 0.5, `半分の時間で半分（${at().x}）`);
+  run(field, input, 600); assert.equal(at().x, 10); assert.ok(!at().moving);
+  field.closeMessage(); assert.ok(!at(), '会話を閉じると消える');
 });

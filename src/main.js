@@ -193,6 +193,7 @@ async function boot() {
   const msgBox = $('msg'); let msgShownAt = 0;
   // 会話（2026-11-24 作者「イベントや会話、適当に沢山作っといて」）：dialogue.lines の値は1行の文か、行の並び（文字列か {who:話す人, text}）。
   // 押すたびに次の行へ。最後の行で、手に入れたもののお知らせ（金の字）も出す
+  const msgActed = new Set(); // この会話で演出をすませた行
   /** @type {{who?:string, text:string, member?:string}[]} */ let msgLines = []; let msgAt = 0; /** @type {string[]} */ let msgNotes = []; /** @type {Record<string, number>} */ const talkLast = {};
   const esc = (/** @type {string} */ t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] || c);
   // 立ち絵の会話（2026-11-24 作者「立ち絵がでてサウンドノベル的な会話形式のイベントがあってもいいな」・2026-11-25 美術・演出室の立ち絵_v01）：
@@ -225,7 +226,8 @@ async function boot() {
     novel.hidden = false; msgBox.classList.add('novel');
   };
   const closeNovel = () => { novel.hidden = true; msgBox.classList.remove('novel'); };
-  const drawNovel = (/** @type {{actor?:string, face?:string}|undefined} */ l) => {
+  const drawNovel = (/** @type {{actor?:string, face?:string, who?:string, act?:any[]}|undefined} */ l) => {
+    novel.classList.toggle('away', !l?.actor && (!!l?.act || !l?.who)); // 地の文や演出の行では立ち絵を下げて、町の様子を見せる（2026-11-25）
     for (const [id, seat] of Object.entries(seatOf)) {
       const speak = l?.actor === id; seat.classList.toggle('dim', !speak);
       if (speak) setFace(seat, portraitOf(id), l?.face);
@@ -236,6 +238,7 @@ async function boot() {
   setTimeout(() => { for (const a of d.ledger.assets) if (a.kind === 'portrait') for (const q of [a, a.poseB].filter(Boolean)) { new Image().src = q.body; for (const f of Object.values(q.faces || {})) new Image().src = /** @type {any} */ (f).file; } }, 4000);
   const drawMsg = () => {
     const l = msgLines[msgAt], last = msgAt >= msgLines.length - 1;
+    if (l?.act && !msgActed.has(msgAt)) { msgActed.add(msgAt); field.sceneAct(l.act); } // 会話の演出（人や敵を出して動かす）。同じ行では一度だけ
     if (sceneOn) drawNovel(l);
     msgBox.innerHTML = (l?.who ? `<p class="who${l.member ? ' party' : ''}">${esc(l.who)}</p>` : '') + (l?.text ? `<p>${esc(l.text)}</p>` : '') + (last ? msgNotes.map((n) => `<p class="note">${n}</p>`).join('') : '');
     msgShownAt = performance.now();
@@ -245,7 +248,7 @@ async function boot() {
     if (m && msgBox.hidden) {
       const raw = m.dialogue ? (dialogue.lines?.[m.dialogue] ?? m.dialogue) : '';
       // 話しかけるたびに会話が変わる（pick）・仲間の合いの手は隊列にいる仲間だけ（2026-11-24 作者「会話をもっと弾ませてほしい」）
-      msgLines = resolveTalk(raw, { party: field.state.actors.map((/** @type {any} */ a) => a.id), key: m.dialogue || '', last: talkLast }); if (!msgLines.length) msgLines = [{ text: '' }];
+      msgActed.clear(); msgLines = resolveTalk(raw, { party: field.state.actors.map((/** @type {any} */ a) => a.id), key: m.dialogue || '', last: talkLast }); if (!msgLines.length) msgLines = [{ text: '' }];
       msgAt = 0; msgNotes = m.notes; sceneOn = isScene(msgLines); if (sceneOn) openNovel(); else closeNovel(); drawMsg(); msgBox.hidden = false;
       if (m.notes.length) sound.play(PAGE_TURNS[pageCueN++ % PAGE_TURNS.length]);
     } else if (!m && !msgBox.hidden) { msgBox.hidden = true; closeNovel(); }

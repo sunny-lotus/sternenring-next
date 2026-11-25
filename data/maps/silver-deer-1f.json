@@ -173,7 +173,8 @@
           "party": [
             "nacht",
             "volt"
-          ]
+          ],
+          "mark": true
         },
         {
           "dialogue": "inn.counter"

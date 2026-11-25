@@ -94,24 +94,52 @@ function build() {
   });
   if (place === 'forest' || place === 'town') { ceil.visible = false; rim.visible = false; } // 外：天井なし、空がひらけている
   if (place === 'dungeon') { sky.visible = false; ceil.geometry.dispose(); ceil.geometry = new THREE.CircleGeometry(16, 64); } // ダンジョン：天井をふさぐ（空は見えない）
+  // 場所ごとの舞台は、フィールドと同じ水彩の絵で作る（2026-11-25 サニー「戦闘の背景ちゃんとしよう」）。絵は NEXT の assets（../assets/）。
+  // 奥の半分に背景の絵を丸く張り（behind）、そのまわりに木・家の絵の板を立てる（カメラのほうへ向ける）。床は手ざわりの絵をくり返す
+  const A = '../assets/';
+  const art = (p, rep) => { const t = loader.load(A + p); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); } return t; };
+  const behind = (p, h, r) => { // 奥の半分（カメラの向こう側）を囲む背景の絵
+    const t = art(p); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 48, 1, true, Math.PI * .5, Math.PI), new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false }));
+    m.position.y = h / 2 - .4; scene.add(m); return m;
+  };
+  const board = (p, h, x, z, tint) => { // 立てた絵の板（足もとを地面に、カメラのほうを向く）
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ transparent: true, alphaTest: .35, roughness: 1, color: tint || 0xffffff }));
+    m.geometry.translate(0, .5, 0); m.position.set(x, 0, z); m.scale.set(h * .6, h, 1);
+    // 足もと：絵の下の透明な余白を詰めて地面につけ、足もとにやわらかい影を落とす（2026-11-25 サニー「森の木が浮いて見える」）
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: SR._blob, transparent: true, depthWrite: false, opacity: .85 }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.set(x, .015, z); scene.add(shadow);
+    m.material.map = loader.load(A + p, (tt) => {
+      const im = tt.image, c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data; let bot = c.height - 1; scan: for (; bot > 0; bot--) for (let i = 0; i < c.width; i += 2) if (d[(bot * c.width + i) * 4 + 3] > 100) break scan;
+      const pad = (c.height - 1 - bot) / c.height, w = h * im.width / im.height;
+      m.scale.set(w, h, 1); m.position.y = -pad * h; shadow.scale.set(w * .75, Math.min(1.4, w * .3), 1);
+    }); m.material.map.colorSpace = THREE.SRGBColorSpace;
+    m.lookAt(0.6, 0, 13.5); scene.add(m); return m;
+  };
+  const ring = (n, r0, r1, a0, a1, seed, put) => { const r = rnd(seed); for (let i = 0; i < n; i++) { const a = a0 + (a1 - a0) * (i + r() * .6) / n, rr = r0 + (r1 - r0) * r(); put(Math.sin(a) * rr, -Math.cos(a) * rr, r); } }; // a：0＝真奥、±で左右
+  if (place === 'forest' || place === 'town') { floor.geometry.dispose(); floor.geometry = new THREE.CircleGeometry(48, 72); } // 外：床を広げて、木や家の足もとから奥まで地面が続くように（床の円のふちの外が空で、木が浮いて見えた）
   if (place === 'forest') {
-    floor.material.map = tex(512, 512, (g, w, h) => { const r = rnd(21); g.fillStyle = '#3c5a32'; g.fillRect(0, 0, w, h); for (let i = 0; i < 2600; i++) { const v = r(); g.fillStyle = v < .5 ? 'rgba(90,130,70,.5)' : v < .8 ? 'rgba(40,70,35,.5)' : 'rgba(110,95,60,.45)'; g.fillRect(r() * w, r() * h, 2 + r() * 4, 2 + r() * 7); } }, [8, 8]);
-    const trees = tex(1024, 512, (g, w, h) => { // まわりの木々（幹と、重なった葉のかたまり）
-      const r = rnd(31); g.fillStyle = '#1c2a1e'; g.fillRect(0, 0, w, h);
-      for (let i = 0; i < 26; i++) { const x = r() * w, tw = 10 + r() * 14; g.fillStyle = '#2e2218'; g.fillRect(x, h * .45, tw, h * .55); }
-      for (let i = 0; i < 70; i++) { const x = r() * w, y = h * (.05 + r() * .5), rr = 40 + r() * 70, v = 30 + r() * 40; g.fillStyle = `rgb(${v * .6},${v + 20},${v * .55})`; g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill(); }
-    }, [3, 1]);
-    wall.material.map = trees; wall.material.emissiveMap = trees;
+    wall.visible = false;
+    floor.material.map = art('forest/forest_soil.webp', [21, 21]);
+    if (!day) behind('backdrops/title_bg_temp.jpg', 16, 15.6); // 夜の森の奥（フィールドの森と同じ背景）。昼は空のまま
+    // 大きさはキャラ（約2.4）に合わせる：木はフィールドと同じくキャラの2倍強、やぶ・岩はひざから腰くらい
+    ring(20, 10, 14.5, -1.9, 1.9, 61, (x, z, r) => board(r() < .55 ? 'forest/tree_fir.webp' : 'forest/tree_broad.webp', 4.8 + r() * 1.2, x, z, day ? 0xffffff : 0xb8c0d0));
+    ring(26, 16, 26, -1.5, 1.5, 63, (x, z, r) => board(r() < .5 ? 'forest/tree_fir.webp' : 'forest/tree_broad.webp', 5.5 + r() * 1.5, x, z, day ? 0xdde4ee : 0x8a94a8)); // 奥の木々（遠いほど少しかすむ）
+    ring(7, 7, 9, -1.7, 1.7, 62, (x, z, r) => { const bush = r() < .6; board(bush ? 'forest/bush.webp' : 'forest/rock.webp', bush ? .75 + r() * .25 : .55 + r() * .25, x, z, day ? 0xffffff : 0xb8c0d0); });
   }
   if (place === 'town') {
-    floor.material.map = tex(512, 512, (g, w, h) => { const r = rnd(41); g.fillStyle = '#6e6152'; g.fillRect(0, 0, w, h); const s = 48; for (let y = 0; y < h; y += s / 2) for (let x = (y / (s / 2)) % 2 ? -s / 2 : 0; x < w; x += s) { const v = 120 + r() * 50; g.fillStyle = `rgb(${v},${v * .9},${v * .78})`; g.beginPath(); g.ellipse(x + s / 2, y + s / 4, s / 2 - 3, s / 4 - 2, 0, 0, Math.PI * 2); g.fill(); } }, [10, 10]);
-    const houses = tex(1024, 512, (g, w, h) => { // まわりの家並み（漆喰と梁・窓・屋根）
-      const r = rnd(51); g.fillStyle = '#3a3040'; g.fillRect(0, 0, w, h);
-      for (let x = 0; x < w;) { const hw = 90 + r() * 80, top = h * (.15 + r() * .2); g.fillStyle = '#d8cdb4'; g.fillRect(x + 2, top, hw - 4, h - top); g.fillStyle = '#5a3a26'; g.fillRect(x + 2, top, hw - 4, 8); g.fillRect(x + 2, top + (h - top) * .5, hw - 4, 6); g.fillRect(x + hw / 2 - 3, top, 6, h - top);
-        g.fillStyle = '#8a3a2c'; g.beginPath(); g.moveTo(x - 6, top + 4); g.lineTo(x + hw / 2, top - 40 - r() * 30); g.lineTo(x + hw + 6, top + 4); g.closePath(); g.fill();
-        g.fillStyle = day ? '#5a6a7a' : '#f0b060'; for (const fy of [.25, .62]) for (const fx of [.22, .66]) g.fillRect(x + hw * fx, top + (h - top) * fy, hw * .14, (h - top) * .13); x += hw; }
-    }, [3, 1]);
-    wall.material.map = houses; wall.material.emissiveMap = houses;
+    wall.visible = false;
+    floor.material.map = art('town/norn/tex_cobble_square.webp', [27, 27]);
+    behind(day ? 'backdrops/norn_day_v02.jpg' : 'backdrops/norn_night_v02.jpg', 16, 15.6); // ノルンの町の奥（フィールドと同じ背景）
+    const H = ['house_home_2f', 'house_a_narrow', 'house_b_sideroof', 'house_c_stepgable', 'house_d_workshop', 'house_e_archway', 'house_f_corner'];
+    ring(9, 12, 13.5, -1.75, 1.75, 71, (x, z, r) => board('town/norn/' + H[Math.floor(r() * H.length)] + '.webp', 5.2 + r() * .8, x, z)); // 家はフィールドと同じく扉がキャラくらい
+    ring(4, 8, 9, -1.5, 1.5, 72, (x, z, r) => { const lamp = r() < .5; board(lamp ? 'town/norn/lamp_post.webp' : 'town/norn/barrels.webp', lamp ? 3.4 : 1.1, x, z); });
+  }
+  if (place === 'dungeon') { // ダンジョン：フィールドのダンジョンと同じ床・壁・天井の絵
+    floor.material.map = art('interiors/test-dungeon/dungeon_floor.webp', [7, 7]);
+    const wt = art('interiors/test-dungeon/dungeon_wall.webp', [10, 2]); wall.material.map = wt; wall.material.emissiveMap = wt; wall.material.emissiveIntensity = .25;
+    ceil.material.map = art('interiors/test-dungeon/dungeon_ceiling.webp', [6, 6]); ceil.material.emissiveMap = ceil.material.map;
+    ring(6, 10, 11, -1.6, 1.6, 81, (x, z) => board('interiors/test-dungeon/dungeon_pillar.webp', 5.5, x, z));
   }
 
   scene.add(new THREE.HemisphereLight(0x9aa6ff, 0x202030, 1.0));

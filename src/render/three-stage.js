@@ -2100,6 +2100,32 @@ export function createThreeStage(canvasEl, assets) {
       g.fillStyle = gr; g.beginPath(); g.moveTo(-len, 0); g.quadraticCurveTo(0, -wid, len, 0); g.quadraticCurveTo(0, wid, -len, 0); g.fill(); g.restore();
     }
   }));
+  // イベントが始まる所のしるし（2026-11-25 サニー「イベントが始まるところにはしるしを」）：金色の菱形（中に白い小さな菱形）を、町の人なら頭の上、物なら少し上に浮かべ、ゆっくり上下させる
+  const markTex = texOf(canvas(96, 128, (g, w, h) => {
+    const dia = (cx, cy, rx, ry) => { g.beginPath(); g.moveTo(cx, cy - ry); g.lineTo(cx + rx, cy); g.lineTo(cx, cy + ry); g.lineTo(cx - rx, cy); g.closePath(); };
+    const glow = g.createRadialGradient(w / 2, h * .42, 4, w / 2, h * .42, w * .5); glow.addColorStop(0, 'rgba(255,220,140,.55)'); glow.addColorStop(1, 'rgba(255,220,140,0)'); g.fillStyle = glow; g.fillRect(0, 0, w, h);
+    dia(w / 2, h * .42, w * .28, h * .3); const gr = g.createLinearGradient(0, h * .1, 0, h * .75); gr.addColorStop(0, '#fff1c4'); gr.addColorStop(.5, '#f0b84a'); gr.addColorStop(1, '#b07818'); g.fillStyle = gr; g.fill();
+    g.lineWidth = 4; g.strokeStyle = '#5a3a10'; g.stroke();
+    dia(w / 2, h * .42, w * .1, h * .11); g.fillStyle = '#fffdf2'; g.fill();
+    g.beginPath(); g.moveTo(w / 2, h * .74); g.lineTo(w / 2 + 6, h * .86); g.lineTo(w / 2 - 6, h * .86); g.closePath(); g.fillStyle = '#b07818'; g.fill(); // 下を指す小さな三角
+  }));
+  let markObjs = new Map(), markRoot = null;
+  function updateMarks(/** @type {{id:string,x:number,y:number,npc:boolean}[]} */ list, /** @type {number} */ now, show = true) {
+    if (markRoot !== root) { markObjs = new Map(); markRoot = root; }
+    if (!root || !map) return;
+    const want = new Set(list.map((m) => m.id));
+    for (const m of list) {
+      if (markObjs.has(m.id)) continue;
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: markTex, transparent: true, depthWrite: false, opacity: 0 })); sp.scale.set(.55, .73, 1);
+      const baseY = heightOf(map, m.x, m.y) * HU + (m.npc ? CHIBI_H + .55 : 1.6);
+      sp.position.set(m.x + .5, baseY, m.y + .55); root.add(sp); markObjs.set(m.id, { sp, baseY, fade: 0, ph: (m.x * 1.7 + m.y) % 6.28 });
+    }
+    for (const [id, o] of markObjs) {
+      const on = want.has(id); o.fade = Math.max(0, Math.min(1, o.fade + (on ? .05 : -.08)));
+      if (!on && o.fade <= 0) { root.remove(o.sp); o.sp.material.dispose(); markObjs.delete(id); continue; }
+      o.sp.visible = show; o.sp.material.opacity = o.fade; o.sp.position.y = o.baseY + Math.sin(now * 2.2 + o.ph) * .12;
+    }
+  }
   function updateSparkles(/** @type {{id:string,x:number,y:number}[]} */ list, /** @type {number} */ now, show = true) {
     if (sparkleRoot !== root) { sparkleObjs = new Map(); sparkleRoot = root; } // マップが変わると root ごと片づく
     if (!root || !map) return;
@@ -2420,7 +2446,8 @@ export function createThreeStage(canvasEl, assets) {
         else if (moving && a.motion !== 'walk') dir = st.gdir;
         place[a.id] = { x: tx, y: ty, dir, walk: a.motion === 'walk' || moving };
       });
-      updateSparkles(view.sparkles || [], now, !intro); // 本がひらく前（タイトルの机）は出さない（2026-11-25 サニー：机の上にきらきらが見えていた）
+      updateSparkles(view.sparkles || [], now, !intro);
+      updateMarks(view.marks || [], now, !intro && !(view.effect?.kind || '').startsWith('nook')); // イベントのしるし（本がひらく前と、建物に出入りするあいだは出さない） // 本がひらく前（タイトルの机）は出さない（2026-11-25 サニー：机の上にきらきらが見えていた）
       // キャラ（左右反転しない。いまは1方向の絵のまま）
       const seen = new Set();
       for (const a0 of view.actors) {
@@ -2470,8 +2497,11 @@ export function createThreeStage(canvasEl, assets) {
       for (const n of view.npcs || []) {
         const key = 'npc:' + n.id; seen.add(key);
         if (!actors[key]) {
-          let am = actorMesh(n.sprite);
-          if (!am) { // 絵（ドット絵）がまだ無い町の人は、コードで描いた仮の人影（モブのドット絵待ち）
+          let am = n.img ? null : actorMesh(n.sprite);
+          if (n.img) { // 演出の敵など（戦闘の敵のドット絵を1枚、立てた板で。2026-11-25 会話の演出）
+            const hgt = n.h || 2.2, t = new THREE.TextureLoader().load(n.img, (tt) => { mesh.scale.set(tt.image.width / tt.image.height, 1, 1); }); t.colorSpace = THREE.SRGBColorSpace; t.magFilter = t.minFilter = THREE.NearestFilter;
+            const mesh = boardMesh(t, hgt, hgt), hinge = new THREE.Group(); hinge.add(mesh); root.add(hinge); am = { hinge, mesh };
+          } else if (!am) { // 絵（ドット絵）がまだ無い町の人は、コードで描いた仮の人影（モブのドット絵待ち）
             const hgt = CHIBI_H, mesh = boardMesh(texOf(mobCanvas(n.tone || '#6a5a4a', false)), hgt / 2, hgt), hinge = new THREE.Group(); hinge.add(mesh); root.add(hinge); am = { hinge, mesh };
           }
           am.hinge.traverse((/** @type {any} */ o) => o.layers.set(1)); actors[key] = am;
@@ -2482,7 +2512,7 @@ export function createThreeStage(canvasEl, assets) {
         flatLay(am.hinge, k, n.y + 0.5, CHIBI_H, true, n.x);
         if (efk.startsWith('nook')) am.hinge.visible = false; // 建物に出入りするあいだ（ぼける・中に着く）は、町の人を消す。flatLay のあとで（前は flatLay が見えるに戻していた。2026-11-25 サニー「はいるとき町の人たちが見えちゃう」）
         if (am.sheet) {
-          const s = am.sheet.idle, f = sheetFrame(s.e, n.dir, now * 1000), img = s.t.image, m = am.mesh.material;
+          const s = n.moving && am.sheet.walk ? am.sheet.walk : am.sheet.idle, f = sheetFrame(s.e, n.dir, now * 1000), img = s.t.image, m = am.mesh.material; // 演出で歩いている人は歩く絵
           if (m.map !== s.t) { m.map = s.t; m.emissiveMap = s.t; am.mesh.customDepthMaterial.map = s.t; m.needsUpdate = true; }
           if (am.npcDir !== n.dir || am.npcCol !== f.sx) { am.npcDir = n.dir; am.npcCol = f.sx; s.t.repeat.set(f.sw / img.width, f.sh / img.height); s.t.offset.set(f.sx / img.width, 1 - (f.sy + f.sh) / img.height); }
           if (am.face) {

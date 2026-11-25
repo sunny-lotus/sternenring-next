@@ -38,6 +38,7 @@ export function createField(data) {
     /** @type {string|null} 逃げた・負けたばかりの見えている敵（1歩動くまで戦わない） */ foeRest: null,
     /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
+    /** @type {Record<string, any>} 会話の演出で出した人や敵（会話が終わると消える） */ cast: {},
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
     /** @type {Record<string, string>} 話しかけた町の人の向き（話すと主人公のほうを向く。マップが変わると元に戻る） */ npcFace: {},
   };
@@ -137,7 +138,22 @@ export function createField(data) {
     return true;
   }
   /** 言葉を閉じる（画面の係が呼ぶ） */
-  function closeMessage() { state.message = null; }
+  function closeMessage() { state.message = null; state.cast = {}; } // 会話が終わったら、演出で出した人や敵も消す
+  /**
+   * 会話の演出（2026-11-25 サニー「イベントが会話だけで見た目が何も変わらない、モブキャラとか敵とかを出して動かして」）：
+   * 会話の行の act を、その行を出すときに画面の係が渡す。{spawn: id, sprite|img, h, x, y, dir}／{move: id, to: [x, y], ms}／{face: id, dir}／{hide: id}。
+   * 出した人や敵は飾り（ぶつからない・話しかけられない）。会話が終わると消える
+   * @param {any[]} acts
+   */
+  function sceneAct(acts) {
+    for (const a of acts || []) {
+      if (a.spawn) state.cast[a.spawn] = { id: a.spawn, sprite: a.sprite, img: a.img, h: a.h, tone: a.tone, fx: a.x, fy: a.y, tx: a.x, ty: a.y, t: 1, dur: 0, dir: a.dir || 'down' };
+      const c = state.cast[a.move || a.face || a.hide]; if (!c) continue;
+      if (a.hide) { delete state.cast[a.hide]; continue; }
+      if (a.face) c.dir = a.dir;
+      if (a.move) { const k = Math.min(1, c.t); c.fx = c.fx + (c.tx - c.fx) * k; c.fy = c.fy + (c.ty - c.fy) * k; c.tx = a.to[0]; c.ty = a.to[1]; c.t = 0; c.dur = Math.max(1, a.ms || 1200); const dx = c.tx - c.fx, dy = c.ty - c.fy; c.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'); }
+    }
+  }
 
   const player = () => state.actors[0];
   const moving = () => player().from !== null;
@@ -216,6 +232,7 @@ export function createField(data) {
    * @param {import('./input.js').InputState} input
    */
   function update(dt, input) {
+    for (const c of Object.values(state.cast)) if (c.t < 1) c.t = Math.min(1, c.t + dt / c.dur); // 演出の人や敵は、会話の間も動く
     if (state.battle) { input.clearQueue(); return; } // 戦闘中はフィールドを止める
     if (state.message) { input.clearQueue(); input.takeAction?.(); return; } // 言葉が出ているあいだも止める（閉じるのは画面の係：closeMessage）
     if (state.leaving) { // 出入口の演出の「離れる」あいだ
@@ -247,6 +264,17 @@ export function createField(data) {
     if (!tryStep(dir, carry)) for (const a of state.actors) a.animMs = 0;
   }
 
+  /**
+   * イベントが始まる所（しるしを出す所）：調べる出来事・町の人のうち、いま選ばれるページに mark: true があるもの。
+   * 見終わって旗が立つと、次のページ（mark なし）になって消える。party のあるページは、その仲間がそろっているときだけ
+   */
+  function eventMarks() {
+    const rec = data.record, m = data.maps[state.mapId]; if (!rec) return [];
+    const has = (/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((a) => a.id === id));
+    const out = [];
+    for (const e of [...(m.events || []), ...(m.npcs || []).filter(npcShown)]) { if (!e.pages) continue; const pg = pickPage(rec, e.pages.filter(has)); if (pg?.mark) out.push({ id: e.id, x: e.x, y: e.y, npc: !!e.sprite }); }
+    return out;
+  }
   /** 描画用の読み取り専用の見え方（補間した位置） */
   function view() {
     return {
@@ -263,7 +291,9 @@ export function createField(data) {
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       // きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：出来事に sparkle があり、その旗がまだ立っていない所
       sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
-      npcs: (data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
+      marks: eventMarks(), // イベントが始まる所のしるし（2026-11-25 サニー「イベントが始まるところにはしるしを」）
+      npcs: [...(data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
+        ...Object.values(state.cast).map((c) => ({ id: 'cast:' + c.id, sprite: c.sprite, img: c.img, h: c.h, tone: c.tone, x: c.fx + (c.tx - c.fx) * c.t, y: c.fy + (c.ty - c.fy) * c.t, dir: c.dir, moving: c.t < 1 }))], // 演出の人や敵（会話のあいだだけ）
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / curStep) : 1;
         const fx = a.from ? a.from.x : a.x, fy = a.from ? a.from.y : a.y;
@@ -302,7 +332,7 @@ export function createField(data) {
   };
 
   return {
-    state, update, view, endBattle, setParty, closeMessage, dev, transitionMs,
+    state, update, view, endBattle, setParty, closeMessage, sceneAct, dev, transitionMs,
     get stepMs() { return stepMs; },
     /** 歩く速さの倍率（1＝ふつう。開発用。2026-11-23 作者「急ぎたいように」） @param {number} k */
     /** 確かめ用のワープ（?warp=マップ:x,y[,向き]。2026-11-23 作者「テストの時ワープとか使ったら？」）。行けないマスなら何もしない @param {string} mapId @param {number} x @param {number} y @param {string} [dir] */

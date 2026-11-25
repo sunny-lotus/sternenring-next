@@ -107,6 +107,8 @@
   #novel .seat[data-side="right"] { left: 50%; margin-left: clamp(-80px, 14vw - 90px, 130px); }
   #novel .seat.dim { filter: brightness(.5) saturate(.75); transform: translateY(1.5%) scale(.96); }
   #novel .seat.empty { opacity: 0; }
+  #novel.away .seat { opacity: 0; transform: translateY(8%); } /* 地の文・演出の行は立ち絵を下げて、町の様子を見せる（2026-11-25） */
+  #novel.away { background: none; }
   #novel .seat img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }
   #novel .seat img.body { inset: 0; width: 100%; height: 100%; }
   @keyframes novel-in { from { opacity: 0; } to { opacity: 1; } }

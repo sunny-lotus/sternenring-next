@@ -12,7 +12,7 @@
 
 export const MEMBER_NAME = Object.freeze({ nacht: 'ナハト', volt: 'ヴォルト', flare: 'フレア', serena: 'セレナ', licht: 'リヒト' });
 
-/** @typedef {{ who?: string, text: string, member?: string, actor?: string, face?: string }} TalkLine */
+/** @typedef {{ who?: string, text: string, member?: string, actor?: string, face?: string, act?: any[] }} TalkLine */
 
 /**
  * @param {any} raw dialogue.lines の値
@@ -45,6 +45,7 @@ export function resolveTalk(raw, o = {}) {
     else line = x.who ? { who: x.who, text: x.text } : { text: x.text };
     if (x.actor) line.actor = x.actor;
     if (x.face) line.face = x.face;
+    if (Array.isArray(x.act)) line.act = x.act; // 演出：この行を出すときに、人や敵を出して動かす（field.sceneAct）
     out.push(line);
   }
   return out;

@@ -44,7 +44,7 @@ for (const [file, id, key] of PLACE) {
   if (!ev) throw new Error(`${file} に ${id} が無い`);
   const flag = key; // 旗の名前＝会話の名前
   ev.pages = ev.pages.filter((p) => p.dialogue !== key);
-  ev.pages.unshift({ when: { flags: { [flag]: false } }, dialogue: key, set: { flags: { [flag]: true } }, party: ['nacht', 'volt'] });
+  ev.pages.unshift({ when: { flags: { [flag]: false } }, dialogue: key, set: { flags: { [flag]: true } }, party: ['nacht', 'volt'], mark: true }); // mark：しるしを出す（まだ見ていない立ち絵の会話）
   write(file, m);
 }
 console.log(`立ち絵の会話 ${Object.keys(SCENES).length} 本`);
