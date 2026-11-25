@@ -7452,6 +7452,20 @@
       "status": "provisional",
       "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
     },
+    "map.erde.witch-shelf": {
+      "lines": [
+        "（棚に、薬草を詰めた小さな瓶が並んでいる。）"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.erde.witch-pot": {
+      "lines": [
+        "（鍋から、草の香りがかすかにする。）"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
     "life.nighttown.square-01.normal-1": {
       "lines": [
         {

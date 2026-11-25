@@ -301,12 +301,42 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   M.put('back', 'witch-house', 13, 15, 9, 4, 9, 0.08, true, { showH: 9 }); // 魔女の家（おとぎ話のように大きく。絵は仮）
   // 庭：家の前の小道（16〜18列）はあけて、両側に花壇・植木鉢、ベンチ、井戸、柵、小さな木
   for (const [a, x, y, w, h, s] of [['flowerbed', 9, 20, 3, 1, 0.9], ['flowerbed', 23, 20, 3, 1, 0.9], ['flowerbed', 9, 23, 3, 1, 0.9], ['flowerbed', 23, 23, 3, 1, 0.9], ['door-pots', 13, 19, 2, 1, 1.1], ['door-pots', 20, 19, 2, 1, 1.1], ['bench', 12, 25, 2, 1, 1.2], ['well', 24, 25, 3, 2, 3.6], ['planter', 6, 21, 2, 1, 1.2], ['planter', 27, 21, 2, 1, 1.2], ['fence', 5, 27, 5, 1, 1.5], ['fence', 25, 27, 5, 1, 1.5], ['tree-small', 7, 17, 1, 1, 2.8], ['tree-small', 27, 17, 1, 1, 2.8]]) M.put('mid', a, x, y, w, h, s, 0.03);
-  M.note('witch-house-door', 17, 19, 'map.erde.witch-house');
+  M.exit('witch-door', 17, 18, 1, 'up', 'nook-in', { map: 'erde-witch-house', exit: 'door', arrive: { x: 5, y: 6, dir: 'up' } }); M.items.back.find((it) => it.asset === 'placeholder:witch-house').doorExit = 'witch-door'; // 扉から入れる（2026-11-26 サニー「いいよ作って試しに」）
   M.put('mid', 'herbs', 22, 18, 3, 1, 1.6, 0.03, true, { showH: 1.6 }); M.put('mid', 'firewood', 10, 18, 2, 1, 0.8, 0.03, true, { showH: 0.8 }); // 干した薬草・薪（美術・演出室 2026-11-26）
   treasures(M, [[27, 8, 'fo-sw'], [5, 25, 'fo-ne']]);
   M.forest(0.5, (x, y) => onRoad(M, x, y) || nearTreasure(M, x, y) || (x >= 5 && x <= 29 && y >= 14 && y <= 28), 2);
   M.exit('north', 15, 0, 3, 'up', 'dive', { map: 'erde-forest-fork', exit: 'south', arrive: { x: 16, y: 24, dir: 'up' } });
   finish(M, { x: 17, y: 23, dir: 'up' }, { stageOrbsNote: '森の奥：苔と木もれ日（仮）', randomEncounters: FOREST_RE });
+}
+// ---------- 森の奥の家の中（試し。2026-11-26 サニー「いいよ作って試しに」）：民家の内装の絵で、薬草の家らしく。住む人・持ち物・間取りは物語に関わるので仮（provisional）。正式な中は作者・シナリオ室・美術室で ----------
+{
+  const home = read('norn-house-plaza-02'), W = 11, H = 8;
+  const C = Array.from({ length: H }, (_, y) => Array.from({ length: W }, (_, x) => (y === 0 || x === 0 || x === W - 1 || y === H - 1 ? '#' : '.')));
+  C[H - 1][5] = 'D';
+  const block = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) C[j][i] = '#'; };
+  const back = [], mid = [];
+  back.push({ asset: 'placeholder:rug', x: 3, y: 3, w: 5, h: 3, standH: 0.05 });
+  for (const x of [1, 4, 7]) back.push({ asset: 'placeholder:home-herbs', x, y: 1, w: 2, h: 1, standH: 0.7 }); // 天井いっぱいの干した薬草
+  back.push({ asset: 'tiles.pipoya-town', region: 'hearth', x: 7, y: 1, w: 3, h: 2, zOffset: 0.1 }); block(7, 1, 3, 2);
+  mid.push({ asset: 'placeholder:home-pot', x: 6, y: 2, w: 1, h: 1, standH: 1.6 }); block(6, 2, 1, 1); // かまどの鍋
+  mid.push({ asset: 'placeholder:home-cupboard', x: 1, y: 1, w: 1, h: 1, standH: 2.4 }); block(1, 1, 1, 1);
+  mid.push({ asset: 'placeholder:home-cupboard', x: 2, y: 1, w: 1, h: 1, standH: 2.4 }); block(2, 1, 1, 1); // 瓶の棚が2つ
+  mid.push({ asset: 'placeholder:bed', x: 1, y: 4, w: 2, h: 2, standH: 1 }); block(1, 4, 2, 2);
+  mid.push({ asset: 'tiles.pipoya-town', region: 'table', x: 5, y: 3, w: 2, h: 2 }); block(5, 3, 2, 2);
+  mid.push({ asset: 'placeholder:home-chest', x: 9, y: 4, w: 1, h: 1, standH: 0.6 }); block(9, 4, 1, 1);
+  mid.push({ asset: 'placeholder:home-washtub', x: 9, y: 5, w: 1, h: 1, standH: 0.8 }); block(9, 5, 1, 1);
+  const m = {
+    format: 'sternenring-next-map', version: 1, id: 'erde-witch-house', title: 'エルデ森林・森の奥の家（試し）', kind: 'interior', footsteps: 'wood', status: 'provisional',
+    provenance: '2026-11-26 作者「いいよ作って試しに」で tools/gen-norn-town.cjs が作った試しの部屋。民家の内装の絵を借りた。フレアの家の中・持ち物・住む人は物語に関わるので未定（作者・シナリオ室・美術室で決める）。',
+    width: W, height: H, tileSize: 32, legend: { '.': 'floor', '#': 'wall', D: 'door' }, collision: C.map((r) => r.join('')),
+    ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
+    exits: [{ id: 'door', x: 5, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: 'erde-deep', exit: 'witch-door', arrive: { x: 17, y: 19, dir: 'down' } } }],
+    spawns: { default: { x: 5, y: H - 2, dir: 'up' } },
+    events: [{ id: 'witch-shelf', x: 1, y: 1, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-shelf' }] }, { id: 'witch-pot', x: 6, y: 2, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-pot' }] }],
+    stage: { look: 'home', camera: home.stage.camera, textures: home.stage.textures, backWindows: false, orbs: { count: 18, alpha: 0.7, color: [0.75, 1, 0.65], size: 0.8, note: '森の奥の家：薬草の香りのような、緑の光の粒（仮）' },
+      layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
+  };
+  write(m);
 }
 // ---------- 小さな村（村の名前・距離・既存の村との関係は未定。人は置かない） ----------
 {
@@ -481,7 +511,7 @@ function district(id, title, seed, opt) {
   }
 }
 // ---------- 一覧・曲・言葉 ----------
-const NEW = ['norn-kingsroad-wall-b', 'norn-kingsroad-wall-c', 'norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village', 'norn-ne', 'norn-nw', 'norn-se'];
+const NEW = ['erde-witch-house', 'norn-kingsroad-wall-b', 'norn-kingsroad-wall-c', 'norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village', 'norn-ne', 'norn-nw', 'norn-se'];
 {
   const f = path.join(__dirname, '..', 'data', 'world.json'), w = JSON.parse(fs.readFileSync(f, 'utf8'));
   for (const id of NEW) if (!w.maps.includes(id)) w.maps.push(id);
@@ -501,6 +531,8 @@ const NEW = ['norn-kingsroad-wall-b', 'norn-kingsroad-wall-c', 'norn-square', 'n
     [SOUTH_NOTE]: P(['（ノルンの南門。）', '〔開発中：南門の先は、まだ決まっていません〕']),
     [ROAD_NOTE]: P(['（王道は、南へ続いている。）', '〔開発中：この先はまだ作っていません〕']),
     'map.norn.gate-gastel': P(['（ガステルへの大門。）', '〔開発中：この先はまだ作っていません〕']),
+    'map.erde.witch-shelf': P(['（棚に、薬草を詰めた小さな瓶が並んでいる。）']),
+    'map.erde.witch-pot': P(['（鍋から、草の香りがかすかにする。）']),
     'map.erde.signpost': P(['（古い道しるべ。文字は書いていない。）', '（板の先は、西と南を指している。）']),
     'map.norn.signpost': P(['（道しるべ。文字は書いていない。）', '（板の先は、北と南を指している。）']),
     'map.erde.witch-house': P(['（森の奥の家。戸は閉まっている。）', '〔開発中：家の外観と中は、まだ仮です〕']),

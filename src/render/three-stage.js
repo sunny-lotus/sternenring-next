@@ -1643,7 +1643,7 @@ export function createThreeStage(canvasEl, assets) {
     const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(roundBox(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
     // 民家（look: home）の家具は、美術・演出室の内装_民家_v01 の切り抜きを立てる（2026-11-25）。絵が無ければ下のいつもの形
     if (map.stage?.look === 'home') {
-      const HK = { bed: ['bedHome', 1.15], 'home-cupboard': ['cupboard', 2.4], 'home-herbs': ['herbs', 0.75], 'home-chest': ['chest', 0.6], 'home-washtub': ['washTub', 0.8] }[name] ?? (it.region === 'table' ? ['tableHome', 1.3] : null);
+      const HK = { bed: ['bedHome', 1.15], 'home-cupboard': ['cupboard', 2.4], 'home-herbs': ['herbs', 0.75], 'home-chest': ['chest', 0.6], 'home-washtub': ['washTub', 0.8], 'home-pot': ['pot', 1.6] }[name] ?? (it.region === 'table' ? ['tableHome', 1.3] : null);
       const cp = HK && cutPlane(HK[0], HK[1]);
       if (cp) {
         if (name === 'home-herbs') cp.position.set(0, 2.55, -d + 0.08); // 奥の壁に、目の高さより上に吊るす
