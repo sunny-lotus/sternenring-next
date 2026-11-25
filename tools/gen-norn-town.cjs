@@ -69,7 +69,8 @@ function base(id, title, W, H, kind, seed) {
     for (const { x, y } of cells) {
       if (M.items.back.length + M.items.mid.length >= max || g[y][x] !== '.') continue;
       const r = M.R(), sb = south * (y / H);
-      if (r < p) { const s = 4.4 + M.R() * 1.4; M.put('back', 'pine', x, y, 1, 1, Math.round(s * 10) / 10, 0, true, { showH: Math.round(s * 10) / 10 }); }
+      const front = M.roads.some((q) => x >= q.x && x < q.x + q.w && y >= q.y + q.h && y < q.y + q.h + 4); // 道の手前（カメラ側）4マス：高い木はキャラを隠すので、やぶ・岩だけ（2026-11-26 サニーと画面で確認）
+      if (r < p && !front) { const s = 4.4 + M.R() * 1.4; M.put('back', 'pine', x, y, 1, 1, Math.round(s * 10) / 10, 0, true, { showH: Math.round(s * 10) / 10 }); }
       else if (r < p + 0.12 + sb * 0.12) { const bush = M.R() < 0.65; M.put('mid', bush ? 'bush' : 'rock', x, y, 1, 1, bush ? 1 : 0.8, 0.02, true, { showH: bush ? 1 : 0.8 }); }
     }
   };
