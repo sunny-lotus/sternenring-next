@@ -2268,7 +2268,9 @@ export function createThreeStage(canvasEl, assets) {
       lastLoad = { id: map.id, parts: ['絵', '町', '敵', '床', '板', '印'].map((k, i) => k + Math.round(pt[i + 1] - pt[i])).join(' '), t0: pt[0] }; // ?perf=1 の画面の表示に（2026-11-24 作者「銀鹿亭の中の部屋に入るとき」重い：作者の画面で何にかかっているか見る）
       const W = map.width, H = map.height, ext = Math.max(W, H) * 0.75;
       Object.assign(key.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far: 120 }); key.shadow.camera.updateProjectionMatrix();
-      key.position.set(W / 2 - 14, 26, H / 2 + 16); key.target.position.set(W / 2, 0, H / 2);
+      // 外では、日の光を西から（ほぼ真横から少し南）当てて、影と光のしまが通り（東西）に沿うように（2026-11-26 サニー「この白い線は通りに沿ってほしい、それかいらない」：前は左手前から斜めに当てて、通りを斜めに横切るしまが出ていた）
+      if (interior) key.position.set(W / 2 - 14, 26, H / 2 + 16); else key.position.set(W / 2 - 30, 26, H / 2 + 2);
+      key.target.position.set(W / 2, 0, H / 2);
       const tavern = interior && map.stage?.look !== 'dungeon' && map.stage?.look !== 'home', homeLook = interior && map.stage?.look === 'home'; // 建物の中は、部屋全体を照らす光を弱めて、灯りのまわりだけ暖かく（暗がりを作る。2026-11-23 作者「銀鹿亭なんだかまだチープ」）
       key.intensity = tavern ? 0.2 : interior ? 0.5 : DAY ? 2.6 : 1.6;
       key.color.set(DAY && !interior ? 0xfff8ec : 0xfff0d8);
