@@ -609,3 +609,26 @@ test('会話で仲間が話し手のほうを向く（2026-11-26 学びノート
   if (dx || dy) assert.equal(f1.dir, want);
   const before = lead.dir; field.sceneAct([{ look: f1.id }]); assert.equal(lead.dir, before); // 主人公の向きは変えない（調べる向きが変わらないように）
 });
+
+test('歩いている人・座っている人（2026-11-26 サニー「ぶつかり判定、話もできるように」）：話せる人のマスは通れず、調べると話す。歩く人は話すあいだ立ち止まってこちらを向く', async () => {
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const { createRecord } = await import('../src/core/record.js');
+  const d = loadAll({ crowd: true }), record = createRecord();
+  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party: d.ledger.party, record });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  assert.ok(Object.values(d.maps).some((m) => (m.walkers || []).every((w) => w.pages)));
+  // 歩く人：止まっている時間（端での wait）に前へ回りこんで話す
+  assert.ok(field.warp('norn-square', 20, 20, 'up'));
+  const w0 = field.view().npcs.find((n) => n.id.startsWith('walk:'));
+  assert.ok(w0 && w0.pages, '広場に話せる歩く人がいる');
+  // 座っている人：家の中の食卓の住人
+  const home = Object.values(d.maps).find((m) => (m.stage?.npcs || []).some((n) => n.pose === 'sit' && n.pages && m.id.startsWith('norn-house-')));
+  const s = home.stage.npcs.find((n) => n.pose === 'sit' && n.pages), sx = Math.floor(s.x), sy = Math.floor(s.z);
+  const q = (await import('../src/core/map.js')).mapQuery(home, d.collision);
+  const side = [[0, 1, 'up'], [1, 0, 'left'], [-1, 0, 'right'], [0, -1, 'down']].find(([dx, dy]) => q.passable(sx + dx, sy + dy));
+  assert.ok(side, '座っている人のとなりに立てる');
+  assert.ok(field.warp(home.id, sx + side[0], sy + side[1], side[2]));
+  const before = field.state.actors[0]; tap(field, input, side[2]); assert.deepEqual([field.state.actors[0].x, field.state.actors[0].y], [sx + side[0], sy + side[1]], 'ぶつかって進めない');
+  input.pressAction(); run(field, input, 20); assert.equal(field.state.message?.dialogue, 'life.seated.home'); field.closeMessage();
+});

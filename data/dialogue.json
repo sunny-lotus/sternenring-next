@@ -7829,6 +7829,84 @@
       ],
       "status": "provisional",
       "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.walker.festival": {
+      "pick": [
+        [
+          {
+            "who": "町の人",
+            "text": "祭りの日は、歩くだけで楽しいね。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "おっと、ごめんよ。人が多くて前が見えなくてね。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "あっちの屋台、もう行ったかい？"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "のんびり見て回るのが、いちばんさ。"
+          }
+        ]
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。シナリオ室の名簿・言葉に差しかえる"
+    },
+    "life.seated.home": {
+      "pick": [
+        [
+          {
+            "who": "町の人",
+            "text": "いらっしゃい。祭りの日でも、うちはいつもどおりさ。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "ひと休みしてるんだ。外はにぎやかだからね。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "温かいお茶が、いちばんのごちそうだよ。"
+          }
+        ]
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。シナリオ室の名簿・言葉に差しかえる"
+    },
+    "life.seated.inn": {
+      "pick": [
+        [
+          {
+            "who": "町の人",
+            "text": "ここの食事は、旅の疲れが取れるよ。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "明日の朝には発つんだ。今夜はゆっくりするよ。"
+          }
+        ],
+        [
+          {
+            "who": "町の人",
+            "text": "祭りの音が、ここまで聞こえてくるね。"
+          }
+        ]
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。シナリオ室の名簿・言葉に差しかえる"
     }
   },
   "lifeNote": "2026-11-24 作者「イベントや会話、適当に沢山作っといて」：life. で始まる文と inn.hearth・inn.counter は tools/gen-town-life.cjs が入れた仮の文（status: provisional）。名前・役目・設定の無い町の人だけ。正式な台詞は世界観・シナリオ室の確定で差しかえる",

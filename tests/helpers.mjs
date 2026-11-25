@@ -8,11 +8,13 @@ import { createField } from '../src/core/field.js';
 export const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const readJson = (p) => JSON.parse(readFileSync(join(root, p), 'utf8'));
 
-export function loadAll() {
+// crowd：歩いている人・座っている人と話せる・ぶつかる（2026-11-26）を入れるか。決まった道を歩くテストでは、時計で動く人にぶつからないよう外す（話せない＝ぶつからない飾りに戻す）
+export function loadAll({ crowd = false } = {}) {
   const world = readJson('data/world.json');
   const collision = readJson('data/collision.json');
   const ledger = readJson('data/assets.json');
   const maps = Object.fromEntries(world.maps.map((id) => [id, readJson(`data/maps/${id}.json`)]));
+  if (!crowd) for (const m of Object.values(maps)) { for (const w of m.walkers || []) delete w.pages; for (const n of m.stage?.npcs || []) delete n.pages; }
   const regions = {};
   for (const a of ledger.assets) if (a.regionsPath) regions[a.id] = readJson(a.regionsPath).layout;
   return { world, collision, ledger, maps, regions };

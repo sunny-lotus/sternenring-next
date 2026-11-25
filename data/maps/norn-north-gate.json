@@ -495,7 +495,12 @@
         ]
       ],
       "speed": 0.6,
-      "wait": 3000
+      "wait": 3000,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "npcs": [

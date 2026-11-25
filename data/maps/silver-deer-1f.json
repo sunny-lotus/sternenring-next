@@ -625,7 +625,12 @@
         "facing": "right",
         "tone": "#6a4a3a",
         "sprite": "mob02",
-        "borrowed": "serena"
+        "borrowed": "serena",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 17.45,
@@ -634,7 +639,12 @@
         "facing": "left",
         "tone": "#4a5a6a",
         "sprite": "mob04",
-        "borrowed": "licht"
+        "borrowed": "licht",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 6.45,
@@ -643,7 +653,12 @@
         "facing": "left",
         "tone": "#5a6a4a",
         "sprite": "mob03",
-        "borrowed": "flare"
+        "borrowed": "flare",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 13.55,
@@ -652,7 +667,12 @@
         "facing": "right",
         "tone": "#7a5a4a",
         "sprite": "mob01",
-        "borrowed": "nacht"
+        "borrowed": "nacht",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 4.2,
@@ -679,7 +699,12 @@
         "facing": "front",
         "sprite": "mob02",
         "seatTest": true,
-        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 15.5,
@@ -688,7 +713,12 @@
         "facing": "back",
         "sprite": "mob01",
         "seatTest": true,
-        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 15.5,
@@ -697,7 +727,12 @@
         "facing": "front",
         "sprite": "mob03",
         "seatTest": true,
-        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       },
       {
         "x": 4.5,
@@ -706,7 +741,12 @@
         "facing": "back",
         "sprite": "mob04",
         "seatTest": true,
-        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）"
+        "note": "2026-11-25 作者「全部やっておいて」：正面・背中向きの座り姿を見るための仮の客（status provisional）",
+        "pages": [
+          {
+            "dialogue": "life.seated.inn"
+          }
+        ]
       }
     ],
     "npcsNote": "2026-11-24 作者「座るの、椅子の上にしないとわからないよ、あと横向きいすをおいてやってみて」：座る客を卓の横はしの横向きの椅子に（仮）"

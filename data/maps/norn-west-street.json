@@ -512,7 +512,12 @@
           9
         ]
       ],
-      "speed": 0.8
+      "speed": 0.8,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "npcs": [

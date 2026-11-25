@@ -1577,7 +1577,12 @@
           8
         ]
       ],
-      "speed": 1.1
+      "speed": 1.1,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "st-b",
@@ -1592,7 +1597,12 @@
           9
         ]
       ],
-      "speed": 0.9
+      "speed": 0.9,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "st-c",
@@ -1612,7 +1622,12 @@
         ]
       ],
       "speed": 1.4,
-      "wait": 600
+      "wait": 600,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "st-d",
@@ -1628,7 +1643,12 @@
         ]
       ],
       "speed": 0.8,
-      "wait": 2400
+      "wait": 2400,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "storyLock": {

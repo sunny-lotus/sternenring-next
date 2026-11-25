@@ -807,7 +807,12 @@
           13
         ]
       ],
-      "speed": 0.9
+      "speed": 0.9,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "sq-b",
@@ -822,7 +827,12 @@
           17
         ]
       ],
-      "speed": 1
+      "speed": 1,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "sq-c",
@@ -838,7 +848,12 @@
         ]
       ],
       "speed": 0.8,
-      "wait": 1800
+      "wait": 1800,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "sq-d",
@@ -853,7 +868,12 @@
           18
         ]
       ],
-      "speed": 1.1
+      "speed": 1.1,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "npcs": [

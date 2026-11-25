@@ -325,7 +325,12 @@
         "facing": "left",
         "sprite": "mob03",
         "life": true,
-        "note": "2026-11-25 サニー「民家でも座らせて」：食卓に座る住人（仮・status provisional）"
+        "note": "2026-11-25 サニー「民家でも座らせて」：食卓に座る住人（仮・status provisional）",
+        "pages": [
+          {
+            "dialogue": "life.seated.home"
+          }
+        ]
       }
     ]
   }

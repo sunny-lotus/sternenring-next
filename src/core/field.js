@@ -48,6 +48,10 @@ export function createField(data) {
   /** @param {number} x @param {number} y */
   // hideWhen：その旗がそろうと、その町の人はいなくなる（2026-11-25 ノルン導入の試作：事件のあと店の手伝いがいない）
   const npcShown = (/** @type {any} */ n) => !n.hideWhen || !Object.entries(n.hideWhen.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v);
+  // 歩いている人・座っている人（2026-11-26 サニー「あるいている、座っている人にもぶつかり判定、話もできるように」）：
+  // 話せる（pages のある）歩く人（walkers）はいまの位置のマス、座っている人（stage.npcs の pose: sit）は座っているマスを通れない。向かいあって調べると話す（話すあいだ歩く人は立ち止まり、こちらを向く）
+  const walkerNear = (/** @type {number} */ x, /** @type {number} */ y) => walkersNow().find((w) => w.pages && Math.abs(w.x - x) < 0.75 && Math.abs(w.y - y) < 0.75) || null;
+  const seatedAt = (/** @type {number} */ x, /** @type {number} */ y) => (data.maps[state.mapId].stage?.npcs || []).find((/** @type {any} */ n) => n.pose === 'sit' && n.pages && /^mob/.test(n.sprite || '') && Math.floor(n.x) === x && Math.floor(n.y ?? n.z) === y) || null;
   const npcAt = (x, y) => (data.maps[state.mapId].npcs || []).find((/** @type {any} */ n) => n.x === x && n.y === y && npcShown(n)) || null;
   const OPP = /** @type {Record<string,string>} */ ({ up: 'down', down: 'up', left: 'right', right: 'left' });
   /**
@@ -142,8 +146,8 @@ export function createField(data) {
   function examine() {
     const p = player(), [dx, dy] = DIR_VEC[p.dir] || [0, 0], rec = data.record;
     const list = (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => (e.trigger || 'examine') === 'examine');
-    const npc = npcAt(p.x + dx, p.y + dy);
-    const ev = (npc && npc.pages ? { id: 'npc:' + npc.id, pages: npc.pages } : null) || list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
+    const npc = npcAt(p.x + dx, p.y + dy), wk = npc ? null : walkerNear(p.x + dx, p.y + dy), st = npc || wk ? null : seatedAt(p.x + dx, p.y + dy);
+    const ev = (npc && npc.pages ? { id: 'npc:' + npc.id, pages: npc.pages } : null) || (wk && wk.pages ? { id: wk.id, pages: wk.pages } : null) || (st && st.pages ? { id: 'seat:' + Math.floor(st.x) + ',' + Math.floor(st.y ?? st.z), pages: st.pages } : null) || list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
     if (!ev || !rec) return false;
     // party のあるページ（立ち絵の会話など）は、その仲間がみんな隊列にいるときだけ
     const page = pickPage(rec, ev.pages.filter((/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((/** @type {any} */ a) => a.id === id))));
@@ -202,6 +206,7 @@ export function createField(data) {
     const foe = lock ? null : encounterAt(nx, ny); // 物語のあいだは戦闘にならない
     if (foe) { state.battle = { id: foe.id, battle: foe.battle, mapId: state.mapId }; return false; }
     if (npcAt(nx, ny)) return false; // 町の人のマスは通れない
+    if (walkerNear(nx, ny) || seatedAt(nx, ny)) return false; // 歩いている人・座っている人にもぶつかる
     if (closedGateAt(nx, ny)) return false; // 閉じている仕掛けの扉
     if (!queries[state.mapId].passable(nx, ny)) return false;
     if (lock && queries[state.mapId].exitAt(nx, ny)) { if (lock.ph.exit) state.message = { event: 'story-lock', dialogue: lock.ph.exit, notes: [] }; return false; } // 物語のあいだは、ほかの場所へ行かない
@@ -269,7 +274,7 @@ export function createField(data) {
   function update(dt, input) {
     for (const c of Object.values(state.cast)) if (c.t < 1) c.t = Math.min(1, c.t + dt / c.dur);
     for (const [k, e] of Object.entries(state.emotes)) { e.t += dt; if (e.t >= e.dur) delete state.emotes[k]; } // 吹き出しは時間で消える // 演出の人や敵は、会話の間も動く
-    state.clock += dt; // 歩き回る町の人（walkers）の時計
+    if (!state.message) state.clock += dt; // 歩き回る町の人（walkers）の時計。話しているあいだは止める（話し相手が歩き去らないように）
     if (state.battle) { input.clearQueue(); return; } // 戦闘中はフィールドを止める
     if (state.message) { input.clearQueue(); input.takeAction?.(); return; } // 言葉が出ているあいだも止める（閉じるのは画面の係：closeMessage）
     if (state.leaving) { // 出入口の演出の「離れる」あいだ
@@ -318,7 +323,9 @@ export function createField(data) {
       let d = still ? (back ? L : 0) : back ? L - t * sp : t * sp, k = 0; while (k < seg.length - 1 && d > seg[k]) { d -= seg[k]; k++; }
       const a = P[k], b = P[k + 1] || a, u = seg[k] ? Math.min(1, d / seg[k]) : 0, dx = (b[0] - a[0]) * (back ? -1 : 1), dy = (b[1] - a[1]) * (back ? -1 : 1);
       const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
-      return { id: 'walk:' + (w.id || i), sprite: w.sprite, tone: w.tone, x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, dir: still ? 'down' : dir, moving: !still };
+      const id = 'walk:' + (w.id || i), talking = state.message?.event === id, p0 = state.actors[0], wx = a[0] + (b[0] - a[0]) * u, wy = a[1] + (b[1] - a[1]) * u;
+      const face = talking ? (Math.abs(p0.x - wx) >= Math.abs(p0.y - wy) ? (p0.x > wx ? 'right' : 'left') : (p0.y > wy ? 'down' : 'up')) : null; // 話しているあいだは、こちらを向いて立ち止まる
+      return { id, sprite: w.sprite, tone: w.tone, x: wx, y: wy, dir: face || (still ? 'down' : dir), moving: !still && !talking, pages: w.pages };
     });
   }
   function eventMarks() {

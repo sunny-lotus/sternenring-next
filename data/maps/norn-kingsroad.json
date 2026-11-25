@@ -573,7 +573,12 @@
         ]
       ],
       "speed": 0.7,
-      "wait": 2200
+      "wait": 2200,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "kr-b",
@@ -588,7 +593,12 @@
           9
         ]
       ],
-      "speed": 0.9
+      "speed": 0.9,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "npcs": [

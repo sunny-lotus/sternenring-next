@@ -361,6 +361,25 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   }
   for (const id of ids) write(maps[id]);
 }
+// ---------- 歩いている人・座っている人と話せるように（2026-11-26 サニー「あるいている、座っている人にもぶつかり判定、話もできるように」） ----------
+// 言葉は Claude の仮（provisional）。町の人ひとりひとりの名前・性格・話し方はシナリオ室に依頼中（依頼_町の人の名前と性格_シナリオ室.md）。届いたら一人ずつの言葉に差しかえる
+{
+  const P = (pick) => ({ pick: pick.map((t) => [{ who: '町の人', text: t }]), status: 'provisional', placeholder: 'Claudeの仮。シナリオ室の名簿・言葉に差しかえる' });
+  const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'dialogue.json'), 'utf8'));
+  Object.assign(D.lines, {
+    'life.walker.festival': P(['祭りの日は、歩くだけで楽しいね。', 'おっと、ごめんよ。人が多くて前が見えなくてね。', 'あっちの屋台、もう行ったかい？', 'のんびり見て回るのが、いちばんさ。']),
+    'life.seated.home': P(['いらっしゃい。祭りの日でも、うちはいつもどおりさ。', 'ひと休みしてるんだ。外はにぎやかだからね。', '温かいお茶が、いちばんのごちそうだよ。']),
+    'life.seated.inn': P(['ここの食事は、旅の疲れが取れるよ。', '明日の朝には発つんだ。今夜はゆっくりするよ。', '祭りの音が、ここまで聞こえてくるね。']),
+  });
+  fs.writeFileSync(path.join(__dirname, '..', 'data', 'dialogue.json'), JSON.stringify(D, null, 2) + '\n');
+  const W = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'world.json'), 'utf8'));
+  for (const id of W.maps) {
+    const m = read(id); let ch = false;
+    for (const w of m.walkers || []) if (!w.pages) { w.pages = [{ dialogue: 'life.walker.festival' }]; ch = true; }
+    for (const n of m.stage?.npcs || []) if (n.pose === 'sit' && /^mob/.test(n.sprite || '') && !n.pages) { n.pages = [{ dialogue: id.startsWith('silver-deer') ? 'life.seated.inn' : 'life.seated.home' }]; ch = true; }
+    if (ch) write(m);
+  }
+}
 // ---------- 一覧・曲・言葉 ----------
 const NEW = ['norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village'];
 {

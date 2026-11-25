@@ -1892,7 +1892,12 @@
           11
         ]
       ],
-      "speed": 1
+      "speed": 1,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "pl-b",
@@ -1907,7 +1912,12 @@
           10
         ]
       ],
-      "speed": 0.9
+      "speed": 0.9,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "pl-c",
@@ -1927,7 +1937,12 @@
         ]
       ],
       "speed": 1.5,
-      "wait": 500
+      "wait": 500,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "pl-d",
@@ -1943,7 +1958,12 @@
         ]
       ],
       "speed": 0.8,
-      "wait": 2000
+      "wait": 2000,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     },
     {
       "id": "pl-e",
@@ -1958,7 +1978,12 @@
           15
         ]
       ],
-      "speed": 1
+      "speed": 1,
+      "pages": [
+        {
+          "dialogue": "life.walker.festival"
+        }
+      ]
     }
   ],
   "oldNote": "2026-11-25 STORY-NORN-MAP：新しい中央広場（norn-square）ができたので、前の広場は見比べ用（開発の窓・ワープで行く）。西の出入口はふさいだ"
