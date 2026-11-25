@@ -1,0 +1,13 @@
+{
+  "format": "sternenring-next-prologue",
+  "version": 1,
+  "status": "provisional",
+  "note": "2026-11-25 サニー「オープニングを作成してほしい」「演出のあるテキストプロローグ」：はじめての冒険で、表紙を押したあと、本がひらく前に流す文。いまの文は、世界観・シナリオ室のノルン導入の台本（ノルン導入から追跡開始_試作シナリオ_v01.md 場面1の地の文）を、句点で区切ってそのまま並べた仮。プロローグの正式な文は世界観・シナリオ室に依頼中（production/claude/依頼_プロローグ_シナリオ室.md）",
+  "source": "production/claude/scenario/ノルン導入から追跡開始_試作シナリオ_v01.md",
+  "backdrop": "assets/backdrops/norn_day_v02.jpg",
+  "lines": [
+    { "text": "ノルンの星環祭、昼。", "style": "title" },
+    { "text": "呼び声と人の足音。" },
+    { "text": "焼けた脂と香辛料の匂い。" }
+  ]
+}

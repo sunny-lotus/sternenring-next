@@ -37,7 +37,7 @@ const street = {
     { id: 'life-st-elder', sprite: 'mob05', tone: '#5a5a5a', x: 30, y: 14, dir: 'down', pages: talk('st-elder',
       [W('年寄り', 'この通りも、わしが若いころとはずいぶん変わった。'), W('年寄り', '変わらんのは、夕方になると決まってパンの匂いがすることくらいじゃな。')],
       [W('年寄り', '歩くのはゆっくりでいい。急いだって、日は同じように沈む。')]) },
-    { id: 'life-st-traveler', sprite: 'mob07', tone: '#4a5a5a', x: 41, y: 7, dir: 'left', pages: talk('st-traveler',
+    { id: 'life-st-traveler', sprite: 'mob07', tone: '#4a5a5a', x: 35, y: 7, dir: 'left', /* 2026-11-25 サニー「隣のマップに行く場所の前にモブが立っているのどけて」：東の出口の前（41,7）から離した */ pages: talk('st-traveler',
       [W('旅の人', 'ようやく着いた。ノルンは、門をくぐった瞬間に空気が変わるね。'), W('旅の人', '人の声と、焼いた肉の匂い。旅のあいだ、これが恋しかったんだ。')],
       [W('旅の人', '宿はあの鹿の看板のところだろう？　まずは足を休めたい。')]) },
   ],
@@ -55,7 +55,7 @@ const street = {
 // ---------------- 広場（norn-plaza） ----------------
 const plaza = {
   npcs: [
-    { id: 'life-pl-merchant', sprite: 'mob01', tone: '#7a5a3a', x: 3, y: 10, dir: 'up', pages: talk('pl-merchant',
+    { id: 'life-pl-merchant', sprite: 'mob01', tone: '#7a5a3a', x: 7, y: 7, dir: 'left', /* 西の出口の前（3,10）から離した（露店の右） */ pages: talk('pl-merchant',
       [W('商人', '広場の露店は、朝がいちばんいい品がそろうんだ。'), W('商人', '昼を過ぎたら、残り物を少し安くする。それを待ってる人も多いけどね。')],
       [W('商人', '値切り？　あんたの顔に免じて……いや、やめておこう。')]) },
     { id: 'life-pl-child1', sprite: 'mob03', tone: '#5a7a4a', x: 28, y: 12, dir: 'right', pages: talk('pl-child1',
@@ -76,7 +76,7 @@ const plaza = {
     { id: 'life-pl-girl', sprite: 'mob08', tone: '#8a5a6a', x: 45, y: 31, dir: 'down', pages: talk('pl-girl',
       [W('町娘', '花はいかが？　今朝、摘んだばかりなの。'), W('町娘', '買わなくてもいいの。いい香りでしょう？　それだけで、少し得した気分になるわ。')],
       [W('町娘', '明日はちがう花を持ってくるつもり。また来てね。')]) },
-    { id: 'life-pl-traveler', sprite: 'mob07', tone: '#4a5a5a', x: 53, y: 8, dir: 'down', pages: talk('pl-traveler',
+    { id: 'life-pl-traveler', sprite: 'mob07', tone: '#4a5a5a', x: 50, y: 6, dir: 'down', /* 東の出口（55,10〜12）の近く（53,8）から離した */ pages: talk('pl-traveler',
       [W('旅の人', 'この先の道は、日が高いうちに歩いたほうがいい。'), W('旅の人', '暗くなってからは、道しるべが見えにくくなる。迷うと厄介だよ。')],
       [W('旅の人', '気をつけて。旅は、帰ってくるまでが旅だ。')]) },
     { id: 'life-pl-waiter', sprite: 'mob04', tone: '#8a7a5a', x: 24, y: 7, dir: 'down', pages: talk('pl-waiter',

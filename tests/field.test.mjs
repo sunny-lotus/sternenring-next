@@ -535,3 +535,13 @@ test('会話の演出（2026-11-25 サニー「モブキャラとか敵とかを
   run(field, input, 600); assert.equal(at().x, 10); assert.ok(!at().moving);
   field.closeMessage(); assert.ok(!at(), '会話を閉じると消える');
 });
+
+test('歩き回る町の人（2026-11-25 星環祭）：道をたどって行き来し、ぶつからない', () => {
+  const { field, input, d } = makeField({ map: 'norn-inn-street', spawn: 'default' });
+  const w0 = field.view().npcs.filter((n) => n.id.startsWith('walk:'));
+  assert.equal(w0.length, d.maps['norn-inn-street'].walkers.length);
+  run(field, input, 4000);
+  const w1 = field.view().npcs.filter((n) => n.id.startsWith('walk:'));
+  assert.ok(w1.some((n, i) => Math.hypot(n.x - w0[i].x, n.y - w0[i].y) > 1), '4秒でだれかが1マス以上動く');
+  for (const n of w1) assert.ok(n.x >= 0 && n.y >= 0 && n.x < d.maps['norn-inn-street'].width && n.y < d.maps['norn-inn-street'].height);
+});

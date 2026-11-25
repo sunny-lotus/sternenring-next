@@ -267,6 +267,25 @@ const ART = {
   // 町の家は、どれも板ごとにちがう形・色になる（2026-11-22 作者「同じものが並びすぎている」）。種類の名前は、元の大きさの目安として残す
   'house-front': (w, h, s) => variedHouseArt(w, h, s),
   'house-small': (w, h, s) => variedHouseArt(w, h, s),
+  // 星環祭の飾り（2026-11-25 サニー「祭り感あるうごきやかざりつけ」。コードで描いた仮。本物の絵は美術・演出室に依頼）。板の上のほうに吊るす（下は透明）
+  bunting: (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 三角の小旗の連なり（たるんだ紐）
+    const y0 = H * .06, sag = H * .07, n = Math.max(4, Math.round(W / (PX * .45))), cols = ['#c0453a', '#e8b84a', '#3f7a5a', '#f2ead4', '#4a6aa8'];
+    const yAt = (x) => y0 + sag * Math.sin(Math.PI * x / W);
+    g.strokeStyle = '#5a4030'; g.lineWidth = Math.max(2, PX * .03); g.beginPath(); for (let x = 0; x <= W; x += 4) x ? g.lineTo(x, yAt(x)) : g.moveTo(x, yAt(x)); g.stroke();
+    for (let i = 0; i < n; i++) { const x = (i + .5) * W / n, y = yAt(x), fw = W / n * .7, fh = H * .1; g.fillStyle = cols[i % cols.length]; g.beginPath(); g.moveTo(x - fw / 2, y); g.lineTo(x + fw / 2, y); g.lineTo(x, y + fh); g.closePath(); g.fill(); g.fillStyle = 'rgba(0,0,0,.15)'; g.beginPath(); g.moveTo(x, y); g.lineTo(x + fw / 2, y); g.lineTo(x, y + fh); g.closePath(); g.fill(); }
+  }),
+  'lantern-string': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 通りに渡した提灯の列
+    const y0 = H * .05, sag = H * .1, n = Math.max(3, Math.round(W / (PX * 1.3))), yAt = (x) => y0 + sag * Math.sin(Math.PI * x / W);
+    g.strokeStyle = '#3a2a20'; g.lineWidth = Math.max(2, PX * .03); g.beginPath(); for (let x = 0; x <= W; x += 4) x ? g.lineTo(x, yAt(x)) : g.moveTo(x, yAt(x)); g.stroke();
+    for (let i = 0; i < n; i++) { const x = (i + .5) * W / n, y = yAt(x) + PX * .12, r = PX * .2; const gl = g.createRadialGradient(x, y + r, 2, x, y + r, r * 2.4); gl.addColorStop(0, 'rgba(255,210,120,.55)'); gl.addColorStop(1, 'rgba(255,210,120,0)'); g.fillStyle = gl; g.fillRect(x - r * 2.4, y - r * 1.4, r * 4.8, r * 4.8);
+      const lg = g.createLinearGradient(x - r, 0, x + r, 0); lg.addColorStop(0, '#c8582c'); lg.addColorStop(.5, '#ffb45a'); lg.addColorStop(1, '#c8582c'); g.fillStyle = lg; g.beginPath(); g.ellipse(x, y + r, r * .8, r, 0, 0, 7); g.fill(); g.fillStyle = '#3a2a20'; g.fillRect(x - r * .45, y - r * .05, r * .9, r * .18); g.fillRect(x - r * .45, y + r * 1.9, r * .9, r * .16); }
+  }),
+  'festival-banner': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 星環の紋の垂れ幕（竿から下げた布）
+    const bw = W * .55, x0 = (W - bw) / 2, top = H * .05, bh = H * .62; g.fillStyle = '#4a3020'; g.fillRect(x0 - W * .08, top, bw + W * .16, H * .025);
+    const gr = g.createLinearGradient(0, top, 0, top + bh); gr.addColorStop(0, '#2c3a6a'); gr.addColorStop(1, '#1e2850'); g.fillStyle = gr; g.beginPath(); g.moveTo(x0, top); g.lineTo(x0 + bw, top); g.lineTo(x0 + bw, top + bh); g.lineTo(x0 + bw / 2, top + bh * .9); g.lineTo(x0, top + bh); g.closePath(); g.fill();
+    const cx = W / 2, cy = top + bh * .42, rr = bw * .3; g.strokeStyle = '#e8c372'; g.lineWidth = Math.max(2, bw * .04); g.beginPath(); g.arc(cx, cy, rr, 0, 7); g.stroke();
+    g.fillStyle = '#f3d48b'; g.beginPath(); for (let i = 0; i < 8; i++) { const ang = i * Math.PI / 4 - Math.PI / 2, rad = i % 2 ? rr * .22 : rr * .62; g.lineTo(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad); } g.closePath(); g.fill();
+  }),
   stall: (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 露店：しまの日よけ・台・小さな灯り
     g.fillStyle = '#5a3a22'; g.fillRect(W * 0.08, H * 0.25, 8, H * 0.75); g.fillRect(W * 0.92 - 8, H * 0.25, 8, H * 0.75);
     for (let k = 0; k < 8; k++) { g.fillStyle = k % 2 ? '#e8dcc0' : '#8a2a22'; g.beginPath(); const x0 = W * 0.04 + k * W * 0.115; g.moveTo(x0, H * 0.06); g.lineTo(x0 + W * 0.115, H * 0.06); g.lineTo(x0 + W * 0.115, H * 0.3); g.quadraticCurveTo(x0 + W * 0.0575, H * 0.38, x0, H * 0.3); g.fill(); }
@@ -532,6 +551,14 @@ function windowGlow(c, file, seed) {
  * 吊るすもの（sign-*・awning-*・herbs）は板の上のほうに、それ以外は地面に立てて、形を変えずに入れる
  */
 const SHOW_H = { tree: 6, 'tree-small': 2.8, stall: 3.2, 'flower-stall': 3.2, pine: 6, 'dungeon-gate': 5.2 }; // pine・dungeon-gate：森の元絵 v01（2026-11-23。木は約6マス、門の口がキャラより高い）
+/** 絵の下の透明な余白の割合（足もとを地面につけるため。絵ごとに一度だけ数える） @param {HTMLImageElement} im */
+const padMemo = new WeakMap();
+function bottomPad(im) {
+  if (padMemo.has(im)) return padMemo.get(im);
+  let pad = 0;
+  try { const c = canvas(im.naturalWidth, im.naturalHeight, (g) => g.drawImage(im, 0, 0)), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let y = c.height - 1; scan: for (; y > 0; y--) for (let x = 0; x < c.width; x += 2) if (d[(y * c.width + x) * 4 + 3] > 100) break scan; pad = (c.height - 1 - y) / c.height; } catch { pad = 0; }
+  padMemo.set(im, pad); return pad;
+}
 function townBoardCanvas(name, b, it) {
   const cfg = TOWN_CFG, imgs = TOWN_IMG; if (!cfg || !imgs) return null;
   let file = it.art || cfg.boards?.[name]; // it.art：地図で家の絵を決めているとき
@@ -548,13 +575,13 @@ function townBoardCanvas(name, b, it) {
   // 見せる高さ（マス）が決まっている物は、絵の形のまま、足もとより大きく描く（木の枝や屋台の屋根は、足もと＝ぶつかる所より広がる）。
   // キャラの背は約2.5マス（2026-11-23 作者「植木などのサイズを確認してほしい」：街路樹が2.6マス＝キャラとほぼ同じ、小さな木は0.9マスだった）
   const showH = it.showH ?? SHOW_H[name];
-  if (showH) { const h = showH, w = h / ar; return { w, h, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, W, H)) }; }
+  if (showH) { const h = showH, w = h / ar, pb = bottomPad(im); return { w, h, c: canvas(w * PX, h * PX, (g, W, H) => g.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight * (1 - pb), 0, H * pb, W, H * (1 - pb))) }; } // 絵の下の透明な余白を詰めて、足もとを地面につける（2026-11-25 サニー「ちょっと浮いている」）
   const hang = /^(sign-|awning-|herbs|laundry)/.test(name); // laundry：路地に渡した洗濯ひも（2026-11-25）
   const artH = hang ? b.h : Math.min(b.h, b.w * ar); // 絵が見えている高さ（マス）。板が高くても、絵は下に低く描かれることがある（花壇など）
   return { h: b.h, artH, c: canvas(b.w * PX, b.h * PX, (g, W, H) => {
     let w = W, h = W * ar; if (h > H) { h = H; w = H / ar; }
     if (hang && /^awning-/.test(name)) { w = W; h = Math.min(H * 0.45, W * ar); } // 庇は横いっぱい
-    g.drawImage(im, (W - w) / 2, hang ? 0 : H - h, w, h);
+    const pb = hang ? 0 : bottomPad(im); g.drawImage(im, 0, 0, im.naturalWidth, im.naturalHeight * (1 - pb), (W - w) / 2, hang ? 0 : H - h * (1 - pb), w, h * (1 - pb)); // 立てる物は、絵の下の透明な余白を詰めて足もとを地面に
   }) };
 }
 /**

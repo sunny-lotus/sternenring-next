@@ -67,3 +67,12 @@ test('森の小道（正しい道）の上は街道：ランダムの戦闘に�
   }
   assert.ok(m.randomEncounters, '森にはランダムの戦闘がある（街道の外だけ）');
 });
+
+test('隣のマップへの出入口の前に、町の人も歩く人もいない（4マス以内に立たない。2026-11-25 サニー「隣のマップに行く場所の前にモブが立っているのどけて」）', () => {
+  for (const m of Object.values(d.maps)) for (const e of (m.exits || []).filter((x) => x.effect === 'page' || x.effect === 'dive')) {
+    const cells = [...Array(e.span || 1)].map((_, k) => (e.dir === 'left' || e.dir === 'right' ? [e.x, e.y + k] : [e.x + k, e.y]));
+    const near = (x, y) => cells.some(([cx, cy]) => Math.abs(cx - x) + Math.abs(cy - y) <= 4);
+    for (const n of m.npcs || []) assert.ok(!near(n.x, n.y), `${m.id} ${n.id} が出入口 ${e.id} の前`);
+    for (const w of m.walkers || []) for (const p of w.path) assert.ok(!near(p[0], p[1]), `${m.id} 歩く人 ${w.id} が出入口 ${e.id} の前`);
+  }
+});

@@ -30,6 +30,32 @@ const ADD = {
 };
 // 扉の真横の植えこみを、扉から離す（2026-11-25 サニー「家の前に花壇があって入り口を邪魔している」）。[地図, もとの x,y, 新しい x]。同じ所の「調べる」出来事もいっしょに動かす
 const MOVE = { 'norn-plaza': [[17, 36, 19], [42, 36, 40]] };
+// 星環祭の飾りと、歩き回る町の人（2026-11-25 サニー「祭り感あるうごきやかざりつけ」。飾りはコードで描いた仮、本物の絵は美術・演出室に依頼）。
+// 飾りはぶつからない。[板の名前, x, y, 幅, 奥行き, 高さ, 帯, ぶつかるか]
+const FESTIVAL = {
+  'norn-inn-street': [
+    ['bunting', 3, 4, 11, 1, 5.6, 'back', false], ['bunting', 15, 4, 8, 1, 5.6, 'back', false], ['bunting', 24, 4, 9, 1, 5.6, 'back', false], ['bunting', 34, 4, 8, 1, 5.6, 'back', false], // 家の正面に沿った小旗
+    ['festival-banner', 14, 4, 1, 1, 4.6, 'back', false], ['festival-banner', 33, 4, 1, 1, 4.6, 'back', false], // 路地の口の垂れ幕
+    ['lantern-string', 1, 7, 42, 1, 6.4, 'mid', false], // 通りの上に渡した提灯
+  ],
+  'norn-plaza': [
+    ['bunting', 2, 5, 20, 1, 5.4, 'back', false], ['bunting', 24, 5, 8, 1, 5.4, 'back', false],
+    ['festival-banner', 22, 5, 1, 1, 4.4, 'back', false],
+    ['lantern-string', 1, 9, 54, 1, 6.6, 'mid', false], ['lantern-string', 1, 13, 22, 1, 6.2, 'mid', false],
+  ],
+};
+// 歩き回る町の人：道をたどって行き来する（端で少し立ち止まる）。マスは通りの空いた所。隣のマップへの出入口から5マス以上離す（2026-11-25 サニー「隣のマップに行く場所の前にモブが立っているのどけて」）
+const WALKERS = {
+  'norn-inn-street': [
+    { id: 'st-a', sprite: 'mob01', path: [[2, 8], [30, 8]], speed: 1.1 }, { id: 'st-b', sprite: 'mob02', path: [[37, 9], [12, 9]], speed: 0.9 },
+    { id: 'st-c', sprite: 'mob03', path: [[19, 14], [19, 9], [34, 9]], speed: 1.4, wait: 600 }, { id: 'st-d', sprite: 'mob04', path: [[22, 6], [37, 6]], speed: 0.8, wait: 2400 },
+  ],
+  'norn-plaza': [
+    { id: 'pl-a', sprite: 'mob01', path: [[6, 11], [30, 11]], speed: 1 }, { id: 'pl-b', sprite: 'mob02', path: [[48, 10], [24, 10]], speed: 0.9 },
+    { id: 'pl-c', sprite: 'mob03', path: [[5, 6], [5, 12], [12, 12]], speed: 1.5, wait: 500 }, { id: 'pl-d', sprite: 'mob04', path: [[12, 30], [12, 16]], speed: 0.8, wait: 2000 },
+    { id: 'pl-e', sprite: 'mob02', path: [[38, 30], [38, 15]], speed: 1 },
+  ],
+};
 // いまのコードの木箱のうち、別の物にするもの（通り）
 const SWAP = { 'norn-inn-street': { '17,11': 'sacks', '16,15': 'firewood', '23,1': 'barrels' } };
 
@@ -58,6 +84,8 @@ for (const id of Object.keys(ADD)) {
     }
     for (const e of m.events || []) if (e.y === y0 && e.x >= x0 && e.x < x0 + it.w && !(e.x >= x1 && e.x < x1 + it.w)) e.x += x1 - x0; // gen-town-life.cjs を流し直すと出来事はもとの所に戻るので、毎回そろえる
   }
+  for (const [name, x, y, w, h, standH, band] of FESTIVAL[id] || []) m.stage.layers.find((l) => l.band === band).items.push({ asset: `placeholder:${name}`, x, y, w, h, standH, zOffset: band === 'back' ? 0.3 : 0.02, prop: true, solid: false, festival: true });
+  m.walkers = WALKERS[id] || [];
   m.collision = g.map((r) => r.join(''));
   fs.writeFileSync(file, JSON.stringify(m, null, 2) + '\n');
   console.log(id, ADD[id].length, '点');

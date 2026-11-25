@@ -1077,6 +1077,42 @@
             "zOffset": 0.1,
             "prop": true,
             "solid": false
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 2,
+            "y": 5,
+            "w": 20,
+            "h": 1,
+            "standH": 5.4,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 24,
+            "y": 5,
+            "w": 8,
+            "h": 1,
+            "standH": 5.4,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:festival-banner",
+            "x": 22,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 4.4,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
           }
         ]
       },
@@ -1362,6 +1398,30 @@
             "zOffset": 0.03,
             "prop": true,
             "solid": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 1,
+            "y": 9,
+            "w": 54,
+            "h": 1,
+            "standH": 6.6,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 1,
+            "y": 13,
+            "w": 22,
+            "h": 1,
+            "standH": 6.2,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
           }
         ]
       },
@@ -1380,9 +1440,9 @@
       "id": "life-pl-merchant",
       "sprite": "mob01",
       "tone": "#7a5a3a",
-      "x": 3,
-      "y": 10,
-      "dir": "up",
+      "x": 7,
+      "y": 7,
+      "dir": "left",
       "pages": [
         {
           "when": {
@@ -1565,8 +1625,8 @@
       "id": "life-pl-traveler",
       "sprite": "mob01",
       "tone": "#4a5a5a",
-      "x": 53,
-      "y": 8,
+      "x": 50,
+      "y": 6,
       "dir": "down",
       "pages": [
         {
@@ -1613,6 +1673,89 @@
           }
         }
       ]
+    }
+  ],
+  "walkers": [
+    {
+      "id": "pl-a",
+      "sprite": "mob01",
+      "path": [
+        [
+          6,
+          11
+        ],
+        [
+          30,
+          11
+        ]
+      ],
+      "speed": 1
+    },
+    {
+      "id": "pl-b",
+      "sprite": "mob02",
+      "path": [
+        [
+          48,
+          10
+        ],
+        [
+          24,
+          10
+        ]
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "pl-c",
+      "sprite": "mob03",
+      "path": [
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          12
+        ],
+        [
+          12,
+          12
+        ]
+      ],
+      "speed": 1.5,
+      "wait": 500
+    },
+    {
+      "id": "pl-d",
+      "sprite": "mob04",
+      "path": [
+        [
+          12,
+          30
+        ],
+        [
+          12,
+          16
+        ]
+      ],
+      "speed": 0.8,
+      "wait": 2000
+    },
+    {
+      "id": "pl-e",
+      "sprite": "mob02",
+      "path": [
+        [
+          38,
+          30
+        ],
+        [
+          38,
+          15
+        ]
+      ],
+      "speed": 1
     }
   ]
 }

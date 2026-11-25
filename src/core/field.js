@@ -39,6 +39,7 @@ export function createField(data) {
     /** @type {{ event:string, dialogue:string|null, notes:string[] }|null} 調べた出来事の言葉（出ているあいだフィールドは止まる） */ message: null,
     /** @type {string[]} 倒した見えている敵（"マップ:敵の id"） */ defeated: [],
     /** @type {Record<string, any>} 会話の演出で出した人や敵（会話が終わると消える） */ cast: {},
+    /** 歩き回る町の人の時計（ミリ秒） */ clock: 0,
     /** @type {{id:string, mapId:string, outcome:string}[]} 戦闘の記録 */ battles: [],
     /** @type {Record<string, string>} 話しかけた町の人の向き（話すと主人公のほうを向く。マップが変わると元に戻る） */ npcFace: {},
   };
@@ -233,6 +234,7 @@ export function createField(data) {
    */
   function update(dt, input) {
     for (const c of Object.values(state.cast)) if (c.t < 1) c.t = Math.min(1, c.t + dt / c.dur); // 演出の人や敵は、会話の間も動く
+    state.clock += dt; // 歩き回る町の人（walkers）の時計
     if (state.battle) { input.clearQueue(); return; } // 戦闘中はフィールドを止める
     if (state.message) { input.clearQueue(); input.takeAction?.(); return; } // 言葉が出ているあいだも止める（閉じるのは画面の係：closeMessage）
     if (state.leaving) { // 出入口の演出の「離れる」あいだ
@@ -268,6 +270,21 @@ export function createField(data) {
    * イベントが始まる所（しるしを出す所）：調べる出来事・町の人のうち、いま選ばれるページに mark: true があるもの。
    * 見終わって旗が立つと、次のページ（mark なし）になって消える。party のあるページは、その仲間がそろっているときだけ
    */
+  /**
+   * 歩き回る町の人（マップの walkers。2026-11-25 サニー「祭り感あるうごき」）：path の点をたどって行き来する（端で折り返す）。飾り（ぶつからない・話しかけられない）。
+   * 位置は時計だけで決まる（何度開いても同じ動き）。{ id, sprite, tone, path: [[x,y],...], speed（マス/秒）, wait（端で立ち止まるミリ秒） }
+   */
+  function walkersNow() {
+    return (data.maps[state.mapId].walkers || []).map((/** @type {any} */ w, /** @type {number} */ i) => {
+      const P = w.path, seg = P.slice(1).map((q, k) => Math.hypot(q[0] - P[k][0], q[1] - P[k][1])), L = seg.reduce((a, b) => a + b, 0) || 1;
+      const sp = (w.speed || 1) / 1000, wait = w.wait ?? 1200, cyc = 2 * L / sp + 2 * wait; let t = (state.clock + i * 2371) % cyc;
+      let back = false, still = false; if (t < wait) still = true; else { t -= wait; if (t > L / sp) { t -= L / sp; if (t < wait) { still = true; back = true; t = L / sp; } else { t -= wait; back = true; } } }
+      let d = still ? (back ? L : 0) : back ? L - t * sp : t * sp, k = 0; while (k < seg.length - 1 && d > seg[k]) { d -= seg[k]; k++; }
+      const a = P[k], b = P[k + 1] || a, u = seg[k] ? Math.min(1, d / seg[k]) : 0, dx = (b[0] - a[0]) * (back ? -1 : 1), dy = (b[1] - a[1]) * (back ? -1 : 1);
+      const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+      return { id: 'walk:' + (w.id || i), sprite: w.sprite, tone: w.tone, x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, dir: still ? 'down' : dir, moving: !still };
+    });
+  }
   function eventMarks() {
     const rec = data.record, m = data.maps[state.mapId]; if (!rec) return [];
     const has = (/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((a) => a.id === id));
@@ -293,6 +310,7 @@ export function createField(data) {
       sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
       marks: eventMarks(), // イベントが始まる所のしるし（2026-11-25 サニー「イベントが始まるところにはしるしを」）
       npcs: [...(data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
+        ...walkersNow(),
         ...Object.values(state.cast).map((c) => ({ id: 'cast:' + c.id, sprite: c.sprite, img: c.img, h: c.h, tone: c.tone, x: c.fx + (c.tx - c.fx) * c.t, y: c.fy + (c.ty - c.fy) * c.t, dir: c.dir, moving: c.t < 1 }))], // 演出の人や敵（会話のあいだだけ）
       actors: state.actors.map((a) => {
         const k = a.from ? Math.min(1, a.t / curStep) : 1;

@@ -877,6 +877,78 @@
             "h": 1,
             "standH": 5,
             "zOffset": 0.25
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 3,
+            "y": 4,
+            "w": 11,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 15,
+            "y": 4,
+            "w": 8,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 24,
+            "y": 4,
+            "w": 9,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 34,
+            "y": 4,
+            "w": 8,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:festival-banner",
+            "x": 14,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:festival-banner",
+            "x": 33,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
           }
         ]
       },
@@ -1120,6 +1192,18 @@
             "zOffset": 0.03,
             "prop": true,
             "solid": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 1,
+            "y": 7,
+            "w": 42,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
           }
         ]
       },
@@ -1284,7 +1368,7 @@
       "id": "life-st-traveler",
       "sprite": "mob01",
       "tone": "#4a5a5a",
-      "x": 41,
+      "x": 35,
       "y": 7,
       "dir": "left",
       "pages": [
@@ -1413,5 +1497,73 @@
       "note": "店の手伝い（名前・年齢・性別・オットーとの関係は付けない仮の人物）。祭りの音が変わったあとは見えなくなる"
     }
   ],
-  "storyNote": "2026-11-25 ノルン導入から追跡開始の試作（tools/gen-norn-story.cjs）。オットー（story-otto）・店の手伝い（story-helper）・包み布（story-cloth）・試作の終わり（story-end）"
+  "storyNote": "2026-11-25 ノルン導入から追跡開始の試作（tools/gen-norn-story.cjs）。オットー（story-otto）・店の手伝い（story-helper）・包み布（story-cloth）・試作の終わり（story-end）",
+  "walkers": [
+    {
+      "id": "st-a",
+      "sprite": "mob01",
+      "path": [
+        [
+          2,
+          8
+        ],
+        [
+          30,
+          8
+        ]
+      ],
+      "speed": 1.1
+    },
+    {
+      "id": "st-b",
+      "sprite": "mob02",
+      "path": [
+        [
+          37,
+          9
+        ],
+        [
+          12,
+          9
+        ]
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "st-c",
+      "sprite": "mob03",
+      "path": [
+        [
+          19,
+          14
+        ],
+        [
+          19,
+          9
+        ],
+        [
+          34,
+          9
+        ]
+      ],
+      "speed": 1.4,
+      "wait": 600
+    },
+    {
+      "id": "st-d",
+      "sprite": "mob04",
+      "path": [
+        [
+          22,
+          6
+        ],
+        [
+          37,
+          6
+        ]
+      ],
+      "speed": 0.8,
+      "wait": 2400
+    }
+  ]
 }

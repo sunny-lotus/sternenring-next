@@ -166,7 +166,44 @@ async function boot() {
   const fsSync = () => { fsBtn.hidden = !fsCan || fsApp; fsBtn.textContent = fsOn() ? '全画面をやめる' : '全画面'; fsTurn(fsOn()); };
   fsBtn.addEventListener('click', () => { /** @type {HTMLElement} */ (fsBtn).blur(); if (fsOn()) fsExit(); else fsEnter(); });
   document.addEventListener('fullscreenchange', fsSync); document.addEventListener('webkitfullscreenchange', fsSync); fsSync();
+  // プロローグ（2026-11-25 サニー「オープニングを作成してほしい」「演出のあるテキストプロローグ」）：はじめての冒険で、表紙を押したあと、本がひらく前に流す。
+  // 文は data/prologue.json。一度見たら旗 prologue.seen で次から出ない（?prologue=1 でもう一度、?prologue=0 で出さない。?warp のときも出さない）
+  let prologueOn = false, prologueDone = false;
+  const playPrologue = async () => {
+    const pd = await getJson('data/prologue.json').catch(() => null); if (!pd || !pd.lines?.length) return;
+    const box = $('prologue'), lines = /** @type {HTMLElement} */ (box.querySelector('.lines')), motes = /** @type {HTMLElement} */ (box.querySelector('.motes'));
+    /** @type {HTMLElement} */ (box.querySelector('.bg')).style.backgroundImage = `url(${pd.backdrop || 'assets/backdrops/norn_day_v02.jpg'})`;
+    motes.innerHTML = Array.from({ length: 26 }, (_, i) => `<i class="mote" style="left:${(i * 37) % 100}%;--dx:${((i * 53) % 60) - 30}px;animation-duration:${9 + (i * 7) % 9}s;animation-delay:-${(i * 13) % 11}s;width:${5 + (i % 4) * 3}px;height:${5 + (i % 4) * 3}px"></i>`).join('');
+    lines.innerHTML = ''; box.hidden = false; prologueOn = true; requestAnimationFrame(() => box.classList.add('on'));
+    let i = -1, done = false, last = 0;
+    await new Promise((resolve) => {
+      const finish = () => { if (done) return; done = true; window.removeEventListener('keydown', key, true); resolve(undefined); };
+      const show = () => {
+        if (done) return;
+        if (i >= pd.lines.length - 1) return finish();
+        i++; last = performance.now();
+        for (const el of lines.children) el.classList.add('past');
+        while (lines.children.length >= 3) lines.firstElementChild?.remove();
+        const l = pd.lines[i], el = document.createElement('div'); el.className = 'ln' + (l.style === 'title' ? ' title' : ''); el.textContent = l.text; lines.appendChild(el);
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+      };
+      const next = () => { if (performance.now() - last > 600) show(); };
+      const key = (/** @type {KeyboardEvent} */ e) => { e.preventDefault(); e.stopImmediatePropagation(); if (e.code === 'Escape') finish(); else if (!e.repeat) next(); };
+      box.onclick = next; /** @type {HTMLElement} */ (box.querySelector('.skip')).onclick = (e) => { e.stopPropagation(); finish(); };
+      window.addEventListener('keydown', key, true);
+      setTimeout(show, 900);
+    });
+    box.classList.remove('on'); await new Promise((r) => setTimeout(r, 1000)); box.hidden = true; prologueOn = false;
+    record.flags['prologue.seen'] = true; saver.now();
+  };
+  const wantPrologue = () => params.get('prologue') === '1' || (params.get('prologue') !== '0' && !params.get('warp') && !record.flags['prologue.seen']);
   const startFromCover = (/** @type {string} */ why) => {
+    if (prologueOn) return;
+    if (!prologueDone && wantPrologue()) { // まずプロローグ（音はここで有効にする：押した操作の中でないと鳴らせない）
+      prologueDone = true; sound.unlock(why); bgm.unlock(why);
+      playPrologue().then(() => startFromCover(why)); return;
+    }
+    prologueDone = true;
     if (fsCan && !fsApp && !fsOn() && window.matchMedia?.('(pointer: coarse)').matches) fsEnter(); // スマホは、はじめる一押しで全画面に（ブラウザは、押したときだけ全画面を許す）
     if (!intro.press(why, performance.now())) return;
     input.clearQueue(); syncIntroUi();
@@ -178,6 +215,7 @@ async function boot() {
   skipBtn.addEventListener('click', () => skipIntro('skip-button'));
   paperCanvas.addEventListener('pointerdown', () => skipIntro('skip-tap'));
   window.addEventListener('keydown', (e) => {
+    if (prologueOn) return;
     if (!intro.blocking || !(e.code === 'Escape' || e.code === 'Enter' || e.code === 'Space' || e.code === 'NumpadEnter')) return;
     if (intro.phase === 'cover') { if (e.code !== 'Escape') { e.preventDefault(); startFromCover('cover-key'); } return; }
     e.preventDefault();
@@ -255,6 +293,7 @@ async function boot() {
   };
   const closeMsg = () => {
     if (!field.state.message || performance.now() - msgShownAt < 200) return false;
+    if (Object.values(field.state.cast).some((c) => c.t < 1)) { input.takeAction(); return true; } // 演出の人や敵が動いているあいだは、会話を先へ進めない（2026-11-25 サニー「動いてる時も会話を進められると動きが見えないかも」）
     if (msgAt < msgLines.length - 1) { msgAt++; drawMsg(); input.takeAction(); return true; } // 次の行へ
     field.closeMessage(); input.takeAction(); msgBox.hidden = true; closeNovel(); return true;
   };
