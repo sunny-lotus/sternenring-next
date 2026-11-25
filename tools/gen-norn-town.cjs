@@ -288,6 +288,51 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   const m = read('norn-plaza'), e = m.exits.find((x) => x.id === 'west-street');
   if (e) { m.exits = m.exits.filter((x) => x !== e); m.collision = m.collision.map((row, y) => (y >= e.y && y < e.y + (e.span || 1) ? '#' + row.slice(1) : row)); m.oldNote = '2026-11-25 STORY-NORN-MAP：新しい中央広場（norn-square）ができたので、前の広場は見比べ用（開発の窓・ワープで行く）。西の出入口はふさいだ'; write(m); }
 }
+// ---------- 新しい町の人（2026-11-26 STORY-NIGHT-TOWN-LIFE-20261126：世界観・シナリオ室「新しい町の人の言葉_v01.md」7マップ16枠48本、provisional） ----------
+// 言葉は .md の表からそのまま読む。話者はみな「町の人」。ふだん1 → ふだん2 → ふだん1…の順（pick は最初が気まぐれなので、life.nighttown.<人> の旗でページを切りかえる。物語の旗ではない）。
+// story.norn.ended のあとは ended 後の1本を優先。置く所は、話題の物（井戸・屋台・時計台・荷・洗濯ひも・花）の近くの、通れて広い所（出入口から5マス以上・出来事のマス・着く所・せまい通路をさける）
+{
+  const LIFE_SRC = path.join(process.env.USERPROFILE || 'C:/Users/takhy', 'OneDrive/ドキュメント/ChatGPT/物語/production/claude/scenario/新しい町の人の言葉_v01.md');
+  const md = fs.readFileSync(LIFE_SRC, 'utf8');
+  const rowsOf = (head) => md.split(/^## /m).find((x) => x.startsWith(head)).split('\n').filter((l) => /^\| *[^-|][^|]*\|/.test(l)).map((l) => l.split('|').slice(1, -1).map((x) => x.trim())).slice(1);
+  const lines = rowsOf('台詞本文'), slots = rowsOf('マップと人物枠の固定対応');
+  const KIND = { ふだん1: 'normal-1', ふだん2: 'normal-2', ended後: 'ended' };
+  const D = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'dialogue.json'), 'utf8'));
+  for (const k of Object.keys(D.lines)) if (k.startsWith('life.nighttown.')) delete D.lines[k];
+  for (const [, who, kind, text] of lines) D.lines[`life.nighttown.${who}.${KIND[kind]}`] = { lines: [{ who: '町の人', text }], status: 'provisional', source: 'production/claude/scenario/新しい町の人の言葉_v01.md' };
+  if (Object.keys(D.lines).filter((k) => k.startsWith('life.nighttown.')).length !== 48) throw new Error('町の人の言葉が48本でない');
+  fs.writeFileSync(path.join(__dirname, '..', 'data', 'dialogue.json'), JSON.stringify(D, null, 2) + '\n');
+  // 話題の物の近く（このマスの近くの、よい所を探す）
+  const NEAR = { 'square-01': [18, 17], 'square-02': [12, 10], 'square-03': [25, 6], 'east-01': [7, 6], 'east-02': [37, 11], 'east-03': [39, 9], 'road-01': [16, 7], 'road-02': [10, 22],
+    'north-01': [26, 11], 'north-02': [4, 10], 'west-01': [8, 9], 'west-02': [19, 11], 'south-01': [7, 7], 'south-02': [19, 15], 'village-01': [18, 7], 'village-02': [9, 14] };
+  const IN = { left: [1, 0], right: [-1, 0], up: [0, 1], down: [0, -1] };
+  const byMap = {};
+  for (const [mapId, who, npcId] of slots) (byMap[mapId] = byMap[mapId] || []).push({ who, npcId });
+  let k = 0;
+  for (const [mapId, list] of Object.entries(byMap)) {
+    const m = read(mapId), W = m.width, H = m.height, C = m.collision.map((r) => [...r]);
+    const open = (x, y) => x > 0 && y > 0 && x < W - 1 && y < H - 1 && C[y][x] === '.';
+    const exitCells = m.exits.flatMap((e) => Array.from({ length: e.span || 1 }, (_, i) => (e.dir === 'left' || e.dir === 'right' ? [e.x, e.y + i] : [e.x + i, e.y])));
+    const bad = new Set([...(m.events || []).map((e) => `${e.x},${e.y}`), ...m.exits.map((e) => { const [dx, dy] = IN[e.dir]; return `${e.x + dx},${e.y + dy}`; })]);
+    const taken = new Set();
+    m.npcs = (m.npcs || []).filter((n) => !String(n.id).startsWith('night-town-'));
+    for (const { who, npcId } of list) {
+      const [ax, ay] = NEAR[who]; let best = null;
+      for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+        if (!open(x, y) || bad.has(`${x},${y}`) || taken.has(`${x},${y}`)) continue;
+        if (exitCells.some(([ex, ey]) => Math.abs(ex - x) + Math.abs(ey - y) < 6)) continue; // 出入口から5マスより遠く
+        if ([[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => open(x + dx, y + dy)).length < 4) continue; // せまい通路・壁ぎわに立たない（まわり4マスが通れる所）
+        const d = Math.hypot(x - ax, y - ay); if (!best || d < best.d) best = { x, y, d };
+      }
+      if (!best) throw new Error(`${mapId} ${who} を置く所が無い`);
+      taken.add(`${best.x},${best.y}`); for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) taken.add(`${best.x + dx},${best.y + dy}`); // となりどうしにも立たせない
+      const F = `life.nighttown.${who}`;
+      m.npcs.push({ id: npcId, sprite: ['mob01', 'mob02', 'mob03', 'mob04'][k++ % 4], x: best.x, y: best.y, dir: 'down', status: 'provisional', note: `新しい町の人（${who}。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126`,
+        pages: [{ when: { flags: { 'story.norn.ended': true } }, dialogue: `${F}.ended` }, { when: { flags: { [F]: true } }, dialogue: `${F}.normal-2`, set: { flags: { [F]: false } } }, { dialogue: `${F}.normal-1`, set: { flags: { [F]: true } } }] });
+    }
+    write(m);
+  }
+}
 // ---------- 着く所は、行き先の出入口のいちばん端のマスの1つ内側（広い出入口では、出た列と同じ列に着く：field.transfer が lane を足す） ----------
 {
   const ids = ['norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village', 'norn-inn-street'];

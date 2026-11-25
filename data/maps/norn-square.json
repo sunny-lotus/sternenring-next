@@ -855,5 +855,127 @@
       ],
       "speed": 1.1
     }
+  ],
+  "npcs": [
+    {
+      "id": "night-town-square-01",
+      "sprite": "mob01",
+      "x": 18,
+      "y": 17,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（square-01。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.square-01.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.square-01": true
+            }
+          },
+          "dialogue": "life.nighttown.square-01.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.square-01": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.square-01.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.square-01": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-town-square-02",
+      "sprite": "mob02",
+      "x": 12,
+      "y": 10,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（square-02。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.square-02.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.square-02": true
+            }
+          },
+          "dialogue": "life.nighttown.square-02.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.square-02": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.square-02.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.square-02": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-town-square-03",
+      "sprite": "mob03",
+      "x": 25,
+      "y": 6,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（square-03。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.square-03.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.square-03": true
+            }
+          },
+          "dialogue": "life.nighttown.square-03.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.square-03": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.square-03.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.square-03": true
+            }
+          }
+        }
+      ]
+    }
   ]
 }

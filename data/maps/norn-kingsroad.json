@@ -597,5 +597,87 @@
       ],
       "speed": 0.9
     }
+  ],
+  "npcs": [
+    {
+      "id": "night-town-road-01",
+      "sprite": "mob03",
+      "x": 16,
+      "y": 7,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（road-01。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.road-01.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.road-01": true
+            }
+          },
+          "dialogue": "life.nighttown.road-01.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.road-01": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.road-01.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.road-01": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-town-road-02",
+      "sprite": "mob04",
+      "x": 10,
+      "y": 22,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（road-02。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.road-02.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.road-02": true
+            }
+          },
+          "dialogue": "life.nighttown.road-02.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.road-02": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.road-02.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.road-02": true
+            }
+          }
+        }
+      ]
+    }
   ]
 }

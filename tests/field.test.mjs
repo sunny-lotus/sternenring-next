@@ -572,3 +572,23 @@ test('歩き回る町の人（2026-11-25 星環祭）：道をたどって行き
   assert.ok(w1.some((n, i) => Math.hypot(n.x - w0[i].x, n.y - w0[i].y) > 1), '4秒でだれかが1マス以上動く');
   for (const n of w1) assert.ok(n.x >= 0 && n.y >= 0 && n.x < d.maps['norn-inn-street'].width && n.y < d.maps['norn-inn-street'].height);
 });
+
+test('新しい町の人（2026-11-26 STORY-NIGHT-TOWN-LIFE）：ふだん1→ふだん2→ふだん1の順に話し、導入の終わり（ended）のあとは ended の言葉。16人とも48本の言葉がある', async () => {
+  const { createRecord } = await import('../src/core/record.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const d = loadAll(), record = createRecord();
+  const npcs = Object.values(d.maps).flatMap((m) => (m.npcs || []).filter((n) => n.id.startsWith('night-town-')).map((n) => ({ ...n, map: m.id })));
+  assert.equal(npcs.length, 16);
+  const lines = JSON.parse((await import('node:fs')).readFileSync(new URL('../data/dialogue.json', import.meta.url), 'utf8')).lines;
+  for (const n of npcs) for (const p of n.pages) assert.ok(lines[p.dialogue], `${n.id} ${p.dialogue}`);
+  assert.equal(Object.keys(lines).filter((k) => k.startsWith('life.nighttown.')).length, 48);
+  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party: d.ledger.party, record });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  assert.ok(field.warp('norn-square', 20, 20, 'up'));
+  const s1 = npcs.find((n) => n.id === 'night-town-square-01');
+  const talk = () => { walkTo(field, input, d, s1.x, s1.y + 1); tap(field, input, 'up'); input.pressAction(); run(field, input, 20); const k = field.state.message?.dialogue; field.closeMessage(); return k; };
+  assert.deepEqual([talk(), talk(), talk()], ['life.nighttown.square-01.normal-1', 'life.nighttown.square-01.normal-2', 'life.nighttown.square-01.normal-1']);
+  record.flags['story.norn.ended'] = true;
+  assert.equal(talk(), 'life.nighttown.square-01.ended');
+});

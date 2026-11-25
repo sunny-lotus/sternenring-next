@@ -533,5 +533,87 @@
       "speed": 0.7,
       "wait": 2000
     }
+  ],
+  "npcs": [
+    {
+      "id": "night-town-south-01",
+      "sprite": "mob01",
+      "x": 7,
+      "y": 7,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（south-01。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.south-01.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.south-01": true
+            }
+          },
+          "dialogue": "life.nighttown.south-01.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.south-01": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.south-01.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.south-01": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "night-town-south-02",
+      "sprite": "mob02",
+      "x": 19,
+      "y": 15,
+      "dir": "down",
+      "status": "provisional",
+      "note": "新しい町の人（south-02。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
+      "pages": [
+        {
+          "when": {
+            "flags": {
+              "story.norn.ended": true
+            }
+          },
+          "dialogue": "life.nighttown.south-02.ended"
+        },
+        {
+          "when": {
+            "flags": {
+              "life.nighttown.south-02": true
+            }
+          },
+          "dialogue": "life.nighttown.south-02.normal-2",
+          "set": {
+            "flags": {
+              "life.nighttown.south-02": false
+            }
+          }
+        },
+        {
+          "dialogue": "life.nighttown.south-02.normal-1",
+          "set": {
+            "flags": {
+              "life.nighttown.south-02": true
+            }
+          }
+        }
+      ]
+    }
   ]
 }
