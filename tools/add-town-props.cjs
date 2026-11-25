@@ -36,18 +36,18 @@ const FESTIVAL = {
   'norn-inn-street': [
     ['bunting', 3, 4, 11, 1, 5.6, 'back', false], ['bunting', 15, 4, 8, 1, 5.6, 'back', false], ['bunting', 24, 4, 9, 1, 5.6, 'back', false], ['bunting', 34, 4, 8, 1, 5.6, 'back', false], // 家の正面に沿った小旗
     ['festival-banner', 14, 4, 1, 1, 4.6, 'back', false], ['festival-banner', 33, 4, 1, 1, 4.6, 'back', false], // 路地の口の垂れ幕
-    ['bunting', 1, 7, 42, 1, 6.4, 'mid', false], // 通りの上に渡した旗（2026-11-26 サニー「祭りは提灯ではなく、旗にしたい」。旗の列の絵が届くまで小旗）
+    ['flag-string', 1, 7, 42, 1, 6.4, 'mid', false], // 通りの上に渡した旗の列（2026-11-26 サニー「祭りは提灯ではなく、旗にしたい」。美術・演出室 festival_flag_string）
   ],
   'norn-plaza': [
     ['bunting', 2, 5, 20, 1, 5.4, 'back', false], ['bunting', 24, 5, 8, 1, 5.4, 'back', false],
     ['festival-banner', 22, 5, 1, 1, 4.4, 'back', false],
-    ['bunting', 1, 9, 54, 1, 6.6, 'mid', false], ['bunting', 1, 13, 22, 1, 6.2, 'mid', false],
+    ['flag-string', 1, 9, 54, 1, 6.6, 'mid', false], ['flag-string', 1, 13, 22, 1, 6.2, 'mid', false],
   ],
 };
 // 祭りの飾りの絵（2026-11-25 ART-FESTIVAL-20261125：美術・演出室の元絵 町_ノルン_祭り_v01 を tools/copy-festival-art.py で写した）。祭りのマップでは、屋台も飾り付きの版にする（屋台の絵に小旗と提灯が描いてあるので、屋台の上には飾りを足さない）
-const FEST_BOARDS = { bunting: 'bunting.webp', 'lantern-string': 'lantern_string.webp', 'festival-banner': 'festival_banner.webp', 'flower-garland': 'flower_garland.webp', stall: 'stall_festival.webp' };
+const FEST_BOARDS = { 'flag-string': 'festival_flag_string.webp', 'lantern-iron': 'lantern_iron_hanging.webp', bunting: 'bunting.webp', 'lantern-string': 'lantern_string.webp', 'festival-banner': 'festival_banner.webp', 'flower-garland': 'flower_garland.webp', stall: 'stall.webp' }; // 屋台は丸い提灯の無い元の絵に戻した（2026-11-26 ART-FESTIVAL-FLAGS-RETURN：stall_festival には丸提灯が描きこまれている。祭りの旗は通りの上の旗の列で）
 // 長く渡す飾り（小旗・提灯）は、絵1本分くらいの長さ（MAXSPAN マス）に区切って、すきまを1マスあけて吊るす（1本の絵を長く引き伸ばさない。ぎっしりにしない）
-const MAXSPAN = { bunting: 10, 'lantern-string': 9 };
+const MAXSPAN = { bunting: 10, 'lantern-string': 9, 'flag-string': 9 };
 const splitSpan = (name, x, w) => { const m = MAXSPAN[name]; if (!m || w <= m + 2) return [[x, w]]; const n = Math.ceil((w + 1) / (m + 1)), sw = (w + 1) / n - 1; return Array.from({ length: n }, (_, i) => [x + i * (sw + 1), sw]); };
 // 花輪：入れる家の扉の上に（家の絵の扉の位置 townArt.doors と、絵の大きさから計算する）。多すぎないよう、扉のある家の1軒おきに
 const IMG = { 'house_home_2f.webp': [512, 511], 'house_a_narrow.webp': [271, 512], 'house_b_sideroof.webp': [512, 452], 'house_c_stepgable.webp': [358, 512], 'house_d_workshop.webp': [512, 487], 'house_e_archway.webp': [512, 463], 'house_f_corner.webp': [464, 512], 'inn_silver_deer.webp': [511, 512] };

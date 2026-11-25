@@ -128,7 +128,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   M.put('mid', 'tree', 15, 10, 1, 1, 6, 0.05); M.put('mid', 'tree', 26, 22, 1, 1, 6, 0.05);
   // 祭りの飾り（吊るす。ぶつからない）
   for (const [x, w] of [[1, 8], [27, 8]]) M.items.back.push({ asset: 'placeholder:bunting', x, y: 4, w, h: 1, standH: 5.6, zOffset: 0.3, prop: true, solid: false, festival: true });
-  for (const x of [11, 21]) M.items.mid.push({ asset: 'placeholder:bunting', x, y: 9, w: 9, h: 1, standH: 6.4, zOffset: 0.02, prop: true, solid: false, festival: true });
+  for (const x of [11, 21]) M.items.mid.push({ asset: 'placeholder:flag-string', x, y: 9, w: 9, h: 1, standH: 6.4, zOffset: 0.02, prop: true, solid: false, festival: true });
   M.exit('north', 19, 0, 3, 'up', 'dive', { map: 'norn-north-gate', exit: 'south', arrive: { x: 18, y: 13, dir: 'up' } });
   M.exit('east', 41, 12, 3, 'right', 'page', { map: 'norn-east-street', exit: 'west', arrive: { x: 1, y: 7, dir: 'right' } });
   M.exit('west', 0, 12, 3, 'left', 'page', { map: 'norn-west-street', exit: 'east', arrive: { x: 42, y: 7, dir: 'left' } });
@@ -473,7 +473,7 @@ function district(id, title, seed, opt) {
       C[H - 2][dx] = '.';
       const TITLE = { shop: '商店通りの店（仮・無人）', store: '北東の倉庫（仮）', work: '北西の小工房（仮）', herb: '北西の薬草の仕分け場（仮）', village: '村の住まい（仮）', home: '家の中（仮）' };
       write({
-        format: 'sternenring-next-map', version: 1, id, title: `${out.title.replace(/（.*$/, '')}・${TITLE[kind]}`, kind: 'interior', footsteps: 'wood', status: 'provisional',
+        format: 'sternenring-next-map', version: 1, id, title: 'ノルン・' + TITLE[kind], kind: 'interior', footsteps: 'wood', status: 'provisional',
         provenance: `2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（${outId} の ${it.art} の家、型：${kind}。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。`,
         width: W, height: H, tileSize: 32, legend: { '.': 'floor', '#': 'wall', D: 'door' }, collision: C.map((r) => r.join('')),
         ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },

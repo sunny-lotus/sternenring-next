@@ -692,7 +692,7 @@
         ],
         "inn-tall": "inn_silver_deer.webp",
         "lamp": "lamp_post.webp",
-        "stall": "stall_festival.webp",
+        "stall": "stall.webp",
         "flower-stall": "flower_stall.webp",
         "cart": "cart.webp",
         "planter": "planter.webp",
@@ -722,7 +722,9 @@
         "bunting": "bunting.webp",
         "lantern-string": "lantern_string.webp",
         "festival-banner": "festival_banner.webp",
-        "flower-garland": "flower_garland.webp"
+        "flower-garland": "flower_garland.webp",
+        "flag-string": "festival_flag_string.webp",
+        "lantern-iron": "lantern_iron_hanging.webp"
       }
     },
     "paved": [
@@ -1243,10 +1245,10 @@
             "solid": true
           },
           {
-            "asset": "placeholder:bunting",
+            "asset": "placeholder:flag-string",
             "x": 1,
             "y": 7,
-            "w": 9.75,
+            "w": 7.6,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1255,10 +1257,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 11.75,
+            "asset": "placeholder:flag-string",
+            "x": 9.6,
             "y": 7,
-            "w": 9.75,
+            "w": 7.6,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1267,10 +1269,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 22.5,
+            "asset": "placeholder:flag-string",
+            "x": 18.2,
             "y": 7,
-            "w": 9.75,
+            "w": 7.6,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1279,10 +1281,22 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 33.25,
+            "asset": "placeholder:flag-string",
+            "x": 26.8,
             "y": 7,
-            "w": 9.75,
+            "w": 7.6,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:flag-string",
+            "x": 35.4,
+            "y": 7,
+            "w": 7.6,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,

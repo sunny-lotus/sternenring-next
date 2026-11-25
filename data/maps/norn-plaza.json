@@ -850,7 +850,7 @@
         ],
         "inn-tall": "house_merchant_3f.webp",
         "lamp": "lamp_post.webp",
-        "stall": "stall_festival.webp",
+        "stall": "stall.webp",
         "flower-stall": "flower_stall.webp",
         "cart": "cart.webp",
         "planter": "planter.webp",
@@ -880,7 +880,9 @@
         "bunting": "bunting.webp",
         "lantern-string": "lantern_string.webp",
         "festival-banner": "festival_banner.webp",
-        "flower-garland": "flower_garland.webp"
+        "flower-garland": "flower_garland.webp",
+        "flag-string": "festival_flag_string.webp",
+        "lantern-iron": "lantern_iron_hanging.webp"
       }
     },
     "floor": "cobble",
@@ -1459,10 +1461,10 @@
             "solid": true
           },
           {
-            "asset": "placeholder:bunting",
+            "asset": "placeholder:flag-string",
             "x": 1,
             "y": 9,
-            "w": 10,
+            "w": 8.167,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1471,10 +1473,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 12,
+            "asset": "placeholder:flag-string",
+            "x": 10.167,
             "y": 9,
-            "w": 10,
+            "w": 8.167,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1483,10 +1485,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 23,
+            "asset": "placeholder:flag-string",
+            "x": 19.333,
             "y": 9,
-            "w": 10,
+            "w": 8.167,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1495,10 +1497,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 34,
+            "asset": "placeholder:flag-string",
+            "x": 28.5,
             "y": 9,
-            "w": 10,
+            "w": 8.167,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1507,10 +1509,10 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
-            "x": 45,
+            "asset": "placeholder:flag-string",
+            "x": 37.667,
             "y": 9,
-            "w": 10,
+            "w": 8.167,
             "h": 1,
             "standH": 6.6,
             "zOffset": 0.02,
@@ -1519,7 +1521,19 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
+            "asset": "placeholder:flag-string",
+            "x": 46.833,
+            "y": 9,
+            "w": 8.167,
+            "h": 1,
+            "standH": 6.6,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:flag-string",
             "x": 1,
             "y": 13,
             "w": 6.667,
@@ -1531,7 +1545,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
+            "asset": "placeholder:flag-string",
             "x": 8.667,
             "y": 13,
             "w": 6.667,
@@ -1543,7 +1557,7 @@
             "festival": true
           },
           {
-            "asset": "placeholder:bunting",
+            "asset": "placeholder:flag-string",
             "x": 16.333,
             "y": 13,
             "w": 6.667,
