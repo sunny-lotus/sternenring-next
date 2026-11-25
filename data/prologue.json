@@ -2,12 +2,74 @@
   "format": "sternenring-next-prologue",
   "version": 1,
   "status": "provisional",
-  "note": "2026-11-25 サニー「オープニングを作成してほしい」「演出のあるテキストプロローグ」：はじめての冒険で、表紙を押したあと、本がひらく前に流す文。いまの文は、世界観・シナリオ室のノルン導入の台本（ノルン導入から追跡開始_試作シナリオ_v01.md 場面1の地の文）を、句点で区切ってそのまま並べた仮。プロローグの正式な文は世界観・シナリオ室に依頼中（production/claude/依頼_プロローグ_シナリオ室.md）",
-  "source": "production/claude/scenario/ノルン導入から追跡開始_試作シナリオ_v01.md",
+  "note": "2026-11-25 STORY-OPENING-20261125 revision 2：世界観・シナリオ室「プロローグ_v01.md」の表示本文16行（見出しは6行目だけ）。tools/gen-prologue.cjs が写した。はじめての冒険で、表紙を押したあと本がひらく前に流し、最後の行のあと本がひらいてノルン導入の場面1（串焼きを一口食べる所から）につなぐ。mood：dark＝冒頭の歴史の語り（背景を暗く）、bright＝祭りの昼",
+  "source": "production/claude/scenario/プロローグ_v01.md",
   "backdrop": "assets/backdrops/norn_day_v02.jpg",
   "lines": [
-    { "text": "ノルンの星環祭、昼。", "style": "title" },
-    { "text": "呼び声と人の足音。" },
-    { "text": "焼けた脂と香辛料の匂い。" }
+    {
+      "text": "かつて、ノヴァより災いが降った。",
+      "mood": "dark"
+    },
+    {
+      "text": "大地は焼け、多くの命が失われた。",
+      "mood": "dark"
+    },
+    {
+      "text": "それでも、人は滅びなかった。",
+      "mood": "dark"
+    },
+    {
+      "text": "魔法を編み、天に星環を築いた。",
+      "mood": "dark"
+    },
+    {
+      "text": "その光が、今も世界を守っている。",
+      "mood": "dark"
+    },
+    {
+      "text": "ノルンの星環祭",
+      "style": "title",
+      "mood": "bright"
+    },
+    {
+      "text": "白と銀の布が、通りの上で揺れる。",
+      "mood": "bright"
+    },
+    {
+      "text": "輪飾りの下を、人々が行き交う。",
+      "mood": "bright"
+    },
+    {
+      "text": "店の呼び声に、楽団の音が重なる。",
+      "mood": "bright"
+    },
+    {
+      "text": "炭火の上で、脂がはぜた。",
+      "mood": "bright"
+    },
+    {
+      "text": "香辛料の匂いが、人波を抜けてくる。",
+      "mood": "bright"
+    },
+    {
+      "text": "星環は今日も、青空に白く輝いていた。",
+      "mood": "bright"
+    },
+    {
+      "text": "笑い声が、通りの向こうへ続いていく。",
+      "mood": "bright"
+    },
+    {
+      "text": "黒髪のナハト。",
+      "mood": "bright"
+    },
+    {
+      "text": "その隣には、金髪のヴォルト。",
+      "mood": "bright"
+    },
+    {
+      "text": "二人の前で、串焼きの煙が上がった。",
+      "mood": "bright"
+    }
   ]
 }

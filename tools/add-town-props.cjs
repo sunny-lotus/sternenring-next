@@ -44,6 +44,25 @@ const FESTIVAL = {
     ['lantern-string', 1, 9, 54, 1, 6.6, 'mid', false], ['lantern-string', 1, 13, 22, 1, 6.2, 'mid', false],
   ],
 };
+// 祭りの飾りの絵（2026-11-25 ART-FESTIVAL-20261125：美術・演出室の元絵 町_ノルン_祭り_v01 を tools/copy-festival-art.py で写した）。祭りのマップでは、屋台も飾り付きの版にする（屋台の絵に小旗と提灯が描いてあるので、屋台の上には飾りを足さない）
+const FEST_BOARDS = { bunting: 'bunting.webp', 'lantern-string': 'lantern_string.webp', 'festival-banner': 'festival_banner.webp', 'flower-garland': 'flower_garland.webp', stall: 'stall_festival.webp' };
+// 長く渡す飾り（小旗・提灯）は、絵1本分くらいの長さ（MAXSPAN マス）に区切って、すきまを1マスあけて吊るす（1本の絵を長く引き伸ばさない。ぎっしりにしない）
+const MAXSPAN = { bunting: 10, 'lantern-string': 9 };
+const splitSpan = (name, x, w) => { const m = MAXSPAN[name]; if (!m || w <= m + 2) return [[x, w]]; const n = Math.ceil((w + 1) / (m + 1)), sw = (w + 1) / n - 1; return Array.from({ length: n }, (_, i) => [x + i * (sw + 1), sw]); };
+// 花輪：入れる家の扉の上に（家の絵の扉の位置 townArt.doors と、絵の大きさから計算する）。多すぎないよう、扉のある家の1軒おきに
+const IMG = { 'house_home_2f.webp': [512, 511], 'house_a_narrow.webp': [271, 512], 'house_b_sideroof.webp': [512, 452], 'house_c_stepgable.webp': [358, 512], 'house_d_workshop.webp': [512, 487], 'house_e_archway.webp': [512, 463], 'house_f_corner.webp': [464, 512], 'inn_silver_deer.webp': [511, 512] };
+const GARLAND_AR = 86 / 512;
+function garlands(m) {
+  const t = m.stage.townArt, out = []; let k = 0;
+  for (const l of m.stage.layers) for (const it of l.items) {
+    if (!it.doorExit || !it.art || !IMG[it.art]) continue; const d = t.doors?.[it.art]; if (!d?.h || !d.cut?.x0) continue;
+    if (k++ % 2) continue;
+    const H = t.doorH / d.h, W = H * IMG[it.art][0] / IMG[it.art][1], cx = it.x + it.w / 2;
+    const dx = cx - W / 2 + W * (d.cut.x0 + d.cut.x1) / 2, top = H * (1 - d.cut.y0), gw = Math.max(1.4, W * (d.cut.x1 - d.cut.x0) * 1.5), gh = gw * GARLAND_AR;
+    out.push({ band: l.band, item: { asset: 'placeholder:flower-garland', x: +(dx - gw / 2).toFixed(3), y: it.y, w: +gw.toFixed(3), h: it.h, standH: +(top + gh * 0.8).toFixed(3), zOffset: 0.3, prop: true, solid: false, festival: true } });
+  }
+  return out;
+}
 // 歩き回る町の人：道をたどって行き来する（端で少し立ち止まる）。マスは通りの空いた所。隣のマップへの出入口から5マス以上離す（2026-11-25 サニー「隣のマップに行く場所の前にモブが立っているのどけて」）
 const WALKERS = {
   'norn-inn-street': [
@@ -62,7 +81,7 @@ const SWAP = { 'norn-inn-street': { '17,11': 'sacks', '16,15': 'firewood', '23,1
 for (const id of Object.keys(ADD)) {
   const file = path.join(dir, `${id}.json`), m = JSON.parse(fs.readFileSync(file, 'utf8'));
   const g = m.collision.map((r) => [...r]);
-  Object.assign(m.stage.townArt.boards, BOARDS);
+  Object.assign(m.stage.townArt.boards, BOARDS); if (FESTIVAL[id]) Object.assign(m.stage.townArt.boards, FEST_BOARDS); else if (m.stage.townArt.boards.stall === FEST_BOARDS.stall) m.stage.townArt.boards.stall = 'stall.webp';
   for (const l of m.stage.layers) { // 前に置いた物を外す（ぶつかる所も戻す）
     for (const it of l.items.filter((x) => x.prop)) if (it.solid) for (let j = it.y; j < it.y + it.h; j++) for (let i = it.x; i < it.x + it.w; i++) g[j][i] = '.';
     l.items = l.items.filter((x) => !x.prop);
@@ -84,7 +103,8 @@ for (const id of Object.keys(ADD)) {
     }
     for (const e of m.events || []) if (e.y === y0 && e.x >= x0 && e.x < x0 + it.w && !(e.x >= x1 && e.x < x1 + it.w)) e.x += x1 - x0; // gen-town-life.cjs を流し直すと出来事はもとの所に戻るので、毎回そろえる
   }
-  for (const [name, x, y, w, h, standH, band] of FESTIVAL[id] || []) m.stage.layers.find((l) => l.band === band).items.push({ asset: `placeholder:${name}`, x, y, w, h, standH, zOffset: band === 'back' ? 0.3 : 0.02, prop: true, solid: false, festival: true });
+  for (const [name, x, y, w, h, standH, band] of FESTIVAL[id] || []) for (const [sx, sw] of splitSpan(name, x, w)) m.stage.layers.find((l) => l.band === band).items.push({ asset: `placeholder:${name}`, x: +sx.toFixed(3), y, w: +sw.toFixed(3), h, standH, zOffset: band === 'back' ? 0.3 : 0.02, prop: true, solid: false, festival: true });
+  if (FESTIVAL[id]) for (const { band, item } of garlands(m)) m.stage.layers.find((l) => l.band === band).items.push(item);
   m.walkers = WALKERS[id] || [];
   m.collision = g.map((r) => r.join(''));
   fs.writeFileSync(file, JSON.stringify(m, null, 2) + '\n');

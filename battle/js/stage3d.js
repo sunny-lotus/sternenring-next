@@ -95,13 +95,9 @@ function build() {
   if (place === 'forest' || place === 'town') { ceil.visible = false; rim.visible = false; } // 外：天井なし、空がひらけている
   if (place === 'dungeon') { sky.visible = false; ceil.geometry.dispose(); ceil.geometry = new THREE.CircleGeometry(16, 64); } // ダンジョン：天井をふさぐ（空は見えない）
   // 場所ごとの舞台は、フィールドと同じ水彩の絵で作る（2026-11-25 サニー「戦闘の背景ちゃんとしよう」）。絵は NEXT の assets（../assets/）。
-  // 奥の半分に背景の絵を丸く張り（behind）、そのまわりに木・家の絵の板を立てる（カメラのほうへ向ける）。床は手ざわりの絵をくり返す
+  // まわりに背景の絵を丸く張り（pano）、手前に少しだけ絵の板を立てる（カメラのほうへ向ける）。床は手ざわりの絵をくり返す
   const A = '../assets/';
   const art = (p, rep) => { const t = loader.load(A + p); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); } return t; };
-  const behind = (p, h, r) => { // 奥の半分（カメラの向こう側）を囲む背景の絵
-    const t = art(p); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 48, 1, true, Math.PI * .5, Math.PI), new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false }));
-    m.position.y = h / 2 - .4; scene.add(m); return m;
-  };
   const board = (p, h, x, z, tint) => { // 立てた絵の板（足もとを地面に、カメラのほうを向く）
     const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ transparent: true, alphaTest: .35, roughness: 1, color: tint || 0xffffff }));
     m.geometry.translate(0, .5, 0); m.position.set(x, 0, z); m.scale.set(h * .6, h, 1);
@@ -117,29 +113,41 @@ function build() {
     m.lookAt(0.6, 0, 13.5); scene.add(m); return m;
   };
   const ring = (n, r0, r1, a0, a1, seed, put) => { const r = rnd(seed); for (let i = 0; i < n; i++) { const a = a0 + (a1 - a0) * (i + r() * .6) / n, rr = r0 + (r1 - r0) * r(); put(Math.sin(a) * rr, -Math.cos(a) * rr, r); } }; // a：0＝真奥、±で左右
-  if (place === 'forest' || place === 'town') { floor.geometry.dispose(); floor.geometry = new THREE.CircleGeometry(48, 72); } // 外：床を広げて、木や家の足もとから奥まで地面が続くように（床の円のふちの外が空で、木が浮いて見えた）
+  // 2026-11-25 ART-BATTLE-BG-20261125：美術・演出室の戦闘背景（4096×1280、左右がつながる絵）と床（1024角のくり返し）に入れかえた。絵は ../assets/battle/（tools/copy-battle-bg.py が元絵から写す）。
+  // 背景はぐるりと一周の円筒に2回くり返して張る（縦横比 3.2:1 を保つ：高さ＝円周/2/3.2、引き伸ばさない）。内側から見ると左右が逆になるので、UV の u を 1-u にして元の向きのまま見せる（反転の拡大は使わない）。
+  // 絵の下の地面（horizon より下）は床より下へ沈め、絵の地平線をカメラの目の高さ近くに置く。床の円は円筒のふちまで広げて、絵の地面と床がつながるようにする。
+  const BR = 22, BH = Math.PI * BR / 3.2; // 円筒の半径と高さ（1回分の絵の幅＝半周）
+  const pano = (p, ground) => { // ground：絵の高さのうち、下から地面の割合
+    const t = art('battle/' + p + '.webp'); t.wrapS = THREE.RepeatWrapping; t.repeat.set(2, 1);
+    const g = new THREE.CylinderGeometry(BR, BR, BH, 96, 1, true, Math.PI * .5, Math.PI * 2); const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setX(i, 1 - uv.getX(i));
+    const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false })); m.position.y = BH / 2 - BH * ground + 2.2; scene.add(m); return m;
+  };
+  const artFloor = (p, unit, gain) => { // unit：絵1枚が何メートル四方か。gain：遠くの床が絵の地面に近い明るさになるよう、自分でも少し光らせる（美術室の仮の色合わせ値を参考に）
+    floor.geometry.dispose(); floor.geometry = new THREE.CircleGeometry(BR - .02, 96);
+    const t = art('battle/' + p + '.webp', [BR * 2 / unit, BR * 2 / unit]); floor.material.map = t; floor.material.emissiveMap = t; floor.material.emissive = new THREE.Color(gain[0], gain[1], gain[2]); floor.material.emissiveIntensity = .55;
+  };
+  if (place === 'forest' || place === 'town' || place === 'dungeon') scene.fog.density = 0.008; // 背景の絵は霧を受けないので、床の霧もうすくして境目をなじませる
   if (place === 'forest') {
     wall.visible = false;
-    floor.material.map = art('forest/forest_soil.webp', [21, 21]);
-    if (!day) behind('backdrops/title_bg_temp.jpg', 16, 15.6); // 夜の森の奥（フィールドの森と同じ背景）。昼は空のまま
-    // 大きさはキャラ（約2.4）に合わせる：木はフィールドと同じくキャラの2倍強、やぶ・岩はひざから腰くらい
-    ring(20, 10, 14.5, -1.9, 1.9, 61, (x, z, r) => board(r() < .55 ? 'forest/tree_fir.webp' : 'forest/tree_broad.webp', 4.8 + r() * 1.2, x, z, day ? 0xffffff : 0xb8c0d0));
-    ring(26, 16, 26, -1.5, 1.5, 63, (x, z, r) => board(r() < .5 ? 'forest/tree_fir.webp' : 'forest/tree_broad.webp', 5.5 + r() * 1.5, x, z, day ? 0xdde4ee : 0x8a94a8)); // 奥の木々（遠いほど少しかすむ）
+    pano(day ? 'battle_forest_day' : 'battle_forest_night', .35);
+    artFloor('battle_floor_forest', 4, day ? [1, 1, 1] : [.45, .55, .75]);
+    // 木は背景の絵に描いてあるので、手前の左右のはしに少しだけ（重なって二重に見えないように）。やぶ・岩はひざから腰くらい
+    ring(6, 9, 12, -1.9, 1.9, 61, (x, z, r) => { if (Math.abs(x) < 6) return; board(r() < .55 ? 'forest/tree_fir.webp' : 'forest/tree_broad.webp', 4.8 + r() * 1.2, x, z, day ? 0xffffff : 0xb8c0d0); });
     ring(7, 7, 9, -1.7, 1.7, 62, (x, z, r) => { const bush = r() < .6; board(bush ? 'forest/bush.webp' : 'forest/rock.webp', bush ? .75 + r() * .25 : .55 + r() * .25, x, z, day ? 0xffffff : 0xb8c0d0); });
   }
   if (place === 'town') {
     wall.visible = false;
-    floor.material.map = art('town/norn/tex_cobble_square.webp', [27, 27]);
-    behind(day ? 'backdrops/norn_day_v02.jpg' : 'backdrops/norn_night_v02.jpg', 16, 15.6); // ノルンの町の奥（フィールドと同じ背景）
-    const H = ['house_home_2f', 'house_a_narrow', 'house_b_sideroof', 'house_c_stepgable', 'house_d_workshop', 'house_e_archway', 'house_f_corner'];
-    ring(9, 12, 13.5, -1.75, 1.75, 71, (x, z, r) => board('town/norn/' + H[Math.floor(r() * H.length)] + '.webp', 5.2 + r() * .8, x, z)); // 家はフィールドと同じく扉がキャラくらい
+    pano(day ? 'battle_town_day' : 'battle_town_night', .29);
+    artFloor('battle_floor_town', 3, day ? [1, 1, 1] : [.4, .48, .68]);
+    // 家は背景の絵に描いてあるので立てない。手前に街灯と樽だけ
     ring(4, 8, 9, -1.5, 1.5, 72, (x, z, r) => { const lamp = r() < .5; board(lamp ? 'town/norn/lamp_post.webp' : 'town/norn/barrels.webp', lamp ? 3.4 : 1.1, x, z); });
   }
-  if (place === 'dungeon') { // ダンジョン：フィールドのダンジョンと同じ床・壁・天井の絵
-    floor.material.map = art('interiors/test-dungeon/dungeon_floor.webp', [7, 7]);
-    const wt = art('interiors/test-dungeon/dungeon_wall.webp', [10, 2]); wall.material.map = wt; wall.material.emissiveMap = wt; wall.material.emissiveIntensity = .25;
-    ceil.material.map = art('interiors/test-dungeon/dungeon_ceiling.webp', [6, 6]); ceil.material.emissiveMap = ceil.material.map;
-    ring(6, 10, 11, -1.6, 1.6, 81, (x, z) => board('interiors/test-dungeon/dungeon_pillar.webp', 5.5, x, z));
+  if (place === 'dungeon') { // ダンジョン：柱と壁は背景の絵。天井は円筒の上でふさぐ（フィールドのダンジョンと同じ天井の絵）
+    wall.visible = false;
+    const pm = pano('battle_dungeon', .37);
+    artFloor('battle_floor_dungeon', 4, [.75, .72, .8]);
+    ceil.geometry.dispose(); ceil.geometry = new THREE.CircleGeometry(BR, 96); ceil.position.y = pm.position.y + BH / 2 - .02;
+    ceil.material.map = art('interiors/test-dungeon/dungeon_ceiling.webp', [9, 9]); ceil.material.emissiveMap = ceil.material.map;
   }
 
   scene.add(new THREE.HemisphereLight(0x9aa6ff, 0x202030, 1.0));
@@ -148,7 +156,7 @@ function build() {
   const tl = new THREE.PointLight(0xffa860, 25, 14, 1.4); tl.position.set(-7, 3.5, -12); scene.add(tl);
   const tr = new THREE.PointLight(0xffa860, 25, 14, 1.4); tr.position.set(8, 3.5, -11); scene.add(tr);
   const moon = new THREE.DirectionalLight(0xaabbff, .6); moon.position.set(-3, 8, 6); scene.add(moon);
-  if (day && place !== 'dungeon') { scene.fog.color.setHex(0xb8c8dc); scene.fog.density = 0.012; moon.color.setHex(0xfff4e0); moon.intensity = 2.2; scene.children.filter((o) => o.isHemisphereLight).forEach((o) => { o.color.setHex(0xdfe8ff); o.groundColor.setHex(0x6a6050); o.intensity = 1.6; }); } // 昼：明るく
+  if (day && place !== 'dungeon') { scene.fog.color.setHex(0xb8c8dc); scene.fog.density = place ? 0.008 : 0.012; moon.color.setHex(0xfff4e0); moon.intensity = 2.2; scene.children.filter((o) => o.isHemisphereLight).forEach((o) => { o.color.setHex(0xdfe8ff); o.groundColor.setHex(0x6a6050); o.intensity = 1.6; }); } // 昼：明るく
   else if (place === 'forest') scene.fog.color.setHex(0x0c1a12); // 夜の森：緑がかった暗がり
   const motes = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(Array.from({ length: lite ? 240 : 600 }, () => (Math.random() - .5) * 20), 3)),
     new THREE.PointsMaterial({ color: 0xffe2a0, size: .05, transparent: true, opacity: .7 }));

@@ -674,7 +674,7 @@
         ],
         "inn-tall": "inn_silver_deer.webp",
         "lamp": "lamp_post.webp",
-        "stall": "stall.webp",
+        "stall": "stall_festival.webp",
         "flower-stall": "flower_stall.webp",
         "cart": "cart.webp",
         "planter": "planter.webp",
@@ -700,7 +700,11 @@
         "firewood": "firewood.webp",
         "fence": "fence.webp",
         "laundry": "laundry.webp",
-        "door-pots": "door_pots.webp"
+        "door-pots": "door_pots.webp",
+        "bunting": "bunting.webp",
+        "lantern-string": "lantern_string.webp",
+        "festival-banner": "festival_banner.webp",
+        "flower-garland": "flower_garland.webp"
       }
     },
     "paved": [
@@ -945,6 +949,30 @@
             "w": 1,
             "h": 1,
             "standH": 4.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:flower-garland",
+            "x": 6.065,
+            "y": 1,
+            "w": 4.87,
+            "h": 4,
+            "standH": 4.377,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:flower-garland",
+            "x": 25.476,
+            "y": 1,
+            "w": 2.071,
+            "h": 4,
+            "standH": 3.234,
             "zOffset": 0.3,
             "prop": true,
             "solid": false,
@@ -1197,7 +1225,55 @@
             "asset": "placeholder:lantern-string",
             "x": 1,
             "y": 7,
-            "w": 42,
+            "w": 7.6,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 9.6,
+            "y": 7,
+            "w": 7.6,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 18.2,
+            "y": 7,
+            "w": 7.6,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 26.8,
+            "y": 7,
+            "w": 7.6,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 35.4,
+            "y": 7,
+            "w": 7.6,
             "h": 1,
             "standH": 6.4,
             "zOffset": 0.02,
@@ -1565,5 +1641,76 @@
       "speed": 0.8,
       "wait": 2400
     }
-  ]
+  ],
+  "storyLock": {
+    "id": "norn-intro",
+    "status": "provisional",
+    "prefix": "story.norn.",
+    "idPrefix": "story-",
+    "active": {
+      "flags": {
+        "story.norn.meal": true
+      }
+    },
+    "until": {
+      "flags": {
+        "story.norn.ended": true
+      }
+    },
+    "phases": [
+      {
+        "when": {
+          "flags": {
+            "story.norn.chase": true
+          }
+        },
+        "talk": [
+          "story.norn.mob.chase-1",
+          "story.norn.mob.chase-2"
+        ],
+        "examine": "story.norn.busy",
+        "exit": "story.norn.stay-chase",
+        "walkers": false
+      },
+      {
+        "when": {
+          "flags": {
+            "story.norn.saved": true
+          }
+        },
+        "talk": [
+          "story.norn.mob.saved-1",
+          "story.norn.mob.saved-2",
+          "story.norn.mob.saved-3"
+        ],
+        "examine": "story.norn.busy",
+        "exit": "story.norn.stay-saved",
+        "walkers": false
+      },
+      {
+        "when": {
+          "flags": {
+            "story.norn.alarm": true
+          }
+        },
+        "talk": [
+          "story.norn.mob.alarm-1",
+          "story.norn.mob.alarm-2",
+          "story.norn.mob.alarm-3"
+        ],
+        "examine": "story.norn.busy",
+        "exit": "story.norn.stay-alarm",
+        "walkers": false
+      },
+      {
+        "talk": [
+          "story.norn.mob.calm-1",
+          "story.norn.mob.calm-2",
+          "story.norn.mob.calm-3"
+        ],
+        "examine": "story.norn.busy-calm",
+        "exit": "story.norn.stay-calm"
+      }
+    ]
+  }
 }

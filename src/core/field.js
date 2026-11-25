@@ -49,6 +49,20 @@ export function createField(data) {
   const npcShown = (/** @type {any} */ n) => !n.hideWhen || !Object.entries(n.hideWhen.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v);
   const npcAt = (x, y) => (data.maps[state.mapId].npcs || []).find((/** @type {any} */ n) => n.x === x && n.y === y && npcShown(n)) || null;
   const OPP = /** @type {Record<string,string>} */ ({ up: 'down', down: 'up', left: 'right', right: 'left' });
+  /**
+   * 物語の一連（マップの storyLock。2026-11-25 サニー「ストーリーが始まったらほかのモブたちのセリフも変わり、一旦イベントの1連が終わるまでほかのイベントは起こらないように、ストーリーの流れを断ち切らないように」）：
+   * active の旗がそろってから until の旗がそろうまでのあいだ、そのマップでは
+   *  ・物語の出来事（id が idPrefix で始まる、または言葉が prefix で始まるページ）だけが動く
+   *  ・ほかの町の人は、いまの段（phases：when の旗がそろう最初の段）の talk の言葉を順に話す。ほかの調べる出来事は examine の言葉だけ（旗・お金などは動かない）
+   *  ・出入口（隣のマップ・家の扉）へは進めず exit の言葉が出る。見えている敵・ランダムの戦闘は起きない。物語でないしるし・きらきらは出ない。walkers: false の段では歩き回る町の人もいない
+   */
+  const flagsOk = (/** @type {any} */ f) => Object.entries(f?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v);
+  function storyLockNow() {
+    const L = data.maps[state.mapId].storyLock; if (!L || !data.record || !flagsOk(L.active) || flagsOk(L.until)) return null;
+    return { L, ph: (L.phases || []).find((/** @type {any} */ p) => !p.when || flagsOk(p.when)) || {} };
+  }
+  const isStory = (/** @type {any} */ L, /** @type {string} */ id, /** @type {any} */ page) => String(id).replace(/^npc:/, '').startsWith(L.idPrefix || 'story-') || (!!page && String(page.dialogue || '').startsWith(L.prefix || 'story.'));
+  /** @type {Record<string, number>} 物語のあいだ、町の人ごとに次に話す言葉の番 */ const lockTalk = {};
 
   /** @param {string} mapId @param {{x:number,y:number,dir:string}} at */
   /** @param {string} mapId @param {any} at @param {{dx:number,dy:number}[]} [keep] 仲間の、主人公からの位置（そのまま並べたいとき） */
@@ -110,7 +124,7 @@ export function createField(data) {
   const onRoad = (mapId, x, y) => (data.maps[mapId].roads || []).some((/** @type {any} */ r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   function randomEncounter() {
     const m = data.maps[state.mapId], re = m.randomEncounters, p = player();
-    if (!re || state.devNoRandom || onRoad(state.mapId, p.x, p.y)) return false;
+    if (!re || state.devNoRandom || onRoad(state.mapId, p.x, p.y) || storyLockNow()) return false;
     state.wildSteps++;
     if (state.wildSteps < (re.minSteps ?? 8) || rng() >= (re.rate ?? 0.08)) return false;
     const list = re.battles || [];
@@ -130,9 +144,20 @@ export function createField(data) {
     const npc = npcAt(p.x + dx, p.y + dy);
     const ev = (npc && npc.pages ? { id: 'npc:' + npc.id, pages: npc.pages } : null) || list.find((/** @type {any} */ e) => e.x === p.x + dx && e.y === p.y + dy) || list.find((/** @type {any} */ e) => e.x === p.x && e.y === p.y);
     if (!ev || !rec) return false;
-    if (npc && npc.pages && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir]; // 話すと、こちらを向く
     // party のあるページ（立ち絵の会話など）は、その仲間がみんな隊列にいるときだけ
-    const page = pickPage(rec, ev.pages.filter((/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((/** @type {any} */ a) => a.id === id)))); if (!page) return false;
+    const page = pickPage(rec, ev.pages.filter((/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((/** @type {any} */ a) => a.id === id))));
+    const lock = storyLockNow();
+    if (lock && !isStory(lock.L, ev.id, page)) { // 物語のあいだは、ほかの出来事は起きない。町の人は物語の段に合った言葉を話す
+      const pool = npc ? lock.ph.talk || [] : [];
+      let d = lock.ph.examine || null;
+      if (npc && pool.length) { const k = lockTalk[npc.id] ?? [...npc.id].reduce((a, c) => a + c.charCodeAt(0), 0); lockTalk[npc.id] = k + 1; d = pool[k % pool.length]; }
+      if (!d) return false;
+      if (npc && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir];
+      state.message = { event: ev.id, dialogue: d, notes: [] };
+      return true;
+    }
+    if (!page) return false;
+    if (npc && npc.pages && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir]; // 話すと、こちらを向く
     const notes = applyEffects(rec, { ...(page.give || {}), flags: { ...(page.set?.flags || {}) } });
     state.message = { event: ev.id, dialogue: page.dialogue || null, notes };
     data.onRecordChange?.();
@@ -166,11 +191,13 @@ export function createField(data) {
     const [dx, dy] = DIR_VEC[dir];
     const nx = p.x + dx, ny = p.y + dy;
     // 見えている敵（マップの encounters）：まだ倒していない敵のマスへ進もうとすると戦闘になる（2026-11-22 作者「森に敵が見えていて、ぶつかると戦闘」）
-    const foe = encounterAt(nx, ny);
+    const lock = storyLockNow();
+    const foe = lock ? null : encounterAt(nx, ny); // 物語のあいだは戦闘にならない
     if (foe) { state.battle = { id: foe.id, battle: foe.battle, mapId: state.mapId }; return false; }
     if (npcAt(nx, ny)) return false; // 町の人のマスは通れない
     if (closedGateAt(nx, ny)) return false; // 閉じている仕掛けの扉
     if (!queries[state.mapId].passable(nx, ny)) return false;
+    if (lock && queries[state.mapId].exitAt(nx, ny)) { if (lock.ph.exit) state.message = { event: 'story-lock', dialogue: lock.ph.exit, notes: [] }; return false; } // 物語のあいだは、ほかの場所へ行かない
     // 高さが1段より大きくちがうマスへは歩けない（2階の通路へは階段からだけ上がれる。2026-11-22）
     if (Math.abs(queries[state.mapId].heightAt(nx, ny) - queries[state.mapId].heightAt(p.x, p.y)) > 1) return false;
     state.foeRest = null; // 1歩動いたら、逃げた敵ともまた戦える
@@ -275,6 +302,7 @@ export function createField(data) {
    * 位置は時計だけで決まる（何度開いても同じ動き）。{ id, sprite, tone, path: [[x,y],...], speed（マス/秒）, wait（端で立ち止まるミリ秒） }
    */
   function walkersNow() {
+    if (storyLockNow()?.ph.walkers === false) return []; // 騒ぎのあいだは、歩き回る町の人はいない
     return (data.maps[state.mapId].walkers || []).map((/** @type {any} */ w, /** @type {number} */ i) => {
       const P = w.path, seg = P.slice(1).map((q, k) => Math.hypot(q[0] - P[k][0], q[1] - P[k][1])), L = seg.reduce((a, b) => a + b, 0) || 1;
       const sp = (w.speed || 1) / 1000, wait = w.wait ?? 1200, cyc = 2 * L / sp + 2 * wait; let t = (state.clock + i * 2371) % cyc;
@@ -288,8 +316,8 @@ export function createField(data) {
   function eventMarks() {
     const rec = data.record, m = data.maps[state.mapId]; if (!rec) return [];
     const has = (/** @type {any} */ pg) => !pg.party || pg.party.every((/** @type {string} */ id) => state.actors.some((a) => a.id === id));
-    const out = [];
-    for (const e of [...(m.events || []), ...(m.npcs || []).filter(npcShown)]) { if (!e.pages) continue; const pg = pickPage(rec, e.pages.filter(has)); if (pg?.mark) out.push({ id: e.id, x: e.x, y: e.y, npc: !!e.sprite }); }
+    const out = [], lock = storyLockNow();
+    for (const e of [...(m.events || []), ...(m.npcs || []).filter(npcShown)]) { if (!e.pages) continue; const pg = pickPage(rec, e.pages.filter(has)); if (pg?.mark && (!lock || isStory(lock.L, e.id, pg))) out.push({ id: e.id, x: e.x, y: e.y, npc: !!e.sprite }); } // 物語のあいだは、物語のしるしだけ
     return out;
   }
   /** 描画用の読み取り専用の見え方（補間した位置） */
@@ -307,7 +335,7 @@ export function createField(data) {
         ? { kind: state.leaving.kind, phase: 'leave', p: 1 - state.leaving.left / (state.leaving.total || 1), at: state.leaving.at || { x: state.leaving.exit.x, y: state.leaving.exit.y }, exit: state.leaving.exit.id }
         : state.arriveKind && state.transitionLeft > 0 ? { kind: state.arriveKind, phase: 'arrive', p: 1 - state.transitionLeft / (state.transitionTotal || 1), at: null, dir: state.arriveDir, exit: state.transferLog.at(-1)?.exit ?? null } : null, // exit：通った出入口の id（扉の音に使う）
       // きらきら光る所（2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」）：出来事に sparkle があり、その旗がまだ立っていない所
-      sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
+      sparkles: (data.maps[state.mapId].events || []).filter((/** @type {any} */ e) => e.sparkle && !(data.record?.flags?.[e.sparkle.flag]) && (!storyLockNow() || isStory(storyLockNow()?.L, e.id, null)) && Object.entries(e.sparkle.when?.flags || {}).every(([k, v]) => !!data.record?.flags?.[k] === v)).map((/** @type {any} */ e) => ({ id: e.id, x: e.x, y: e.y })), // sparkle.when：その旗がそろってから光る（2026-11-25 包み布は目撃を聞いてから）
       marks: eventMarks(), // イベントが始まる所のしるし（2026-11-25 サニー「イベントが始まるところにはしるしを」）
       npcs: [...(data.maps[state.mapId].npcs || []).filter(npcShown).map((/** @type {any} */ n) => ({ id: n.id, sprite: n.sprite, tone: n.tone, x: n.x, y: n.y, dir: state.npcFace[n.id] || n.dir || 'down' })),
         ...walkersNow(),

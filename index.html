@@ -110,18 +110,24 @@
   #novel.away .seat { opacity: 0; transform: translateY(8%); } /* 地の文・演出の行は立ち絵を下げて、町の様子を見せる（2026-11-25） */
   #novel.away { background: none; }
   /* プロローグ（2026-11-25 サニー「演出のあるテキストプロローグ」）：表紙を押したあと、本がひらく前。町の絵をぼかして暗くし、ゆっくり寄る。提灯の光の粒が昇る。文は1行ずつにじんで浮かぶ */
-  #prologue { position: fixed; inset: 0; z-index: 70; background: #07060c; overflow: hidden; cursor: pointer; opacity: 0; transition: opacity 1s ease; }
+  #prologue { position: fixed; inset: 0; z-index: 70; background: #07060c; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; outline: none; opacity: 0; transition: opacity 1s ease; }
   #prologue.on { opacity: 1; }
   #prologue .bg { position: absolute; inset: -6%; background-size: cover; background-position: center; filter: blur(3px) brightness(.42) saturate(.85); animation: pro-zoom 40s ease-out forwards; }
   @keyframes pro-zoom { from { transform: scale(1.0); } to { transform: scale(1.12); } }
+  #prologue .bg { transition: filter 2.4s ease; }
+  #prologue.dark .bg { filter: blur(4px) brightness(.16) saturate(.4) sepia(.3); }
+  #prologue.dark .mote { visibility: hidden; }
   #prologue .vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,0) 30%, rgba(4,3,8,.85) 100%); }
   #prologue .mote { position: absolute; bottom: -20px; border-radius: 50%; background: radial-gradient(circle, #ffe2a0 0%, rgba(255,190,110,.6) 40%, rgba(255,170,90,0) 70%); animation: pro-rise linear infinite; opacity: 0; }
   @keyframes pro-rise { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 12% { opacity: .9; } 85% { opacity: .7; } 100% { transform: translate(var(--dx), -110vh) scale(1.1); opacity: 0; } }
-  #prologue .lines { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86vw, 900px); text-align: center; color: #f3ead2; font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif; letter-spacing: .12em; text-shadow: 0 2px 12px rgba(0,0,0,.8); }
-  #prologue .ln { font-size: clamp(18px, 3.2vw, 30px); line-height: 2; opacity: 0; filter: blur(8px); transform: translateY(14px); transition: opacity 1.6s ease, filter 1.6s ease, transform 1.6s ease; }
+  #prologue .lines { position: absolute; left: 50%; top: 50%; width: min(86vw, 900px); height: 0; transform: translateX(-50%); text-align: center; color: #f3ead2; font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif; letter-spacing: .12em; text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+  #prologue .ln { position: absolute; left: 0; right: 0; top: 0; font-size: clamp(18px, 3.2vw, 30px); line-height: 2; opacity: 0; filter: blur(8px); transform: translateY(calc(var(--y, 0px) + 18px)); transition: opacity 1.8s ease, filter 1.8s ease, transform 1.6s cubic-bezier(.22,.61,.36,1); will-change: transform, opacity; }
   #prologue .ln.title { font-size: clamp(24px, 4.6vw, 44px); color: #f3d48b; letter-spacing: .2em; }
-  #prologue .ln.in { opacity: 1; filter: blur(0); transform: none; }
-  #prologue .ln.in.past { opacity: .38; }
+  #prologue .ln.in { opacity: 1; filter: blur(0); transform: translateY(var(--y, 0px)); }
+  #prologue .ln.in.age1 { opacity: .45; }
+  #prologue .ln.in.age2 { opacity: .18; }
+  #prologue .ln.gone { opacity: 0; filter: blur(6px); transform: translateY(calc(var(--y, 0px) - 12px)); }
+  @media (max-width: 520px) { #prologue .ln { font-size: 16px; letter-spacing: .04em; } #prologue .ln.title { font-size: 26px; letter-spacing: .12em; } }
   #prologue .hint { position: absolute; right: 18px; bottom: 14px; color: rgba(243,234,210,.55); font-size: 13px; letter-spacing: .1em; }
   #prologue .skip { position: absolute; right: 16px; top: 14px; background: rgba(0,0,0,.35); color: #f3ead2; border: 1px solid rgba(243,212,139,.5); border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
   #novel .seat img { position: absolute; display: block; user-select: none; -webkit-user-drag: none; }

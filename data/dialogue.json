@@ -7127,7 +7127,159 @@
     ],
     "story.norn.alley": [
       "（細い路地の奥。荷が置いてある。）"
-    ]
+    ],
+    "story.norn.mob.calm-1": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "楽団の音、広場のほうから聞こえてくるね。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.calm-2": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "人が多くて、なかなか前に進めないよ。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.calm-3": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "いい匂い。串焼きの屋台かな。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.alarm-1": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "星獣だって……！　どっちへ逃げればいいんだ！"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.alarm-2": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "東のほうで、荷車が倒れたって！"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.alarm-3": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "押さないで！　子どもがいるの！"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.saved-1": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "さっきは助かったよ……。でも、まだ見つからない人がいるって。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.saved-2": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "あの星獣、どこへ行ったんだろう。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.saved-3": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "祭りの日に、こんなことになるなんて。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.chase-1": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "脇の通りへ行くのかい？　気をつけて。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.mob.chase-2": {
+      "lines": [
+        {
+          "who": "町の人",
+          "text": "オットーさん、ずっと通りの向こうを見てるよ。"
+        }
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.busy-calm": {
+      "lines": [
+        "（人波に押されて、ゆっくり見ていられない。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.busy": {
+      "lines": [
+        "（今は、それどころではない。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.stay-calm": {
+      "lines": [
+        "（オットーの屋台に、まだ用がありそうだ。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.stay-alarm": {
+      "lines": [
+        "（取り残された人がいる。ここを離れるわけにはいかない。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.stay-saved": {
+      "lines": [
+        "（まだ、戻ってこない人がいる。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    },
+    "story.norn.stay-chase": {
+      "lines": [
+        "（脇の通りの先を、追わないと。）"
+      ],
+      "status": "provisional",
+      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+    }
   },
   "lifeNote": "2026-11-24 作者「イベントや会話、適当に沢山作っといて」：life. で始まる文と inn.hearth・inn.counter は tools/gen-town-life.cjs が入れた仮の文（status: provisional）。名前・役目・設定の無い町の人だけ。正式な台詞は世界観・シナリオ室の確定で差しかえる",
   "sparkleNote": "2026-11-24 作者「きらきら光るオーブがあるところはアイテムが隠されているとかも」「イベントを適当に」：光る所の言葉と、落とし物の小さな話（仮・Claude 作。正式な台詞は4室へ）",

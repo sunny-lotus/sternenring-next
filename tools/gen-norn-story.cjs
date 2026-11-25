@@ -57,6 +57,26 @@ act(s4, '分かった。走れる人は壁際へ', [{ move: 'beast', to: [24, 7]
 act(s5, '倒れた荷台のそばに人がいる', [{ spawn: 'p', sprite: 'mob02', x: 40, y: 10, dir: 'left' }, { spawn: 'beast', img: BEAST, h: 2.6, x: 33, y: 7, dir: 'right' }, { move: 'beast', to: [37, 9], ms: 1800 }]); // 主人公は荷車の下（40,13）から上を見る。荷車の奥に取り残された人
 act(s5, 'ナハトは突進を正面から受けず', [{ move: 'p', to: [42, 7], ms: 2000 }, { move: 'beast', to: [36, 8], ms: 600 }]);
 act(s5, '目前の人を逃がす', [{ move: 'beast', to: [28, 6], ms: 2200 }, { move: 'p', to: [42, 5], ms: 1500 }]);
+const P = (lines) => ({ lines, status: 'provisional', placeholder: 'Claudeの仮。世界観・シナリオ室の言葉に差しかえる' });
+const LOCK_LINES = {
+  'story.norn.mob.calm-1': P([{ who: '町の人', text: '楽団の音、広場のほうから聞こえてくるね。' }]),
+  'story.norn.mob.calm-2': P([{ who: '町の人', text: '人が多くて、なかなか前に進めないよ。' }]),
+  'story.norn.mob.calm-3': P([{ who: '町の人', text: 'いい匂い。串焼きの屋台かな。' }]),
+  'story.norn.mob.alarm-1': P([{ who: '町の人', text: '星獣だって……！　どっちへ逃げればいいんだ！' }]),
+  'story.norn.mob.alarm-2': P([{ who: '町の人', text: '東のほうで、荷車が倒れたって！' }]),
+  'story.norn.mob.alarm-3': P([{ who: '町の人', text: '押さないで！　子どもがいるの！' }]),
+  'story.norn.mob.saved-1': P([{ who: '町の人', text: 'さっきは助かったよ……。でも、まだ見つからない人がいるって。' }]),
+  'story.norn.mob.saved-2': P([{ who: '町の人', text: 'あの星獣、どこへ行ったんだろう。' }]),
+  'story.norn.mob.saved-3': P([{ who: '町の人', text: '祭りの日に、こんなことになるなんて。' }]),
+  'story.norn.mob.chase-1': P([{ who: '町の人', text: '脇の通りへ行くのかい？　気をつけて。' }]),
+  'story.norn.mob.chase-2': P([{ who: '町の人', text: 'オットーさん、ずっと通りの向こうを見てるよ。' }]),
+  'story.norn.busy-calm': P(['（人波に押されて、ゆっくり見ていられない。）']),
+  'story.norn.busy': P(['（今は、それどころではない。）']),
+  'story.norn.stay-calm': P(['（オットーの屋台に、まだ用がありそうだ。）']),
+  'story.norn.stay-alarm': P(['（取り残された人がいる。ここを離れるわけにはいかない。）']),
+  'story.norn.stay-saved': P(['（まだ、戻ってこない人がいる。）']),
+  'story.norn.stay-chase': P(['（脇の通りの先を、追わないと。）']),
+};
 const SC = (scene, ttl, lines) => ({ scene, title: ttl, lines, status: 'provisional', source: 'production/claude/scenario/ノルン導入から追跡開始_試作シナリオ_v01.md' });
 const D = read('data/dialogue.json');
 for (const k of Object.keys(D.lines)) if (k.startsWith('story.norn.')) delete D.lines[k];
@@ -72,6 +92,9 @@ Object.assign(D.lines, {
   'story.norn.end': ['（ノルン導入の試作は、ここまでです。脇の通りの先は、まだ作っていません。）'],
   'story.norn.wait': ['（オットーが、行き交う人を何度も見ている。）'],
   'story.norn.alley': ['（細い路地の奥。荷が置いてある。）'],
+  // 物語の一連のあいだの、町の人の言葉と画面のお知らせ（2026-11-25 サニー「ストーリーが始まったらほかのモブたちのセリフも変わり…ストーリーの流れを断ち切らないように」）。
+  // Claudeの仮（status provisional）。世界観・シナリオ室に正式な言葉を依頼（依頼_物語中の町の人の言葉_シナリオ室.md）
+  ...LOCK_LINES,
 });
 D.storyNote = '2026-11-25：story.norn.* は世界観・シナリオ室「ノルン導入から追跡開始_試作シナリオ_v01」（provisional・担当室の内部試作採用）を tools/gen-norn-story.cjs が写したもの。story.norn.end・wait・alley はClaudeの画面のお知らせ';
 write('data/dialogue.json', D);
@@ -109,6 +132,17 @@ m.events.push({ id: 'story-cloth', x: 23, y: 1, trigger: 'examine', status: 'pro
   { when: flags({ witness: true }), dialogue: F + '6c-cloth', set: flags({ cloth: true }) },
   { dialogue: F + 'alley' }] }); // 脇の通り（路地の奥の樽のそば）に落ちている包み布
 m.events.push({ id: 'story-end', x: 2, y: 1, trigger: 'examine', status: 'provisional', pages: [{ when: flags({ chase: true, ended: false }), dialogue: F + 'end', set: flags({ ended: true }), mark: true }, { when: flags({ chase: true }), dialogue: F + 'end' }, { dialogue: F + 'alley' }] });
+// 物語の一連（field の storyLock）：串焼きの場面を見てから（meal）試作の終わり（ended）まで、ほかの出来事・戦闘・隣のマップへの移動は起きず、町の人は段ごとの言葉を話す
+const mob = (k, n) => Array.from({ length: n }, (_, i) => `${F}mob.${k}-${i + 1}`);
+m.storyLock = {
+  id: 'norn-intro', status: 'provisional', prefix: F, idPrefix: 'story-', active: flags({ meal: true }), until: flags({ ended: true }),
+  phases: [
+    { when: flags({ chase: true }), talk: mob('chase', 2), examine: F + 'busy', exit: F + 'stay-chase', walkers: false },
+    { when: flags({ saved: true }), talk: mob('saved', 3), examine: F + 'busy', exit: F + 'stay-saved', walkers: false },
+    { when: flags({ alarm: true }), talk: mob('alarm', 3), examine: F + 'busy', exit: F + 'stay-alarm', walkers: false },
+    { talk: mob('calm', 3), examine: F + 'busy-calm', exit: F + 'stay-calm' },
+  ],
+};
 m.storyNote = '2026-11-25 ノルン導入から追跡開始の試作（tools/gen-norn-story.cjs）。オットー（story-otto）・店の手伝い（story-helper）・包み布（story-cloth）・試作の終わり（story-end）';
 write('data/maps/norn-inn-street.json', m);
 console.log('ノルン導入の試作：場面', Object.keys(D.lines).filter((k) => k.startsWith(F)).length, '本の会話');

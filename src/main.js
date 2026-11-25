@@ -182,9 +182,10 @@ async function boot() {
         if (done) return;
         if (i >= pd.lines.length - 1) return finish();
         i++; last = performance.now();
-        for (const el of lines.children) el.classList.add('past');
-        while (lines.children.length >= 3) lines.firstElementChild?.remove();
-        const l = pd.lines[i], el = document.createElement('div'); el.className = 'ln' + (l.style === 'title' ? ' title' : ''); el.textContent = l.text; lines.appendChild(el);
+        // 文字送り（2026-11-25 サニー「文字の移り変わりもっと、なめらかに」）：行は消して詰めるのでなく、それぞれの行が上へすべり、古い行ほど薄く、4行目はにじんで消える
+        const l = pd.lines[i], el = document.createElement('div'); box.classList.toggle('dark', l.mood === 'dark'); el.className = 'ln' + (l.style === 'title' ? ' title' : ''); el.textContent = l.text; lines.appendChild(el);
+        const live = [...lines.children].filter((x) => !x.classList.contains('gone')).reverse(); let acc = 0; // 新しい行から順に、真ん中から上へ積む
+        live.forEach((x, k) => { const hh = /** @type {HTMLElement} */ (x).offsetHeight; /** @type {HTMLElement} */ (x).style.setProperty('--y', (-acc - hh / 2) + 'px'); acc += hh; x.classList.toggle('age1', k === 1); x.classList.toggle('age2', k === 2); if (k >= 3) { x.classList.add('gone'); setTimeout(() => x.remove(), 2000); } });
         requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
       };
       const next = () => { if (performance.now() - last > 600) show(); };

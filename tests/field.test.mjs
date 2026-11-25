@@ -287,6 +287,33 @@ test('ノルン導入の試作（2026-11-25 シナリオ室）：オットー→
   assert.ok(!marked().some((id) => /^story-|life-st-(cart|woman)/.test(id))); // 見終わると、物語のしるしは残らない
 });
 
+test('ノルン導入の一連のあいだ（2026-11-25 サニー「ほかのイベントは起こらないように、ストーリーの流れを断ち切らないように」）：町の人は段ごとの言葉、ほかの出来事・しるし・家や隣のマップへの出入りは止まり、終わると戻る', async () => {
+  const { createRecord } = await import('../src/core/record.js');
+  const { loadAll } = await import('./helpers.mjs');
+  const { createField } = await import('../src/core/field.js');
+  const d = loadAll(), record = createRecord();
+  const field = createField({ maps: d.maps, collision: d.collision, world: d.world, party: d.ledger.party, record });
+  const input = new InputState({ buffer: d.world.inputBuffer });
+  const m = d.maps['norn-inn-street'], otto = m.npcs.find((n) => n.id === 'story-otto'), elder = m.npcs.find((n) => n.id === 'life-st-elder');
+  const talk = (x, y, face) => { walkTo(field, input, d, x, y); tap(field, input, face); input.pressAction(); run(field, input, 20); const k = field.state.message?.dialogue; field.closeMessage(); return k; };
+  const atOtto = () => talk(otto.x + 1, otto.y, 'left'), atElder = () => talk(elder.x, elder.y + 1, 'up');
+  const before = atElder(); assert.ok(!String(before).startsWith('story.'));
+  assert.ok(field.view().npcs.some((n) => n.id.startsWith('walk:')));
+  assert.equal(atOtto(), 'story.norn.1-3');
+  assert.match(atElder(), /^story\.norn\.mob\.calm-/); // 物語が始まると、町の人の言葉が変わる
+  assert.equal(atOtto(), 'story.norn.4');
+  const a1 = atElder(), a2 = atElder(); assert.match(a1, /^story\.norn\.mob\.alarm-/); assert.notEqual(a1, a2); // 騒ぎの言葉（話すたびに別の言葉）
+  assert.ok(!field.view().npcs.some((n) => n.id.startsWith('walk:'))); // 騒ぎのあいだは、歩き回る町の人はいない
+  assert.ok(!field.view().marks.some((mk) => mk.id === 'life-st-crates')); // 物語でないしるしは出ない
+  const crates = m.events.find((e) => e.id === 'life-st-crates'); assert.equal(talk(crates.x, crates.y + 1, 'up'), 'story.norn.busy'); // 立ち絵の会話も起きない
+  assert.ok(!Object.keys(record.flags).some((k) => k.startsWith('talk.') || k.startsWith('scene.')));
+  const door = m.exits.find((e) => e.id === 'house-02'); walkTo(field, input, d, door.x, door.y + 1); tap(field, input, 'up'); run(field, input, 20);
+  assert.equal(field.state.message?.dialogue, 'story.norn.stay-alarm'); assert.equal(field.state.mapId, 'norn-inn-street'); field.closeMessage(); // 家にも入らない
+  record.flags['story.norn.ended'] = true; // 試作の終わりまで見たら
+  assert.ok(!String(atElder()).startsWith('story.norn.mob')); // 元の言葉に戻る
+  walkTo(field, input, d, door.x, door.y + 1); tap(field, input, 'up'); run(field, input, 400); assert.notEqual(field.state.mapId, 'norn-inn-street'); // 家にも入れる
+});
+
 test('銀鹿亭：右の階段で吹き抜けの2階の通路へ上がり、奥の扉から客室へ入って戻る（2026-11-22）', () => {
   const { field, input } = makeField({ map: 'silver-deer-1f', spawn: 'default' }); // (10,11)
   tap(field, input, 'up', 6); tap(field, input, 'right', 8); // (10,5) → 階段のいちばん下の段(18,5)（高さ1：1階から1段は上がれる）
