@@ -277,7 +277,8 @@ async function boot() {
   setTimeout(() => { for (const a of d.ledger.assets) if (a.kind === 'portrait') for (const q of [a, a.poseB].filter(Boolean)) { new Image().src = q.body; for (const f of Object.values(q.faces || {})) new Image().src = /** @type {any} */ (f).file; } }, 4000);
   const drawMsg = () => {
     const l = msgLines[msgAt], last = msgAt >= msgLines.length - 1;
-    if (l?.act && !msgActed.has(msgAt)) { msgActed.add(msgAt); field.sceneAct(l.act); } // 会話の演出（人や敵を出して動かす）。同じ行では一度だけ
+    if (l?.act && !msgActed.has(msgAt)) { msgActed.add(msgAt); field.sceneAct(l.act); }
+    { const ev = field.state.message?.event || '', spk = l?.member || l?.actor || (l?.who && ev.startsWith('npc:') ? ev.slice(4) : null); if (spk) field.sceneAct([{ look: spk }]); } // 仲間が話し手のほうを向く（話しかけた町の人の言葉なら、その町の人のほうへ） // 会話の演出（人や敵を出して動かす）。同じ行では一度だけ
     if (sceneOn) drawNovel(l);
     msgBox.innerHTML = (l?.who ? `<p class="who${l.member ? ' party' : ''}">${esc(l.who)}</p>` : '') + (l?.text ? `<p>${esc(l.text)}</p>` : '') + (last ? msgNotes.map((n) => `<p class="note">${n}</p>`).join('') : '');
     msgShownAt = performance.now();

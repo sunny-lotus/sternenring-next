@@ -174,6 +174,11 @@ export function createField(data) {
    */
   function sceneAct(acts) {
     for (const a of acts || []) {
+      if (a.look) { // {look: id}：仲間（先頭の主人公は除く）が、話している人のほうを向く（2026-11-26 夜の改善・学びノート題3「話し手のほうを向く」）
+        const t = state.actors.find((x) => x.id === a.look) || (state.cast[a.look] ? { x: state.cast[a.look].tx, y: state.cast[a.look].ty } : null) || (data.maps[state.mapId].npcs || []).find((x) => x.id === a.look);
+        if (t) for (const f of state.actors.slice(1)) { if (f.id === a.look || f.from) continue; const dx = t.x - f.x, dy = t.y - f.y; if (dx || dy) f.dir = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'); }
+        continue;
+      }
       if (a.emote) { state.emotes[a.who] = { type: a.emote, t: 0, dur: a.ms || 1800 }; continue; } // {emote: surprise|question|silence|idea|note, who: 仲間の id・演出の人の id・町の人の id, ms}
       if (a.spawn) state.cast[a.spawn] = { id: a.spawn, sprite: a.sprite, img: a.img, h: a.h, tone: a.tone, fx: a.x, fy: a.y, tx: a.x, ty: a.y, t: 1, dur: 0, dir: a.dir || 'down' };
       const c = state.cast[a.move || a.face || a.hide]; if (!c) continue;

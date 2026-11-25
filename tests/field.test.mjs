@@ -600,3 +600,12 @@ test('頭の上の吹き出し（2026-11-26 ART-NIGHT-EMOTE）：act の emote �
   run(field, input, 1100); assert.equal(field.view().emotes.length, 0);
   field.sceneAct([{ emote: 'idea', who: 'nacht' }]); field.closeMessage(); assert.equal(field.view().emotes.length, 0);
 });
+
+test('会話で仲間が話し手のほうを向く（2026-11-26 学びノート題3）：{look: id} で、先頭の主人公以外の仲間がその人のほうを向く', () => {
+  const { field } = makeField();
+  const [lead, f1] = field.state.actors; f1.dir = 'up';
+  field.sceneAct([{ look: lead.id }]);
+  const dx = lead.x - f1.x, dy = lead.y - f1.y, want = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+  if (dx || dy) assert.equal(f1.dir, want);
+  const before = lead.dir; field.sceneAct([{ look: f1.id }]); assert.equal(lead.dir, before); // 主人公の向きは変えない（調べる向きが変わらないように）
+});
