@@ -440,7 +440,15 @@ function roundRectPath(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.
 function cobbleFloor(g, map, T, W, H) { // 石畳：角の丸い四角い石が、少しずつずれながら横の列に並ぶ。目地は暗く、ところどころ草・こけ、欠けた石・直した石
   const R = rnd(71);
   const pat = townPattern(g, 'paved', T, 4); // 町の絵があれば、絵の石畳（1枚＝4マス）
-  if (pat) { g.fillStyle = pat; g.fillRect(0, 0, W, H); return; } // 町の絵の石畳（家の下も暗くしない：枠に見えるので）
+  if (pat) { // 町の絵の石畳（家の下も暗くしない：枠に見えるので）
+    // 石畳の絵には、車輪ですり減った明るい帯（わだち）が縦に通っている。横に長い道（東西の通り）では絵を90度まわして、わだちが道に沿うように
+    // （2026-11-26 サニー「この白い線は通りに沿ってほしい」「石畳の車輪の後」：東西の通りを横切っていた）。縦に長い道・広場の縦の部分はそのまま
+    const im = TOWN_IMG?.[TOWN_CFG?.ground?.paved], S = (4 * T) / (im?.naturalWidth || 1024), paved = map.stage?.paved || [{ x: 0, y: 0, w: map.width, h: map.height }];
+    g.fillStyle = pat; g.fillRect(0, 0, W, H);
+    for (const p of paved) if (p.w > p.h) { pat.setTransform(new DOMMatrix().rotate(90).scale(S, S)); g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); }
+    pat.setTransform(new DOMMatrix().scale(S, S)); for (const p of paved) if (p.w <= p.h) { g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); } // 縦の道を上に重ねる（交わる所は縦の向き）
+    return;
+  }
   g.fillStyle = '#6e665a'; g.fillRect(0, 0, W, H); // 目地
   const rowH = T * 0.42;
   for (let y = 0, row = 0; y < H; y += rowH, row++) {
