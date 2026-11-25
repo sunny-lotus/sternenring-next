@@ -155,7 +155,7 @@ export function createField(data) {
     if (lock && !isStory(lock.L, ev.id, page)) { // 物語のあいだは、ほかの出来事は起きない。町の人は物語の段に合った言葉を話す
       const pool = npc ? lock.ph.talk || [] : [];
       let d = lock.ph.examine || null;
-      if (npc && pool.length) { const k = lockTalk[npc.id] ?? [...npc.id].reduce((a, c) => a + c.charCodeAt(0), 0); lockTalk[npc.id] = k + 1; d = pool[k % pool.length]; }
+      if (npc && pool.length) { const k = lockTalk[npc.id] ?? [...npc.id].reduce((a, c) => a + c.charCodeAt(0), 0); lockTalk[npc.id] = k + 1; d = pool[k % pool.length]; d = lock.L.variants?.[npc.id]?.[d] || d; } // その人用の言葉があればそれを（2026-11-26 STORY-NPC-IDENTITY：名前と話し方）
       if (!d) return false;
       if (npc && npc.turn !== false) state.npcFace[npc.id] = OPP[p.dir];
       state.message = { event: ev.id, dialogue: d, notes: [] };

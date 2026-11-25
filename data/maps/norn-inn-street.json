@@ -1754,6 +1754,86 @@
         "examine": "story.norn.busy-calm",
         "exit": "story.norn.stay-calm"
       }
-    ]
+    ],
+    "variants": {
+      "life-st-merchant": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-merchant",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-merchant",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-merchant",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-merchant",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-merchant",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-merchant",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-merchant",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-merchant",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-merchant",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-merchant",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-merchant"
+      },
+      "life-st-woman": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-woman",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-woman",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-woman",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-woman",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-woman",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-woman",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-woman",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-woman",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-woman",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-woman",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-woman"
+      },
+      "life-st-child": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-child",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-child",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-child",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-child",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-child",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-child",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-child",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-child",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-child",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-child",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-child"
+      },
+      "life-st-waiter": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-waiter",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-waiter",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-waiter",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-waiter",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-waiter",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-waiter",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-waiter",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-waiter",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-waiter",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-waiter",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-waiter"
+      },
+      "life-st-elder": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-elder",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-elder",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-elder",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-elder",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-elder",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-elder",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-elder",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-elder",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-elder",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-elder",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-elder"
+      },
+      "life-st-traveler": {
+        "story.norn.mob.calm-1": "story.norn.mob.calm-1.life-st-traveler",
+        "story.norn.mob.calm-2": "story.norn.mob.calm-2.life-st-traveler",
+        "story.norn.mob.calm-3": "story.norn.mob.calm-3.life-st-traveler",
+        "story.norn.mob.alarm-1": "story.norn.mob.alarm-1.life-st-traveler",
+        "story.norn.mob.alarm-2": "story.norn.mob.alarm-2.life-st-traveler",
+        "story.norn.mob.alarm-3": "story.norn.mob.alarm-3.life-st-traveler",
+        "story.norn.mob.saved-1": "story.norn.mob.saved-1.life-st-traveler",
+        "story.norn.mob.saved-2": "story.norn.mob.saved-2.life-st-traveler",
+        "story.norn.mob.saved-3": "story.norn.mob.saved-3.life-st-traveler",
+        "story.norn.mob.chase-1": "story.norn.mob.chase-1.life-st-traveler",
+        "story.norn.mob.chase-2": "story.norn.mob.chase-2.life-st-traveler"
+      }
+    }
   }
 }

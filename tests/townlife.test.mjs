@@ -47,3 +47,14 @@ test('町のにぎわい：通り・広場・銀鹿亭・家の中に、町の�
   assert.ok(count((m) => (m.events || []).filter((e) => String(e.id).startsWith('life-')).length) >= 60);
   assert.ok(count((m) => (m.npcs || []).filter((n) => /resident$/.test(n.id)).length) >= 6, '家の中の住人');
 });
+
+test('町の人の名前と話し方（2026-11-26 STORY-NPC-IDENTITY）：名簿の41人に名前があり、言葉の話し手が名前になっている。物語のあいだは、その人用の言葉を話す', async () => {
+  const { readJson } = await import('./helpers.mjs');
+  const roster = readJson('data/npc-roster.json'), D = readJson('data/dialogue.json').lines, inn = readJson('data/maps/norn-inn-street.json');
+  assert.equal(roster.npcs.length, 41);
+  assert.ok(roster.npcs.every((n) => n.name && n.voice));
+  const tim = roster.npcs.find((n) => n.id === 'life-st-child'); assert.equal(tim.name, 'ティム');
+  const whos = new Set(JSON.stringify(D).match(/"who":"[^"]+"/g)); assert.ok(whos.has('"who":"ティム"') && whos.has('"who":"フーベルト"'));
+  const v = inn.storyLock.variants; assert.ok(Object.keys(v).length > 0);
+  for (const [, map] of Object.entries(v)) for (const key of Object.values(map)) assert.ok(D[key], key);
+});

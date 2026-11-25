@@ -1,0 +1,418 @@
+{
+  "format": "sternenring-next-npc-roster",
+  "version": 1,
+  "status": "provisional",
+  "source": "production/claude/scenario/町の人の名簿_v01.md・町の人の会話差替え_v01.json（STORY-NPC-IDENTITY-20261126）",
+  "npcs": [
+    {
+      "id": "life-st-child",
+      "name": "ティム",
+      "age": "子ども・男",
+      "personality": "数えるのが好きで得意げ",
+      "look": "茶の短髪、青い短衣、膝丈ズボン、小石を握る",
+      "voice": "ぼく。短い文、数を言い直す。知ったことをすぐ試す",
+      "art": "CM01",
+      "primary": true
+    },
+    {
+      "id": "life-house10-resident",
+      "name": "ニコ",
+      "age": "子ども・男",
+      "personality": "留守番をほめてほしい",
+      "look": "栗色のくせ毛、黄土色のベスト、両手を前で合わせる",
+      "voice": "ぼく。うん／できるよ。怖さも希望も素直に言う",
+      "art": "CM02",
+      "primary": true
+    },
+    {
+      "id": "life-pl-child1",
+      "name": "ロッテ",
+      "age": "子ども・女",
+      "personality": "遊びに夢中な小声の子",
+      "look": "黒いおかっぱ、赤いスカート、柔らかな短靴",
+      "voice": "わたし。しーっ／だよ。短くささやく",
+      "art": "CF01",
+      "primary": true
+    },
+    {
+      "id": "night-town-village-02",
+      "name": "ピア",
+      "age": "子ども・女",
+      "personality": "草花を見るとしゃがみこむ",
+      "look": "明るい茶の二つ結び、藤色の短衣、小さな草取り用エプロン",
+      "voice": "わたし。見て／ちがうね。観察を短く話す",
+      "art": "CF02",
+      "primary": true
+    },
+    {
+      "id": "life-pl-waiter",
+      "name": "レミー",
+      "age": "若い・男",
+      "personality": "気が散るが手伝いには熱心",
+      "look": "柔らかい茶髪、緑のベスト、軽い布のかばん",
+      "voice": "ぼく。〜なんだ／えっと。言葉を探し、最後まで話す",
+      "art": "YM01",
+      "primary": true
+    },
+    {
+      "id": "life-st-waiter",
+      "name": "カスパー",
+      "age": "若い・男",
+      "personality": "愛想がよく料理を勧める",
+      "look": "短い赤茶髪、生成りシャツ、濃色ベスト、腰に給仕布",
+      "voice": "ぼく。〜だよ／〜だね。客には軽く丁寧",
+      "art": "YM02",
+      "primary": true
+    },
+    {
+      "id": "life-pl-girl",
+      "name": "ユッテ",
+      "age": "若い・女",
+      "personality": "花の魅力を分けたい",
+      "look": "濃い茶の三つ編み、淡い緑の服、花入りの小かご",
+      "voice": "私。〜なの／どうかしら。柔らかく誘う",
+      "art": "YF01",
+      "primary": true
+    },
+    {
+      "id": "story-helper",
+      "name": "エルゼ",
+      "age": "若い・女",
+      "personality": "手際がよく控えめにからかう",
+      "look": "こげ茶髪を低く結び、灰色の服と作業エプロン、包み布",
+      "voice": "私。〜だよ／〜なんだ。冗談にも落ち着いて返す",
+      "art": "YF02",
+      "primary": true
+    },
+    {
+      "id": "story-otto",
+      "name": "オットー",
+      "age": "中年・男",
+      "personality": "値段には強気、働いた礼は惜しまない",
+      "look": "短い濃茶髪と無精ひげ、太めの腕、生成り袖まくり、焦茶エプロン、焼きばさみ",
+      "voice": "俺。〜だ／〜ぞ。豪快だが威圧しない",
+      "art": "MM01",
+      "primary": true
+    },
+    {
+      "id": "life-pl-craftsman",
+      "name": "ブルーノ",
+      "age": "中年・男",
+      "personality": "道具には厳しく休憩には正直",
+      "look": "くすんだ赤茶髪、短いひげ、革エプロン、腰の金づち",
+      "voice": "俺。〜だな／〜だろ。手短に具体物を話す",
+      "art": "MM02",
+      "primary": true
+    },
+    {
+      "id": "life-st-woman",
+      "name": "ヘルガ",
+      "age": "中年・女",
+      "personality": "買い物好きで気が回る",
+      "look": "灰茶のまとめ髪、青緑の普段着、花を入れた買い物かご",
+      "voice": "私。〜なの／〜かしら。気づいたことを相手に話す",
+      "art": "MF01",
+      "primary": true
+    },
+    {
+      "id": "night-town-square-02",
+      "name": "マルタ",
+      "age": "中年・女",
+      "personality": "世話好きで食べ方にも目が届く",
+      "look": "茶の髪を頭巾でまとめ、赤茶の服と厚手エプロン",
+      "voice": "私。〜おいで／〜しな。親しみある接客",
+      "art": "MF02",
+      "primary": true
+    },
+    {
+      "id": "life-st-elder",
+      "name": "オスカー",
+      "age": "年寄り・男",
+      "personality": "変化を面白がる話し好き",
+      "look": "白髪と短い白ひげ、黄褐色の外套、普通の木の杖",
+      "voice": "わし。〜じゃな／〜かね。長広舌にしない",
+      "art": "EM01",
+      "primary": true
+    },
+    {
+      "id": "life-house01-resident",
+      "name": "アグネス",
+      "age": "年寄り・女",
+      "personality": "客好きで少しうっかり",
+      "look": "銀髪のおだんご、えんじ色の羽織、落ち着いた長い服",
+      "voice": "私。〜なのよ／〜してね。温かく招く",
+      "art": "EF01",
+      "primary": true
+    },
+    {
+      "id": "life-st-merchant",
+      "name": "ルッツ",
+      "age": "中年・男",
+      "personality": "商売上手で機嫌がよい",
+      "look": "濃茶の布帽子、縞のベスト、腰の小袋、干し果物の袋",
+      "voice": "俺。〜かい／〜だよ。勧めても押しつけない",
+      "art": "TM01",
+      "primary": true
+    },
+    {
+      "id": "life-pl-traveler",
+      "name": "モーリッツ",
+      "age": "中年・男",
+      "personality": "よく歩き、具体的な助言をする",
+      "look": "日に焼けた肌、暗い青の旅外套、背負い袋、巻いた毛布",
+      "voice": "俺。〜だよ／〜だな。経験を控えめに話す",
+      "art": "TM02",
+      "primary": true
+    },
+    {
+      "id": "life-pl-child2",
+      "name": "ペーター",
+      "age": "子ども・男",
+      "personality": "負けず嫌いだが遊びの約束は守る",
+      "art": "CM01",
+      "look": "くすんだ緑の短衣、茶の短髪、走りやすい短靴",
+      "voice": "ぼく。いち、に／だめだよ。短文で思ったことを言う",
+      "primary": false
+    },
+    {
+      "id": "life-pl-merchant",
+      "name": "ウルリク",
+      "age": "中年・男",
+      "personality": "値切りの応酬を楽しむ",
+      "art": "TM01",
+      "look": "黒茶の布帽子、朱茶のベスト、布を腕にかける",
+      "voice": "俺。〜かい／〜だね。客の反応を見て間を置く",
+      "primary": false
+    },
+    {
+      "id": "life-pl-woman",
+      "name": "ヘンリエッテ",
+      "age": "中年・女",
+      "personality": "段取りを気にしつつ針仕事を後回しにする",
+      "art": "MF01",
+      "look": "濃茶のまとめ髪、青灰の服、針仕事の布袋",
+      "voice": "私。〜なのよ／〜なくちゃ。自分にも少し呆れる",
+      "primary": false
+    },
+    {
+      "id": "life-pl-elder",
+      "name": "ベルト",
+      "age": "年寄り・男",
+      "personality": "用心深く話の合間に笑う",
+      "art": "EM01",
+      "look": "白い短髪、薄い灰色のひげ、濃緑の上着、素朴な木の杖",
+      "voice": "わし。〜じゃ／〜ぞ。怖がらせるために誇張しない",
+      "primary": false
+    },
+    {
+      "id": "life-st-traveler",
+      "name": "ヴィクトル",
+      "age": "中年・男",
+      "personality": "到着すると食事が楽しみになる",
+      "art": "TM02",
+      "look": "栗色の短髪、黄褐色の旅外套、使い込んだ背負い袋",
+      "voice": "俺。〜だね／〜だな。食べ物の話では少し声が弾む",
+      "primary": false
+    },
+    {
+      "id": "life-house04-resident",
+      "name": "フリッツ",
+      "age": "中年・男",
+      "personality": "休むと決めると動かない働き者",
+      "art": "MM02",
+      "look": "短い茶髪、煤色の作業服、太めの布帯。金づちは持たない",
+      "voice": "俺。〜だ／〜だよ。短く、時々冗談を混ぜる",
+      "primary": false
+    },
+    {
+      "id": "life-house07-resident",
+      "name": "ゲルノート",
+      "age": "年寄り・男",
+      "personality": "家の小さな音まで愛着を持つ",
+      "art": "EM01",
+      "look": "白髪の薄い頭、淡い灰の長衣、木の杖",
+      "voice": "わし。〜じゃ／〜のう。家について具体的に話す",
+      "primary": false
+    },
+    {
+      "id": "life-house13-resident",
+      "name": "ローゼマリー",
+      "age": "中年・女",
+      "personality": "花にも人にも声をかけたくなる",
+      "art": "MF02",
+      "look": "茶髪のゆるいまとめ髪、薄緑の服、土のついた小エプロン",
+      "voice": "私。〜なの／〜でしょう。柔らかく感想を伝える",
+      "primary": false
+    },
+    {
+      "id": "life-house16-resident",
+      "name": "トビアス",
+      "age": "中年・男",
+      "personality": "小さな売上増を喜ぶが計算は苦手",
+      "art": "TM01",
+      "look": "黒茶の短髪、焦茶ベスト、腰の財布と小さな帳面",
+      "voice": "俺。〜だね／〜だよ。確信がないと少し間が空く",
+      "primary": false
+    },
+    {
+      "id": "life-house19-resident",
+      "name": "ハンネス",
+      "age": "若い・男",
+      "personality": "旅が楽しみで荷を決められない",
+      "art": "TM02",
+      "look": "明るい茶髪、くすんだ青の上着、荷造り中の布袋",
+      "voice": "ぼく。〜だね／〜かな。考え直して言い直す",
+      "primary": false
+    },
+    {
+      "id": "life-house22-resident",
+      "name": "バスティアン",
+      "age": "若い・男",
+      "personality": "疲れていても自分の店を夢見る",
+      "art": "YM01",
+      "look": "短い黒髪、砂色シャツ、緑褐色ベスト、外した給仕布",
+      "voice": "ぼく。〜なんだ／〜だよ。勤務後は少しゆっくり",
+      "primary": false
+    },
+    {
+      "id": "night-town-square-01",
+      "name": "ロルフ",
+      "age": "若い・男",
+      "personality": "いい匂いに足を止める食いしん坊",
+      "art": "YM01",
+      "look": "柔らかな茶髪、黄土色ベスト、小さな紙包み",
+      "voice": "ぼく。〜だね／〜だよ。少し照れながら楽しさを話す",
+      "primary": false
+    },
+    {
+      "id": "night-town-square-03",
+      "name": "ベアーテ",
+      "age": "若い・女",
+      "personality": "周囲をよく見て待ち時間も楽しむ",
+      "art": "YF01",
+      "look": "茶のひとつ結び、淡青の服、手元は空ける。花かごなし",
+      "voice": "私。〜なの／〜ちゃう。話を押しつけず感想を添える",
+      "primary": false
+    },
+    {
+      "id": "night-town-east-01",
+      "name": "オルガ",
+      "age": "中年・女",
+      "personality": "旅支度を無駄なく整えたい",
+      "art": "MF01",
+      "look": "茶髪のおだんご、藍色の仕事着、布袋。花かごなし",
+      "voice": "私。〜かい／〜しな。相手に合わせて手短に勧める",
+      "primary": false
+    },
+    {
+      "id": "night-town-east-02",
+      "name": "ディート",
+      "age": "中年・男",
+      "personality": "荷には慎重で自分の疲れは笑う",
+      "art": "MM02",
+      "look": "短い黒茶髪、灰の作業服、丈夫な手袋、金づちなし",
+      "voice": "俺。〜くれ／〜だね。相手の足元に気を配る",
+      "primary": false
+    },
+    {
+      "id": "night-town-east-03",
+      "name": "ブリッタ",
+      "age": "若い・女",
+      "personality": "初めて見る店が気になって仕方ない",
+      "art": "YF01",
+      "look": "赤茶の三つ編み、淡緑の旅上着、肩掛け袋。花かごなし",
+      "voice": "私。〜だね／〜だよ。短い感想を続ける",
+      "primary": false
+    },
+    {
+      "id": "night-town-road-01",
+      "name": "ギュンター",
+      "age": "中年・男",
+      "personality": "道の情報は知る範囲だけ教える",
+      "art": "TM01",
+      "look": "茶の布帽子、鈍い赤のベスト、旅の肩袋",
+      "voice": "俺。〜かい／〜だ。必要なことから答える",
+      "primary": false
+    },
+    {
+      "id": "night-town-road-02",
+      "name": "ヤン",
+      "age": "若い・男",
+      "personality": "相手に踏み込みすぎない商人",
+      "art": "TM02",
+      "look": "こげ茶の髪、深緑の短い外套、背負い袋",
+      "voice": "ぼく。〜だね／〜だよ。問いかけの後は返事を待つ",
+      "primary": false
+    },
+    {
+      "id": "night-town-north-01",
+      "name": "エーダ",
+      "age": "年寄り・女",
+      "personality": "待つ時間を無理なく過ごす",
+      "art": "EF01",
+      "look": "銀髪を低くまとめ、青灰の羽織、小さな袋",
+      "voice": "私。〜かい／〜だね。落ち着いた調子",
+      "primary": false
+    },
+    {
+      "id": "night-town-north-02",
+      "name": "アデーレ",
+      "age": "若い・女",
+      "personality": "丁寧だが話すと数を見失う",
+      "art": "YF02",
+      "look": "こげ茶のひとつ結び、茶灰の作業着、荷札の束",
+      "voice": "私。〜の／〜だよ。数える間を大切にする",
+      "primary": false
+    },
+    {
+      "id": "night-town-west-01",
+      "name": "コンラート",
+      "age": "若い・男",
+      "personality": "出発前の支度を怠らない",
+      "art": "TM02",
+      "look": "茶の短髪、緑の外套、荷ひもの付いた背負い袋",
+      "voice": "ぼく。〜だよ／〜だからね。具体的にひとつずつ伝える",
+      "primary": false
+    },
+    {
+      "id": "night-town-west-02",
+      "name": "ウルズラ",
+      "age": "中年・女",
+      "personality": "森と町の違いを楽しむ",
+      "art": "MF02",
+      "look": "灰茶の頭巾、土色の上着、採取用の布袋",
+      "voice": "私。〜だね／〜おくれ。声を張りすぎず話す",
+      "primary": false
+    },
+    {
+      "id": "night-town-south-01",
+      "name": "イーダ",
+      "age": "中年・女",
+      "personality": "家事の段取りを大切にする",
+      "art": "MF01",
+      "look": "茶のまとめ髪、袖をまくった青い服、洗濯かご",
+      "voice": "私。〜だね／〜さ。作業を続けながら気さくに話す",
+      "primary": false
+    },
+    {
+      "id": "night-town-south-02",
+      "name": "ライナー",
+      "age": "中年・男",
+      "personality": "静かな通りでひと息つくのが好き",
+      "art": "MM01",
+      "look": "短い黒茶髪、薄い口ひげ、濃紺の上着。エプロン・焼きばさみなし",
+      "voice": "俺。〜だよ／〜かい。急かさず短く受ける",
+      "primary": false
+    },
+    {
+      "id": "night-town-village-01",
+      "name": "フーベルト",
+      "age": "年寄り・男",
+      "personality": "訪ねて来た人を急かさない",
+      "art": "EM01",
+      "look": "灰白の短髪と短いひげ、麻色の上着、木の杖",
+      "voice": "わし。〜かい／〜だよ。大げさな古語にはしない",
+      "primary": false
+    }
+  ]
+}
