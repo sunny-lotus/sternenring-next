@@ -1668,7 +1668,7 @@
           "story.norn.mob.chase-1",
           "story.norn.mob.chase-2"
         ],
-        "examine": "story.norn.busy",
+        "examine": "story.norn.busy-chase",
         "exit": "story.norn.stay-chase",
         "walkers": false
       },
@@ -1683,7 +1683,7 @@
           "story.norn.mob.saved-2",
           "story.norn.mob.saved-3"
         ],
-        "examine": "story.norn.busy",
+        "examine": "story.norn.busy-saved",
         "exit": "story.norn.stay-saved",
         "walkers": false
       },

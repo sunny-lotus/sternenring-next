@@ -7132,153 +7132,167 @@
       "lines": [
         {
           "who": "町の人",
-          "text": "楽団の音、広場のほうから聞こえてくるね。"
+          "text": "今日は、通りじゅういい匂いだね。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.calm-2": {
       "lines": [
         {
           "who": "町の人",
-          "text": "人が多くて、なかなか前に進めないよ。"
+          "text": "串焼きは熱いうちがうまいよ。香りを楽しんでる間に、冷めちまうからね。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.calm-3": {
       "lines": [
         {
           "who": "町の人",
-          "text": "いい匂い。串焼きの屋台かな。"
+          "text": "ずいぶんな人出だね。通りの端なら、少し落ち着けそうだ。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.busy-calm": {
+      "lines": [
+        "（人の行き来が絶えない。今は、店先へ戻ろう。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.stay-calm": {
+      "lines": [
+        "（食事は済んだ。もう一度、オットーに声をかけよう。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.alarm-1": {
       "lines": [
         {
           "who": "町の人",
-          "text": "星獣だって……！　どっちへ逃げればいいんだ！"
+          "text": "星獣だ……！　こっちまで来るのか？"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.alarm-2": {
       "lines": [
         {
           "who": "町の人",
-          "text": "東のほうで、荷車が倒れたって！"
+          "text": "押さないで！　足元を見て、落ち着いて！"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.alarm-3": {
       "lines": [
         {
           "who": "町の人",
-          "text": "押さないで！　子どもがいるの！"
+          "text": "荷車のそばに、まだ人がいる！"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.busy": {
+      "lines": [
+        "（今は、ゆっくり見ている場合ではない。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.stay-alarm": {
+      "lines": [
+        "（荷車のそばに取り残された人がいる。先に助けよう。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.saved-1": {
       "lines": [
         {
           "who": "町の人",
-          "text": "さっきは助かったよ……。でも、まだ見つからない人がいるって。"
+          "text": "さっきまで、あんなににぎやかだったのに。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.saved-2": {
       "lines": [
         {
           "who": "町の人",
-          "text": "あの星獣、どこへ行ったんだろう。"
+          "text": "あの星獣、もう見えないね。どこへ行ったんだろう。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.saved-3": {
       "lines": [
         {
           "who": "町の人",
-          "text": "祭りの日に、こんなことになるなんて。"
+          "text": "まだ、落ち着かないよ。さっきの音が耳に残ってる。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.busy-saved": {
+      "lines": [
+        "（騒ぎのあとの通りを、もう少し確かめよう。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "story.norn.stay-saved": {
+      "lines": [
+        "（通りを離れる前に、確かめることが残っている。）"
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.chase-1": {
       "lines": [
         {
           "who": "町の人",
-          "text": "脇の通りへ行くのかい？　気をつけて。"
+          "text": "脇の通りへ行くのかい。足元に気をつけて。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.mob.chase-2": {
       "lines": [
         {
           "who": "町の人",
-          "text": "オットーさん、ずっと通りの向こうを見てるよ。"
+          "text": "オットーさん、何度も通りの向こうを見てるよ。"
         }
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
-    "story.norn.busy-calm": {
+    "story.norn.busy-chase": {
       "lines": [
-        "（人波に押されて、ゆっくり見ていられない。）"
+        "（ほかの物を調べるより、今は後を追おう。）"
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
-    },
-    "story.norn.busy": {
-      "lines": [
-        "（今は、それどころではない。）"
-      ],
-      "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
-    },
-    "story.norn.stay-calm": {
-      "lines": [
-        "（オットーの屋台に、まだ用がありそうだ。）"
-      ],
-      "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
-    },
-    "story.norn.stay-alarm": {
-      "lines": [
-        "（取り残された人がいる。ここを離れるわけにはいかない。）"
-      ],
-      "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
-    },
-    "story.norn.stay-saved": {
-      "lines": [
-        "（まだ、戻ってこない人がいる。）"
-      ],
-      "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     },
     "story.norn.stay-chase": {
       "lines": [
-        "（脇の通りの先を、追わないと。）"
+        "（脇の通りの先へ、急ごう。）"
       ],
       "status": "provisional",
-      "placeholder": "Claudeの仮。世界観・シナリオ室の言葉に差しかえる"
+      "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
     }
   },
   "lifeNote": "2026-11-24 作者「イベントや会話、適当に沢山作っといて」：life. で始まる文と inn.hearth・inn.counter は tools/gen-town-life.cjs が入れた仮の文（status: provisional）。名前・役目・設定の無い町の人だけ。正式な台詞は世界観・シナリオ室の確定で差しかえる",
