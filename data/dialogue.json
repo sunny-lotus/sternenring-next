@@ -7293,6 +7293,38 @@
       ],
       "status": "provisional",
       "source": "production/claude/scenario/ノルン導入_町の人の言葉_v01.md"
+    },
+    "map.norn.gate-permit": {
+      "lines": [
+        "（カルディアへの門。通るには、通行の許可が要る。）",
+        "〔開発中：この先はまだ作っていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.norn.gate-south": {
+      "lines": [
+        "（ノルンの南門。）",
+        "〔開発中：南門の先は、まだ決まっていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.road-unbuilt": {
+      "lines": [
+        "（王道は、南へ続いている。）",
+        "〔開発中：この先はまだ作っていません〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
+    },
+    "map.erde.witch-house": {
+      "lines": [
+        "（森の奥の家。戸は閉まっている。）",
+        "〔開発中：家の外観と中は、まだ仮です〕"
+      ],
+      "status": "provisional",
+      "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
     }
   },
   "lifeNote": "2026-11-24 作者「イベントや会話、適当に沢山作っといて」：life. で始まる文と inn.hearth・inn.counter は tools/gen-town-life.cjs が入れた仮の文（status: provisional）。名前・役目・設定の無い町の人だけ。正式な台詞は世界観・シナリオ室の確定で差しかえる",

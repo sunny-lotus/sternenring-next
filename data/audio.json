@@ -573,6 +573,16 @@
     "norn-house-plaza-18": "bgm.town.celtic.v30",
     "norn-house-plaza-19": "bgm.town.celtic.v30",
     "norn-house-plaza-20": "bgm.town.celtic.v30",
-    "norn-house-plaza-21": "bgm.town.celtic.v30"
+    "norn-house-plaza-21": "bgm.town.celtic.v30",
+    "norn-square": "bgm.town.celtic.v30",
+    "norn-east-street": "bgm.town.celtic.v30",
+    "norn-kingsroad": "bgm.town.celtic.v30",
+    "norn-north-gate": "bgm.town.celtic.v30",
+    "norn-west-street": "bgm.town.celtic.v30",
+    "norn-south-street": "bgm.town.celtic.v30",
+    "erde-forest-east": "bgm.field.hikari-no-arpeggio",
+    "erde-forest-fork": "bgm.field.hikari-no-arpeggio",
+    "erde-deep": "bgm.field.hikari-no-arpeggio",
+    "erde-village": "bgm.town.celtic.v30"
   }
 }

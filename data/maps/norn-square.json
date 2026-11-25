@@ -1,0 +1,764 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "norn-square",
+  "title": "ノルン・中央広場",
+  "kind": "exterior",
+  "status": "provisional",
+  "provenance": "2026-11-25 production/claude/scenario/Claude引渡し_ノルンとエルデ森林の地図制作_v01.md（STORY-NORN-MAP-20261125 revision 2） から、tools/gen-norn-town.cjs で作った歩ける内部試作。配置・広さ・建物の数は仮で、正式な地理ではない。",
+  "width": 42,
+  "height": 30,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "paving",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "north",
+      "x": 19,
+      "y": 0,
+      "span": 3,
+      "dir": "up",
+      "effect": "dive",
+      "to": {
+        "map": "norn-north-gate",
+        "exit": "south",
+        "arrive": {
+          "x": 17,
+          "y": 14,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "east",
+      "x": 41,
+      "y": 12,
+      "span": 3,
+      "dir": "right",
+      "effect": "page",
+      "to": {
+        "map": "norn-east-street",
+        "exit": "west",
+        "arrive": {
+          "x": 1,
+          "y": 6,
+          "dir": "right"
+        }
+      }
+    },
+    {
+      "id": "west",
+      "x": 0,
+      "y": 12,
+      "span": 3,
+      "dir": "left",
+      "effect": "page",
+      "to": {
+        "map": "norn-west-street",
+        "exit": "east",
+        "arrive": {
+          "x": 42,
+          "y": 6,
+          "dir": "left"
+        }
+      }
+    },
+    {
+      "id": "inn-street",
+      "x": 0,
+      "y": 23,
+      "span": 3,
+      "dir": "left",
+      "effect": "page",
+      "to": {
+        "map": "norn-inn-street",
+        "exit": "east-street",
+        "arrive": {
+          "x": 42,
+          "y": 6,
+          "dir": "left"
+        }
+      }
+    },
+    {
+      "id": "south",
+      "x": 19,
+      "y": 29,
+      "span": 3,
+      "dir": "down",
+      "effect": "emerge",
+      "to": {
+        "map": "norn-south-street",
+        "exit": "north",
+        "arrive": {
+          "x": 11,
+          "y": 1,
+          "dir": "down"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 20,
+      "y": 18,
+      "dir": "up"
+    }
+  },
+  "events": [],
+  "collision": [
+    "###################DDD####################",
+    "##################.......#################",
+    "##################.....###################",
+    "##################.....###################",
+    "##################.....###################",
+    "#........................................#",
+    "##########.......................#########",
+    "##########.###..............###..#########",
+    "##########.###..............###..#########",
+    "##########.......................#########",
+    "#..............#..........##.............#",
+    "#........................................#",
+    "D.........#....................#.........D",
+    "D........................................D",
+    "D..................###...................D",
+    "#..................###...................#",
+    "#........................................#",
+    "##########.......................#######.#",
+    "##########.......................#######.#",
+    "##########.###..............###..#######.#",
+    "##########.###..............###..#######.#",
+    "#........................................#",
+    "#..............##.........#..............#",
+    "D........................................#",
+    "D.........#....................#.........#",
+    "D........................................#",
+    "#........................................#",
+    "#.##....##...............##....##....##..#",
+    "#........................................#",
+    "###################DDD####################"
+  ],
+  "stage": {
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 75,
+      "distance": 6.5,
+      "follow": "player",
+      "deadzone": [
+        2,
+        1.5
+      ]
+    },
+    "floor": "cobble",
+    "townArt": {
+      "doorH": 2.5,
+      "doors": {
+        "house_a_narrow.webp": {
+          "h": 0.24,
+          "x": 0.39,
+          "cut": {
+            "x0": 0.289,
+            "x1": 0.498,
+            "y0": 0.771,
+            "y1": 0.978,
+            "arch": 0.021,
+            "hinge": "left"
+          }
+        },
+        "house_b_sideroof.webp": {
+          "h": 0.283,
+          "x": 0.35,
+          "cut": {
+            "x0": 0.27,
+            "x1": 0.415,
+            "y0": 0.681,
+            "y1": 0.96,
+            "arch": 0.053,
+            "hinge": "left"
+          }
+        },
+        "house_c_stepgable.webp": {
+          "h": 0.254,
+          "x": 0.5,
+          "cut": {
+            "x0": 0.393,
+            "x1": 0.612,
+            "y0": 0.75,
+            "y1": 0.976,
+            "arch": 0.046,
+            "double": true
+          }
+        },
+        "house_d_workshop.webp": {
+          "h": 0.308,
+          "x": 0.48,
+          "cut": {
+            "x0": 0.302,
+            "x1": 0.702,
+            "y0": 0.614,
+            "y1": 0.982,
+            "arch": 0.079,
+            "double": true
+          }
+        },
+        "house_e_archway.webp": {
+          "h": 0.281,
+          "x": 0.49,
+          "cut": {
+            "x0": 0.432,
+            "x1": 0.553,
+            "y0": 0.659,
+            "y1": 0.942,
+            "arch": 0.054,
+            "hinge": "right"
+          }
+        },
+        "house_f_corner.webp": {
+          "h": 0.283,
+          "x": 0.33,
+          "cut": {
+            "x0": 0.241,
+            "x1": 0.387,
+            "y0": 0.678,
+            "y1": 0.952,
+            "arch": 0.05,
+            "hinge": "left"
+          }
+        },
+        "house_home_2f.webp": {
+          "h": 0.274,
+          "x": 0.28,
+          "cut": {
+            "x0": 0.207,
+            "x1": 0.358,
+            "y0": 0.676,
+            "y1": 0.977,
+            "arch": 0.039,
+            "hinge": "left"
+          }
+        },
+        "house_merchant_3f.webp": {
+          "h": 0.234,
+          "x": 0.42
+        },
+        "inn_silver_deer.webp": {
+          "h": 0.229,
+          "x": 0.499,
+          "cut": {
+            "x0": 0.351,
+            "x1": 0.649,
+            "y0": 0.659,
+            "y1": 0.943,
+            "arch": 0.085,
+            "hole": true,
+            "mx0": 0.419,
+            "mx1": 0.581,
+            "leafTop": {
+              "outer": 0.709,
+              "inner": 0.738,
+              "lo": 0.366,
+              "li": 0.419,
+              "ri": 0.586,
+              "ro": 0.651
+            },
+            "windows": [
+              {
+                "x0": 0.117,
+                "x1": 0.279,
+                "y0": 0.709,
+                "y1": 0.855,
+                "arch": 0.037
+              },
+              {
+                "x0": 0.724,
+                "x1": 0.886,
+                "y0": 0.709,
+                "y1": 0.855,
+                "arch": 0.037
+              }
+            ]
+          }
+        }
+      },
+      "note": "ノルンの町の絵（美術・演出室 2026-11-22、pixel/元絵/町_ノルン を tools の town-prep.ps1 で小さくしたもの）。板の名前ごとの絵。家は位置で選ぶ",
+      "base": "assets/town/norn/",
+      "ground": {
+        "paved": "tex_cobble_street.webp",
+        "grass": "tex_grass.webp"
+      },
+      "boards": {
+        "house-*": [
+          "house_home_2f.webp",
+          "house_a_narrow.webp",
+          "house_b_sideroof.webp",
+          "house_c_stepgable.webp",
+          "house_d_workshop.webp",
+          "house_e_archway.webp",
+          "house_f_corner.webp"
+        ],
+        "inn-tall": "inn_silver_deer.webp",
+        "lamp": "lamp_post.webp",
+        "stall": "stall_festival.webp",
+        "flower-stall": "flower_stall.webp",
+        "cart": "cart.webp",
+        "planter": "planter.webp",
+        "flowerbed": "flowerbed.webp",
+        "tree": "tree_street.webp",
+        "tree-small": "tree_small.webp",
+        "herbs": "herbs_drying.webp",
+        "awning-green": "awnings-1.webp",
+        "awning-red": "awnings-2.webp",
+        "awning-wheat": "awnings-3.webp",
+        "sign-bread": "signs-1.webp",
+        "sign-shoe": "signs-2.webp",
+        "sign-cup": "signs-3.webp",
+        "sign-deer": "signs-4.webp",
+        "crates": "crates.webp",
+        "barrels": "barrels.webp",
+        "well": "well.webp",
+        "bench": "bench.webp",
+        "notice-board": "notice_board.webp",
+        "signpost": "signpost.webp",
+        "trough": "trough.webp",
+        "sacks": "sacks.webp",
+        "firewood": "firewood.webp",
+        "fence": "fence.webp",
+        "laundry": "laundry.webp",
+        "door-pots": "door_pots.webp",
+        "bunting": "bunting.webp",
+        "lantern-string": "lantern_string.webp",
+        "festival-banner": "festival_banner.webp",
+        "flower-garland": "flower_garland.webp"
+      }
+    },
+    "paved": [
+      {
+        "x": 0,
+        "y": 0,
+        "w": 42,
+        "h": 30
+      }
+    ],
+    "orbs": {
+      "count": 10,
+      "alpha": 0.5,
+      "color": [
+        1,
+        0.86,
+        0.62
+      ],
+      "size": 0.7,
+      "note": "町：暖かいほこりの粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": [
+          {
+            "asset": "placeholder:night-sky-ring",
+            "sink": 1,
+            "image": "assets/backdrops/norn_night_v02.jpg",
+            "imageNightNote": "夜の背景（美術・演出室 2026-11-22 pixel/元絵/背景_ノルン/norn_night_backdrop_v02、試作）",
+            "imageDay": "assets/backdrops/norn_day_v02.jpg",
+            "imageDayNote": "昼の背景（美術・演出室 2026-11-22 norn_day_backdrop_v02。手前の家を一階・扉まで描き直したもの。作者「背景を書かせなおす、家の窓やドアがあるように」）",
+            "imageNote": "今だけの仮（作者「背景をもっと高く、試しにバトルのタイトルの背景を、今だけ」）。カルディアの城壁とレグナス城の背景の元絵を依頼中",
+            "x": 0,
+            "y": 0,
+            "w": 42,
+            "h": 1,
+            "standH": 22
+          }
+        ]
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "placeholder:house-front",
+            "x": 1,
+            "y": 1,
+            "w": 10,
+            "h": 4,
+            "standH": 8.8,
+            "zOffset": 0.04,
+            "art": "house_b_sideroof.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 11,
+            "y": 1,
+            "w": 7,
+            "h": 4,
+            "standH": 9.8,
+            "zOffset": 0.07,
+            "art": "house_c_stepgable.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 25,
+            "y": 1,
+            "w": 9,
+            "h": 4,
+            "standH": 9.1,
+            "zOffset": 0.02,
+            "art": "house_home_2f.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 34,
+            "y": 1,
+            "w": 7,
+            "h": 4,
+            "standH": 9.8,
+            "zOffset": 0.06,
+            "art": "house_c_stepgable.webp"
+          },
+          {
+            "asset": "placeholder:clock-tower",
+            "x": 23,
+            "y": 2,
+            "w": 4,
+            "h": 3,
+            "standH": 11,
+            "zOffset": 0.1
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 1,
+            "y": 6,
+            "w": 9,
+            "h": 4,
+            "standH": 9.1,
+            "zOffset": 0,
+            "art": "house_home_2f.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 33,
+            "y": 6,
+            "w": 8,
+            "h": 4,
+            "standH": 8.8,
+            "zOffset": 0.02,
+            "art": "house_f_corner.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 1,
+            "y": 17,
+            "w": 9,
+            "h": 4,
+            "standH": 8.1,
+            "zOffset": 0.02,
+            "art": "house_d_workshop.webp"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 33,
+            "y": 17,
+            "w": 7,
+            "h": 4,
+            "standH": 9.8,
+            "zOffset": 0.01,
+            "art": "house_c_stepgable.webp"
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 1,
+            "y": 4,
+            "w": 8,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:bunting",
+            "x": 27,
+            "y": 4,
+            "w": 8,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0.3,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:planter",
+            "x": 2,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 8,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 25,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 31,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:planter",
+            "x": 37,
+            "y": 27,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.02
+          },
+          {
+            "asset": "placeholder:stall",
+            "x": 11,
+            "y": 7,
+            "w": 3,
+            "h": 2,
+            "standH": 3.2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:stall",
+            "x": 28,
+            "y": 7,
+            "w": 3,
+            "h": 2,
+            "standH": 3.2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:stall",
+            "x": 11,
+            "y": 19,
+            "w": 3,
+            "h": 2,
+            "standH": 3.2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:stall",
+            "x": 28,
+            "y": 19,
+            "w": 3,
+            "h": 2,
+            "standH": 3.2,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:well",
+            "x": 19,
+            "y": 14,
+            "w": 3,
+            "h": 2,
+            "standH": 3.6,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:lamp",
+            "x": 10,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 3.8,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:lamp",
+            "x": 31,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 3.8,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:lamp",
+            "x": 10,
+            "y": 24,
+            "w": 1,
+            "h": 1,
+            "standH": 3.8,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:lamp",
+            "x": 31,
+            "y": 24,
+            "w": 1,
+            "h": 1,
+            "standH": 3.8,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:bench",
+            "x": 15,
+            "y": 22,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:bench",
+            "x": 26,
+            "y": 10,
+            "w": 2,
+            "h": 1,
+            "standH": 1.2,
+            "zOffset": 0.03
+          },
+          {
+            "asset": "placeholder:tree",
+            "x": 15,
+            "y": 10,
+            "w": 1,
+            "h": 1,
+            "standH": 6,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:tree",
+            "x": 26,
+            "y": 22,
+            "w": 1,
+            "h": 1,
+            "standH": 6,
+            "zOffset": 0.05
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 11,
+            "y": 9,
+            "w": 9,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          },
+          {
+            "asset": "placeholder:lantern-string",
+            "x": 21,
+            "y": 9,
+            "w": 9,
+            "h": 1,
+            "standH": 6.4,
+            "zOffset": 0.02,
+            "prop": true,
+            "solid": false,
+            "festival": true
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  },
+  "walkers": [
+    {
+      "id": "sq-a",
+      "sprite": "mob01",
+      "path": [
+        [
+          8,
+          13
+        ],
+        [
+          16,
+          13
+        ]
+      ],
+      "speed": 0.9
+    },
+    {
+      "id": "sq-b",
+      "sprite": "mob02",
+      "path": [
+        [
+          24,
+          17
+        ],
+        [
+          34,
+          17
+        ]
+      ],
+      "speed": 1
+    },
+    {
+      "id": "sq-c",
+      "sprite": "mob03",
+      "path": [
+        [
+          14,
+          11
+        ],
+        [
+          14,
+          21
+        ]
+      ],
+      "speed": 0.8,
+      "wait": 1800
+    },
+    {
+      "id": "sq-d",
+      "sprite": "mob04",
+      "path": [
+        [
+          27,
+          12
+        ],
+        [
+          27,
+          18
+        ]
+      ],
+      "speed": 1.1
+    }
+  ]
+}

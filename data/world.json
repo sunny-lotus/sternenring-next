@@ -34,7 +34,17 @@
     "norn-house-plaza-18",
     "norn-house-plaza-19",
     "norn-house-plaza-20",
-    "norn-house-plaza-21"
+    "norn-house-plaza-21",
+    "norn-square",
+    "norn-east-street",
+    "norn-kingsroad",
+    "norn-north-gate",
+    "norn-west-street",
+    "norn-south-street",
+    "erde-forest-east",
+    "erde-forest-fork",
+    "erde-deep",
+    "erde-village"
   ],
   "start": {
     "map": "norn-inn-street",

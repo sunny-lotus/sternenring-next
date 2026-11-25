@@ -46,14 +46,15 @@
       "dir": "right",
       "effect": "page",
       "to": {
-        "map": "norn-plaza",
-        "exit": "west-street",
+        "map": "norn-square",
+        "exit": "inn-street",
         "arrive": {
           "x": 1,
-          "y": 10,
+          "y": 23,
           "dir": "right"
         }
-      }
+      },
+      "note": "2026-11-25 STORY-NORN-MAP：新しい中央広場の左下（広場の西南）へ。前の広場（norn-plaza）は見比べ用に残した"
     },
     {
       "id": "house-01",

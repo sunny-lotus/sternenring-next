@@ -1,0 +1,1368 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "erde-forest-east",
+  "title": "エルデ森林・ノルン寄り",
+  "kind": "exterior",
+  "status": "provisional",
+  "provenance": "2026-11-25 production/claude/scenario/Claude引渡し_ノルンとエルデ森林の地図制作_v01.md（STORY-NORN-MAP-20261125 revision 2） から、tools/gen-norn-town.cjs で作った歩ける内部試作。配置・広さ・建物の数は仮で、正式な地理ではない。",
+  "width": 50,
+  "height": 20,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "paving",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "east",
+      "x": 49,
+      "y": 9,
+      "span": 3,
+      "dir": "right",
+      "effect": "page",
+      "to": {
+        "map": "norn-west-street",
+        "exit": "west-gate",
+        "arrive": {
+          "x": 1,
+          "y": 6,
+          "dir": "right"
+        }
+      }
+    },
+    {
+      "id": "west",
+      "x": 0,
+      "y": 8,
+      "span": 3,
+      "dir": "left",
+      "effect": "page",
+      "to": {
+        "map": "erde-forest-fork",
+        "exit": "east",
+        "arrive": {
+          "x": 48,
+          "y": 9,
+          "dir": "left"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 40,
+      "y": 10,
+      "dir": "left"
+    }
+  },
+  "events": [],
+  "roads": [
+    {
+      "x": 0,
+      "y": 8,
+      "w": 16,
+      "h": 3
+    },
+    {
+      "x": 13,
+      "y": 6,
+      "w": 7,
+      "h": 5
+    },
+    {
+      "x": 17,
+      "y": 6,
+      "w": 15,
+      "h": 3
+    },
+    {
+      "x": 29,
+      "y": 6,
+      "w": 7,
+      "h": 6
+    },
+    {
+      "x": 33,
+      "y": 9,
+      "w": 17,
+      "h": 3
+    }
+  ],
+  "collision": [
+    "##################################################",
+    "#.............#....#......#......................#",
+    "#..##.............#......#......##...............#",
+    "#.....#......##..............#...................#",
+    "#.##....##.#.......#....#.......#.##......#..#...#",
+    "#.#...#.#............................#...........#",
+    "#...........................................#....#",
+    "#.....................................#..#.......#",
+    "D................................................#",
+    "D................................................D",
+    "D................................................D",
+    "#.........................#......................D",
+    "#.#............#..#.#..#...#.....................#",
+    "##....##...###.......###..###.##...#...#...#..#..#",
+    "#..#.#.##.....#.#..........#.#...#....#.....#....#",
+    "#..##......#..#.....###..#.#.....#.......#....#..#",
+    "#.....#..##..##...........#....##..#...#....#.####",
+    "#..#......#.#..#........##.......#.......#.......#",
+    "##...........#.....#..#.#...##.#.........##.#.#..#",
+    "##################################################"
+  ],
+  "stage": {
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 75,
+      "distance": 6.5,
+      "follow": "player",
+      "deadzone": [
+        2,
+        1.5
+      ]
+    },
+    "floor": "soil",
+    "townArt": {
+      "note": "森の元絵 v01（美術・演出室 2026-11-23、pixel/元絵/森_試し_v01）。木は位置でもみの木と広葉樹を交ぜる。門は口をくりぬき、奥に中の写し",
+      "base": "assets/forest/",
+      "ground": {
+        "soil": "forest_soil.webp",
+        "path": "forest_path.webp"
+      },
+      "boards": {
+        "pine": [
+          "tree_fir.webp",
+          "tree_broad.webp",
+          "tree_fir.webp"
+        ],
+        "rock": "rock.webp",
+        "bush": "bush.webp"
+      }
+    },
+    "paths": [
+      {
+        "pts": [
+          [
+            0.5,
+            9.5
+          ],
+          [
+            14.5,
+            9.5
+          ],
+          [
+            18.5,
+            7.5
+          ],
+          [
+            30.5,
+            7.5
+          ],
+          [
+            34.5,
+            10.5
+          ],
+          [
+            49.5,
+            10.5
+          ]
+        ],
+        "w": 2.4
+      }
+    ],
+    "orbs": {
+      "count": 26,
+      "alpha": 0.75,
+      "color": [
+        0.8,
+        1,
+        0.7
+      ],
+      "size": 1,
+      "note": "森：木もれ日のような光の粒（仮）"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": [
+          {
+            "asset": "placeholder:night-sky-ring",
+            "image": "assets/backdrops/title_bg_temp.jpg",
+            "imageNote": "今だけの仮（試しの森と同じ背景）。エルデ森林の背景の元絵は美術・演出室へ依頼",
+            "x": 0,
+            "y": 0,
+            "h": 1,
+            "standH": 30,
+            "w": 50
+          }
+        ]
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "placeholder:pine",
+            "x": 14,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 19,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 26,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 4.7,
+            "zOffset": 0,
+            "showH": 4.7
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 3,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 4,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 5,
+            "zOffset": 0,
+            "showH": 5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 18,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 25,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 5.2,
+            "zOffset": 0,
+            "showH": 5.2
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 33,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 6,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 5.8,
+            "zOffset": 0,
+            "showH": 5.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 13,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 4.8,
+            "zOffset": 0,
+            "showH": 4.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 14,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 5.5,
+            "zOffset": 0,
+            "showH": 5.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 29,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 2,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 5.2,
+            "zOffset": 0,
+            "showH": 5.2
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 3,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 4.4,
+            "zOffset": 0,
+            "showH": 4.4
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 8,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 9,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 5,
+            "zOffset": 0,
+            "showH": 5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 19,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 5,
+            "zOffset": 0,
+            "showH": 5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 24,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0,
+            "showH": 4.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 42,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 5.8,
+            "zOffset": 0,
+            "showH": 5.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 2,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 37,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 4.7,
+            "zOffset": 0,
+            "showH": 4.7
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 44,
+            "y": 6,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 26,
+            "y": 11,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 2,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 4.7,
+            "zOffset": 0,
+            "showH": 4.7
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 15,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 27,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 1,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.7,
+            "zOffset": 0,
+            "showH": 4.7
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 12,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.7,
+            "zOffset": 0,
+            "showH": 4.7
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 13,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 26,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 28,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 5,
+            "zOffset": 0,
+            "showH": 5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 30,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 5.4,
+            "zOffset": 0,
+            "showH": 5.4
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 31,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.8,
+            "zOffset": 0,
+            "showH": 4.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 35,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.8,
+            "zOffset": 0,
+            "showH": 4.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 39,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0,
+            "showH": 4.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 46,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 5,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 5.4,
+            "zOffset": 0,
+            "showH": 5.4
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 7,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 16,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 27,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 29,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 14,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 22,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 4.8,
+            "zOffset": 0,
+            "showH": 4.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 27,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0,
+            "showH": 5.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 33,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 5.2,
+            "zOffset": 0,
+            "showH": 5.2
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 41,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 46,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0,
+            "showH": 5.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 9,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 10,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 4.5,
+            "zOffset": 0,
+            "showH": 4.5
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 13,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 4.9,
+            "zOffset": 0,
+            "showH": 4.9
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 26,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 5.4,
+            "zOffset": 0,
+            "showH": 5.4
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 32,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0,
+            "showH": 5.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 35,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 46,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0,
+            "showH": 4.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 3,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 5.3,
+            "zOffset": 0,
+            "showH": 5.3
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 33,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 5.6,
+            "zOffset": 0,
+            "showH": 5.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 41,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 4.8,
+            "zOffset": 0,
+            "showH": 4.8
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 29,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 4.6,
+            "zOffset": 0,
+            "showH": 4.6
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 41,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 5.1,
+            "zOffset": 0,
+            "showH": 5.1
+          },
+          {
+            "asset": "placeholder:pine",
+            "x": 42,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 5.7,
+            "zOffset": 0,
+            "showH": 5.7
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:bush",
+            "x": 32,
+            "y": 2,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 11,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 32,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 34,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 35,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 45,
+            "y": 4,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 6,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 8,
+            "y": 5,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 38,
+            "y": 7,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 41,
+            "y": 7,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 18,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 20,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 23,
+            "y": 12,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 6,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 7,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 11,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 21,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 22,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 23,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 27,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 43,
+            "y": 13,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 3,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 8,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 14,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 33,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 38,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 44,
+            "y": 14,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 3,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 4,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 11,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 20,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 21,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 25,
+            "y": 15,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 6,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 14,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 31,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 39,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 44,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 47,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 48,
+            "y": 16,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 10,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 12,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 15,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 24,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 25,
+            "y": 17,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 1,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 13,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 19,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 22,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 24,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 28,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:bush",
+            "x": 31,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 1,
+            "zOffset": 0.02,
+            "showH": 1
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 44,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          },
+          {
+            "asset": "placeholder:rock",
+            "x": 46,
+            "y": 18,
+            "w": 1,
+            "h": 1,
+            "standH": 0.8,
+            "zOffset": 0.02,
+            "showH": 0.8
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  }
+}

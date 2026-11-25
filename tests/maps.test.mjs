@@ -76,3 +76,20 @@ test('隣のマップへの出入口の前に、町の人も歩く人もいな�
     for (const w of m.walkers || []) for (const p of w.path) assert.ok(!near(p[0], p[1]), `${m.id} 歩く人 ${w.id} が出入口 ${e.id} の前`);
   }
 });
+
+test('ノルンの新しい骨格と森・村・魔女の家（2026-11-25 STORY-NORN-MAP）：どの地図も、出入口から出入口へ歩いて行け、着く所は通れる。東門→商店通り→広場→北門、広場→銀鹿亭の通り・西門、森→村、分かれ道→魔女の家がつながる', async () => {
+  const { mapQuery } = await import('../src/core/map.js');
+  const NEW = ['norn-square', 'norn-east-street', 'norn-kingsroad', 'norn-north-gate', 'norn-west-street', 'norn-south-street', 'erde-forest-east', 'erde-forest-fork', 'erde-deep', 'erde-village'];
+  const IN = { left: [1, 0], right: [-1, 0], up: [0, 1], down: [0, -1] };
+  for (const id of NEW) {
+    const m = d.maps[id], q = mapQuery(m, d.collision);
+    const starts = m.exits.map((e) => ({ id: e.id, x: e.x + IN[e.dir][0], y: e.y + IN[e.dir][1] }));
+    const seen = new Set([`${starts[0].x},${starts[0].y}`]), todo = [starts[0]];
+    while (todo.length) { const c = todo.pop(); for (const [dx, dy] of Object.values(IN)) { const x = c.x + dx, y = c.y + dy, k = `${x},${y}`; if (!seen.has(k) && q.passable(x, y) && !q.exitAt(x, y)) { seen.add(k); todo.push({ x, y }); } } }
+    for (const s of starts) assert.ok(seen.has(`${s.x},${s.y}`), `${id}: 出入口 ${s.id} へ歩いて行けない`);
+    for (const e of m.exits) { const a = e.to.arrive; assert.ok(mapQuery(d.maps[e.to.map], d.collision).passable(a.x, a.y), `${id}.${e.id} の着く所が通れない`); }
+  }
+  const link = (a, b) => d.maps[a].exits.some((e) => e.to.map === b);
+  for (const [a, b] of [['norn-kingsroad', 'norn-east-street'], ['norn-east-street', 'norn-square'], ['norn-square', 'norn-north-gate'], ['norn-square', 'norn-inn-street'], ['norn-square', 'norn-west-street'], ['norn-west-street', 'erde-forest-east'], ['erde-forest-east', 'erde-forest-fork'], ['erde-forest-fork', 'erde-village'], ['erde-forest-fork', 'erde-deep'], ['norn-inn-street', 'norn-square']]) assert.ok(link(a, b) && link(b, a), `${a} ⇄ ${b}`);
+  assert.ok(!link('erde-deep', 'erde-village')); // 魔女の家は村への通り道にしない
+});

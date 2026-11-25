@@ -262,6 +262,16 @@ function variedHouseArt(w, h, seed) {
     g.strokeStyle = 'rgba(40,24,10,.55)'; g.lineWidth = 3; g.strokeRect(W * 0.04, roofH, W * 0.92, H - roofH);
   });
 }
+/** 石積みの壁（町の壁・城壁の仮の絵）。crenel：上の狭間の高さ（割合）、top：絵の上から壁が始まる所（px） */
+function stoneWall(g, W, H, col, crenel, top = 0) {
+  const R = rnd(Math.round(W + H)), cr = H * crenel, y0 = top + cr, bh = Math.max(10, PX * 0.38), bw = bh * 1.8;
+  g.fillStyle = col; g.fillRect(0, y0, W, H - y0);
+  if (cr > 0) for (let x = 0; x < W; x += bw) g.fillRect(x, top, bw * 0.55, cr + 1);
+  g.strokeStyle = 'rgba(40,32,24,.45)'; g.lineWidth = Math.max(1.5, bh * 0.08);
+  for (let y = y0, r = 0; y < H; y += bh, r++) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); for (let x = (r % 2) * bw / 2; x < W; x += bw) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + bh); g.stroke(); } }
+  for (let k = 0; k < W * H / 4000; k++) { g.fillStyle = R() < 0.5 ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.08)'; g.fillRect(R() * W, y0 + R() * (H - y0), bw * 0.9, bh * 0.85); }
+  g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(0, H - bh * 0.6, W, bh * 0.6);
+}
 const ART = {
   'inn-front': (w, h) => houseArt(w, h, '#9a5a3a', '#4a2a2a', 1, { sign: true, door: true }),
   // 町の家は、どれも板ごとにちがう形・色になる（2026-11-22 作者「同じものが並びすぎている」）。種類の名前は、元の大きさの目安として残す
@@ -285,6 +295,36 @@ const ART = {
     const gr = g.createLinearGradient(0, top, 0, top + bh); gr.addColorStop(0, '#2c3a6a'); gr.addColorStop(1, '#1e2850'); g.fillStyle = gr; g.beginPath(); g.moveTo(x0, top); g.lineTo(x0 + bw, top); g.lineTo(x0 + bw, top + bh); g.lineTo(x0 + bw / 2, top + bh * .9); g.lineTo(x0, top + bh); g.closePath(); g.fill();
     const cx = W / 2, cy = top + bh * .42, rr = bw * .3; g.strokeStyle = '#e8c372'; g.lineWidth = Math.max(2, bw * .04); g.beginPath(); g.arc(cx, cy, rr, 0, 7); g.stroke();
     g.fillStyle = '#f3d48b'; g.beginPath(); for (let i = 0; i < 8; i++) { const ang = i * Math.PI / 4 - Math.PI / 2, rad = i % 2 ? rr * .22 : rr * .62; g.lineTo(cx + Math.cos(ang) * rad, cy + Math.sin(ang) * rad); } g.closePath(); g.fill();
+  }),
+  // 町の壁・門・時計台・森の奥の家（2026-11-25 STORY-NORN-MAP の地図の試作。コードで描いた仮。本物の絵は美術・演出室に依頼）
+  'town-wall': (w, h) => canvas(w * PX, h * PX, (g, W, H) => stoneWall(g, W, H, '#8a8272', 0.1)), // ノルンの壁（石積み、上に狭間）
+  'third-wall': (w, h) => canvas(w * PX, h * PX, (g, W, H) => stoneWall(g, W, H, '#77736a', 0.06)), // カルディアの第三城壁（高く、色を少し暗く）
+  'gate-tower': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 門の脇の塔（とんがり屋根）
+    const rt = H * 0.22; stoneWall(g, W, H, '#8a8272', 0, rt);
+    g.fillStyle = '#6a3a2a'; g.beginPath(); g.moveTo(-W * 0.04, rt); g.lineTo(W / 2, 0); g.lineTo(W * 1.04, rt); g.closePath(); g.fill();
+    g.fillStyle = '#2a2018'; g.fillRect(W * 0.42, H * 0.38, W * 0.16, H * 0.1);
+  }),
+  'kardia-gate': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // カルディアへの門（閉じた木の扉。アーチ）
+    stoneWall(g, W, H, '#77736a', 0.06); const aw = W * 0.46, ax = (W - aw) / 2, ay = H * 0.32;
+    g.fillStyle = '#4a3020'; g.beginPath(); g.moveTo(ax, H); g.lineTo(ax, ay + aw / 2); g.arc(W / 2, ay + aw / 2, aw / 2, Math.PI, 0); g.lineTo(ax + aw, H); g.closePath(); g.fill();
+    g.strokeStyle = '#2a1a10'; g.lineWidth = Math.max(2, W * 0.01); for (let k = 1; k < 6; k++) { g.beginPath(); g.moveTo(ax + aw * k / 6, ay + aw * 0.2); g.lineTo(ax + aw * k / 6, H); g.stroke(); }
+    g.fillStyle = '#3a3a3a'; for (const yy of [0.55, 0.8]) g.fillRect(ax, H * yy, aw, H * 0.03);
+  }),
+  'clock-tower': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 時計台（案。形・用途は未定）
+    const rt = H * 0.16, tw = W * 0.7, tx = (W - tw) / 2; g.fillStyle = '#c8b898'; g.fillRect(tx, rt, tw, H - rt);
+    g.fillStyle = '#6a3a2a'; g.beginPath(); g.moveTo(tx - W * 0.06, rt); g.lineTo(W / 2, 0); g.lineTo(tx + tw + W * 0.06, rt); g.closePath(); g.fill();
+    const cx = W / 2, cy = rt + H * 0.12, r = tw * 0.32; g.fillStyle = '#f2ead4'; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill(); g.strokeStyle = '#3a2a20'; g.lineWidth = Math.max(2, r * 0.12); g.stroke();
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - r * 0.7); g.moveTo(cx, cy); g.lineTo(cx + r * 0.5, cy); g.stroke();
+    g.fillStyle = '#3a2412'; g.fillRect(W / 2 - tw * 0.18, H - H * 0.14, tw * 0.36, H * 0.14);
+    for (let k = 0; k < 3; k++) { g.fillStyle = '#4a5a6a'; g.fillRect(W / 2 - tw * 0.1, rt + H * (0.3 + k * 0.17), tw * 0.2, H * 0.08); }
+    noise(g, W, H, rnd(31), 14);
+  }),
+  'witch-house': (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 森の奥の家（仮の外観）：低い石と木の家、苔の屋根、煙突
+    const wy = H * 0.45; g.fillStyle = '#7a6a52'; g.fillRect(W * 0.08, wy, W * 0.84, H - wy);
+    g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(0, wy + H * 0.04); g.lineTo(W * 0.5, H * 0.08); g.lineTo(W, wy + H * 0.04); g.closePath(); g.fill();
+    g.fillStyle = '#5a4a3a'; g.fillRect(W * 0.7, H * 0.12, W * 0.08, H * 0.2);
+    g.fillStyle = '#3a2412'; g.fillRect(W * 0.43, H * 0.66, W * 0.14, H * 0.34); g.fillStyle = '#ffd77a'; g.fillRect(W * 0.18, H * 0.6, W * 0.12, H * 0.12); g.fillRect(W * 0.7, H * 0.6, W * 0.12, H * 0.12);
+    noise(g, W, H, rnd(77), 16);
   }),
   stall: (w, h) => canvas(w * PX, h * PX, (g, W, H) => { // 露店：しまの日よけ・台・小さな灯り
     g.fillStyle = '#5a3a22'; g.fillRect(W * 0.08, H * 0.25, 8, H * 0.75); g.fillRect(W * 0.92 - 8, H * 0.25, 8, H * 0.75);
