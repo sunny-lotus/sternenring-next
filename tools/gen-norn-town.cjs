@@ -24,7 +24,7 @@ const HOUSE_FILES = Object.keys(HOUSE.ART).filter((f) => !['house_merchant_3f.we
 function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296; }
 const SRC = 'production/claude/scenario/Claude引渡し_ノルンとエルデ森林の地図制作_v01.md（STORY-NORN-MAP-20261125 revision 2）';
 const inn = read('norn-inn-street');
-const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt));
+const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt)); TOWN_ART.ground.square = 'tex_cobble_square.webp'; // 広場の扇形の石畳（2026-11-26 サニー「広場は雰囲気ちがう石畳でもいいね」）
 const FOREST_ART = JSON.parse(JSON.stringify(read('test-forest').stage.townArt)); delete FOREST_ART.doors; FOREST_ART.boards = { pine: FOREST_ART.boards.pine, rock: FOREST_ART.boards.rock, bush: FOREST_ART.boards.bush };
 // 骨格の絵（2026-11-26 美術・演出室 ART-NIGHT-NORN-20261126、pixel/元絵/ノルン_骨格_v01 を tools/copy-norn-structure-art.py で写した。provisional）。壁は横にくり返して張る
 Object.assign(TOWN_ART.boards, { 'town-wall': 'town_wall.webp', 'third-wall': 'third_wall.webp', 'gate-tower': 'gate_tower.webp', 'kardia-gate': 'kardia_gate.webp', 'clock-tower': 'clock_tower.webp' });
@@ -110,7 +110,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
 // ---------- 中央広場（大きめ。作者「広場は大きめがいい」） ----------
 {
   const M = base('norn-square', 'ノルン・中央広場', 42, 30, 'town', 101);
-  M.paved.push({ x: 0, y: 0, w: 42, h: 30 });
+  M.paved.push({ x: 0, y: 0, w: 42, h: 30, plaza: true }); // 広場はわだちの無い扇形の石畳（2026-11-26 サニー）
   // 北：時計台の案（広場の北のはし、北門へ向かう通りの東）と、その両側の家並み
   M.houses(1, 17, 1, 'back'); M.houses(25, 40, 1, 'back');
   M.put('back', 'clock-tower', 23, 2, 4, 3, 11, 0.1); // 時計台（案）。形・用途は未定。遠くからの目印

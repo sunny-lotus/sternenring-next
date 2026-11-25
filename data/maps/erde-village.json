@@ -215,7 +215,8 @@
       "base": "assets/town/norn/",
       "ground": {
         "paved": "tex_cobble_street.webp",
-        "grass": "tex_grass.webp"
+        "grass": "tex_grass.webp",
+        "square": "tex_cobble_square.webp"
       },
       "boards": {
         "house-*": [

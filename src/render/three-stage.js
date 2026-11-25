@@ -445,8 +445,10 @@ function cobbleFloor(g, map, T, W, H) { // 石畳：角の丸い四角い石が�
     // （2026-11-26 サニー「この白い線は通りに沿ってほしい」「石畳の車輪の後」：東西の通りを横切っていた）。縦に長い道・広場の縦の部分はそのまま
     const im = TOWN_IMG?.[TOWN_CFG?.ground?.paved], S = (4 * T) / (im?.naturalWidth || 1024), paved = map.stage?.paved || [{ x: 0, y: 0, w: map.width, h: map.height }];
     g.fillStyle = pat; g.fillRect(0, 0, W, H);
-    for (const p of paved) if (p.w > p.h) { pat.setTransform(new DOMMatrix().rotate(90).scale(S, S)); g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); }
-    pat.setTransform(new DOMMatrix().scale(S, S)); for (const p of paved) if (p.w <= p.h) { g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); } // 縦の道を上に重ねる（交わる所は縦の向き）
+    for (const p of paved) if (p.w > p.h && !p.plaza) { pat.setTransform(new DOMMatrix().rotate(90).scale(S, S)); g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); }
+    pat.setTransform(new DOMMatrix().scale(S, S)); for (const p of paved) if (p.w <= p.h && !p.plaza) { g.fillStyle = pat; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); } // 縦の道を上に重ねる（交わる所は縦の向き）
+    // 広場（paved の plaza: true）は、わだちの無い扇形の石畳（2026-11-26 サニー「広場とかはいらないかなこの線」）
+    const sq = townPattern(g, 'square', T, 4); if (sq) for (const p of paved) if (p.plaza) { g.fillStyle = sq; g.fillRect(p.x * T, p.y * T, p.w * T, p.h * T); }
     return;
   }
   g.fillStyle = '#6e665a'; g.fillRect(0, 0, W, H); // 目地
