@@ -89,7 +89,10 @@
     "norn-room-se-03",
     "norn-room-se-04",
     "norn-room-vi-01",
-    "norn-room-vi-02"
+    "norn-room-vi-02",
+    "norn-room-sw-01",
+    "norn-room-sw-02",
+    "norn-room-sw-03"
   ],
   "start": {
     "map": "norn-inn-street",

@@ -120,6 +120,54 @@
         }
       },
       "note": "2026-11-26 四地区：南西（宿と旅支度）から西の通りへ抜ける細い路地"
+    },
+    {
+      "id": "room-01",
+      "x": 18,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-sw-01",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-02",
+      "x": 27,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-sw-02",
+        "exit": "door",
+        "arrive": {
+          "x": 5,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-03",
+      "x": 36,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-sw-03",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
     }
   ],
   "spawns": {
@@ -517,7 +565,7 @@
     "#.############.##################.#######..#",
     "#..###########.########.#########.########.#",
     "#..###########.########.#########.#######..#",
-    "#..#####D#####.##D#####.##D######.###D###..#",
+    "#..#####D#####.##DD####.##DD#####.##DD###..#",
     "#.....#.............##.......##..##........#",
     "#..........................................D",
     "#..........................................D",
@@ -819,7 +867,7 @@
             "standH": 8.8,
             "zOffset": 0.02,
             "art": "house_f_corner.webp",
-            "doorExit": "house-01"
+            "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-ochre",
@@ -830,7 +878,7 @@
             "standH": 9.1,
             "zOffset": 0.04,
             "art": "house_home_2f.webp",
-            "doorExit": "house-02"
+            "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-mid",
@@ -841,7 +889,7 @@
             "standH": 9.8,
             "zOffset": 0.02,
             "art": "house_c_stepgable.webp",
-            "doorExit": "house-03"
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:awning-green",

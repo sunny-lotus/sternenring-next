@@ -1,0 +1,355 @@
+{
+  "format": "sternenring-next-map",
+  "version": 1,
+  "id": "norn-room-sw-02",
+  "title": "ノルン・家の中（仮）",
+  "kind": "interior",
+  "footsteps": "wood",
+  "status": "provisional",
+  "provenance": "2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（norn-inn-street の house_home_2f.webp の家、型：home。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。",
+  "width": 10,
+  "height": 7,
+  "tileSize": 32,
+  "legend": {
+    ".": "floor",
+    "#": "wall",
+    "D": "door"
+  },
+  "collision": [
+    "##########",
+    "########.#",
+    "#........#",
+    "##..###..#",
+    "#........#",
+    "#........#",
+    "#####D####"
+  ],
+  "ground": {
+    "tileset": "tiles.pipoya-town",
+    "fill": "floor",
+    "wall": "wall",
+    "rows": null
+  },
+  "exits": [
+    {
+      "id": "door",
+      "x": 5,
+      "y": 6,
+      "dir": "down",
+      "effect": "nook-out",
+      "to": {
+        "map": "norn-inn-street",
+        "exit": "room-02",
+        "arrive": {
+          "x": 27,
+          "y": 5,
+          "dir": "down"
+        }
+      }
+    }
+  ],
+  "spawns": {
+    "default": {
+      "x": 5,
+      "y": 5,
+      "dir": "up"
+    }
+  },
+  "events": [],
+  "stage": {
+    "look": "home",
+    "camera": {
+      "pitchDeg": 10,
+      "fovDeg": 90,
+      "distance": 3,
+      "follow": "center-if-fits"
+    },
+    "textures": {
+      "note": "部屋セット se_home_elder（南東・年寄りの生活）。美術・演出室 内装_地区_v01（provisional）",
+      "base": "assets/interiors/",
+      "floor": "district/mat_floor_gray.webp",
+      "wall": "district/mat_wall_plaster.webp",
+      "ceiling": "district/mat_ceiling_gray.webp",
+      "brick": "silver-deer/brick.webp",
+      "window": "silver-deer/window.webp",
+      "tabletop": "silver-deer/tabletop.webp",
+      "counter": "silver-deer/counter.webp",
+      "blanket": "silver-deer/blanket.webp",
+      "door": "silver-deer/door.webp",
+      "wood": "silver-deer/wood_side.webp",
+      "wainscot": "silver-deer/wainscot.webp",
+      "linen": "silver-deer/linen.webp",
+      "rug": "home/rug_home.webp",
+      "barrels": "silver-deer/barrels.webp",
+      "bottles": "silver-deer/bottles.webp",
+      "mugs": "silver-deer/mugs.webp",
+      "candle": "silver-deer/candle.webp",
+      "lampHanging": "silver-deer/lamp_hanging.webp",
+      "lampWall": "silver-deer/lamp_wall.webp",
+      "flame": "silver-deer/hearth_flame.webp",
+      "logs": "silver-deer/hearth_logs.webp",
+      "bedHome": "home/bed_home.webp",
+      "tableHome": "home/table_home.webp",
+      "cupboard": "home/cupboard.webp",
+      "herbs": "home/herbs_hanging.webp",
+      "pot": "home/hearth_pot.webp",
+      "chest": "home/chest.webp",
+      "washTub": "home/wash_tub.webp",
+      "cuts": {
+        "rug": [
+          [
+            0,
+            0,
+            767,
+            392
+          ],
+          768,
+          393
+        ],
+        "bedHome": [
+          [
+            0,
+            0,
+            767,
+            302
+          ],
+          768,
+          303
+        ],
+        "tableHome": [
+          [
+            0,
+            0,
+            767,
+            336
+          ],
+          768,
+          337
+        ],
+        "cupboard": [
+          [
+            0,
+            0,
+            433,
+            767
+          ],
+          434,
+          768
+        ],
+        "herbs": [
+          [
+            0,
+            0,
+            612,
+            281
+          ],
+          613,
+          282
+        ],
+        "pot": [
+          [
+            0,
+            0,
+            287,
+            724
+          ],
+          288,
+          725
+        ],
+        "chest": [
+          [
+            0,
+            0,
+            714,
+            196
+          ],
+          715,
+          197
+        ],
+        "washTub": [
+          [
+            0,
+            0,
+            664,
+            294
+          ],
+          665,
+          295
+        ],
+        "rocking_chair": [
+          [
+            0,
+            0,
+            323,
+            511
+          ],
+          324,
+          512
+        ],
+        "knitting_basket": [
+          [
+            0,
+            0,
+            511,
+            375
+          ],
+          512,
+          376
+        ],
+        "shared_bed": [
+          [
+            0,
+            0,
+            511,
+            201
+          ],
+          512,
+          202
+        ],
+        "shared_table_chairs": [
+          [
+            0,
+            0,
+            511,
+            224
+          ],
+          512,
+          225
+        ],
+        "baking_oven": [
+          [
+            0,
+            0,
+            428,
+            511
+          ],
+          429,
+          512
+        ],
+        "shared_hearth_pot": [
+          [
+            0,
+            0,
+            202,
+            511
+          ],
+          203,
+          512
+        ],
+        "shared_chest": [
+          [
+            0,
+            0,
+            511,
+            140
+          ],
+          512,
+          141
+        ]
+      },
+      "rocking_chair": "district/rocking_chair.webp",
+      "knitting_basket": "district/knitting_basket.webp",
+      "shared_bed": "district/shared_bed.webp",
+      "shared_table_chairs": "district/shared_table_chairs.webp",
+      "baking_oven": "district/baking_oven.webp",
+      "shared_hearth_pot": "district/shared_hearth_pot.webp",
+      "shared_chest": "district/shared_chest.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
+    },
+    "windowView": {},
+    "backWindows": false,
+    "orbs": {
+      "count": 8,
+      "alpha": 0.85,
+      "color": [
+        1,
+        0.92,
+        0.72
+      ],
+      "size": 0.95,
+      "note": "宿の中：暖炉の火の粉のような、暖かい粒（仮）。2026-11-23 作者「オーブの量を増やして」：暖かい壁に溶けて見えなかったので、濃く大きく少し白く"
+    },
+    "layers": [
+      {
+        "band": "backdrop",
+        "items": []
+      },
+      {
+        "band": "back",
+        "items": [
+          {
+            "asset": "placeholder:furn-shared_hearth_pot",
+            "x": 8,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 1.44,
+            "hangY": 2.3
+          }
+        ]
+      },
+      {
+        "band": "mid",
+        "items": [
+          {
+            "asset": "placeholder:furn-rocking_chair",
+            "x": 1,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 1.44
+          },
+          {
+            "asset": "placeholder:furn-knitting_basket",
+            "x": 2,
+            "y": 1,
+            "w": 1,
+            "h": 1,
+            "standH": 0.432
+          },
+          {
+            "asset": "placeholder:furn-shared_bed",
+            "x": 3,
+            "y": 1,
+            "w": 3,
+            "h": 1,
+            "standH": 1.2
+          },
+          {
+            "asset": "placeholder:furn-shared_table_chairs",
+            "x": 4,
+            "y": 3,
+            "w": 3,
+            "h": 1,
+            "standH": 1.44
+          },
+          {
+            "asset": "placeholder:furn-baking_oven",
+            "x": 6,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 2.88
+          },
+          {
+            "asset": "placeholder:furn-shared_chest",
+            "x": 1,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 0.72
+          }
+        ]
+      },
+      {
+        "band": "actors",
+        "items": []
+      },
+      {
+        "band": "front",
+        "items": []
+      }
+    ]
+  }
+}

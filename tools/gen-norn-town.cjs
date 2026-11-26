@@ -431,14 +431,15 @@ function district(id, title, seed, opt) {
   const IAP = path.join(__dirname, '..', 'data', 'interior-art.json'), IA = fs.existsSync(IAP) ? JSON.parse(fs.readFileSync(IAP, 'utf8')) : null; // 地区・店の内装の絵（tools/copy-interior-district-art.py）
   const FURN_H = { shared_bed: 0.5, shared_table_chairs: 0.6, shared_cupboard: 1.1, shared_hearth_pot: 0.6, shared_chest: 0.3, shared_wash_tub: 0.3, shared_crates: 0.45, shared_sacks: 0.4, shared_barrels: 0.5, shared_scale: 0.55, shared_travel_gear: 1.0, shared_household_shelf: 1.1, shared_workbench: 0.55, shared_bench: 0.3, shared_key_rack: 0.3, shared_bottles: 0.25, shared_pottery: 0.2, shared_breadbasket: 0.25, shared_logbasket: 0.3, shared_herbs: 0.4 }; // 人の背＝1 の目安（資料に無い物は Claude の目分量）
   const ROOM_OF = { 'norn-east-street': 'shop', 'norn-ne': 'store', 'norn-nw': 'work', 'erde-village': 'village' };
-  const SHORT = { 'norn-square': 'sq', 'norn-east-street': 'ea', 'norn-west-street': 'we', 'norn-south-street': 'so', 'norn-north-gate': 'no', 'norn-ne': 'ne', 'norn-nw': 'nw', 'norn-se': 'se', 'erde-village': 'vi' };
+  const SHORT = { 'norn-square': 'sq', 'norn-east-street': 'ea', 'norn-west-street': 'we', 'norn-south-street': 'so', 'norn-north-gate': 'no', 'norn-ne': 'ne', 'norn-nw': 'nw', 'norn-se': 'se', 'erde-village': 'vi', 'norn-inn-street': 'sw' }; // 南西（銀鹿亭前の通り）：銀鹿亭は自分の入口のまま。ほかの家の1軒目を小さな宿（2026-11-26 シナリオ室「店と住まいの内装対応_v01.md」：銀鹿亭とは別の小宿、名前・店主・宿賃なし、空室）
   const made = [];
   for (const [outId, short] of Object.entries(SHORT)) {
     const out = read(outId), doors = out.stage.townArt?.doors || {}, rows = out.collision.map((r) => [...r]);
     out.exits = out.exits.filter((e) => !String(e.id).startsWith('room-'));
+    for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) if (rows[y][x] === 'D' && !out.exits.some((e) => { const k = e.span || 1, v = e.dir === 'left' || e.dir === 'right'; return v ? e.x === x && e.y <= y && y < e.y + k : e.y === y && e.x <= x && x < e.x + k; })) rows[y][x] = '#'; // 前の回の家の扉を壁に戻す（地図を毎回作り直さない南西の通りでも、くり返し走らせて同じになるように）
     let n = 0;
     for (const layer of out.stage.layers) for (const it of layer.items) {
-      if (!/^placeholder:house-/.test(it.asset) || !it.art) continue;
+      if (!/^placeholder:house-/.test(it.asset) || !it.art || it.art === 'inn_silver_deer.webp') continue;
       delete it.doorExit;
       const row = it.y + it.h - 1, want = it.x + (doors[it.art]?.x ?? 0.5) * it.w;
       let col = -1;
@@ -450,7 +451,7 @@ function district(id, title, seed, opt) {
       if (col < 0) continue;
       n++; rows[row][col] = 'D';
       const nn = String(n).padStart(2, '0'), id = `norn-room-${short}-${nn}`, exitId = `room-${nn}`;
-      const kind = it.shop ? 'shop' : ROOM_OF[outId] === 'store' ? (n % 2 ? 'store' : 'home') : ROOM_OF[outId] === 'work' ? (n % 2 ? 'work' : 'herb') : ROOM_OF[outId] || 'home';
+      const kind = it.shop ? 'shop' : outId === 'norn-inn-street' ? (n === 1 ? 'inn' : 'home') : ROOM_OF[outId] === 'store' ? (n % 2 ? 'store' : 'home') : ROOM_OF[outId] === 'work' ? (n % 2 ? 'work' : 'herb') : ROOM_OF[outId] || 'home';
       const W = Math.max(8, Math.min(11, it.w + 1)), H = 7, dx = Math.floor(W / 2);
       out.exits.push({ id: exitId, x: col, y: row, dir: 'up', effect: 'nook-in', to: { map: id, exit: 'door', arrive: { x: dx, y: H - 2, dir: 'up' } } });
       it.doorExit = exitId;
@@ -479,7 +480,7 @@ function district(id, title, seed, opt) {
       }
       // 地区・店ごとの内装（2026-11-26 美術・演出室 ART-INTERIORS-RETURN：部屋セット＝床・壁・天井と家具）。セットがあれば、上の仮の家具をやめて、セットの家具を置く
       let roomTex = homeRoom.stage.textures;
-      const SETID = it.shop ? 'shop_' + it.shop : { store: 'ne_warehouse', work: 'nw_workshop', herb: 'nw_herb_sort', village: 'village_home' }[kind] || (outId === 'norn-ne' ? 'ne_porter_home' : ['se_home_standard', 'se_home_child', 'se_home_elder'][n % 3]);
+      const SETID = it.shop ? 'shop_' + it.shop : { inn: 'sw_small_inn', store: 'ne_warehouse', work: 'nw_workshop', herb: 'nw_herb_sort', village: 'village_home' }[kind] || (outId === 'norn-ne' ? 'ne_porter_home' : ['se_home_standard', 'se_home_child', 'se_home_elder'][n % 3]);
       const SET = IA && IA.sets.sets.find((x) => x.id === (IA.sets.aliases[SETID] || SETID));
       if (SET) {
         back.length = 0; mid.length = 0; for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) C[y][x] = '.';
@@ -509,7 +510,7 @@ function district(id, title, seed, opt) {
       for (let y = 1; y < H - 1; y++) C[y][dx] = C[y][dx] === '#' && y >= H - 2 ? '.' : C[y][dx]; // 扉の前は通れる
       C[H - 2][dx] = '.';
       const SHOPNAME = { travel: '旅支度の店', transport: '荷物と運送の店', bakery: 'パン屋', eatery: '食堂', general: '雑貨屋', herbal: '薬草の店', repair: '修理の店', cloth: '服と布の店' };
-      const TITLE = { shop: '商店通りの店（仮・無人）', store: '北東の倉庫（仮）', work: '北西の小工房（仮）', herb: '北西の薬草の仕分け場（仮）', village: '村の住まい（仮）', home: '家の中（仮）' };
+      const TITLE = { inn: '南西の小さな宿（仮・無人）', shop: '商店通りの店（仮・無人）', store: '北東の倉庫（仮）', work: '北西の小工房（仮）', herb: '北西の薬草の仕分け場（仮）', village: '村の住まい（仮）', home: '家の中（仮）' };
       write({
         format: 'sternenring-next-map', version: 1, id, title: 'ノルン・' + (it.shop ? SHOPNAME[it.shop] + '（仮・無人）' : TITLE[kind]), kind: 'interior', footsteps: 'wood', status: 'provisional',
         provenance: `2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（${outId} の ${it.art} の家、型：${kind}。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。`,
