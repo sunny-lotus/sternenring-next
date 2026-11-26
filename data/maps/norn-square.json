@@ -108,7 +108,7 @@
     },
     {
       "id": "room-01",
-      "x": 4,
+      "x": 5,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -124,7 +124,7 @@
     },
     {
       "id": "room-02",
-      "x": 14,
+      "x": 16,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -140,7 +140,7 @@
     },
     {
       "id": "room-03",
-      "x": 27,
+      "x": 30,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -148,7 +148,7 @@
         "map": "norn-room-sq-03",
         "exit": "door",
         "arrive": {
-          "x": 5,
+          "x": 4,
           "y": 5,
           "dir": "up"
         }
@@ -156,7 +156,7 @@
     },
     {
       "id": "room-04",
-      "x": 37,
+      "x": 34,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -188,7 +188,7 @@
     },
     {
       "id": "room-06",
-      "x": 35,
+      "x": 37,
       "y": 9,
       "dir": "up",
       "effect": "nook-in",
@@ -220,7 +220,7 @@
     },
     {
       "id": "room-08",
-      "x": 36,
+      "x": 35,
       "y": 20,
       "dir": "up",
       "effect": "nook-in",
@@ -245,15 +245,15 @@
   "events": [],
   "collision": [
     "###################DDD####################",
-    "###################...#..#################",
-    "##################.....###################",
-    "##################.....###################",
-    "####D#########D###.....####D#########D####",
+    "###################...#..###############.#",
+    "##################.....#################.#",
+    "##################.....#################.#",
+    "#####D##########D#.....#######D###D#####.#",
     "#........................................#",
-    "##########.......................#########",
-    "##########.###..............###..#########",
-    "##########.###..............###..#########",
-    "###D######.......................##D######",
+    "##########.......................######..#",
+    "##########.###..............###..######..#",
+    "##########.###..............###..######..#",
+    "###D######.......................####D#..#",
     "#..............#..........##.............#",
     "##......................................##",
     "D.........#....................#.........D",
@@ -261,10 +261,10 @@
     "D..................###...................D",
     "##.................###..................##",
     "#........................................#",
-    "##########.......................#######.#",
-    "##########.......................#######.#",
-    "##########.###..............###..#######.#",
-    "#####D####.###..............###..###D###.#",
+    "##########.......................#########",
+    "##########.......................#########",
+    "##########.###..............###..#########",
+    "#####D####.###..............###..##D######",
     "#........................................#",
     "##.............##.........#..............#",
     "D........................................#",
@@ -292,51 +292,19 @@
       "doors": {
         "house_a_narrow.webp": {
           "h": 0.24,
-          "x": 0.39,
-          "cut": {
-            "x0": 0.289,
-            "x1": 0.498,
-            "y0": 0.771,
-            "y1": 0.978,
-            "arch": 0.021,
-            "hinge": "left"
-          }
+          "x": 0.39
         },
         "house_b_sideroof.webp": {
           "h": 0.283,
-          "x": 0.35,
-          "cut": {
-            "x0": 0.27,
-            "x1": 0.415,
-            "y0": 0.681,
-            "y1": 0.96,
-            "arch": 0.053,
-            "hinge": "left"
-          }
+          "x": 0.35
         },
         "house_c_stepgable.webp": {
           "h": 0.254,
-          "x": 0.5,
-          "cut": {
-            "x0": 0.393,
-            "x1": 0.612,
-            "y0": 0.75,
-            "y1": 0.976,
-            "arch": 0.046,
-            "double": true
-          }
+          "x": 0.5
         },
         "house_d_workshop.webp": {
           "h": 0.308,
-          "x": 0.48,
-          "cut": {
-            "x0": 0.302,
-            "x1": 0.702,
-            "y0": 0.614,
-            "y1": 0.982,
-            "arch": 0.079,
-            "double": true
-          }
+          "x": 0.48
         },
         "house_e_archway.webp": {
           "h": 0.281,
@@ -352,31 +320,47 @@
         },
         "house_f_corner.webp": {
           "h": 0.283,
-          "x": 0.33,
-          "cut": {
-            "x0": 0.241,
-            "x1": 0.387,
-            "y0": 0.678,
-            "y1": 0.952,
-            "arch": 0.05,
-            "hinge": "left"
-          }
+          "x": 0.33
         },
         "house_home_2f.webp": {
           "h": 0.274,
-          "x": 0.28,
-          "cut": {
-            "x0": 0.207,
-            "x1": 0.358,
-            "y0": 0.676,
-            "y1": 0.977,
-            "arch": 0.039,
-            "hinge": "left"
-          }
+          "x": 0.28
         },
         "house_merchant_3f.webp": {
           "h": 0.234,
           "x": 0.42
+        },
+        "shop_travel.webp": {
+          "h": 0.37,
+          "x": 0.24
+        },
+        "shop_transport.webp": {
+          "h": 0.38,
+          "x": 0.77
+        },
+        "shop_bakery.webp": {
+          "h": 0.39,
+          "x": 0.735
+        },
+        "shop_eatery.webp": {
+          "h": 0.35,
+          "x": 0.255
+        },
+        "shop_general.webp": {
+          "h": 0.38,
+          "x": 0.31
+        },
+        "shop_herbal.webp": {
+          "h": 0.35,
+          "x": 0.735
+        },
+        "shop_repair.webp": {
+          "h": 0.32,
+          "x": 0.745
+        },
+        "shop_cloth.webp": {
+          "h": 0.36,
+          "x": 0.235
         },
         "inn_silver_deer.webp": {
           "h": 0.229,
@@ -421,8 +405,7 @@
       "base": "assets/town/norn/",
       "ground": {
         "paved": "tex_cobble_street.webp",
-        "grass": "tex_grass.webp",
-        "square": "tex_cobble_square.webp"
+        "grass": "tex_grass.webp"
       },
       "boards": {
         "house-*": [
@@ -469,6 +452,19 @@
         "flower-garland": "flower_garland.webp",
         "flag-string": "festival_flag_string.webp",
         "lantern-iron": "lantern_iron_hanging.webp",
+        "shop-*": [
+          "shop_travel.webp",
+          "shop_transport.webp",
+          "shop_bakery.webp",
+          "shop_eatery.webp",
+          "shop_general.webp",
+          "shop_herbal.webp",
+          "shop_repair.webp",
+          "shop_cloth.webp"
+        ],
+        "kardia-great-gate": "kardia_great_gate.webp",
+        "gastel-great-gate": "gastel_great_gate.webp",
+        "norn-east-gate": "norn_east_gate.webp",
         "town-wall": "town_wall.webp",
         "third-wall": "third_wall.webp",
         "gate-tower": "gate_tower.webp",
@@ -525,9 +521,9 @@
             "y": 1,
             "w": 10,
             "h": 4,
-            "standH": 8.8,
+            "standH": 8.9,
             "zOffset": 0.04,
-            "art": "house_b_sideroof.webp",
+            "art": "house_e_archway.webp",
             "doorExit": "room-01"
           },
           {
@@ -536,31 +532,31 @@
             "y": 1,
             "w": 7,
             "h": 4,
-            "standH": 9.8,
+            "standH": 7.8,
             "zOffset": 0.07,
-            "art": "house_c_stepgable.webp",
+            "art": "shop_repair.webp",
             "doorExit": "room-02"
           },
           {
             "asset": "placeholder:house-front",
             "x": 25,
             "y": 1,
-            "w": 9,
+            "w": 7,
             "h": 4,
-            "standH": 9.1,
+            "standH": 7.8,
             "zOffset": 0.02,
-            "art": "house_home_2f.webp",
+            "art": "shop_repair.webp",
             "doorExit": "room-03"
           },
           {
             "asset": "placeholder:house-front",
-            "x": 34,
+            "x": 32,
             "y": 1,
-            "w": 7,
+            "w": 8,
             "h": 4,
-            "standH": 9.8,
+            "standH": 8.8,
             "zOffset": 0.06,
-            "art": "house_c_stepgable.webp",
+            "art": "house_f_corner.webp",
             "doorExit": "room-04"
           },
           {
@@ -587,11 +583,11 @@
             "asset": "placeholder:house-front",
             "x": 33,
             "y": 6,
-            "w": 8,
+            "w": 6,
             "h": 4,
-            "standH": 8.8,
+            "standH": 6.6,
             "zOffset": 0.02,
-            "art": "house_f_corner.webp",
+            "art": "shop_transport.webp",
             "doorExit": "room-06"
           },
           {
@@ -601,7 +597,7 @@
             "w": 9,
             "h": 4,
             "standH": 8.1,
-            "zOffset": 0.02,
+            "zOffset": 0.03,
             "art": "house_d_workshop.webp",
             "doorExit": "room-07"
           },
@@ -609,11 +605,11 @@
             "asset": "placeholder:house-front",
             "x": 33,
             "y": 17,
-            "w": 7,
+            "w": 8,
             "h": 4,
-            "standH": 9.8,
-            "zOffset": 0.01,
-            "art": "house_c_stepgable.webp",
+            "standH": 8.8,
+            "zOffset": 0.05,
+            "art": "house_f_corner.webp",
             "doorExit": "room-08"
           },
           {
@@ -1100,8 +1096,8 @@
     {
       "id": "night-town-square-03",
       "sprite": "mob03",
-      "x": 24,
-      "y": 7,
+      "x": 25,
+      "y": 6,
       "dir": "down",
       "status": "provisional",
       "note": "新しい町の人（square-03。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",

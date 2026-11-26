@@ -177,51 +177,19 @@
       "doors": {
         "house_a_narrow.webp": {
           "h": 0.24,
-          "x": 0.39,
-          "cut": {
-            "x0": 0.289,
-            "x1": 0.498,
-            "y0": 0.771,
-            "y1": 0.978,
-            "arch": 0.021,
-            "hinge": "left"
-          }
+          "x": 0.39
         },
         "house_b_sideroof.webp": {
           "h": 0.283,
-          "x": 0.35,
-          "cut": {
-            "x0": 0.27,
-            "x1": 0.415,
-            "y0": 0.681,
-            "y1": 0.96,
-            "arch": 0.053,
-            "hinge": "left"
-          }
+          "x": 0.35
         },
         "house_c_stepgable.webp": {
           "h": 0.254,
-          "x": 0.5,
-          "cut": {
-            "x0": 0.393,
-            "x1": 0.612,
-            "y0": 0.75,
-            "y1": 0.976,
-            "arch": 0.046,
-            "double": true
-          }
+          "x": 0.5
         },
         "house_d_workshop.webp": {
           "h": 0.308,
-          "x": 0.48,
-          "cut": {
-            "x0": 0.302,
-            "x1": 0.702,
-            "y0": 0.614,
-            "y1": 0.982,
-            "arch": 0.079,
-            "double": true
-          }
+          "x": 0.48
         },
         "house_e_archway.webp": {
           "h": 0.281,
@@ -237,31 +205,47 @@
         },
         "house_f_corner.webp": {
           "h": 0.283,
-          "x": 0.33,
-          "cut": {
-            "x0": 0.241,
-            "x1": 0.387,
-            "y0": 0.678,
-            "y1": 0.952,
-            "arch": 0.05,
-            "hinge": "left"
-          }
+          "x": 0.33
         },
         "house_home_2f.webp": {
           "h": 0.274,
-          "x": 0.28,
-          "cut": {
-            "x0": 0.207,
-            "x1": 0.358,
-            "y0": 0.676,
-            "y1": 0.977,
-            "arch": 0.039,
-            "hinge": "left"
-          }
+          "x": 0.28
         },
         "house_merchant_3f.webp": {
           "h": 0.234,
           "x": 0.42
+        },
+        "shop_travel.webp": {
+          "h": 0.37,
+          "x": 0.24
+        },
+        "shop_transport.webp": {
+          "h": 0.38,
+          "x": 0.77
+        },
+        "shop_bakery.webp": {
+          "h": 0.39,
+          "x": 0.735
+        },
+        "shop_eatery.webp": {
+          "h": 0.35,
+          "x": 0.255
+        },
+        "shop_general.webp": {
+          "h": 0.38,
+          "x": 0.31
+        },
+        "shop_herbal.webp": {
+          "h": 0.35,
+          "x": 0.735
+        },
+        "shop_repair.webp": {
+          "h": 0.32,
+          "x": 0.745
+        },
+        "shop_cloth.webp": {
+          "h": 0.36,
+          "x": 0.235
         },
         "inn_silver_deer.webp": {
           "h": 0.229,
@@ -306,8 +290,7 @@
       "base": "assets/town/norn/",
       "ground": {
         "paved": "tex_cobble_street.webp",
-        "grass": "tex_grass.webp",
-        "square": "tex_cobble_square.webp"
+        "grass": "tex_grass.webp"
       },
       "boards": {
         "house-*": [
@@ -354,6 +337,19 @@
         "flower-garland": "flower_garland.webp",
         "flag-string": "festival_flag_string.webp",
         "lantern-iron": "lantern_iron_hanging.webp",
+        "shop-*": [
+          "shop_travel.webp",
+          "shop_transport.webp",
+          "shop_bakery.webp",
+          "shop_eatery.webp",
+          "shop_general.webp",
+          "shop_herbal.webp",
+          "shop_repair.webp",
+          "shop_cloth.webp"
+        ],
+        "kardia-great-gate": "kardia_great_gate.webp",
+        "gastel-great-gate": "gastel_great_gate.webp",
+        "norn-east-gate": "norn_east_gate.webp",
         "town-wall": "town_wall.webp",
         "third-wall": "third_wall.webp",
         "gate-tower": "gate_tower.webp",
@@ -425,7 +421,7 @@
             "zOffset": 0.02
           },
           {
-            "asset": "placeholder:kardia-gate",
+            "asset": "placeholder:kardia-great-gate",
             "x": 4,
             "y": 1,
             "w": 9,
@@ -435,15 +431,14 @@
             "showH": 11
           },
           {
-            "asset": "placeholder:kardia-gate",
+            "asset": "placeholder:gastel-great-gate",
             "x": 27,
             "y": 1,
             "w": 9,
             "h": 3,
             "standH": 11,
             "zOffset": 0.08,
-            "showH": 11,
-            "gateFor": "gastel"
+            "showH": 11
           },
           {
             "asset": "placeholder:town-wall",

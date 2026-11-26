@@ -6,7 +6,7 @@
   "kind": "interior",
   "footsteps": "wood",
   "status": "provisional",
-  "provenance": "2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（norn-nw の house_home_2f.webp の家、型：work。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。",
+  "provenance": "2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（norn-nw の house_d_workshop.webp の家、型：work。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。",
   "width": 10,
   "height": 7,
   "tileSize": 32,

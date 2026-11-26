@@ -41,7 +41,7 @@
         "map": "norn-se",
         "exit": "room-04",
         "arrive": {
-          "x": 33,
+          "x": 35,
           "y": 5,
           "dir": "down"
         }

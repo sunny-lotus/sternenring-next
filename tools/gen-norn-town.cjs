@@ -24,7 +24,7 @@ const HOUSE_FILES = Object.keys(HOUSE.ART).filter((f) => !['house_merchant_3f.we
 function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296; }
 const SRC = 'production/claude/scenario/Claude引渡し_ノルンとエルデ森林の地図制作_v01.md（STORY-NORN-MAP-20261125 revision 2）';
 const inn = read('norn-inn-street');
-const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt)); TOWN_ART.ground.square = 'tex_cobble_square.webp'; // 広場の扇形の石畳（2026-11-26 サニー「広場は雰囲気ちがう石畳でもいいね」）
+const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt)); TOWN_ART.doors = HOUSE.doorsForMap(); TOWN_ART.boards['shop-*'] = ['shop_travel.webp', 'shop_transport.webp', 'shop_bakery.webp', 'shop_eatery.webp', 'shop_general.webp', 'shop_herbal.webp', 'shop_repair.webp', 'shop_cloth.webp']; Object.assign(TOWN_ART.boards, { 'kardia-great-gate': 'kardia_great_gate.webp', 'gastel-great-gate': 'gastel_great_gate.webp', 'norn-east-gate': 'norn_east_gate.webp' }); // 店の正面・大門・東門（2026-11-26 美術・演出室） TOWN_ART.ground.square = 'tex_cobble_square.webp'; // 広場の扇形の石畳（2026-11-26 サニー「広場は雰囲気ちがう石畳でもいいね」）
 const FOREST_ART = JSON.parse(JSON.stringify(read('test-forest').stage.townArt)); delete FOREST_ART.doors; FOREST_ART.boards = { pine: FOREST_ART.boards.pine, rock: FOREST_ART.boards.rock, bush: FOREST_ART.boards.bush };
 // 骨格の絵（2026-11-26 美術・演出室 ART-NIGHT-NORN-20261126、pixel/元絵/ノルン_骨格_v01 を tools/copy-norn-structure-art.py で写した。provisional）。壁は横にくり返して張る
 Object.assign(TOWN_ART.boards, { 'town-wall': 'town_wall.webp', 'third-wall': 'third_wall.webp', 'gate-tower': 'gate_tower.webp', 'kardia-gate': 'kardia_gate.webp', 'clock-tower': 'clock_tower.webp' });
@@ -62,6 +62,8 @@ function base(id, title, W, H, kind, seed) {
       x += w + (M.R() < (opts.gap ?? 0.15) ? 1 : 0);
     }
   };
+  /** 店の正面：files の順に、x0 から右へ並べる（入らなければ止める） */
+  M.shops = (files, x0, x1, y = 1) => { let x = x0; for (const art of files) { const sz = HOUSE.boardSize(art), w = Math.round(sz.w); if (x + w > x1 + 1 || !M.free(x, y, w, 4)) break; M.put('back', 'house-front', x, y, w, 4, Math.round(sz.h * 10) / 10, 0.03, true, { art, shop: art.replace(/^shop_|\.webp$/g, '') }); x += w; } };
   /** 森の木：あいたマスに、密度 p で木・やぶ・岩（keep の所は空けておく） */
   /** 森の木：板は1マップ150枚までなので、道に近い所ほど多く置く（道ぞいが森らしく見える）。遠い所はまばら。南ほど、やぶ・岩が多い（南ほど自然が多い） */
   M.forest = (p, keep, south = 0, max = 140) => {
@@ -146,10 +148,10 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
 {
   const M = base('norn-east-street', 'ノルン・商店通りと東門', 48, 16, 'town', 202);
   M.paved.push({ x: 0, y: 5, w: 48, h: 7 });
-  M.houses(1, 19, 1, 'back', { gap: 0.05 }); M.houses(23, 38, 1, 'back', { gap: 0.05 }); // 20〜22列は北東の地区への道（2026-11-26 サニー「ノルンの街中はすべて道でつながっているように」）
+  M.shops(['shop_bakery.webp', 'shop_eatery.webp', 'shop_general.webp'], 1, 19); M.shops(['shop_herbal.webp', 'shop_transport.webp', 'shop_travel.webp'], 23, 38); // 店の正面（2026-11-26 ART-SHOP-FRONTS。広場寄りに食べ物・日用品、門寄りに旅支度・荷物）。20〜22列は北東の地区への道
   // 店が並ぶ通り（2026-11-26 サニー「東はもっとお店にしたい」）：どの家の1階にも庇、看板を多く、通りの南側は屋台と花屋・荷を並べ、店先の品（樽・袋・木箱）も
   const AW = ['awning-red', 'awning-green', 'awning-wheat'], SG = ['sign-bread', 'sign-cup', 'sign-shoe'];
-  M.items.back.filter((it) => /house-/.test(it.asset)).forEach((h, i) => { M.items.back.push({ asset: `placeholder:${AW[i % 3]}`, x: h.x + Math.max(0, Math.floor(h.w / 2) - 1), y: 4, w: 3, h: 1, standH: 3.9, zOffset: 0.25 }, { asset: `placeholder:${SG[i % 3]}`, x: h.x + h.w - 1, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 }); });
+  M.items.back.filter((it) => /house-/.test(it.asset) && !it.shop).forEach((h, i) => { M.items.back.push({ asset: `placeholder:${AW[i % 3]}`, x: h.x + Math.max(0, Math.floor(h.w / 2) - 1), y: 4, w: 3, h: 1, standH: 3.9, zOffset: 0.25 }, { asset: `placeholder:${SG[i % 3]}`, x: h.x + h.w - 1, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 }); });
   for (const [x, w] of [[3, 3], [9, 3], [15, 3], [25, 3]]) M.put('mid', 'stall', x, 12, w, 2, 3.2, 0.05); // 21〜23列は南東の地区への道
   M.put('mid', 'flower-stall', 30, 12, 3, 2, 3.2, 0.05);
   for (const [a, x] of [['barrels', 6], ['sacks', 12], ['crates', 18], ['barrels', 34]]) M.put('mid', a, x, 14, 2, 1, 1.3, 0.03);
@@ -157,8 +159,7 @@ const GATE_NOTE = 'map.norn.gate-permit', SOUTH_NOTE = 'map.norn.gate-south', RO
   for (const x of [8, 22, 36]) M.put('mid', 'lamp', x, 11, 1, 1, 3.8, 0.05);
   // 東門：町の東の壁（家並みの東）と門の塔。東の出入口は門の口
   // 東門（2026-11-26 サニー：東門が門に見えない）：通りの奥（北）に町の壁と門の塔を2本立て、そのあいだの口（42〜43列）を奥へ抜けて王道へ
-  M.put('back', 'town-wall', 39, 1, 3, 4, 4.6, 0.05, true); M.put('back', 'town-wall', 44, 1, 3, 4, 4.6, 0.05, true);
-  M.put('back', 'gate-tower', 39, 4, 3, 1, 12, 0.12, true, { showH: 12 }); M.put('back', 'gate-tower', 44, 4, 3, 1, 12, 0.12, true, { showH: 12 });
+  M.put('back', 'norn-east-gate', 40, 1, 6, 4, 6.2, 0.12, false, { showH: 6.2 }); M.wall(39, 1, 3, 4); M.wall(44, 1, 3, 4); // ノルンの東門（美術・演出室 2026-11-26。開いたアーチの口を 42〜43列に合わせる）
   M.paved.push({ x: 42, y: 0, w: 2, h: 5 }); M.wall(39, 12, 8, 3);
   for (const x of [40, 45]) M.put('mid', 'lamp', x, 11, 1, 1, 3.8, 0.05);
   M.exit('west', 0, 6, 3, 'left', 'page', { map: 'norn-square', exit: 'east', arrive: { x: 40, y: 13, dir: 'left' } });
@@ -176,8 +177,8 @@ function kingsroad(id, title, wallStyle, withExits) {
   M.paved.push({ x: 13, y: 0, w: 13, h: 32 }, { x: 1, y: 4, w: 38, h: 6 }, { x: 0, y: 14, w: 14, h: 5 });
   // 北：第三城壁（端から端まで1枚）と、二つの大門
   M.put('back', 'third-wall', 1, 1, 38, 3, 8, 0.02);
-  M.put('back', 'kardia-gate', 4, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // カルディア行きの大門（西側）
-  M.put('back', 'kardia-gate', 27, 1, 9, 3, 11, 0.08, true, { showH: 11, gateFor: 'gastel' }); // ガステル行きの大門（東側。絵はいまカルディアの門と同じ仮。美術室に依頼）
+  M.put('back', 'kardia-great-gate', 4, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // カルディア行きの大門（西側。美術・演出室 2026-11-26）
+  M.put('back', 'gastel-great-gate', 27, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // ガステル行きの大門（東側。美術・演出室 2026-11-26）
   for (const x of [7, 8, 9]) M.note(`kardia-gate-${x}`, x, 4, GATE_NOTE);
   for (const x of [30, 31, 32]) M.note(`gastel-gate-${x}`, x, 4, 'map.norn.gate-gastel');
   // 王道の両側に街灯の列（壮大に）
@@ -227,7 +228,7 @@ kingsroad('norn-kingsroad-wall-c', '王道（東の壁 案C：木の列）', 'C'
 {
   const M = base('norn-west-street', 'ノルン・西の通りと西門', 44, 16, 'town', 505);
   M.paved.push({ x: 0, y: 5, w: 44, h: 7 });
-  M.houses(9, 22, 1, 'back', { gap: 0.2 }); M.houses(27, 42, 1, 'back', { gap: 0.2 }); // 23〜26列は北西の地区への道
+  M.shops(['shop_travel.webp'], 9, 22); M.houses(15, 22, 1, 'back', { gap: 0.2 }); M.houses(27, 42, 1, 'back', { gap: 0.2 }); // 西門のそばに旅支度の店（森へ向かう人の道）。23〜26列は北西の地区への道
   M.items.back.push({ asset: 'placeholder:herbs', x: 14, y: 4, w: 2, h: 1, standH: 4.2, zOffset: 0.25 }, { asset: 'placeholder:awning-green', x: 26, y: 4, w: 3, h: 1, standH: 3.9, zOffset: 0.25 });
   M.put('mid', 'firewood', 18, 12, 2, 1, 0.8, 0.03); M.put('mid', 'fence', 22, 12, 4, 1, 1.5, 0.03); M.put('mid', 'crates', 30, 12, 2, 1, 1.4, 0.03); M.put('mid', 'tree', 36, 12, 1, 1, 6, 0.05);
   for (const x of [14, 28]) M.put('mid', 'lamp', x, 11, 1, 1, 3.8, 0.05);
@@ -358,6 +359,7 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
 function district(id, title, seed, opt) {
   const M = base(id, title, 44, 16, 'town', seed);
   M.paved.push({ x: 0, y: 5, w: 44, h: 7 });
+  if (opt.shopFirst) M.shops(opt.shopFirst, 1, 10); // 地区の店（左はし）
   if (opt.topExit) { M.houses(1, opt.topExit - 2, 1, 'back', { files: opt.files, gap: 0.1 }); M.houses(opt.topExit + 4, 42, 1, 'back', { files: opt.files, gap: 0.1 }); M.paved.push({ x: opt.topExit, y: 0, w: 3, h: 5 }); }
   else M.houses(1, 42, 1, 'back', { files: opt.files, gap: 0.1 });
   if (opt.botExit) M.paved.push({ x: opt.botExit, y: 11, w: 3, h: 5 });
@@ -376,7 +378,7 @@ function district(id, title, seed, opt) {
   finish(M, { x: 22, y: 8, dir: 'up' });
 }
 { // 北西：職人と森の恵み（小さな工房・干した薬草・薪・柵・荷車）
-  const M = district('norn-nw', 'ノルン・北西（職人と森の恵み）', 1202, { botExit: 20, files: ['house_d_workshop.webp', 'house_home_2f.webp', 'house_c_stepgable.webp'], props: (M) => {
+  const M = district('norn-nw', 'ノルン・北西（職人と森の恵み）', 1202, { botExit: 20, shopFirst: ['shop_repair.webp'], files: ['house_d_workshop.webp', 'house_home_2f.webp', 'house_c_stepgable.webp'], props: (M) => {
     for (const x of [4, 13, 28, 37]) M.items.back.push({ asset: 'placeholder:herbs', x, y: 4, w: 2, h: 1, standH: 4.2, zOffset: 0.25 });
     for (const [a, x, y, w, h, s] of [['firewood', 2, 12, 2, 1, 0.8], ['firewood', 5, 12, 2, 1, 0.8], ['fence', 9, 12, 4, 1, 1.5], ['cart', 14, 12, 3, 2, 2.4], ['crates', 25, 12, 2, 1, 1.4], ['fence', 28, 12, 4, 1, 1.5], ['firewood', 33, 12, 2, 1, 0.8], ['tree-small', 37, 12, 1, 1, 2.8], ['tree', 41, 12, 1, 1, 6]]) M.put('mid', a, x, y, w, h, s, 0.05);
   } });
@@ -386,7 +388,7 @@ function district(id, title, seed, opt) {
   finish(M, { x: 22, y: 8, dir: 'up' });
 }
 { // 南東：住まいと日用品（民家・パン屋の看板・洗濯物・植木鉢・花壇）
-  const M = district('norn-se', 'ノルン・南東（住まいと日用品）', 1303, { topExit: 20, files: ['house_home_2f.webp', 'house_c_stepgable.webp', 'house_a_narrow.webp', 'house_b_sideroof.webp'], props: (M) => {
+  const M = district('norn-se', 'ノルン・南東（住まいと日用品）', 1303, { topExit: 20, shopFirst: ['shop_cloth.webp'], files: ['house_home_2f.webp', 'house_c_stepgable.webp', 'house_a_narrow.webp', 'house_b_sideroof.webp'], props: (M) => {
     for (const [a, x] of [['sign-bread', 6], ['sign-cup', 30], ['sign-bread', 38]]) M.items.back.push({ asset: 'placeholder:' + a, x, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 });
     for (const [a, x] of [['awning-wheat', 3], ['awning-red', 27], ['awning-green', 35]]) M.items.back.push({ asset: 'placeholder:' + a, x, y: 4, w: 3, h: 1, standH: 4.2, zOffset: 0.25 });
     for (const x of [10, 31]) M.items.back.push({ asset: 'placeholder:laundry', x, y: 4, w: 4, h: 1, standH: 4.2, zOffset: 0.3 });
@@ -442,7 +444,7 @@ function district(id, title, seed, opt) {
       if (col < 0) continue;
       n++; rows[row][col] = 'D';
       const nn = String(n).padStart(2, '0'), id = `norn-room-${short}-${nn}`, exitId = `room-${nn}`;
-      const kind = ROOM_OF[outId] === 'store' ? (n % 2 ? 'store' : 'home') : ROOM_OF[outId] === 'work' ? (n % 2 ? 'work' : 'herb') : ROOM_OF[outId] || 'home';
+      const kind = it.shop ? 'shop' : ROOM_OF[outId] === 'store' ? (n % 2 ? 'store' : 'home') : ROOM_OF[outId] === 'work' ? (n % 2 ? 'work' : 'herb') : ROOM_OF[outId] || 'home';
       const W = Math.max(8, Math.min(11, it.w + 1)), H = 7, dx = Math.floor(W / 2);
       out.exits.push({ id: exitId, x: col, y: row, dir: 'up', effect: 'nook-in', to: { map: id, exit: 'door', arrive: { x: dx, y: H - 2, dir: 'up' } } });
       it.doorExit = exitId;
@@ -471,9 +473,10 @@ function district(id, title, seed, opt) {
       }
       for (let y = 1; y < H - 1; y++) C[y][dx] = C[y][dx] === '#' && y >= H - 2 ? '.' : C[y][dx]; // 扉の前は通れる
       C[H - 2][dx] = '.';
+      const SHOPNAME = { travel: '旅支度の店', transport: '荷物と運送の店', bakery: 'パン屋', eatery: '食堂', general: '雑貨屋', herbal: '薬草の店', repair: '修理の店', cloth: '服と布の店' };
       const TITLE = { shop: '商店通りの店（仮・無人）', store: '北東の倉庫（仮）', work: '北西の小工房（仮）', herb: '北西の薬草の仕分け場（仮）', village: '村の住まい（仮）', home: '家の中（仮）' };
       write({
-        format: 'sternenring-next-map', version: 1, id, title: 'ノルン・' + TITLE[kind], kind: 'interior', footsteps: 'wood', status: 'provisional',
+        format: 'sternenring-next-map', version: 1, id, title: 'ノルン・' + (it.shop ? SHOPNAME[it.shop] + '（仮・無人）' : TITLE[kind]), kind: 'interior', footsteps: 'wood', status: 'provisional',
         provenance: `2026-11-26 作者「家の中も入れるようにどこも」で tools/gen-norn-town.cjs が作った仮の部屋（${outId} の ${it.art} の家、型：${kind}。シナリオ室「店と住まいの内装対応_v01.md」に合わせ、店主・住人は置かない）。地区・店ごとの内装の絵が届いたら差しかえる。`,
         width: W, height: H, tileSize: 32, legend: { '.': 'floor', '#': 'wall', D: 'door' }, collision: C.map((r) => r.join('')),
         ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },

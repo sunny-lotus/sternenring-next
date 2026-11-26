@@ -7466,486 +7466,6 @@
       "status": "provisional",
       "placeholder": "地図の試作の仮のお知らせ（Claude）。決定記録「両経路とも通行の許可が要る」の範囲で、許可の取り方・審査は書かない"
     },
-    "life.nighttown.square-01.normal-1": {
-      "lines": [
-        {
-          "who": "ロルフ",
-          "text": "いい匂いがすると、ぼく、すぐ足が止まるんだ。今日は広場を抜けるのに時間がかかりそう。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-01.normal-2": {
-      "lines": [
-        {
-          "who": "ロルフ",
-          "text": "見るだけのつもりだったんだけどね。あれ、いつの間に買ったんだろう。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-01.ended": {
-      "lines": [
-        {
-          "who": "ロルフ",
-          "text": "銀鹿亭の方が騒がしかったね。みんな、落ち着けるといいけど。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-02.normal-1": {
-      "lines": [
-        {
-          "who": "マルタ",
-          "text": "ほら、まず食べ終えてからさ。次を選ぶのは、手が空いてからでいいよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-02.normal-2": {
-      "lines": [
-        {
-          "who": "マルタ",
-          "text": "通りの真ん中で立ち止まると、人にぶつかるよ。少し脇へ寄っておいで。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-02.ended": {
-      "lines": [
-        {
-          "who": "マルタ",
-          "text": "食べられそうなら、何か口にしておきな。急いで飲み込まなくていいからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-03.normal-1": {
-      "lines": [
-        {
-          "who": "ベアーテ",
-          "text": "時計台の下で待ち合わせなの。同じことを考える人、多いのね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-03.normal-2": {
-      "lines": [
-        {
-          "who": "ベアーテ",
-          "text": "時間を見るつもりで顔を上げたのに、つい時計台のてっぺんまで見ちゃう。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.square-03.ended": {
-      "lines": [
-        {
-          "who": "ベアーテ",
-          "text": "顔を上げる目印があると、少しほっとするね。人が多いと、なおさらさ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-01.normal-1": {
-      "lines": [
-        {
-          "who": "オルガ",
-          "text": "旅支度かい？　まず、何に使うか決めておくんだよ。荷を増やしすぎずに済むからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-01.normal-2": {
-      "lines": [
-        {
-          "who": "オルガ",
-          "text": "道中で欲しくなる物は多いけど、運ぶのも自分だからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-01.ended": {
-      "lines": [
-        {
-          "who": "オルガ",
-          "text": "慌てて荷をまとめると、置き忘れるからね。出る前に、ひとつずつ確かめな。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-02.normal-1": {
-      "lines": [
-        {
-          "who": "ディート",
-          "text": "通るかい？　荷の角に気をつけてな。俺は少し脇へ寄るよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-02.normal-2": {
-      "lines": [
-        {
-          "who": "ディート",
-          "text": "荷を下ろした直後が、いちばん肩が軽いね。何も持ってないだけなんだけど。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-02.ended": {
-      "lines": [
-        {
-          "who": "ディート",
-          "text": "荷はこっちへ寄せておくよ。足元を見て、通っておくれ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-03.normal-1": {
-      "lines": [
-        {
-          "who": "ブリッタ",
-          "text": "門の中、店がずらりだね。私、歩くより先に、目が忙しくなっちゃった。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-03.normal-2": {
-      "lines": [
-        {
-          "who": "ブリッタ",
-          "text": "まだ少ししか歩いてないのに、気になる店が増えるばかりだ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.east-03.ended": {
-      "lines": [
-        {
-          "who": "ブリッタ",
-          "text": "急いでいる人もいるからね。店を見るなら、道の端へ寄ろうか。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-01.normal-1": {
-      "lines": [
-        {
-          "who": "ギュンター",
-          "text": "カルディアへ行くのかい？　ここから入るにも、ノルンから入るにも、通行許可が要るぞ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-01.normal-2": {
-      "lines": [
-        {
-          "who": "ギュンター",
-          "text": "ノルンへ入るなら、そっちの東門だ。王道とは別の入口になってる。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-01.ended": {
-      "lines": [
-        {
-          "who": "ギュンター",
-          "text": "出発する前に、荷の具合をもう一度見ておこう。急ぐときほど大事だからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-02.normal-1": {
-      "lines": [
-        {
-          "who": "ヤン",
-          "text": "道の真ん中だと、落ち着かないね。ぼくたち、少し端へ寄ろうか。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-02.normal-2": {
-      "lines": [
-        {
-          "who": "ヤン",
-          "text": "町へ寄ると、食事と休憩を一度に済ませられる。それだけでも助かるよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.road-02.ended": {
-      "lines": [
-        {
-          "who": "ヤン",
-          "text": "少し疲れて見えるけど、大丈夫かい。話したくないなら、無理には聞かないよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-01.normal-1": {
-      "lines": [
-        {
-          "who": "エーダ",
-          "text": "ここから見上げると、首が疲れるねえ。第三城壁は、やっぱり大きいこと。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-01.normal-2": {
-      "lines": [
-        {
-          "who": "エーダ",
-          "text": "カルディアへ入る前に、少し座っているんだ。立ったままだと足がこわばるからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-01.ended": {
-      "lines": [
-        {
-          "who": "エーダ",
-          "text": "疲れたなら、少し座っていくかい。立って考えるより、楽なこともあるよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-02.normal-1": {
-      "lines": [
-        {
-          "who": "アデーレ",
-          "text": "ひとつ、ふたつ……あれ？　私、お話しすると、どこまで数えたか忘れちゃうの。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-02.normal-2": {
-      "lines": [
-        {
-          "who": "アデーレ",
-          "text": "数え終わるまで、荷の順番は変えないようにしてる。やり直しは大変だからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.north-02.ended": {
-      "lines": [
-        {
-          "who": "アデーレ",
-          "text": "慌てると、数えた所まで分からなくなる。ひと息ついて、最初から確かめるよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-01.normal-1": {
-      "lines": [
-        {
-          "who": "コンラート",
-          "text": "西門の向こうはエルデ森林だよ。道をそのまま抜けていくと、小さな村に着くんだ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-01.normal-2": {
-      "lines": [
-        {
-          "who": "コンラート",
-          "text": "荷ひもを結び直しているんだ。歩き始めてから緩むと、気になって仕方ないからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-01.ended": {
-      "lines": [
-        {
-          "who": "コンラート",
-          "text": "ひもが緩んでいたら、ここで直していきな。気が急くときほど、足元は確かめたいからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-02.normal-1": {
-      "lines": [
-        {
-          "who": "ウルズラ",
-          "text": "森から戻ったばかりだと、町の声がよく聞こえるね。今日は祭りだもの、なおさらさ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-02.normal-2": {
-      "lines": [
-        {
-          "who": "ウルズラ",
-          "text": "土の道を歩いたあとだと、石畳の硬さがよく分かるよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.west-02.ended": {
-      "lines": [
-        {
-          "who": "ウルズラ",
-          "text": "顔色がすぐれないね。何があったかは知らないけど、無理はしないでおくれ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-01.normal-1": {
-      "lines": [
-        {
-          "who": "イーダ",
-          "text": "干した布が重ならないようにね。ちょっと気を抜くと、端がくっついちまうのさ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-01.normal-2": {
-      "lines": [
-        {
-          "who": "イーダ",
-          "text": "広場へ出る前に、これだけ済ませたいんだ。祭りの日でも、洗濯物は待ってくれないね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-01.ended": {
-      "lines": [
-        {
-          "who": "イーダ",
-          "text": "気持ちが落ち着かないと、手元もおろそかになるね。いつもの事でも、ひとつずつさ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-02.normal-1": {
-      "lines": [
-        {
-          "who": "ライナー",
-          "text": "にぎやかな通りもいいが、俺はここでひと息つくのも好きでね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-02.normal-2": {
-      "lines": [
-        {
-          "who": "ライナー",
-          "text": "広場を回って戻ると、よく歩いたなって思うよ。帰りはつい、足がゆっくりになるね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.south-02.ended": {
-      "lines": [
-        {
-          "who": "ライナー",
-          "text": "何か気になることでもあるのかい。ここでは、少し息をついていっていいよ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-01.normal-1": {
-      "lines": [
-        {
-          "who": "フーベルト",
-          "text": "森を抜けて来たのかい。町とは、聞こえてくる音も違うだろうね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-01.normal-2": {
-      "lines": [
-        {
-          "who": "フーベルト",
-          "text": "井戸のそばで話していると、つい長くなるね。用事を済ませてからのつもりだったのに。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-01.ended": {
-      "lines": [
-        {
-          "who": "フーベルト",
-          "text": "歩いてきたなら、まず息を整えなよ。急いで話さなくても大丈夫だからね。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-02.normal-1": {
-      "lines": [
-        {
-          "who": "ピア",
-          "text": "お花のあいだに、草がのびてきたの。ちょっとずつ、ぬいてるんだ。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-02.normal-2": {
-      "lines": [
-        {
-          "who": "ピア",
-          "text": "見て、はっぱのかたち、みんなちがうよ！　しゃがむと、よく見えるの。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
-    "life.nighttown.village-02.ended": {
-      "lines": [
-        {
-          "who": "ピア",
-          "text": "なにか、かんがえてたの？　ねえ、お花も見ていって。"
-        }
-      ],
-      "status": "provisional",
-      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
-    },
     "story.norn.mob.calm-1.life-st-merchant": {
       "lines": [
         {
@@ -8605,6 +8125,486 @@
       ],
       "status": "provisional",
       "source": "production/claude/scenario/町の人の会話差替え_v01.json（STORY-NPC-IDENTITY-20261126）"
+    },
+    "life.nighttown.square-01.normal-1": {
+      "lines": [
+        {
+          "who": "ロルフ",
+          "text": "いい匂いがすると、ぼく、すぐ足が止まるんだ。今日は広場を抜けるのに時間がかかりそう。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-01.normal-2": {
+      "lines": [
+        {
+          "who": "ロルフ",
+          "text": "見るだけのつもりだったんだけどね。あれ、いつの間に買ったんだろう。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-01.ended": {
+      "lines": [
+        {
+          "who": "ロルフ",
+          "text": "銀鹿亭の方が騒がしかったね。みんな、落ち着けるといいけど。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-02.normal-1": {
+      "lines": [
+        {
+          "who": "マルタ",
+          "text": "ほら、まず食べ終えてからさ。次を選ぶのは、手が空いてからでいいよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-02.normal-2": {
+      "lines": [
+        {
+          "who": "マルタ",
+          "text": "通りの真ん中で立ち止まると、人にぶつかるよ。少し脇へ寄っておいで。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-02.ended": {
+      "lines": [
+        {
+          "who": "マルタ",
+          "text": "食べられそうなら、何か口にしておきな。急いで飲み込まなくていいからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-03.normal-1": {
+      "lines": [
+        {
+          "who": "ベアーテ",
+          "text": "時計台の下で待ち合わせなの。同じことを考える人、多いのね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-03.normal-2": {
+      "lines": [
+        {
+          "who": "ベアーテ",
+          "text": "時間を見るつもりで顔を上げたのに、つい時計台のてっぺんまで見ちゃう。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.square-03.ended": {
+      "lines": [
+        {
+          "who": "ベアーテ",
+          "text": "顔を上げる目印があると、少しほっとするね。人が多いと、なおさらさ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-01.normal-1": {
+      "lines": [
+        {
+          "who": "オルガ",
+          "text": "旅支度かい？　まず、何に使うか決めておくんだよ。荷を増やしすぎずに済むからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-01.normal-2": {
+      "lines": [
+        {
+          "who": "オルガ",
+          "text": "道中で欲しくなる物は多いけど、運ぶのも自分だからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-01.ended": {
+      "lines": [
+        {
+          "who": "オルガ",
+          "text": "慌てて荷をまとめると、置き忘れるからね。出る前に、ひとつずつ確かめな。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-02.normal-1": {
+      "lines": [
+        {
+          "who": "ディート",
+          "text": "通るかい？　荷の角に気をつけてな。俺は少し脇へ寄るよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-02.normal-2": {
+      "lines": [
+        {
+          "who": "ディート",
+          "text": "荷を下ろした直後が、いちばん肩が軽いね。何も持ってないだけなんだけど。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-02.ended": {
+      "lines": [
+        {
+          "who": "ディート",
+          "text": "荷はこっちへ寄せておくよ。足元を見て、通っておくれ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-03.normal-1": {
+      "lines": [
+        {
+          "who": "ブリッタ",
+          "text": "門の中、店がずらりだね。私、歩くより先に、目が忙しくなっちゃった。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-03.normal-2": {
+      "lines": [
+        {
+          "who": "ブリッタ",
+          "text": "まだ少ししか歩いてないのに、気になる店が増えるばかりだ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.east-03.ended": {
+      "lines": [
+        {
+          "who": "ブリッタ",
+          "text": "急いでいる人もいるからね。店を見るなら、道の端へ寄ろうか。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-01.normal-1": {
+      "lines": [
+        {
+          "who": "ギュンター",
+          "text": "カルディアへ行くのかい？　ここから入るにも、ノルンから入るにも、通行許可が要るぞ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-01.normal-2": {
+      "lines": [
+        {
+          "who": "ギュンター",
+          "text": "ノルンへ入るなら、そっちの東門だ。王道とは別の入口になってる。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-01.ended": {
+      "lines": [
+        {
+          "who": "ギュンター",
+          "text": "出発する前に、荷の具合をもう一度見ておこう。急ぐときほど大事だからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-02.normal-1": {
+      "lines": [
+        {
+          "who": "ヤン",
+          "text": "道の真ん中だと、落ち着かないね。ぼくたち、少し端へ寄ろうか。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-02.normal-2": {
+      "lines": [
+        {
+          "who": "ヤン",
+          "text": "町へ寄ると、食事と休憩を一度に済ませられる。それだけでも助かるよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.road-02.ended": {
+      "lines": [
+        {
+          "who": "ヤン",
+          "text": "少し疲れて見えるけど、大丈夫かい。話したくないなら、無理には聞かないよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-01.normal-1": {
+      "lines": [
+        {
+          "who": "エーダ",
+          "text": "ここから見上げると、首が疲れるねえ。第三城壁は、やっぱり大きいこと。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-01.normal-2": {
+      "lines": [
+        {
+          "who": "エーダ",
+          "text": "カルディアへ入る前に、少し座っているんだ。立ったままだと足がこわばるからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-01.ended": {
+      "lines": [
+        {
+          "who": "エーダ",
+          "text": "疲れたなら、少し座っていくかい。立って考えるより、楽なこともあるよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-02.normal-1": {
+      "lines": [
+        {
+          "who": "アデーレ",
+          "text": "ひとつ、ふたつ……あれ？　私、お話しすると、どこまで数えたか忘れちゃうの。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-02.normal-2": {
+      "lines": [
+        {
+          "who": "アデーレ",
+          "text": "数え終わるまで、荷の順番は変えないようにしてる。やり直しは大変だからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.north-02.ended": {
+      "lines": [
+        {
+          "who": "アデーレ",
+          "text": "慌てると、数えた所まで分からなくなる。ひと息ついて、最初から確かめるよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-01.normal-1": {
+      "lines": [
+        {
+          "who": "コンラート",
+          "text": "西門の向こうはエルデ森林だよ。道をそのまま抜けていくと、小さな村に着くんだ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-01.normal-2": {
+      "lines": [
+        {
+          "who": "コンラート",
+          "text": "荷ひもを結び直しているんだ。歩き始めてから緩むと、気になって仕方ないからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-01.ended": {
+      "lines": [
+        {
+          "who": "コンラート",
+          "text": "ひもが緩んでいたら、ここで直していきな。気が急くときほど、足元は確かめたいからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-02.normal-1": {
+      "lines": [
+        {
+          "who": "ウルズラ",
+          "text": "森から戻ったばかりだと、町の声がよく聞こえるね。今日は祭りだもの、なおさらさ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-02.normal-2": {
+      "lines": [
+        {
+          "who": "ウルズラ",
+          "text": "土の道を歩いたあとだと、石畳の硬さがよく分かるよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.west-02.ended": {
+      "lines": [
+        {
+          "who": "ウルズラ",
+          "text": "顔色がすぐれないね。何があったかは知らないけど、無理はしないでおくれ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-01.normal-1": {
+      "lines": [
+        {
+          "who": "イーダ",
+          "text": "干した布が重ならないようにね。ちょっと気を抜くと、端がくっついちまうのさ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-01.normal-2": {
+      "lines": [
+        {
+          "who": "イーダ",
+          "text": "広場へ出る前に、これだけ済ませたいんだ。祭りの日でも、洗濯物は待ってくれないね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-01.ended": {
+      "lines": [
+        {
+          "who": "イーダ",
+          "text": "気持ちが落ち着かないと、手元もおろそかになるね。いつもの事でも、ひとつずつさ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-02.normal-1": {
+      "lines": [
+        {
+          "who": "ライナー",
+          "text": "にぎやかな通りもいいが、俺はここでひと息つくのも好きでね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-02.normal-2": {
+      "lines": [
+        {
+          "who": "ライナー",
+          "text": "広場を回って戻ると、よく歩いたなって思うよ。帰りはつい、足がゆっくりになるね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.south-02.ended": {
+      "lines": [
+        {
+          "who": "ライナー",
+          "text": "何か気になることでもあるのかい。ここでは、少し息をついていっていいよ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-01.normal-1": {
+      "lines": [
+        {
+          "who": "フーベルト",
+          "text": "森を抜けて来たのかい。町とは、聞こえてくる音も違うだろうね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-01.normal-2": {
+      "lines": [
+        {
+          "who": "フーベルト",
+          "text": "井戸のそばで話していると、つい長くなるね。用事を済ませてからのつもりだったのに。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-01.ended": {
+      "lines": [
+        {
+          "who": "フーベルト",
+          "text": "歩いてきたなら、まず息を整えなよ。急いで話さなくても大丈夫だからね。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-02.normal-1": {
+      "lines": [
+        {
+          "who": "ピア",
+          "text": "お花のあいだに、草がのびてきたの。ちょっとずつ、ぬいてるんだ。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-02.normal-2": {
+      "lines": [
+        {
+          "who": "ピア",
+          "text": "見て、はっぱのかたち、みんなちがうよ！　しゃがむと、よく見えるの。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
+    },
+    "life.nighttown.village-02.ended": {
+      "lines": [
+        {
+          "who": "ピア",
+          "text": "なにか、かんがえてたの？　ねえ、お花も見ていって。"
+        }
+      ],
+      "status": "provisional",
+      "source": "production/claude/scenario/新しい町の人の言葉_v01.md"
     }
   },
   "lifeNote": "2026-11-24 作者「イベントや会話、適当に沢山作っといて」：life. で始まる文と inn.hearth・inn.counter は tools/gen-town-life.cjs が入れた仮の文（status: provisional）。名前・役目・設定の無い町の人だけ。正式な台詞は世界観・シナリオ室の確定で差しかえる",

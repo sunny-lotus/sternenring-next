@@ -107,7 +107,7 @@
     },
     {
       "id": "room-02",
-      "x": 11,
+      "x": 7,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -115,7 +115,7 @@
         "map": "norn-room-ea-02",
         "exit": "door",
         "arrive": {
-          "x": 5,
+          "x": 4,
           "y": 5,
           "dir": "up"
         }
@@ -123,7 +123,7 @@
     },
     {
       "id": "room-03",
-      "x": 27,
+      "x": 13,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
@@ -131,7 +131,7 @@
         "map": "norn-room-ea-03",
         "exit": "door",
         "arrive": {
-          "x": 5,
+          "x": 4,
           "y": 5,
           "dir": "up"
         }
@@ -139,12 +139,28 @@
     },
     {
       "id": "room-04",
-      "x": 35,
+      "x": 27,
       "y": 4,
       "dir": "up",
       "effect": "nook-in",
       "to": {
         "map": "norn-room-ea-04",
+        "exit": "door",
+        "arrive": {
+          "x": 4,
+          "y": 5,
+          "dir": "up"
+        }
+      }
+    },
+    {
+      "id": "room-05",
+      "x": 33,
+      "y": 4,
+      "dir": "up",
+      "effect": "nook-in",
+      "to": {
+        "map": "norn-room-ea-05",
         "exit": "door",
         "arrive": {
           "x": 4,
@@ -164,10 +180,10 @@
   "events": [],
   "collision": [
     "####################DDD###################DD####",
-    "##################.....###################..####",
-    "##################.....###################..####",
-    "##################.....###################..####",
-    "####D######D######.....####D#######D######..####",
+    "##################.....############....###..####",
+    "##################.....############....###..####",
+    "##################.....############....###..####",
+    "####D##D#####D####.....####D#####D#....###..####",
     "#..............................................#",
     "D..............................................#",
     "D..............................................#",
@@ -197,51 +213,19 @@
       "doors": {
         "house_a_narrow.webp": {
           "h": 0.24,
-          "x": 0.39,
-          "cut": {
-            "x0": 0.289,
-            "x1": 0.498,
-            "y0": 0.771,
-            "y1": 0.978,
-            "arch": 0.021,
-            "hinge": "left"
-          }
+          "x": 0.39
         },
         "house_b_sideroof.webp": {
           "h": 0.283,
-          "x": 0.35,
-          "cut": {
-            "x0": 0.27,
-            "x1": 0.415,
-            "y0": 0.681,
-            "y1": 0.96,
-            "arch": 0.053,
-            "hinge": "left"
-          }
+          "x": 0.35
         },
         "house_c_stepgable.webp": {
           "h": 0.254,
-          "x": 0.5,
-          "cut": {
-            "x0": 0.393,
-            "x1": 0.612,
-            "y0": 0.75,
-            "y1": 0.976,
-            "arch": 0.046,
-            "double": true
-          }
+          "x": 0.5
         },
         "house_d_workshop.webp": {
           "h": 0.308,
-          "x": 0.48,
-          "cut": {
-            "x0": 0.302,
-            "x1": 0.702,
-            "y0": 0.614,
-            "y1": 0.982,
-            "arch": 0.079,
-            "double": true
-          }
+          "x": 0.48
         },
         "house_e_archway.webp": {
           "h": 0.281,
@@ -257,31 +241,47 @@
         },
         "house_f_corner.webp": {
           "h": 0.283,
-          "x": 0.33,
-          "cut": {
-            "x0": 0.241,
-            "x1": 0.387,
-            "y0": 0.678,
-            "y1": 0.952,
-            "arch": 0.05,
-            "hinge": "left"
-          }
+          "x": 0.33
         },
         "house_home_2f.webp": {
           "h": 0.274,
-          "x": 0.28,
-          "cut": {
-            "x0": 0.207,
-            "x1": 0.358,
-            "y0": 0.676,
-            "y1": 0.977,
-            "arch": 0.039,
-            "hinge": "left"
-          }
+          "x": 0.28
         },
         "house_merchant_3f.webp": {
           "h": 0.234,
           "x": 0.42
+        },
+        "shop_travel.webp": {
+          "h": 0.37,
+          "x": 0.24
+        },
+        "shop_transport.webp": {
+          "h": 0.38,
+          "x": 0.77
+        },
+        "shop_bakery.webp": {
+          "h": 0.39,
+          "x": 0.735
+        },
+        "shop_eatery.webp": {
+          "h": 0.35,
+          "x": 0.255
+        },
+        "shop_general.webp": {
+          "h": 0.38,
+          "x": 0.31
+        },
+        "shop_herbal.webp": {
+          "h": 0.35,
+          "x": 0.735
+        },
+        "shop_repair.webp": {
+          "h": 0.32,
+          "x": 0.745
+        },
+        "shop_cloth.webp": {
+          "h": 0.36,
+          "x": 0.235
         },
         "inn_silver_deer.webp": {
           "h": 0.229,
@@ -326,8 +326,7 @@
       "base": "assets/town/norn/",
       "ground": {
         "paved": "tex_cobble_street.webp",
-        "grass": "tex_grass.webp",
-        "square": "tex_cobble_square.webp"
+        "grass": "tex_grass.webp"
       },
       "boards": {
         "house-*": [
@@ -374,6 +373,19 @@
         "flower-garland": "flower_garland.webp",
         "flag-string": "festival_flag_string.webp",
         "lantern-iron": "lantern_iron_hanging.webp",
+        "shop-*": [
+          "shop_travel.webp",
+          "shop_transport.webp",
+          "shop_bakery.webp",
+          "shop_eatery.webp",
+          "shop_general.webp",
+          "shop_herbal.webp",
+          "shop_repair.webp",
+          "shop_cloth.webp"
+        ],
+        "kardia-great-gate": "kardia_great_gate.webp",
+        "gastel-great-gate": "gastel_great_gate.webp",
+        "norn-east-gate": "norn_east_gate.webp",
         "town-wall": "town_wall.webp",
         "third-wall": "third_wall.webp",
         "gate-tower": "gate_tower.webp",
@@ -433,159 +445,71 @@
             "asset": "placeholder:house-front",
             "x": 1,
             "y": 1,
-            "w": 7,
+            "w": 5,
             "h": 4,
-            "standH": 9.8,
-            "zOffset": 0.06,
-            "art": "house_c_stepgable.webp",
+            "standH": 6.4,
+            "zOffset": 0.03,
+            "art": "shop_bakery.webp",
+            "shop": "bakery",
             "doorExit": "room-01"
           },
           {
             "asset": "placeholder:house-front",
-            "x": 8,
+            "x": 6,
             "y": 1,
-            "w": 10,
+            "w": 6,
             "h": 4,
-            "standH": 8.8,
-            "zOffset": 0,
-            "art": "house_b_sideroof.webp",
+            "standH": 7.1,
+            "zOffset": 0.03,
+            "art": "shop_eatery.webp",
+            "shop": "eatery",
             "doorExit": "room-02"
+          },
+          {
+            "asset": "placeholder:house-front",
+            "x": 12,
+            "y": 1,
+            "w": 6,
+            "h": 4,
+            "standH": 6.6,
+            "zOffset": 0.03,
+            "art": "shop_general.webp",
+            "shop": "general",
+            "doorExit": "room-03"
           },
           {
             "asset": "placeholder:house-front",
             "x": 23,
             "y": 1,
-            "w": 10,
-            "h": 4,
-            "standH": 8.9,
-            "zOffset": 0.03,
-            "art": "house_e_archway.webp",
-            "doorExit": "room-03"
-          },
-          {
-            "asset": "placeholder:house-front",
-            "x": 33,
-            "y": 1,
             "w": 6,
             "h": 4,
-            "standH": 10.4,
-            "zOffset": 0.01,
-            "art": "house_a_narrow.webp",
+            "standH": 7.1,
+            "zOffset": 0.03,
+            "art": "shop_herbal.webp",
+            "shop": "herbal",
             "doorExit": "room-04"
           },
           {
-            "asset": "placeholder:awning-red",
-            "x": 3,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 4.17,
-            "zOffset": 0.25,
-            "note": "扉の真上（2026-11-26 サニー「布の置く位置は考えてね」）"
-          },
-          {
-            "asset": "placeholder:sign-bread",
-            "x": 7,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 5,
-            "zOffset": 0.25
-          },
-          {
-            "asset": "placeholder:awning-green",
-            "x": 10,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 4.17,
-            "zOffset": 0.25,
-            "note": "扉の真上（2026-11-26 サニー「布の置く位置は考えてね」）"
-          },
-          {
-            "asset": "placeholder:sign-cup",
-            "x": 17,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 5,
-            "zOffset": 0.25
-          },
-          {
-            "asset": "placeholder:awning-wheat",
-            "x": 26.4,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 4.17,
-            "zOffset": 0.25,
-            "note": "扉の真上（2026-11-26 サニー「布の置く位置は考えてね」）"
-          },
-          {
-            "asset": "placeholder:sign-shoe",
-            "x": 32,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 5,
-            "zOffset": 0.25
-          },
-          {
-            "asset": "placeholder:awning-red",
-            "x": 33.89,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 4.17,
-            "zOffset": 0.25,
-            "note": "扉の真上（2026-11-26 サニー「布の置く位置は考えてね」）"
-          },
-          {
-            "asset": "placeholder:sign-bread",
-            "x": 38,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 5,
-            "zOffset": 0.25
-          },
-          {
-            "asset": "placeholder:town-wall",
-            "x": 39,
+            "asset": "placeholder:house-front",
+            "x": 29,
             "y": 1,
-            "w": 3,
+            "w": 6,
             "h": 4,
-            "standH": 4.6,
-            "zOffset": 0.05
+            "standH": 6.6,
+            "zOffset": 0.03,
+            "art": "shop_transport.webp",
+            "shop": "transport",
+            "doorExit": "room-05"
           },
           {
-            "asset": "placeholder:town-wall",
-            "x": 44,
+            "asset": "placeholder:norn-east-gate",
+            "x": 40,
             "y": 1,
-            "w": 3,
+            "w": 6,
             "h": 4,
-            "standH": 4.6,
-            "zOffset": 0.05
-          },
-          {
-            "asset": "placeholder:gate-tower",
-            "x": 39,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 12,
+            "standH": 6.2,
             "zOffset": 0.12,
-            "showH": 12
-          },
-          {
-            "asset": "placeholder:gate-tower",
-            "x": 44,
-            "y": 4,
-            "w": 3,
-            "h": 1,
-            "standH": 12,
-            "zOffset": 0.12,
-            "showH": 12
+            "showH": 6.2
           }
         ]
       },
@@ -804,8 +728,8 @@
     {
       "id": "night-town-east-01",
       "sprite": "mob04",
-      "x": 7,
-      "y": 7,
+      "x": 9,
+      "y": 8,
       "dir": "down",
       "status": "provisional",
       "note": "新しい町の人（east-01。名前・年齢・経歴は付けない仮の枠）。STORY-NIGHT-TOWN-LIFE-20261126",
