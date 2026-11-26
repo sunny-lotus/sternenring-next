@@ -231,8 +231,11 @@
       "herb_bottle_shelf": "district/herb_bottle_shelf.webp",
       "herb_sort_table": "district/herb_sort_table.webp",
       "stool": "district/stool.webp",
-      "shared_chest": "district/shared_chest.webp"
+      "shared_chest": "district/shared_chest.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

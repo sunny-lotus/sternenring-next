@@ -1532,6 +1532,19 @@ export function createThreeStage(canvasEl, assets) {
       lights.push({ L, base: L.intensity, ph: z * 3 + side, z, glow: g });
     }
     const hasBackdrop = (map.stage.layers || []).some((l) => l.band === 'backdrop' && l.items.length);
+    // 窓の外の景色（2026-11-26 美術・演出室 内装_追加_v01 window_<町・森・村>_<昼・夜>）：民家の奥の壁のまん中、家具より上に、木の枠と十字の桟の窓。昼と夜で絵を変える（時間を変えるとマップを読み直す）
+    { const vt = home && map.stage.windowView ? (DAY ? artT('winDay') : artT('winNight')) ?? artT('winDay') : null;
+      if (vt) {
+        const ww = Math.min(2.4, W * 0.27), wh = ww * 0.95, cx = map.stage.windowView.x ?? W / 2, cy = map.stage.windowView.y ?? HT * 0.66, z0 = 0.03;
+        vt.repeat.set(0.62, 0.78); vt.offset.set(0.19, 0.12); plane(ww, wh, new THREE.MeshBasicMaterial({ map: vt, color: DAY ? 0xffffff : 0xb8bccc }), [cx, cy, z0], [0, 0, 0]);
+        const wood = new THREE.MeshStandardMaterial({ color: 0x5a3c24, roughness: 0.85 }), fr = 0.12, dp = 0.1;
+        const bar = (w, h, x, y) => { const m = new THREE.Mesh(roundBox(w, h, dp), wood); m.position.set(x, y, z0 + dp / 2); m.castShadow = true; m.receiveShadow = true; root.add(m); };
+        bar(ww + fr * 2, fr, cx, cy + wh / 2 + fr / 2); bar(ww + fr * 2, fr, cx, cy - wh / 2 - fr / 2); bar(fr, wh, cx - ww / 2 - fr / 2, cy); bar(fr, wh, cx + ww / 2 + fr / 2, cy); // 枠
+        bar(fr * 0.7, wh, cx, cy); bar(ww, fr * 0.7, cx, cy + wh * 0.1); // 十字の桟
+        { const m = new THREE.Mesh(roundBox(ww + fr * 3, fr * 0.8, 0.28), wood); m.position.set(cx, cy - wh / 2 - fr, z0 + 0.14); m.receiveShadow = true; root.add(m); } // 窓台
+        if (DAY) { const L = new THREE.PointLight(0xeef2ff, 10, 6, 1.5); L.position.set(cx, cy, 0.8); root.add(L); } // 昼は窓から光
+      }
+    }
     if (!dungeon && !hasBackdrop && map.stage.backWindows !== false) { plane(1.0 * S, 1.4 * S, winM, [W * 0.35, HT * 0.45, 0.04], [0, 0, 0]); plane(1.0 * S, 1.4 * S, winM, [W * 0.68, HT * 0.6, 0.04], [0, 0, 0]); }
     // 天井の吊りランプ（2026-11-22 作者「天井のランプが一個もない」）：建物の中は、部屋全体に等間隔で鎖とランタンを下げる。ダンジョンは奥へ並ぶ鎖の灯り（間をあけて）
     {

@@ -242,8 +242,11 @@
       "shared_sacks": "district/shared_sacks.webp",
       "shared_scale": "district/shared_scale.webp",
       "ledger_desk": "district/ledger_desk.webp",
-      "rope_bundle": "district/rope_bundle.webp"
+      "rope_bundle": "district/rope_bundle.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

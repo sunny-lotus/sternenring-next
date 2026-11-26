@@ -231,8 +231,11 @@
       "fabric_shelf": "district/fabric_shelf.webp",
       "clothes_rail": "district/clothes_rail.webp",
       "cutting_table": "district/cutting_table.webp",
-      "stool": "district/stool.webp"
+      "stool": "district/stool.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

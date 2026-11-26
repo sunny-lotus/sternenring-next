@@ -231,8 +231,11 @@
       "counter_plain": "district/counter_plain.webp",
       "baking_oven": "district/baking_oven.webp",
       "kneading_table": "district/kneading_table.webp",
-      "shared_breadbasket": "district/shared_breadbasket.webp"
+      "shared_breadbasket": "district/shared_breadbasket.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

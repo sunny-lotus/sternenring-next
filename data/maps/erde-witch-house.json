@@ -290,8 +290,11 @@
       "shared_chest": "district/shared_chest.webp",
       "shared_hearth_pot": "district/shared_hearth_pot.webp",
       "tea_table": "district/tea_table.webp",
-      "shared_logbasket": "district/shared_logbasket.webp"
+      "shared_logbasket": "district/shared_logbasket.webp",
+      "winDay": "district/window_forest_day.webp",
+      "winNight": "district/window_forest_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 18,

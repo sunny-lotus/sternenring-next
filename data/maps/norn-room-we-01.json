@@ -242,8 +242,11 @@
       "rope_bundle": "district/rope_bundle.webp",
       "stool": "district/stool.webp",
       "clothes_rail": "district/clothes_rail.webp",
-      "shared_workbench": "district/shared_workbench.webp"
+      "shared_workbench": "district/shared_workbench.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

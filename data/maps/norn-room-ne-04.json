@@ -242,8 +242,11 @@
       "shared_chest": "district/shared_chest.webp",
       "baking_oven": "district/baking_oven.webp",
       "shared_hearth_pot": "district/shared_hearth_pot.webp",
-      "clothes_rail": "district/clothes_rail.webp"
+      "clothes_rail": "district/clothes_rail.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

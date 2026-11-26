@@ -16,6 +16,7 @@
 // 銀鹿亭前の通り（ノルン導入の7場面・storyLock）はそのまま使い、東の出入口だけ新しい広場へつなぎかえる。前の広場（norn-plaza）は見比べ用に残す（開発の窓・ワープで行ける）。
 // 使い方：<node> tools/gen-norn-town.cjs（ほかの町の道具・gen-norn-story.cjs のあとに流す。何度流しても同じ結果）
 const fs = require('fs'), path = require('path');
+const WINVIEW = (place) => ({ winDay: 'district/window_' + place + '_day.webp', winNight: 'district/window_' + place + '_night.webp' }); // 窓の外の景色（2026-11-26 美術・演出室 内装_追加_v01、tools/copy-window-views.py）。base は assets/interiors/
 const HOUSE = require('./norn-house-art.cjs');
 const dir = path.join(__dirname, '..', 'data', 'maps');
 const read = (id) => JSON.parse(fs.readFileSync(path.join(dir, id + '.json'), 'utf8'));
@@ -334,7 +335,7 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
     exits: [{ id: 'door', x: 5, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: 'erde-deep', exit: 'witch-door', arrive: { x: 17, y: 19, dir: 'down' } } }],
     spawns: { default: { x: 5, y: H - 2, dir: 'up' } },
     events: [{ id: 'witch-shelf', x: 1, y: 1, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-shelf' }] }, { id: 'witch-pot', x: 8, y: 2, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-pot' }] }],
-    stage: { look: 'home', camera: home.stage.camera, textures: tex, backWindows: false, orbs: { count: 18, alpha: 0.7, color: [0.75, 1, 0.65], size: 0.8, note: '森の奥の家：薬草の香りのような、緑の光の粒（仮）' },
+    stage: { look: 'home', camera: home.stage.camera, textures: { ...tex, ...WINVIEW('forest') }, windowView: {}, backWindows: false, orbs: { count: 18, alpha: 0.7, color: [0.75, 1, 0.65], size: 0.8, note: '森の奥の家：薬草の香りのような、緑の光の粒（仮）' },
       layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
   };
   write(m);
@@ -516,7 +517,7 @@ function district(id, title, seed, opt) {
         ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
         exits: [{ id: 'door', x: dx, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: outId, exit: exitId, arrive: { x: col, y: row + 1, dir: 'down' } } }],
         spawns: { default: { x: dx, y: H - 2, dir: 'up' } }, events: [],
-        stage: { look: 'home', camera: homeRoom.stage.camera, textures: roomTex, backWindows: false, orbs: homeRoom.stage.orbs,
+        stage: { look: 'home', camera: homeRoom.stage.camera, textures: { ...roomTex, ...WINVIEW(/village/.test(outId) ? 'village' : /^erde/.test(outId) ? 'forest' : 'town') }, windowView: {}, backWindows: false, orbs: homeRoom.stage.orbs,
           layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
       });
       made.push(id);

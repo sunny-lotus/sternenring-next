@@ -231,8 +231,11 @@
       "tool_rack": "district/tool_rack.webp",
       "materials_box": "district/materials_box.webp",
       "stool": "district/stool.webp",
-      "shared_chest": "district/shared_chest.webp"
+      "shared_chest": "district/shared_chest.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

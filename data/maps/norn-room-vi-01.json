@@ -253,8 +253,11 @@
       "shared_bed": "district/shared_bed.webp",
       "farm_tool_rack": "district/farm_tool_rack.webp",
       "shared_wash_tub": "district/shared_wash_tub.webp",
-      "shared_chest": "district/shared_chest.webp"
+      "shared_chest": "district/shared_chest.webp",
+      "winDay": "district/window_village_day.webp",
+      "winNight": "district/window_village_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

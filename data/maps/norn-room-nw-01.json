@@ -242,8 +242,11 @@
       "shared_workbench": "district/shared_workbench.webp",
       "tool_rack": "district/tool_rack.webp",
       "materials_box": "district/materials_box.webp",
-      "shared_wash_tub": "district/shared_wash_tub.webp"
+      "shared_wash_tub": "district/shared_wash_tub.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,

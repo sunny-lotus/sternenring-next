@@ -242,8 +242,11 @@
       "pots_basket_rack": "district/pots_basket_rack.webp",
       "shared_bottles": "district/shared_bottles.webp",
       "shared_crates": "district/shared_crates.webp",
-      "shared_workbench": "district/shared_workbench.webp"
+      "shared_workbench": "district/shared_workbench.webp",
+      "winDay": "district/window_town_day.webp",
+      "winNight": "district/window_town_night.webp"
     },
+    "windowView": {},
     "backWindows": false,
     "orbs": {
       "count": 8,
