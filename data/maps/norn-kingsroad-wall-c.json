@@ -30,8 +30,8 @@
   },
   "events": [
     {
-      "id": "kardia-gate-7",
-      "x": 7,
+      "id": "kardia-gate-12",
+      "x": 12,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -42,8 +42,8 @@
       ]
     },
     {
-      "id": "kardia-gate-8",
-      "x": 8,
+      "id": "kardia-gate-13",
+      "x": 13,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -54,8 +54,8 @@
       ]
     },
     {
-      "id": "kardia-gate-9",
-      "x": 9,
+      "id": "kardia-gate-14",
+      "x": 14,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -66,8 +66,8 @@
       ]
     },
     {
-      "id": "gastel-gate-30",
-      "x": 30,
+      "id": "gastel-gate-25",
+      "x": 25,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -78,8 +78,8 @@
       ]
     },
     {
-      "id": "gastel-gate-31",
-      "x": 31,
+      "id": "gastel-gate-26",
+      "x": 26,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -90,8 +90,8 @@
       ]
     },
     {
-      "id": "gastel-gate-32",
-      "x": 32,
+      "id": "gastel-gate-27",
+      "x": 27,
       "y": 4,
       "trigger": "examine",
       "status": "provisional",
@@ -422,7 +422,7 @@
           },
           {
             "asset": "placeholder:kardia-great-gate",
-            "x": 4,
+            "x": 9,
             "y": 1,
             "w": 9,
             "h": 3,
@@ -432,7 +432,7 @@
           },
           {
             "asset": "placeholder:gastel-great-gate",
-            "x": 27,
+            "x": 22,
             "y": 1,
             "w": 9,
             "h": 3,

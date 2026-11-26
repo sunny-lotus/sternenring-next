@@ -177,10 +177,10 @@ function kingsroad(id, title, wallStyle, withExits) {
   M.paved.push({ x: 13, y: 0, w: 13, h: 32 }, { x: 1, y: 4, w: 38, h: 6 }, { x: 0, y: 14, w: 14, h: 5 });
   // 北：第三城壁（端から端まで1枚）と、二つの大門
   M.put('back', 'third-wall', 1, 1, 38, 3, 8, 0.02);
-  M.put('back', 'kardia-great-gate', 4, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // カルディア行きの大門（西側。美術・演出室 2026-11-26）
-  M.put('back', 'gastel-great-gate', 27, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // ガステル行きの大門（東側。美術・演出室 2026-11-26）
-  for (const x of [7, 8, 9]) M.note(`kardia-gate-${x}`, x, 4, GATE_NOTE);
-  for (const x of [30, 31, 32]) M.note(`gastel-gate-${x}`, x, 4, 'map.norn.gate-gastel');
+  M.put('back', 'kardia-great-gate', 9, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // カルディア行きの大門（西側。美術・演出室 2026-11-26）
+  M.put('back', 'gastel-great-gate', 22, 1, 9, 3, 11, 0.08, true, { showH: 11 }); // ガステル行きの大門（東側。美術・演出室 2026-11-26）
+  for (const x of [12, 13, 14]) M.note(`kardia-gate-${x}`, x, 4, GATE_NOTE);
+  for (const x of [25, 26, 27]) M.note(`gastel-gate-${x}`, x, 4, 'map.norn.gate-gastel');
   // 王道の両側に街灯の列（壮大に）
   for (let y = 11; y <= 29; y += 4) { M.put('mid', 'lamp', 12, y, 1, 1, 3.8, 0.05); M.put('mid', 'lamp', 26, y, 1, 1, 3.8, 0.05); }
   // 東：野と木の列
