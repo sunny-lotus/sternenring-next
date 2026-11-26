@@ -17,10 +17,10 @@
   },
   "collision": [
     "###########",
-    "####...####",
-    "###....####",
-    "#...##....#",
-    "#...##....#",
+    "###.#######",
+    "#.........#",
+    "##..###...#",
+    "#.........#",
     "#.........#",
     "#####D#####"
   ],
@@ -65,11 +65,11 @@
       "follow": "center-if-fits"
     },
     "textures": {
-      "note": "民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵",
+      "note": "部屋セット village_home（村の家）。美術・演出室 内装_地区_v01（provisional）",
       "base": "assets/interiors/",
-      "floor": "home/floor_home.webp",
-      "wall": "home/wall_home.webp",
-      "ceiling": "home/ceiling_home.webp",
+      "floor": "district/mat_floor_dirt.webp",
+      "wall": "district/mat_wall_plaster.webp",
+      "ceiling": "district/mat_ceiling_gray.webp",
       "brick": "silver-deer/brick.webp",
       "window": "silver-deer/window.webp",
       "tabletop": "silver-deer/tabletop.webp",
@@ -175,8 +175,85 @@
           ],
           665,
           295
+        ],
+        "baking_oven": [
+          [
+            0,
+            0,
+            428,
+            511
+          ],
+          429,
+          512
+        ],
+        "shared_hearth_pot": [
+          [
+            0,
+            0,
+            202,
+            511
+          ],
+          203,
+          512
+        ],
+        "shared_table_chairs": [
+          [
+            0,
+            0,
+            511,
+            224
+          ],
+          512,
+          225
+        ],
+        "shared_bed": [
+          [
+            0,
+            0,
+            511,
+            201
+          ],
+          512,
+          202
+        ],
+        "farm_tool_rack": [
+          [
+            0,
+            0,
+            313,
+            511
+          ],
+          314,
+          512
+        ],
+        "shared_wash_tub": [
+          [
+            0,
+            0,
+            511,
+            226
+          ],
+          512,
+          227
+        ],
+        "shared_chest": [
+          [
+            0,
+            0,
+            511,
+            140
+          ],
+          512,
+          141
         ]
-      }
+      },
+      "baking_oven": "district/baking_oven.webp",
+      "shared_hearth_pot": "district/shared_hearth_pot.webp",
+      "shared_table_chairs": "district/shared_table_chairs.webp",
+      "shared_bed": "district/shared_bed.webp",
+      "farm_tool_rack": "district/farm_tool_rack.webp",
+      "shared_wash_tub": "district/shared_wash_tub.webp",
+      "shared_chest": "district/shared_chest.webp"
     },
     "backWindows": false,
     "orbs": {
@@ -199,29 +276,13 @@
         "band": "back",
         "items": [
           {
-            "asset": "placeholder:rug",
-            "x": 2,
-            "y": 3,
-            "w": 7,
-            "h": 2,
-            "standH": 0.05
-          },
-          {
-            "asset": "tiles.pipoya-town",
-            "region": "hearth",
-            "x": 7,
+            "asset": "placeholder:furn-shared_hearth_pot",
+            "x": 3,
             "y": 1,
-            "w": 3,
-            "h": 2,
-            "zOffset": 0.1
-          },
-          {
-            "asset": "placeholder:home-herbs",
-            "x": 1,
-            "y": 1,
-            "w": 2,
+            "w": 1,
             "h": 1,
-            "standH": 0.7
+            "standH": 1.44,
+            "hangY": 2.3
           }
         ]
       },
@@ -229,28 +290,52 @@
         "band": "mid",
         "items": [
           {
-            "asset": "placeholder:bed",
+            "asset": "placeholder:furn-baking_oven",
             "x": 1,
             "y": 1,
             "w": 2,
-            "h": 2,
-            "standH": 1
+            "h": 1,
+            "standH": 2.88
           },
           {
-            "asset": "tiles.pipoya-town",
+            "asset": "placeholder:furn-shared_table_chairs",
             "x": 4,
             "y": 3,
-            "w": 2,
-            "h": 2,
-            "region": "table"
+            "w": 3,
+            "h": 1,
+            "standH": 1.44
           },
           {
-            "asset": "placeholder:home-cupboard",
-            "x": 3,
+            "asset": "placeholder:furn-shared_bed",
+            "x": 4,
+            "y": 1,
+            "w": 3,
+            "h": 1,
+            "standH": 1.2
+          },
+          {
+            "asset": "placeholder:furn-farm_tool_rack",
+            "x": 7,
             "y": 1,
             "w": 1,
             "h": 1,
-            "standH": 2.4
+            "standH": 2.28
+          },
+          {
+            "asset": "placeholder:furn-shared_wash_tub",
+            "x": 8,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 0.72
+          },
+          {
+            "asset": "placeholder:furn-shared_chest",
+            "x": 1,
+            "y": 3,
+            "w": 1,
+            "h": 1,
+            "standH": 0.72
           }
         ]
       },

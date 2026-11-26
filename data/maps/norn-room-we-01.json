@@ -17,10 +17,10 @@
   },
   "collision": [
     "########",
-    "###...##",
+    "########",
     "#......#",
-    "#..##.##",
     "##.##..#",
+    "#......#",
     "#......#",
     "####D###"
   ],
@@ -65,11 +65,11 @@
       "follow": "center-if-fits"
     },
     "textures": {
-      "note": "民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵",
+      "note": "部屋セット shop_travel（旅支度の店）。美術・演出室 内装_地区_v01（provisional）",
       "base": "assets/interiors/",
-      "floor": "home/floor_home.webp",
-      "wall": "home/wall_home.webp",
-      "ceiling": "home/ceiling_home.webp",
+      "floor": "district/mat_floor_gray.webp",
+      "wall": "district/mat_wall_plaster.webp",
+      "ceiling": "district/mat_ceiling_gray.webp",
       "brick": "silver-deer/brick.webp",
       "window": "silver-deer/window.webp",
       "tabletop": "silver-deer/tabletop.webp",
@@ -175,8 +175,74 @@
           ],
           665,
           295
+        ],
+        "counter_plain": [
+          [
+            0,
+            0,
+            511,
+            289
+          ],
+          512,
+          290
+        ],
+        "shared_travel_gear": [
+          [
+            0,
+            0,
+            434,
+            511
+          ],
+          435,
+          512
+        ],
+        "rope_bundle": [
+          [
+            0,
+            0,
+            511,
+            285
+          ],
+          512,
+          286
+        ],
+        "stool": [
+          [
+            0,
+            0,
+            387,
+            511
+          ],
+          388,
+          512
+        ],
+        "clothes_rail": [
+          [
+            0,
+            0,
+            414,
+            511
+          ],
+          415,
+          512
+        ],
+        "shared_workbench": [
+          [
+            0,
+            0,
+            511,
+            329
+          ],
+          512,
+          330
         ]
-      }
+      },
+      "counter_plain": "district/counter_plain.webp",
+      "shared_travel_gear": "district/shared_travel_gear.webp",
+      "rope_bundle": "district/rope_bundle.webp",
+      "stool": "district/stool.webp",
+      "clothes_rail": "district/clothes_rail.webp",
+      "shared_workbench": "district/shared_workbench.webp"
     },
     "backWindows": false,
     "orbs": {
@@ -197,75 +263,58 @@
       },
       {
         "band": "back",
-        "items": [
-          {
-            "asset": "placeholder:rug",
-            "x": 2,
-            "y": 3,
-            "w": 4,
-            "h": 2,
-            "standH": 0.05
-          },
-          {
-            "asset": "placeholder:home-herbs",
-            "x": 4,
-            "y": 1,
-            "w": 2,
-            "h": 1,
-            "standH": 0.7
-          }
-        ]
+        "items": []
       },
       {
         "band": "mid",
         "items": [
           {
-            "asset": "tiles.pipoya-town",
+            "asset": "placeholder:furn-counter_plain",
             "x": 3,
             "y": 3,
             "w": 2,
-            "h": 2,
-            "region": "table"
+            "h": 1,
+            "standH": 1.2
           },
           {
-            "asset": "placeholder:home-cupboard",
+            "asset": "placeholder:furn-shared_travel_gear",
             "x": 1,
             "y": 1,
-            "w": 1,
+            "w": 2,
             "h": 1,
             "standH": 2.4
           },
           {
-            "asset": "placeholder:home-cupboard",
-            "x": 2,
+            "asset": "placeholder:furn-rope_bundle",
+            "x": 3,
             "y": 1,
             "w": 1,
             "h": 1,
-            "standH": 2.4
+            "standH": 0.432
           },
           {
-            "asset": "placeholder:home-cupboard",
-            "x": 6,
+            "asset": "placeholder:furn-stool",
+            "x": 4,
             "y": 1,
             "w": 1,
             "h": 1,
-            "standH": 2.4
+            "standH": 0.672
           },
           {
-            "asset": "placeholder:barrels",
-            "x": 6,
+            "asset": "placeholder:furn-clothes_rail",
+            "x": 5,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 2.64
+          },
+          {
+            "asset": "placeholder:furn-shared_workbench",
+            "x": 1,
             "y": 3,
             "w": 1,
             "h": 1,
-            "standH": 1.3
-          },
-          {
-            "asset": "placeholder:home-chest",
-            "x": 1,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 0.6
+            "standH": 1.32
           }
         ]
       },

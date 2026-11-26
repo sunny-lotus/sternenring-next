@@ -424,6 +424,8 @@ function district(id, title, seed, opt) {
 // 住む人・店主は置かない（資料：店主不明は家具あり無人。屋外の町の人を中へ複製しない）。売買・店名・家族は作らない ----------
 {
   const homeRoom = read('norn-house-plaza-02');
+  const IAP = path.join(__dirname, '..', 'data', 'interior-art.json'), IA = fs.existsSync(IAP) ? JSON.parse(fs.readFileSync(IAP, 'utf8')) : null; // 地区・店の内装の絵（tools/copy-interior-district-art.py）
+  const FURN_H = { shared_bed: 0.5, shared_table_chairs: 0.6, shared_cupboard: 1.1, shared_hearth_pot: 0.6, shared_chest: 0.3, shared_wash_tub: 0.3, shared_crates: 0.45, shared_sacks: 0.4, shared_barrels: 0.5, shared_scale: 0.55, shared_travel_gear: 1.0, shared_household_shelf: 1.1, shared_workbench: 0.55, shared_bench: 0.3, shared_key_rack: 0.3, shared_bottles: 0.25, shared_pottery: 0.2, shared_breadbasket: 0.25, shared_logbasket: 0.3, shared_herbs: 0.4 }; // 人の背＝1 の目安（資料に無い物は Claude の目分量）
   const ROOM_OF = { 'norn-east-street': 'shop', 'norn-ne': 'store', 'norn-nw': 'work', 'erde-village': 'village' };
   const SHORT = { 'norn-square': 'sq', 'norn-east-street': 'ea', 'norn-west-street': 'we', 'norn-south-street': 'so', 'norn-north-gate': 'no', 'norn-ne': 'ne', 'norn-nw': 'nw', 'norn-se': 'se', 'erde-village': 'vi' };
   const made = [];
@@ -471,6 +473,35 @@ function district(id, title, seed, opt) {
         back.push({ asset: 'placeholder:home-herbs', x: 1, y: 1, w: 2, h: 1, standH: 0.7 });
         if (n % 3 === 0) put('placeholder:home-chest', 1, 4, 1, 1, 0.6); else if (n % 3 === 1) put('placeholder:home-washtub', W - 2, 4, 1, 1, 0.8);
       }
+      // 地区・店ごとの内装（2026-11-26 美術・演出室 ART-INTERIORS-RETURN：部屋セット＝床・壁・天井と家具）。セットがあれば、上の仮の家具をやめて、セットの家具を置く
+      let roomTex = homeRoom.stage.textures;
+      const SETID = it.shop ? 'shop_' + it.shop : { store: 'ne_warehouse', work: 'nw_workshop', herb: 'nw_herb_sort', village: 'village_home' }[kind] || (outId === 'norn-ne' ? 'ne_porter_home' : ['se_home_standard', 'se_home_child', 'se_home_elder'][n % 3]);
+      const SET = IA && IA.sets.sets.find((x) => x.id === (IA.sets.aliases[SETID] || SETID));
+      if (SET) {
+        back.length = 0; mid.length = 0; for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) C[y][x] = '.';
+        const tex = { ...homeRoom.stage.textures, cuts: { ...(homeRoom.stage.textures.cuts || {}) }, base: 'assets/interiors/', floor: 'district/' + SET.materials.floor + '.webp', wall: 'district/' + SET.materials.wall + '.webp', ceiling: 'district/' + SET.materials.ceiling + '.webp', note: `部屋セット ${SET.id}（${SET.label}）。美術・演出室 内装_地区_v01（provisional）` };
+        const heightOf = (f) => (IA.scale.visualHeightCharacterUnits[f] ?? FURN_H[f] ?? 0.5) * 2.4; // 人の背＝1 の目安 × キャラの高さ 2.4 マス
+        const widthOf = (f) => { const a = IA.art[f]; return a && a.size ? heightOf(f) * a.size[0] / a.size[1] : 1; };
+        const backX = []; for (let x = 1; x < W - 1; x++) backX.push(x);
+        let bx = 1; const placeBack = (f) => { // 奥の壁ぞいに、左から並べる（扉の列の正面はあけない：奥の壁ぞいはふさいでも通れる）
+          const w = Math.max(1, Math.min(3, Math.round(widthOf(f)))); if (bx + w > W - 1) return false;
+          if (IA.art[f].kind === 'hanging') { back.push({ asset: 'placeholder:furn-' + f, x: bx, y: 1, w, h: 1, standH: heightOf(f), hangY: 2.3 }); bx += w; return true; }
+          mid.push({ asset: 'placeholder:furn-' + f, x: bx, y: 1, w, h: 1, standH: heightOf(f) }); for (let i = 0; i < w; i++) C[1][bx + i] = '#'; bx += w; return true;
+        };
+        const side = [[1, 3], [W - 2, 3], [1, 4], [W - 2, 4]]; let si = 0;
+        for (const f of SET.furniture) {
+          const a = IA.art[f]; if (!a) continue;
+          tex[f] = 'district/' + f + '.webp'; if (a.size) tex.cuts[f] = [[0, 0, a.size[0] - 1, a.size[1] - 1], a.size[0], a.size[1]];
+          if (a.kind === 'top') { back.push({ asset: 'placeholder:rug', x: 2, y: 3, w: W - 4, h: 2, standH: 0.05 }); tex.rug = tex[f]; tex.cuts.rug = tex.cuts[f]; continue; }
+          if (f === 'counter_plain' || f === 'shared_table_chairs' || f === 'kneading_table' || f === 'cutting_table' || f === 'herb_sort_table' || f === 'tea_table') { // 卓・台は部屋の手前のまん中（入口から見える所）
+            const w = Math.max(2, Math.min(3, Math.round(widthOf(f)))), x0 = Math.max(1, Math.min(W - 1 - w, dx - Math.floor(w / 2)));
+            if (C[3].slice(x0, x0 + w).every((c) => c === '.') && !mid.some((m) => m.y === 3)) { mid.push({ asset: 'placeholder:furn-' + f, x: x0, y: 3, w, h: 1, standH: heightOf(f) }); for (let i = 0; i < w; i++) C[3][x0 + i] = '#'; continue; }
+          }
+          if (placeBack(f)) continue;
+          while (si < side.length) { const [x, y] = side[si++]; if (C[y][x] === '.' && Math.abs(x - dx) > 1) { mid.push({ asset: 'placeholder:furn-' + f, x, y, w: 1, h: 1, standH: Math.min(heightOf(f), 1.6) }); C[y][x] = '#'; break; } }
+        }
+        roomTex = tex;
+      }
       for (let y = 1; y < H - 1; y++) C[y][dx] = C[y][dx] === '#' && y >= H - 2 ? '.' : C[y][dx]; // 扉の前は通れる
       C[H - 2][dx] = '.';
       const SHOPNAME = { travel: '旅支度の店', transport: '荷物と運送の店', bakery: 'パン屋', eatery: '食堂', general: '雑貨屋', herbal: '薬草の店', repair: '修理の店', cloth: '服と布の店' };
@@ -482,7 +513,7 @@ function district(id, title, seed, opt) {
         ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
         exits: [{ id: 'door', x: dx, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: outId, exit: exitId, arrive: { x: col, y: row + 1, dir: 'down' } } }],
         spawns: { default: { x: dx, y: H - 2, dir: 'up' } }, events: [],
-        stage: { look: 'home', camera: homeRoom.stage.camera, textures: homeRoom.stage.textures, backWindows: false, orbs: homeRoom.stage.orbs,
+        stage: { look: 'home', camera: homeRoom.stage.camera, textures: roomTex, backWindows: false, orbs: homeRoom.stage.orbs,
           layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
       });
       made.push(id);

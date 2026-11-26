@@ -17,10 +17,10 @@
   },
   "collision": [
     "#########",
-    "###...###",
-    "#..##...#",
-    "##.##..##",
-    "##.....##",
+    "#######.#",
+    "#.......#",
+    "##......#",
+    "#.......#",
     "#.......#",
     "####D####"
   ],
@@ -65,11 +65,11 @@
       "follow": "center-if-fits"
     },
     "textures": {
-      "note": "民家（仮）：床・壁・天井・敷物・寝台・食卓・食器棚・干した香草・鍋は内装_民家_v01。ほかは銀鹿亭の絵",
+      "note": "部屋セット ne_warehouse（北東・倉庫）。美術・演出室 内装_地区_v01（provisional）",
       "base": "assets/interiors/",
-      "floor": "home/floor_home.webp",
-      "wall": "home/wall_home.webp",
-      "ceiling": "home/ceiling_home.webp",
+      "floor": "district/mat_floor_stone.webp",
+      "wall": "district/mat_wall_stone.webp",
+      "ceiling": "district/mat_ceiling_gray.webp",
       "brick": "silver-deer/brick.webp",
       "window": "silver-deer/window.webp",
       "tabletop": "silver-deer/tabletop.webp",
@@ -175,8 +175,63 @@
           ],
           665,
           295
+        ],
+        "shared_crates": [
+          [
+            0,
+            0,
+            511,
+            279
+          ],
+          512,
+          280
+        ],
+        "shared_barrels": [
+          [
+            0,
+            0,
+            433,
+            511
+          ],
+          434,
+          512
+        ],
+        "shared_sacks": [
+          [
+            0,
+            0,
+            511,
+            322
+          ],
+          512,
+          323
+        ],
+        "shared_scale": [
+          [
+            0,
+            0,
+            458,
+            511
+          ],
+          459,
+          512
+        ],
+        "ledger_desk": [
+          [
+            0,
+            0,
+            511,
+            432
+          ],
+          512,
+          433
         ]
-      }
+      },
+      "shared_crates": "district/shared_crates.webp",
+      "shared_barrels": "district/shared_barrels.webp",
+      "shared_sacks": "district/shared_sacks.webp",
+      "shared_scale": "district/shared_scale.webp",
+      "ledger_desk": "district/ledger_desk.webp"
     },
     "backWindows": false,
     "orbs": {
@@ -197,91 +252,50 @@
       },
       {
         "band": "back",
-        "items": [
-          {
-            "asset": "placeholder:rug",
-            "x": 2,
-            "y": 3,
-            "w": 5,
-            "h": 2,
-            "standH": 0.05
-          }
-        ]
+        "items": []
       },
       {
         "band": "mid",
         "items": [
           {
-            "asset": "placeholder:barrels",
+            "asset": "placeholder:furn-shared_crates",
             "x": 1,
             "y": 1,
-            "w": 1,
+            "w": 2,
             "h": 1,
-            "standH": 1.3
+            "standH": 1.08
           },
           {
-            "asset": "placeholder:barrels",
-            "x": 2,
+            "asset": "placeholder:furn-shared_barrels",
+            "x": 3,
             "y": 1,
             "w": 1,
             "h": 1,
-            "standH": 1.3
+            "standH": 1.2
           },
           {
-            "asset": "placeholder:barrels",
+            "asset": "placeholder:furn-shared_sacks",
+            "x": 4,
+            "y": 1,
+            "w": 2,
+            "h": 1,
+            "standH": 0.96
+          },
+          {
+            "asset": "placeholder:furn-shared_scale",
             "x": 6,
             "y": 1,
             "w": 1,
             "h": 1,
-            "standH": 1.3
+            "standH": 1.32
           },
           {
-            "asset": "placeholder:barrels",
-            "x": 7,
-            "y": 1,
-            "w": 1,
-            "h": 1,
-            "standH": 1.3
-          },
-          {
-            "asset": "placeholder:barrels",
+            "asset": "placeholder:furn-ledger_desk",
             "x": 1,
             "y": 3,
             "w": 1,
             "h": 1,
-            "standH": 1.3
-          },
-          {
-            "asset": "placeholder:barrels",
-            "x": 7,
-            "y": 3,
-            "w": 1,
-            "h": 1,
-            "standH": 1.3
-          },
-          {
-            "asset": "placeholder:home-chest",
-            "x": 1,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 0.6
-          },
-          {
-            "asset": "placeholder:home-chest",
-            "x": 7,
-            "y": 4,
-            "w": 1,
-            "h": 1,
-            "standH": 0.6
-          },
-          {
-            "asset": "tiles.pipoya-town",
-            "x": 3,
-            "y": 2,
-            "w": 2,
-            "h": 2,
-            "region": "table"
+            "standH": 1.32
           }
         ]
       },

@@ -1,0 +1,745 @@
+{
+ "format": "sternenring-next-interior-art",
+ "version": 1,
+ "status": "provisional",
+ "source": "production/claude/pixel/元絵/内装_地区_v01（ART-INTERIORS-RETURN-20261126）",
+ "base": "assets/interiors/district/",
+ "art": {
+  "mat_floor_gray": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_floor_warm": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_floor_stone": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_floor_dirt": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_wall_plaster": {
+   "kind": "texture",
+   "repeat": "X"
+  },
+  "mat_wall_warm": {
+   "kind": "texture",
+   "repeat": "X"
+  },
+  "mat_wall_stone": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_ceiling_gray": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "mat_ceiling_warm": {
+   "kind": "texture",
+   "repeat": "XY"
+  },
+  "shared_bed": {
+   "kind": "ground",
+   "size": [
+    512,
+    202
+   ]
+  },
+  "shared_table_chairs": {
+   "kind": "ground",
+   "size": [
+    512,
+    225
+   ]
+  },
+  "shared_cupboard": {
+   "kind": "ground",
+   "size": [
+    290,
+    512
+   ]
+  },
+  "shared_hearth_pot": {
+   "kind": "hanging",
+   "size": [
+    203,
+    512
+   ]
+  },
+  "shared_chest": {
+   "kind": "ground",
+   "size": [
+    512,
+    141
+   ]
+  },
+  "shared_wash_tub": {
+   "kind": "ground",
+   "size": [
+    512,
+    227
+   ]
+  },
+  "shared_rug": {
+   "kind": "top",
+   "size": [
+    512,
+    262
+   ]
+  },
+  "shared_herbs": {
+   "kind": "hanging",
+   "size": [
+    512,
+    236
+   ]
+  },
+  "shared_crates": {
+   "kind": "ground",
+   "size": [
+    512,
+    280
+   ]
+  },
+  "shared_sacks": {
+   "kind": "ground",
+   "size": [
+    512,
+    323
+   ]
+  },
+  "shared_barrels": {
+   "kind": "ground",
+   "size": [
+    434,
+    512
+   ]
+  },
+  "shared_scale": {
+   "kind": "ground",
+   "size": [
+    459,
+    512
+   ]
+  },
+  "shared_travel_gear": {
+   "kind": "ground",
+   "size": [
+    435,
+    512
+   ]
+  },
+  "shared_household_shelf": {
+   "kind": "ground",
+   "size": [
+    336,
+    512
+   ]
+  },
+  "shared_workbench": {
+   "kind": "ground",
+   "size": [
+    512,
+    330
+   ]
+  },
+  "shared_bench": {
+   "kind": "ground",
+   "size": [
+    512,
+    250
+   ]
+  },
+  "shared_key_rack": {
+   "kind": "hanging",
+   "size": [
+    476,
+    425
+   ]
+  },
+  "shared_bottles": {
+   "kind": "loose-props",
+   "size": [
+    512,
+    178
+   ]
+  },
+  "shared_pottery": {
+   "kind": "loose-props",
+   "size": [
+    512,
+    119
+   ]
+  },
+  "shared_breadbasket": {
+   "kind": "ground",
+   "size": [
+    476,
+    283
+   ]
+  },
+  "shared_logbasket": {
+   "kind": "ground",
+   "size": [
+    392,
+    476
+   ]
+  },
+  "counter_plain": {
+   "kind": "ground",
+   "size": [
+    512,
+    290
+   ]
+  },
+  "ledger_desk": {
+   "kind": "ground",
+   "size": [
+    512,
+    433
+   ]
+  },
+  "rope_bundle": {
+   "kind": "ground",
+   "size": [
+    512,
+    286
+   ]
+  },
+  "bread_shelf": {
+   "kind": "ground",
+   "size": [
+    324,
+    512
+   ]
+  },
+  "baking_oven": {
+   "kind": "ground",
+   "size": [
+    429,
+    512
+   ]
+  },
+  "kneading_table": {
+   "kind": "ground",
+   "size": [
+    512,
+    284
+   ]
+  },
+  "pots_basket_rack": {
+   "kind": "hanging",
+   "size": [
+    512,
+    274
+   ]
+  },
+  "herb_bottle_shelf": {
+   "kind": "ground",
+   "size": [
+    292,
+    512
+   ]
+  },
+  "herb_sort_table": {
+   "kind": "ground",
+   "size": [
+    512,
+    412
+   ]
+  },
+  "anvil": {
+   "kind": "ground",
+   "size": [
+    460,
+    512
+   ]
+  },
+  "forge_hearth": {
+   "kind": "ground",
+   "size": [
+    367,
+    512
+   ]
+  },
+  "tool_rack": {
+   "kind": "hanging",
+   "size": [
+    512,
+    186
+   ]
+  },
+  "materials_box": {
+   "kind": "ground",
+   "size": [
+    512,
+    378
+   ]
+  },
+  "fabric_shelf": {
+   "kind": "ground",
+   "size": [
+    298,
+    512
+   ]
+  },
+  "cutting_table": {
+   "kind": "ground",
+   "size": [
+    512,
+    327
+   ]
+  },
+  "clothes_rail": {
+   "kind": "ground",
+   "size": [
+    415,
+    512
+   ]
+  },
+  "stool": {
+   "kind": "ground",
+   "size": [
+    388,
+    512
+   ]
+  },
+  "child_bed": {
+   "kind": "ground",
+   "size": [
+    512,
+    242
+   ]
+  },
+  "toys_chest": {
+   "kind": "ground",
+   "size": [
+    512,
+    330
+   ]
+  },
+  "rocking_chair": {
+   "kind": "ground",
+   "size": [
+    324,
+    512
+   ]
+  },
+  "knitting_basket": {
+   "kind": "ground",
+   "size": [
+    512,
+    376
+   ]
+  },
+  "farm_tool_rack": {
+   "kind": "ground",
+   "size": [
+    314,
+    512
+   ]
+  },
+  "tea_table": {
+   "kind": "ground",
+   "size": [
+    512,
+    304
+   ]
+  },
+  "closed_bookcase": {
+   "kind": "ground",
+   "size": [
+    294,
+    512
+   ]
+  }
+ },
+ "sets": {
+  "requestId": "ART-DAY-EXPANSION-20261126",
+  "status": "completed_provisional_material_sets",
+  "sets": [
+   {
+    "id": "shop_travel",
+    "label": "旅支度の店",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "counter_plain",
+     "shared_travel_gear",
+     "rope_bundle",
+     "stool",
+     "clothes_rail",
+     "shared_workbench"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "夜の人物オルガを室内複製しない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_transport",
+    "label": "荷物・運送",
+    "materials": {
+     "floor": "mat_floor_stone",
+     "wall": "mat_wall_stone",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "counter_plain",
+     "shared_crates",
+     "shared_sacks",
+     "shared_scale",
+     "ledger_desk",
+     "rope_bundle"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "荷札は無地、帳場は許可証発行所ではない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_bakery",
+    "label": "パン屋",
+    "materials": {
+     "floor": "mat_floor_stone",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "bread_shelf",
+     "counter_plain",
+     "baking_oven",
+     "kneading_table",
+     "shared_breadbasket"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "粉袋/天板はこね台のまとまりに含む。南東パン屋もこの同じセット。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_eatery",
+    "label": "食堂",
+    "materials": {
+     "floor": "mat_floor_warm",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_warm"
+    },
+    "furniture": [
+     "shared_table_chairs",
+     "counter_plain",
+     "shared_hearth_pot",
+     "shared_cupboard",
+     "baking_oven",
+     "shared_pottery"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "南西食堂と同一セット。銀鹿亭の別名やNPC移転にしない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_general",
+    "label": "雑貨屋",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "counter_plain",
+     "shared_household_shelf",
+     "pots_basket_rack",
+     "shared_bottles",
+     "shared_crates",
+     "shared_workbench"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "店主未割当。無人でも用途が伝わる。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_herbal",
+    "label": "薬草・薬の店",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "counter_plain",
+     "shared_herbs",
+     "herb_bottle_shelf",
+     "herb_sort_table",
+     "stool"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "フレアや魔女を店主にしない。薬効/販売制度なし。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_repair",
+    "label": "鍛冶・修理",
+    "materials": {
+     "floor": "mat_floor_stone",
+     "wall": "mat_wall_stone",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "anvil",
+     "forge_hearth",
+     "shared_workbench",
+     "tool_rack",
+     "materials_box",
+     "shared_wash_tub"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "ブルーノを鍛冶店主として置かない。製造/燃料の技術方式は未決。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "shop_cloth",
+    "label": "服・布の店",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "counter_plain",
+     "fabric_shelf",
+     "clothes_rail",
+     "cutting_table",
+     "stool"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "露店の商人を自動移転しない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "ne_warehouse",
+    "label": "北東・倉庫",
+    "materials": {
+     "floor": "mat_floor_stone",
+     "wall": "mat_wall_stone",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_crates",
+     "shared_barrels",
+     "shared_sacks",
+     "shared_scale",
+     "ledger_desk"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "荷を壁際へ、通路を広く取る。倉庫主の新設なし。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "ne_porter_home",
+    "label": "北東・荷運びの人の家",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_table_chairs",
+     "shared_bed",
+     "shared_chest",
+     "baking_oven",
+     "shared_hearth_pot",
+     "clothes_rail"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "既存住居の意匠候補。転居や職人化はしない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "nw_workshop",
+    "label": "北西・小工房",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_workbench",
+     "tool_rack",
+     "materials_box",
+     "stool",
+     "shared_chest"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "専門職の人物史は未確定。木くずは部材箱に含む。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "nw_herb_sort",
+    "label": "北西・薬草仕分け",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_herbs",
+     "herb_bottle_shelf",
+     "herb_sort_table",
+     "stool",
+     "shared_chest"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "特定の住人/魔女の仕事場と同一視しない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "se_home_standard",
+    "label": "南東・標準民家",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_table_chairs",
+     "shared_bed",
+     "shared_cupboard",
+     "baking_oven",
+     "shared_hearth_pot",
+     "shared_chest"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "寝台や椅子数で家族数を確定しない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "se_home_child",
+    "label": "南東・子どもの生活",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "shared_table_chairs",
+     "child_bed",
+     "toys_chest",
+     "shared_chest",
+     "baking_oven",
+     "shared_hearth_pot"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "ニコ住居の意匠候補。新しい親の名やNPCを作らない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "se_home_elder",
+    "label": "南東・年寄りの生活",
+    "materials": {
+     "floor": "mat_floor_gray",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "rocking_chair",
+     "knitting_basket",
+     "shared_bed",
+     "shared_table_chairs",
+     "baking_oven",
+     "shared_hearth_pot",
+     "shared_chest"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "既存住居差替え候補。年齢だけで同居させない。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "sw_small_inn",
+    "label": "南西・小さな宿",
+    "materials": {
+     "floor": "mat_floor_warm",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_warm"
+    },
+    "furniture": [
+     "counter_plain",
+     "shared_key_rack",
+     "shared_bench",
+     "shared_bed",
+     "clothes_rail",
+     "shared_chest",
+     "shared_rug"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "銀鹿亭とは別の小宿仮案。無名、店主/宿賃なし。",
+    "unassignedResidents": true
+   },
+   {
+    "id": "village_home",
+    "label": "村の家",
+    "materials": {
+     "floor": "mat_floor_dirt",
+     "wall": "mat_wall_plaster",
+     "ceiling": "mat_ceiling_gray"
+    },
+    "furniture": [
+     "baking_oven",
+     "shared_hearth_pot",
+     "shared_table_chairs",
+     "shared_bed",
+     "farm_tool_rack",
+     "shared_wash_tub",
+     "shared_chest"
+    ],
+    "status": "completed_provisional_material_set",
+    "note": "土間と日常。産業/所有/家族は未割当。",
+    "unassignedResidents": true
+   }
+  ],
+  "aliases": {
+   "se_bakery": "shop_bakery",
+   "sw_eatery": "shop_eatery"
+  },
+  "conditions": "素材の共用原型17型。完成判定はすべての参照PNGがあり各セット家具4〜8点かつ3材質が揃う時。ゲームの部屋や住人を新設/変更しない。入口と歩行通路を残す。寸法/基準点は素材生成一覧へ。"
+ },
+ "scale": {
+  "scope": "合成用の仮目安。人物背高=1。正本寸法ではない。画像全体高ではなく可視本体高を基準に実機調整。",
+  "visualHeightCharacterUnits": {
+   "farm_tool_rack": 0.95,
+   "counter_plain": 0.5,
+   "kneading_table": 0.6,
+   "clothes_rail": 1.1,
+   "anvil": 0.45,
+   "closed_bookcase": 1.15,
+   "baking_oven": 1.2,
+   "forge_hearth": 1.4,
+   "ledger_desk": 0.55,
+   "herb_bottle_shelf": 1.1,
+   "tea_table": 0.55,
+   "pots_basket_rack": 0.55,
+   "child_bed": 0.35,
+   "herb_sort_table": 0.55,
+   "rope_bundle": 0.18,
+   "rocking_chair": 0.6,
+   "materials_box": 0.25,
+   "cutting_table": 0.55,
+   "toys_chest": 0.25,
+   "bread_shelf": 1.1,
+   "knitting_basket": 0.18,
+   "stool": 0.28,
+   "tool_rack": 0.55,
+   "fabric_shelf": 1.1
+  },
+  "childBedWidthAdultBedUnits": [
+   0.65,
+   0.75
+  ],
+  "floorBoardCountCharacterHeight": [
+   6,
+   7
+  ]
+ }
+}

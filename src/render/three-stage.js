@@ -1089,6 +1089,8 @@ export function createThreeStage(canvasEl, assets) {
   // マップの手ざわり（stage.textures）：美術・演出室の元絵をそのまま張る（2026-11-22 作者「試しにドット化しないでそのまま張ったらどうなる？」）。?innart=0 で前のコードの絵
   const artCache = {}; let ART2 = null;
   // 内装の手ざわりと切り抜き（v01：床〜扉、v02：木・腰板・麻布・敷物と、切り抜きの灯り・瓶・ジョッキ・樽。2026-11-23 作者「銀鹿亭のテクスチャできたよ」）
+  /** 内装の絵の名前：決まった名前のほか、地区・店の家具（2026-11-26 内装_地区_v01）も、textures にある名前はみな読む */
+  const artKeys = (/** @type {any} */ t) => [...new Set([...INN_KEYS, ...Object.keys(t).filter((k) => typeof t[k] === "string" && k !== "base" && k !== "note")])];
   const INN_KEYS = ['bedHome', 'tableHome', 'cupboard', 'herbs', 'pot', 'chest', 'washTub', 'pillar', 'windowArch', 'flowerBox', 'pottery', 'bread', 'guestBook', 'keyRack', 'logBasket', 'floor', 'wall', 'ceiling', 'brick', 'window', 'tabletop', 'counter', 'blanket', 'door', 'wood', 'wainscot', 'linen', 'rug', 'barrels', 'bottles', 'mugs', 'candle', 'lampHanging', 'lampWall', 'flame', 'logs'];
   // 元絵1枚が覆うマス数（横, 縦）。ドット絵にするときの細かさを決める
   const ART_TILES = { floor: [4, 4], wall: [4, 4], ceiling: [4, 4], brick: [1.5, 1.9], window: [1.3, 1.8], tabletop: [3, 1.8], counter: [7, 1.1], blanket: [2, 1.2], door: [1, 2.1] };
@@ -1125,7 +1127,7 @@ export function createThreeStage(canvasEl, assets) {
   async function loadArt(m) {
     TOWN_CFG = null; TOWN_IMG = null; ART2 = null; CUT_OVR = m.stage?.textures?.cuts || {}; const t = m.stage?.textures; if (!t || new URLSearchParams(location.search).get('innart') === '0') return;
     const out = {};
-    for (const k of INN_KEYS) {
+    for (const k of artKeys(t)) {
       if (!t[k]) continue; const url = (t.base || '') + t[k];
       if (!(url in artCache)) artCache[url] = await loader.loadAsync(url).then((x) => { x.colorSpace = THREE.SRGBColorSpace; return x; }, () => null);
       if (!artCache[url]) continue;
@@ -1149,7 +1151,7 @@ export function createThreeStage(canvasEl, assets) {
     if (t) for (const f of new Set([...Object.values(t.ground || {}), ...Object.values(t.boards || {}).flat()])) { const url = (t.base || '') + f; if (!(url in townCache)) jobs.push(img(url).then((im) => { if (!(url in townCache)) townCache[url] = im; })); }
     for (const e of m.encounters || []) for (const url of e.symbol || []) if (!(url in symCache)) jobs.push(img(url).then((im) => { if (!(url in symCache)) symCache[url] = im; }));
     const tx = m.stage?.textures;
-    if (tx && new URLSearchParams(location.search).get('innart') !== '0') for (const k of INN_KEYS) {
+    if (tx && new URLSearchParams(location.search).get('innart') !== '0') for (const k of artKeys(tx)) {
       if (!tx[k]) continue; const url = (tx.base || '') + tx[k]; if (url in artCache) continue;
       jobs.push(loader.loadAsync(url).then(async (x) => { try { await x.image?.decode?.(); } catch { /* ほどけなくても張るときにほどく */ } x.colorSpace = THREE.SRGBColorSpace; if (!(url in artCache)) { artCache[url] = x; upQ.push(x); pumpUploads(); } }, () => {}));
     }
@@ -1652,6 +1654,10 @@ export function createThreeStage(canvasEl, assets) {
     const g = new THREE.Group();
     const box = (mats, bw, bh, bd, y, z = -d / 2) => { const m = new THREE.Mesh(roundBox(bw, bh, bd), mats); m.position.set(0, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
     // 民家（look: home）の家具は、美術・演出室の内装_民家_v01 の切り抜きを立てる（2026-11-25）。絵が無ければ下のいつもの形
+    if (map.stage?.look === 'home' && name.startsWith('furn-')) { // 地区・店の家具（2026-11-26 美術・演出室 内装_地区_v01）：切り抜きを立てる。hang＝壁に掛ける物（hangY の高さ）
+      const cp = cutPlane(name.slice(5), it.standH ?? 1);
+      if (cp) { if (it.hangY) cp.position.set(0, it.hangY, -d + 0.08); else cp.position.set(0, (it.standH ?? 1) / 2, -d / 2); cp.receiveShadow = true; g.add(cp); return g; }
+    }
     if (map.stage?.look === 'home') {
       const HK = { bed: ['bedHome', 1.15], 'home-cupboard': ['cupboard', 2.4], 'home-herbs': ['herbs', 0.75], 'home-chest': ['chest', 0.6], 'home-washtub': ['washTub', 0.8], 'home-pot': ['pot', 1.6] }[name] ?? (it.region === 'table' ? ['tableHome', 1.3] : null);
       const cp = HK && cutPlane(HK[0], HK[1]);
