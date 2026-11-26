@@ -316,16 +316,15 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
   C[H - 1][5] = 'D';
   const block = (x, y, w, h) => { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) C[j][i] = '#'; };
   const back = [], mid = [];
-  back.push({ asset: 'placeholder:rug', x: 3, y: 3, w: 5, h: 3, standH: 0.05 });
-  for (const x of [1, 4, 7]) back.push({ asset: 'placeholder:home-herbs', x, y: 1, w: 2, h: 1, standH: 0.7 }); // 天井いっぱいの干した薬草
-  back.push({ asset: 'tiles.pipoya-town', region: 'hearth', x: 7, y: 1, w: 3, h: 2, zOffset: 0.1 }); block(7, 1, 3, 2);
-  mid.push({ asset: 'placeholder:home-pot', x: 6, y: 2, w: 1, h: 1, standH: 1.6 }); block(6, 2, 1, 1); // かまどの鍋
-  mid.push({ asset: 'placeholder:home-cupboard', x: 1, y: 1, w: 1, h: 1, standH: 2.4 }); block(1, 1, 1, 1);
-  mid.push({ asset: 'placeholder:home-cupboard', x: 2, y: 1, w: 1, h: 1, standH: 2.4 }); block(2, 1, 1, 1); // 瓶の棚が2つ
-  mid.push({ asset: 'placeholder:bed', x: 1, y: 4, w: 2, h: 2, standH: 1 }); block(1, 4, 2, 2);
-  mid.push({ asset: 'tiles.pipoya-town', region: 'table', x: 5, y: 3, w: 2, h: 2 }); block(5, 3, 2, 2);
-  mid.push({ asset: 'placeholder:home-chest', x: 9, y: 4, w: 1, h: 1, standH: 0.6 }); block(9, 4, 1, 1);
-  mid.push({ asset: 'placeholder:home-washtub', x: 9, y: 5, w: 1, h: 1, standH: 0.8 }); block(9, 5, 1, 1);
+  // 中の生活（2026-11-26 シナリオ室「店と住まいの内装対応_v01.md」の魔女の家：入口脇にかご・薪、手前の中央に茶の卓、壁ぎわに薬草の棚、別の壁ぎわに閉じた本棚、奥に寝台・衣類箱・敷物、火の場所にかまどと鍋）。絵は美術・演出室 内装_地区_v01・内装_追加_v01
+  const IA = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'interior-art.json'), 'utf8'));
+  const tex = { ...home.stage.textures, cuts: { ...(home.stage.textures.cuts || {}) }, base: 'assets/interiors/', floor: 'district/mat_floor_warm.webp', wall: 'district/mat_wall_plaster.webp', ceiling: 'district/mat_ceiling_warm.webp' };
+  const F = (f, x, y, w, hChar, extra = {}) => { const a = IA.art[f]; tex[f] = 'district/' + f + '.webp'; tex.cuts[f] = [[0, 0, a.size[0] - 1, a.size[1] - 1], a.size[0], a.size[1]]; const it = { asset: 'placeholder:furn-' + f, x, y, w, h: 1, standH: hChar * 2.4, ...extra }; if (a.kind === 'hanging') back.push(it); else { mid.push(it); block(x, y, w, 1); } };
+  F('herb_bottle_shelf', 1, 1, 1, 1.1); F('closed_bookcase', 2, 1, 1, 1.15); F('shared_herbs', 1, 1, 2, 0.4, { hangY: 2.3 });
+  F('shared_bed', 3, 1, 3, 0.5); F('shared_chest', 6, 1, 1, 0.3);
+  back.push({ asset: 'tiles.pipoya-town', region: 'hearth', x: 7, y: 1, w: 3, h: 2, zOffset: 0.1 }); block(7, 1, 3, 2); F('shared_hearth_pot', 8, 2, 1, 0.6, { hangY: 1.4 });
+  F('tea_table', 4, 4, 2, 0.55); F('shared_logbasket', 7, 6, 1, 0.3);
+  tex.rug = 'district/shared_rug.webp'; tex.cuts.rug = [[0, 0, IA.art.shared_rug.size[0] - 1, IA.art.shared_rug.size[1] - 1], IA.art.shared_rug.size[0], IA.art.shared_rug.size[1]]; back.push({ asset: 'placeholder:rug', x: 3, y: 3, w: 5, h: 3, standH: 0.05 });
   const m = {
     format: 'sternenring-next-map', version: 1, id: 'erde-witch-house', title: 'エルデ森林・森の奥の家（試し）', kind: 'interior', footsteps: 'wood', status: 'provisional',
     provenance: '2026-11-26 作者「いいよ作って試しに」で tools/gen-norn-town.cjs が作った試しの部屋。民家の内装の絵を借りた。フレアの家の中・持ち物・住む人は物語に関わるので未定（作者・シナリオ室・美術室で決める）。',
@@ -333,8 +332,8 @@ const onRoad = (M, x, y, pad = 1) => M.roads.some((r) => x >= r.x - pad && x < r
     ground: { tileset: 'tiles.pipoya-town', fill: 'floor', wall: 'wall', rows: null },
     exits: [{ id: 'door', x: 5, y: H - 1, dir: 'down', effect: 'nook-out', to: { map: 'erde-deep', exit: 'witch-door', arrive: { x: 17, y: 19, dir: 'down' } } }],
     spawns: { default: { x: 5, y: H - 2, dir: 'up' } },
-    events: [{ id: 'witch-shelf', x: 1, y: 1, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-shelf' }] }, { id: 'witch-pot', x: 6, y: 2, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-pot' }] }],
-    stage: { look: 'home', camera: home.stage.camera, textures: home.stage.textures, backWindows: false, orbs: { count: 18, alpha: 0.7, color: [0.75, 1, 0.65], size: 0.8, note: '森の奥の家：薬草の香りのような、緑の光の粒（仮）' },
+    events: [{ id: 'witch-shelf', x: 1, y: 1, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-shelf' }] }, { id: 'witch-pot', x: 8, y: 2, trigger: 'examine', status: 'provisional', pages: [{ dialogue: 'map.erde.witch-pot' }] }],
+    stage: { look: 'home', camera: home.stage.camera, textures: tex, backWindows: false, orbs: { count: 18, alpha: 0.7, color: [0.75, 1, 0.65], size: 0.8, note: '森の奥の家：薬草の香りのような、緑の光の粒（仮）' },
       layers: [{ band: 'backdrop', items: [] }, { band: 'back', items: back }, { band: 'mid', items: mid }, { band: 'actors', items: [] }, { band: 'front', items: [] }] },
   };
   write(m);
