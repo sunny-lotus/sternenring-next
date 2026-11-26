@@ -24,7 +24,8 @@ const HOUSE_FILES = Object.keys(HOUSE.ART).filter((f) => !['house_merchant_3f.we
 function rnd(seed) { let x = seed >>> 0 || 1; return () => (x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 4294967296; }
 const SRC = 'production/claude/scenario/Claude引渡し_ノルンとエルデ森林の地図制作_v01.md（STORY-NORN-MAP-20261125 revision 2）';
 const inn = read('norn-inn-street');
-const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt)); TOWN_ART.doors = HOUSE.doorsForMap(); TOWN_ART.boards['shop-*'] = ['shop_travel.webp', 'shop_transport.webp', 'shop_bakery.webp', 'shop_eatery.webp', 'shop_general.webp', 'shop_herbal.webp', 'shop_repair.webp', 'shop_cloth.webp']; Object.assign(TOWN_ART.boards, { 'kardia-great-gate': 'kardia_great_gate.webp', 'gastel-great-gate': 'gastel_great_gate.webp', 'norn-east-gate': 'norn_east_gate.webp' }); // 店の正面・大門・東門（2026-11-26 美術・演出室） TOWN_ART.ground.square = 'tex_cobble_square.webp'; // 広場の扇形の石畳（2026-11-26 サニー「広場は雰囲気ちがう石畳でもいいね」）
+const TOWN_ART = JSON.parse(JSON.stringify(inn.stage.townArt)); TOWN_ART.doors = HOUSE.doorsForMap(); TOWN_ART.boards['shop-*'] = ['shop_travel.webp', 'shop_transport.webp', 'shop_bakery.webp', 'shop_eatery.webp', 'shop_general.webp', 'shop_herbal.webp', 'shop_repair.webp', 'shop_cloth.webp']; Object.assign(TOWN_ART.boards, Object.fromEntries(["ne_cargo_landmark","ne_balance_scale","ne_covered_cart","ne_crates","ne_sacks","nw_tool_sign_landmark","nw_cart_repair","nw_firewood","nw_herbs_rack","nw_workbench","se_bread_sign_landmark","se_door_pots","se_grocery_display","se_household_shelf","se_laundry","sw_boot_sign_landmark","sw_bench","sw_inn_cup_sign","sw_table_chairs","sw_travel_gear"].map((n) => [n, n + '.webp']))); // 四地区の小物と目印（2026-11-26 美術・演出室 ART-NORN-DISTRICTS-RETURN、tools/copy-district-props.py）
+Object.assign(TOWN_ART.boards, { 'kardia-great-gate': 'kardia_great_gate.webp', 'gastel-great-gate': 'gastel_great_gate.webp', 'norn-east-gate': 'norn_east_gate.webp' }); // 店の正面・大門・東門（2026-11-26 美術・演出室） TOWN_ART.ground.square = 'tex_cobble_square.webp'; // 広場の扇形の石畳（2026-11-26 サニー「広場は雰囲気ちがう石畳でもいいね」）
 const FOREST_ART = JSON.parse(JSON.stringify(read('test-forest').stage.townArt)); delete FOREST_ART.doors; FOREST_ART.boards = { pine: FOREST_ART.boards.pine, rock: FOREST_ART.boards.rock, bush: FOREST_ART.boards.bush };
 // 骨格の絵（2026-11-26 美術・演出室 ART-NIGHT-NORN-20261126、pixel/元絵/ノルン_骨格_v01 を tools/copy-norn-structure-art.py で写した。provisional）。壁は横にくり返して張る
 Object.assign(TOWN_ART.boards, { 'town-wall': 'town_wall.webp', 'third-wall': 'third_wall.webp', 'gate-tower': 'gate_tower.webp', 'kardia-gate': 'kardia_gate.webp', 'clock-tower': 'clock_tower.webp' });
@@ -368,7 +369,9 @@ function district(id, title, seed, opt) {
 }
 { // 北東：交易と荷（倉庫・荷置き場・荷車・袋や樽の山）
   const M = district('norn-ne', 'ノルン・北東（交易と荷）', 1101, { botExit: 20, files: ['house_d_workshop.webp', 'house_b_sideroof.webp', 'house_f_corner.webp'], props: (M) => {
-    for (const [a, x, y, w, h, s] of [['crates', 2, 12, 2, 1, 1.4], ['crates', 4, 12, 2, 1, 1.8], ['barrels', 7, 12, 2, 1, 1.4], ['sacks', 10, 12, 2, 1, 1.2], ['cart', 13, 12, 3, 2, 2.4], ['crates', 25, 12, 2, 1, 1.4], ['sacks', 28, 12, 2, 1, 1.2], ['barrels', 31, 12, 2, 1, 1.4], ['cart', 34, 12, 3, 2, 2.4], ['crates', 39, 12, 2, 1, 1.8]]) M.put('mid', a, x, y, w, h, s, 0.05);
+    // 地区の絵（2026-11-26 美術・演出室）：目印の荷棚は通りの北側に。荷車・木箱・袋・量りは手前の荷置き場
+    M.put('mid', 'ne_cargo_landmark', 30, 5, 3, 1, 5.5, 0.05, true, { showH: 5.5 });
+    for (const [a, x, y, w, h, s] of [['ne_crates', 2, 12, 2, 1, 1.5], ['ne_sacks', 5, 12, 2, 1, 1.0], ['ne_balance_scale', 8, 12, 1, 1, 1.6], ['ne_covered_cart', 11, 12, 4, 2, 2.8], ['ne_crates', 25, 12, 2, 1, 1.5], ['ne_sacks', 28, 12, 2, 1, 1.0], ['barrels', 31, 12, 2, 1, 1.4], ['ne_covered_cart', 34, 12, 4, 2, 2.8], ['ne_crates', 39, 12, 2, 1, 1.5]]) M.put('mid', a, x, y, w, h, s, 0.05, true, { showH: s });
     M.put('mid', 'trough', 40, 5, 3, 1, 1, 0.03);
   } });
   M.exit('west', 0, 6, 3, 'left', 'page', { map: 'norn-north-gate', exit: 'east', arrive: { x: 36, y: 7, dir: 'left' } });
@@ -378,8 +381,9 @@ function district(id, title, seed, opt) {
 }
 { // 北西：職人と森の恵み（小さな工房・干した薬草・薪・柵・荷車）
   const M = district('norn-nw', 'ノルン・北西（職人と森の恵み）', 1202, { botExit: 20, shopFirst: ['shop_repair.webp'], files: ['house_d_workshop.webp', 'house_home_2f.webp', 'house_c_stepgable.webp'], props: (M) => {
-    for (const x of [4, 13, 28, 37]) M.items.back.push({ asset: 'placeholder:herbs', x, y: 4, w: 2, h: 1, standH: 4.2, zOffset: 0.25 });
-    for (const [a, x, y, w, h, s] of [['firewood', 2, 12, 2, 1, 0.8], ['firewood', 5, 12, 2, 1, 0.8], ['fence', 9, 12, 4, 1, 1.5], ['cart', 14, 12, 3, 2, 2.4], ['crates', 25, 12, 2, 1, 1.4], ['fence', 28, 12, 4, 1, 1.5], ['firewood', 33, 12, 2, 1, 0.8], ['tree-small', 37, 12, 1, 1, 2.8], ['tree', 41, 12, 1, 1, 6]]) M.put('mid', a, x, y, w, h, s, 0.05);
+    for (const x of [13, 28, 37]) M.items.back.push({ asset: 'placeholder:nw_herbs_rack', x, y: 4, w: 3, h: 1, standH: 4.4, zOffset: 0.25 }); // 干した薬草の棚（吊る）
+    M.items.back.push({ asset: 'placeholder:nw_tool_sign_landmark', x: 10, y: 4, w: 2, h: 1, standH: 5.2, zOffset: 0.27 }); // 目印：道具の看板（壁に付ける）
+    for (const [a, x, y, w, h, s] of [['nw_firewood', 2, 12, 2, 1, 0.9], ['nw_workbench', 5, 12, 3, 1, 1.5], ['fence', 9, 12, 4, 1, 1.5], ['nw_cart_repair', 14, 12, 3, 2, 2.4], ['nw_workbench', 25, 12, 3, 1, 1.5], ['fence', 29, 12, 3, 1, 1.5], ['nw_firewood', 33, 12, 2, 1, 0.9], ['tree-small', 37, 12, 1, 1, 2.8], ['tree', 41, 12, 1, 1, 6]]) M.put('mid', a, x, y, w, h, s, 0.05, true, /^n[ew]_/.test(a) ? { showH: s } : {});
   } });
   M.exit('east', 43, 6, 3, 'right', 'page', { map: 'norn-north-gate', exit: 'west', arrive: { x: 1, y: 7, dir: 'right' } });
   M.exit('south', 20, 15, 3, 'down', 'emerge', { map: 'norn-west-street', exit: 'north', arrive: { x: 24, y: 1, dir: 'down' } });
@@ -388,10 +392,10 @@ function district(id, title, seed, opt) {
 }
 { // 南東：住まいと日用品（民家・パン屋の看板・洗濯物・植木鉢・花壇）
   const M = district('norn-se', 'ノルン・南東（住まいと日用品）', 1303, { topExit: 20, shopFirst: ['shop_cloth.webp'], files: ['house_home_2f.webp', 'house_c_stepgable.webp', 'house_a_narrow.webp', 'house_b_sideroof.webp'], props: (M) => {
-    for (const [a, x] of [['sign-bread', 6], ['sign-cup', 30], ['sign-bread', 38]]) M.items.back.push({ asset: 'placeholder:' + a, x, y: 4, w: 1, h: 1, standH: 5, zOffset: 0.25 });
+    M.items.back.push({ asset: 'placeholder:se_bread_sign_landmark', x: 37, y: 4, w: 2, h: 1, standH: 5.2, zOffset: 0.27 }); // 目印：パンの看板
     for (const [a, x] of [['awning-wheat', 3], ['awning-red', 27], ['awning-green', 35]]) M.items.back.push({ asset: 'placeholder:' + a, x, y: 4, w: 3, h: 1, standH: 4.2, zOffset: 0.25 });
-    for (const x of [10, 31]) M.items.back.push({ asset: 'placeholder:laundry', x, y: 4, w: 4, h: 1, standH: 4.2, zOffset: 0.3 });
-    for (const [a, x, y, w, h, s] of [['planter', 2, 12, 2, 1, 1.2], ['flowerbed', 5, 13, 3, 1, 0.9], ['door-pots', 10, 12, 2, 1, 1.1], ['bench', 14, 12, 2, 1, 1.2], ['flowerbed', 26, 13, 3, 1, 0.9], ['planter', 30, 12, 2, 1, 1.2], ['door-pots', 34, 12, 2, 1, 1.1], ['tree-small', 39, 12, 1, 1, 2.8]]) M.put('mid', a, x, y, w, h, s, 0.03);
+    for (const x of [10, 31]) M.items.back.push({ asset: 'placeholder:se_laundry', x, y: 4, w: 4, h: 1, standH: 4.2, zOffset: 0.3 }); // 洗濯物（吊る）
+    for (const [a, x, y, w, h, s] of [['planter', 2, 12, 2, 1, 1.2], ['flowerbed', 5, 13, 3, 1, 0.9], ['se_door_pots', 10, 12, 2, 1, 1.0], ['se_grocery_display', 13, 12, 3, 1, 1.8], ['flowerbed', 26, 13, 3, 1, 0.9], ['se_household_shelf', 30, 12, 2, 1, 2.4], ['se_door_pots', 34, 12, 2, 1, 1.0], ['tree-small', 39, 12, 1, 1, 2.8]]) M.put('mid', a, x, y, w, h, s, 0.03, true, /^se_/.test(a) ? { showH: s } : {});
   } });
   M.exit('north', 20, 0, 3, 'up', 'dive', { map: 'norn-east-street', exit: 'south', arrive: { x: 21, y: 14, dir: 'up' } });
   M.exit('west', 0, 6, 3, 'left', 'page', { map: 'norn-south-street', exit: 'east', arrive: { x: 24, y: 7, dir: 'left' } });
@@ -604,6 +608,18 @@ function district(id, title, seed, opt) {
     for (const n of m.stage?.npcs || []) if (n.pose === 'sit' && /^mob/.test(n.sprite || '') && !n.pages) { n.pages = [{ dialogue: id.startsWith('silver-deer') ? 'life.seated.inn' : 'life.seated.home' }]; ch = true; }
     if (ch) write(m);
   }
+}
+{ // 南西（宿と旅支度）＝銀鹿亭前の通りに、地区の絵（2026-11-26 美術・演出室）。物語の荷車・布・目撃者・町の人をふさがないよう、空いているマスにだけ
+  const m = read('norn-inn-street'), mid = m.stage.layers.find((l) => l.band === 'mid'), backL = m.stage.layers.find((l) => l.band === 'back'), C = m.collision.map((r) => [...r]);
+  Object.assign(m.stage.townArt.boards, { sw_boot_sign_landmark: 'sw_boot_sign_landmark.webp', sw_bench: 'sw_bench.webp', sw_table_chairs: 'sw_table_chairs.webp', sw_travel_gear: 'sw_travel_gear.webp' });
+  for (const it of mid.items.filter((i) => i.sw)) for (let i = 0; i < it.w; i++) C[it.y][it.x + i] = '.'; // 前に置いた物のぶつかる所を戻す
+  mid.items = mid.items.filter((it) => !it.sw); backL.items = backL.items.filter((it) => !it.sw);
+  const busy = new Set([...(m.npcs || []).map((n) => n.x + ',' + n.y), ...(m.events || []).map((e) => e.x + ',' + e.y)]);
+  for (let y = 1; y < C.length; y++) for (let x = 0; x < C[y].length; x++) if (C[y - 1][x] === 'D') busy.add(x + ',' + y); // 扉の前（出てきて着くマス）はあける
+  const free = (x, y, w) => { for (let i = 0; i < w; i++) if (C[y]?.[x + i] !== '.' || busy.has((x + i) + ',' + y) || busy.has((x + i) + ',' + (y + 1))) return false; return true; };
+  for (const [a, x, y, w, s] of [['sw_travel_gear', 37, 5, 2, 2.2], ['sw_table_chairs', 4, 9, 3, 1.6], ['sw_bench', 33, 5, 2, 1.0]]) if (free(x, y, w)) { mid.items.push({ asset: 'placeholder:' + a, x, y, w, h: 1, standH: s, showH: s, zOffset: 0.04, sw: true }); for (let i = 0; i < w; i++) C[y][x + i] = '#'; }
+  backL.items.push({ asset: 'placeholder:sw_boot_sign_landmark', x: 38, y: 4, w: 2, h: 1, standH: 5.2, zOffset: 0.27, sw: true }); // 目印：靴の看板（旅支度）
+  m.collision = C.map((r) => r.join('')); write(m);
 }
 // ---------- 庇は家の扉の真上に（2026-11-26 サニー「こういう布の置く位置は考えてね」：庇が壁のまん中に浮いていた） ----------
 {

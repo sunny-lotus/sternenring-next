@@ -518,7 +518,7 @@
     "#..###########.########.#########.########.#",
     "#..###########.########.#########.#######..#",
     "#..#####D#####.##D#####.##D######.###D###..#",
-    "#.....#.............##.......##............#",
+    "#.....#.............##.......##..##........#",
     "#..........................................D",
     "#..........................................D",
     "#..........................................D",
@@ -724,7 +724,11 @@
         "festival-banner": "festival_banner.webp",
         "flower-garland": "flower_garland.webp",
         "flag-string": "festival_flag_string.webp",
-        "lantern-iron": "lantern_iron_hanging.webp"
+        "lantern-iron": "lantern_iron_hanging.webp",
+        "sw_boot_sign_landmark": "sw_boot_sign_landmark.webp",
+        "sw_bench": "sw_bench.webp",
+        "sw_table_chairs": "sw_table_chairs.webp",
+        "sw_travel_gear": "sw_travel_gear.webp"
       }
     },
     "paved": [
@@ -1000,6 +1004,16 @@
             "prop": true,
             "solid": false,
             "festival": true
+          },
+          {
+            "asset": "placeholder:sw_boot_sign_landmark",
+            "x": 38,
+            "y": 4,
+            "w": 2,
+            "h": 1,
+            "standH": 5.2,
+            "zOffset": 0.27,
+            "sw": true
           }
         ]
       },
@@ -1303,6 +1317,17 @@
             "prop": true,
             "solid": false,
             "festival": true
+          },
+          {
+            "asset": "placeholder:sw_bench",
+            "x": 33,
+            "y": 5,
+            "w": 2,
+            "h": 1,
+            "standH": 1,
+            "showH": 1,
+            "zOffset": 0.04,
+            "sw": true
           }
         ]
       },
