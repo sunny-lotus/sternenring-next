@@ -9,7 +9,7 @@ import { startLoop } from './core/loop.js';
 import { createFlat2d } from './render/flat2d.js';
 import { createPaperStage } from './render/paper-stage.js';
 import { createThreeStage, RIFFLE } from './render/three-stage.js';
-import { bindKeyboard, bindTouchpad } from './ui/controls.js';
+import { bindKeyboard, bindTouchpad, bindFloatStick } from './ui/controls.js';
 import { createCamPanel } from './ui/cam-panel.js';
 import { createIntro, shouldPlayIntro, gateInput, startWhenReady, INTRO_TIMING } from './render/book-intro.js';
 import { createSound, decideOpenCue, nextLevel, SOUND_LEVELS, OPEN_CUE_DELAY } from './audio/sound.js';
@@ -227,6 +227,7 @@ async function boot() {
   syncIntroUi();
 
   bindKeyboard(input); bindTouchpad($('pad'), input);
+  bindFloatStick([paperCanvas, $('stage')], $('pad'), $('stick'), input, () => !msgBox.hidden || document.body.classList.contains('cover')); // 浮くスティック（左半分のどこでも歩ける）
   // 言葉の窓（2026-11-22 作者「フィールドの出来事から記録を書きかえる」）：調べた出来事の言葉と、手に入れたもののお知らせ（金の字）。
   // 調べる（Enter・Space・Z・画面の「調べる」）か、窓を押すと閉じる。閉じた同じ押しで、また調べてしまわないようにする
   const msgBox = $('msg'); let msgShownAt = 0;

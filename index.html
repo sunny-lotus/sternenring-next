@@ -101,6 +101,11 @@
   /* 会話の箱が出ているあいだは十字ボタンを隠す（2026-11-26 学びノート題7「操作は場面に合わせて出し入れ」：箱の下に十字が重なって見えにくかった）。会話を進める「調べる」はそのまま */
   #msg:not([hidden]) ~ #pad { opacity: 0; pointer-events: none; transition: opacity .2s; }
   #pad { transition: opacity .2s; }
+  /* 浮くスティック：さわった所がまん中（左半分） */
+  #stick { position: fixed; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%; border: 2px solid rgba(232,223,202,.5); background: rgba(27,26,34,.22); pointer-events: none; z-index: 5; }
+  #stick[hidden] { display: none; }
+  #stick i { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; border-radius: 50%; background: rgba(232,223,202,.55); transform: translate(-50%, -50%); }
+  #paper, #stage { touch-action: none; }
   #msg { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(720px, calc(100% - 32px)); z-index: 60; background: linear-gradient(180deg, rgba(34,24,14,.94), rgba(20,14,8,.96)); border: 1px solid #c9a050; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.5), inset 0 0 0 3px rgba(201,160,80,.18); padding: 14px 20px; color: #f3e6c4; font: 16px/1.7 "Shippori Mincho B1", serif; animation: msg-in .22s ease-out; }
   #msg p { margin: 0; } #msg p.who { color: #e8c47a; font-size: 13px; letter-spacing: 2px; margin-bottom: 2px; } #msg p.note { color: #ffd77a; font-weight: 700; margin-top: 4px; } #msg p.who.party { color: #9fd4ff; } /* 仲間の言葉は名前を青く（町の人と見分ける） */
   /* 立ち絵の会話（2026-11-24 作者「立ち絵がでてサウンドノベル的な会話形式のイベントがあってもいいな」）：左右に立ち絵、話す人は明るく少し前に、聞く人は少し暗く */
@@ -209,6 +214,7 @@ window.SR_PRE = (() => {
   <button type="button" data-dir="right" aria-label="右"></button>
   <button type="button" data-dir="down" aria-label="下"></button>
 </div>
+<div id="stick" hidden aria-hidden="true"><i></i></div>
 <button type="button" id="intro-skip" hidden>とばす</button>
 <div id="status">読み込み中…</div>
 <script type="module" src="src/main.js"></script>
