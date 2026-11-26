@@ -486,6 +486,7 @@ async function boot() {
     const fr = /** @type {HTMLIFrameElement} */ (box.querySelector('iframe')); fr.addEventListener('load', () => { box.classList.add('ready'); fr.contentWindow?.focus(); });
   };
   $('status-toggle').addEventListener('click', () => { /** @type {HTMLElement} */ ($('status-toggle')).blur(); openStatus(); });
+  $('menu-btn').addEventListener('click', () => { /** @type {HTMLElement} */ ($('menu-btn')).blur(); openStatus(); }); // 親指の届く所のメニュー（スマホ）
   window.addEventListener('keydown', (e) => { if ((e.key === 'm' || e.key === 'M') && !e.repeat) openStatus(); });
   // 開発者メニューは、いつでも開ける（2026-11-22 作者「開発者メニューはいつでも開けるようにしておきたい。ショートカットキーでもボタンでも」）：F2・右上の「開発」
   /** メニューの中のページへ移る（メニューのボタンを押したのと同じ） @param {string} page */

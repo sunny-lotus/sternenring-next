@@ -147,6 +147,11 @@
   @keyframes msg-blink { 50% { opacity: .2; } }
   #act-btn { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(28px, env(safe-area-inset-bottom)); z-index: 40; width: 72px; height: 72px; border-radius: 50%; background: rgba(232,223,202,.22); border: 1px solid rgba(232,223,202,.45); color: #f3e6c4; font: 14px "Shippori Mincho B1", serif; }
   #act-btn:active { background: rgba(201,162,94,.55); }
+  /* 親指の届く所のメニュー（スマホ・幅のせまい画面だけ。2026-11-26 学びノート題7：右上は片手で届かない） */
+  #menu-btn { display: none; position: fixed; right: max(30px, calc(env(safe-area-inset-right) + 12px)); bottom: max(116px, calc(env(safe-area-inset-bottom) + 96px)); z-index: 40; width: 50px; height: 50px; border-radius: 50%; background: rgba(27,26,34,.5); border: 1px solid rgba(232,223,202,.45); color: #f3e6c4; font: 12px "Shippori Mincho B1", serif; padding: 0; transition: opacity .2s; }
+  #menu-btn:active { background: rgba(201,162,94,.55); }
+  @media (pointer: coarse), (max-width: 820px) { #menu-btn { display: block; } }
+  body.cover #menu-btn, #msg:not([hidden]) ~ #menu-btn { opacity: 0; pointer-events: none; }
   /* 設定の統一（2026-11-22）：右上はメニューだけ。音・曲・表示・内装はメニューの「設定」へ。カメラは、調整のパネルが開いているあいだだけ「カメラ：閉じる」を出す */
   #sound-toggle, #bgm-toggle, #room-toggle, #render-toggle { display: none !important; }
   #cam-toggle:not([aria-pressed="true"]) { display: none !important; }
@@ -207,6 +212,7 @@ window.SR_PRE = (() => {
 <div id="dev-pos" hidden></div>
 <div id="novel" hidden aria-hidden="true"><div class="seat empty" data-side="left"><img class="body" alt=""><img class="face" alt="" hidden></div><div class="seat empty" data-side="right"><img class="body" alt=""><img class="face" alt="" hidden></div></div>
 <div id="msg" hidden role="status" aria-live="polite"></div>
+<button type="button" id="menu-btn" aria-label="メニュー">メニュー</button>
 <button type="button" id="act-btn" aria-label="調べる" aria-keyshortcuts="Enter Space Z">調べる</button>
 <div id="pad" aria-label="十字ボタン">
   <button type="button" data-dir="up" aria-label="上"></button>
