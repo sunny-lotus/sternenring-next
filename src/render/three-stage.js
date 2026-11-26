@@ -1535,7 +1535,14 @@ export function createThreeStage(canvasEl, assets) {
     // 窓の外の景色（2026-11-26 美術・演出室 内装_追加_v01 window_<町・森・村>_<昼・夜>）：民家の奥の壁のまん中、家具より上に、木の枠と十字の桟の窓。昼と夜で絵を変える（時間を変えるとマップを読み直す）
     { const vt = home && map.stage.windowView ? (DAY ? artT('winDay') : artT('winNight')) ?? artT('winDay') : null;
       if (vt) {
-        const ww = Math.min(2.4, W * 0.27), wh = ww * 0.95, cx = map.stage.windowView.x ?? W / 2, cy = map.stage.windowView.y ?? HT * 0.66, z0 = 0.03;
+        // 奥の壁ぞいの家具（棚・かまど）と重ならない所をさがす：いちばん低い所の横に置き、窓の下を家具の上より高く。足りなければ窓を小さく
+        const backTop = (a, b) => { let t = 0; for (const L of map.stage.layers || []) for (const it of L.items) { if (it.y > 2 || it.x + it.w <= a || it.x >= b || (it.standH ?? 1) <= 0.1) continue; t = Math.max(t, it.hangY ? it.hangY + (it.standH ?? 1) / 2 : (it.standH ?? 1)); } return t; };
+        let ww = Math.min(2.4, W * 0.27), cx = map.stage.windowView.x ?? W / 2, top = 0;
+        if (map.stage.windowView.x == null) { let best = Infinity; for (let x = 1 + ww / 2 + 0.2; x <= W - 1 - ww / 2 - 0.2; x += 0.25) { const t = backTop(x - ww / 2 - 0.15, x + ww / 2 + 0.15) + Math.abs(x - W / 2) * 0.05; if (t < best - 1e-6) { best = t; cx = x; } } }
+        top = backTop(cx - ww / 2 - 0.15, cx + ww / 2 + 0.15);
+        const ceil = HT - 0.3; let wh = ww * 0.95, cy = map.stage.windowView.y ?? Math.max(HT * 0.66, top + 0.3 + wh / 2);
+        if (cy + wh / 2 > ceil) { wh = Math.max(0.9, Math.min(wh, ceil - top - 0.3)); ww = wh / 0.95; cy = Math.min(ceil - wh / 2, Math.max(HT * 0.66, top + 0.3 + wh / 2)); }
+        const z0 = 0.03;
         vt.repeat.set(0.62, 0.78); vt.offset.set(0.19, 0.12); plane(ww, wh, new THREE.MeshBasicMaterial({ map: vt, color: DAY ? 0xffffff : 0xb8bccc }), [cx, cy, z0], [0, 0, 0]);
         const wood = new THREE.MeshStandardMaterial({ color: 0x5a3c24, roughness: 0.85 }), fr = 0.12, dp = 0.1;
         const bar = (w, h, x, y) => { const m = new THREE.Mesh(roundBox(w, h, dp), wood); m.position.set(x, y, z0 + dp / 2); m.castShadow = true; m.receiveShadow = true; root.add(m); };
